@@ -153,23 +153,21 @@ public class Poly
         
         Console.WriteLine(a);
         var rCoefs = Array.Empty<Expr>(); 
-        var init = false;
-        for (int i = 1; i < a.Deg() - b.Deg(); i++)
+        var debut = -1;
+        for (int i = 0; i < a.Coefs.Length; i++)
         {
-            Console.WriteLine(a.Coefs[i+b.Deg()]);
-
-            var a_i = a.Coefs[b.Deg() + i];
-            if (init)
+            var a_i = a.Coefs[i];
+            if (debut != -1)
             {
-                rCoefs[i] = a_i;
+                rCoefs[i - debut] = a_i;
                 continue;
             }
 
             if (!a_i.IsZero())
             {
-                init = true;
-                rCoefs = new Expr[a.Deg() - (b.Deg() + i) + 1];
-                rCoefs[i] = a_i;
+                debut = i;
+                rCoefs = new Expr[a.Coefs.Length - debut];
+                rCoefs[i - debut] = a_i;
             }
         }
         
