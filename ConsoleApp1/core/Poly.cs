@@ -6,14 +6,87 @@ namespace ConsoleApp1.core;
 public class Poly
 {
     /// [a,b,c] -> ax^2+bx+c
-    public Expr[] Coefs;
+    private Expr[] _coefs;
 
     public Poly(params Expr[] coefs)
     {
         if (coefs.Length == 0)
             coefs = new[] { Zero };
         
-        Coefs = coefs;
+        _coefs = coefs;
+    }
+
+    public static Poly VideDeg(int deg)
+    {
+        var coefs = new Expr[deg];
+        Array.Fill(coefs, Zero);
+
+        return new Poly(coefs);
+    }
+    
+    public int Deg()
+    {
+        return _coefs.Length - 1;
+    }
+
+    public Expr CoefDeg(int deg)
+    {
+        if (deg > Deg())
+            return Zero;
+        
+        return _coefs[Deg() - deg];
+    }
+
+    public void SetCoefDeg(int deg, Expr value)
+    {
+        if (deg < Deg())
+            _coefs[Deg() - deg] = value;
+    }
+    
+    public Expr LC()
+    {
+        return CoefDeg(Deg());
+    }
+
+    public Poly EnleveZeroInutile()
+    {
+
+        if (!LC().IsZero())
+            return this;
+
+        Poly? newPoly = null;
+        var noZero = false;
+
+        for (int deg = Deg(); deg >= 0; deg--)
+        {
+            if (noZero)
+            {
+                newPoly.SetCoefDeg(deg, CoefDeg(deg));
+                continue;
+            }
+
+            if (!CoefDeg(deg).IsZero())
+            {
+                newPoly = VideDeg(deg);
+                noZero = true;
+            }
+        }
+
+        return newPoly ?? PolyZero;
+    }
+
+    public bool Equals(Poly poly2)
+    {
+        if (_coefs.Length != poly2._coefs.Length)
+            return false;
+
+        for (int i = 0; i < _coefs.Length; i++)
+        {
+            if (_coefs[i] != poly2._coefs[i])
+                return false;
+        }
+
+        return true;
     }
 
     // TODO
@@ -26,73 +99,73 @@ public class Poly
     {
         
         var str = "";
-        for (var i = 0; i < Coefs.Length; i++)
+        for (var i = 0; i < _coefs.Length; i++)
         {
-            var coef = Coefs[i];
+            var coef = _coefs[i];
             var deg = Deg() - i; 
-            if (coef.IsZero()) continue;
-            if (deg == 0)
-            {
-                str += "+" + coef;
+            if (coef.IsZero())
                 continue;
-            }
-            if (deg == 1)
+            var coef_str = coef.IsOne() && deg != 0 ? "" : coef.ToString();
+            switch (deg)
             {
-                str += "+" + coef + "x";
-                continue;
+                case 0:
+                    str += "+" + coef_str;
+                    continue;
+                case 1:
+                    str += "+" + coef_str + "x";
+                    continue;
+                default:
+                    str += "+" + coef_str + "x^" + deg;
+                    break;
             }
-            str += "+" + coef + "x^" + deg;
         }
         
         if (str == "") 
             return "0";
         
         if (str[0] == '+')
-            str = str.Substring(1);
+            str = str[1..];
 
         return str;
     }
 
-    public int Deg()
-    {
-        return Coefs.Length - 1;
-    }
     
-    public Expr LC()
-    {
-        return Coefs[0];
-    }
-
-    public Expr CoefDeg(int deg)
-    {
-        return Coefs[Deg() - deg];
-    }
 
     public bool IsZero()
     {
-        return Coefs.Length == 1 && Coefs[0].IsZero();
+        return Deg() == 0 && CoefDeg(0).IsZero();
+    }
+
+    /// (g, (u, v))
+    /// g = gcd(a,b)
+    /// g = ua+vb
+    /// TODO: Ne marche pas avec deux constant (ex: gcd(8, 12) = 1)
+    public static (Poly, (Poly, Poly)) ExtendedGcd(Poly a, Poly b)
+    {
+        var (old_r, r) = (a, b);
+        var (old_s, s) = (new Poly(Un), PolyZero);
+        var (old_t, t) = (PolyZero, new Poly(Un));
+        
+        while (!r.IsZero())
+        {
+            var (q, new_r) = Div(old_r, r);
+            (old_r, r) = (r, new_r);
+            (old_s, s) = (s, old_s - q * s);
+            (old_t, t) = (t, old_t - q * t);
+        }
+
+        var lc_r = old_r.LC();
+        old_r /= lc_r;
+        old_s /= lc_r;
+        old_t /= lc_r;
+        
+        return (old_r, (old_s, old_t));
     }
     
     public static Poly Gcd(Poly a, Poly b)
     {
-        if (b.Deg() > a.Deg())
-        {
-            (a, b) = (b, a);
-        }
-
-        var quotient = new Poly(Un);
-        while (!b.IsZero())
-        {
-            Console.WriteLine(a+";"+b);
-            (quotient, var reste) = Div(a, b);
-            Console.WriteLine(quotient+";"+reste);
-
-            a = b;
-            b = reste;
-        }
-        
-        
-        return quotient;
+        var (gcd, _) = ExtendedGcd(a, b);
+        return gcd;
     }
     
     
@@ -100,31 +173,30 @@ public class Poly
     public Poly Derivee()
     {
 
-        var deriveeCoefs = new Expr[Coefs.Length - 1];
-        var deg = Deg();
-        for (int i = 0; i < Coefs.Length - 1; i++)
+        var derivee = VideDeg(Deg() - 1);
+        for (int deg = 1; deg <= Deg(); deg++)
         {
-            deriveeCoefs[i] = (deg - i).Expr() * Coefs[i];
+            // cx^n -> c*nx^(n-1)
+            derivee.SetCoefDeg(deg - 1, deg.Expr() * CoefDeg(deg));
         }
-        
-        return new Poly(deriveeCoefs);
+
+        return derivee;
     }
 
     /// https://en.wikipedia.org/wiki/Square-free_polynomial
     public static Poly[] YunSquareFree(Poly f)
     {
-        var a = new List<Poly>();
         var df = f.Derivee();
-        a.Add(Gcd(f, df));
+        var a = new List<Poly> { Gcd(f, df) };
 
         var (b, _) = Div(f, a[0]);
         var (c, _) = Div(df, a[0]);
         var d = c - b.Derivee();
         var i = 1;
 
-        while (b.Deg() > 1)
+        while (b.Deg() != 0 && !b._coefs[0].IsOne())
         {
-            a[i] = Gcd(b, d);
+            a.Add(Gcd(b, d));
             (b, _) = Div(b, a[i]);
             (c, _) = Div(d, a[i]);
             d = c - b.Derivee();
@@ -142,118 +214,115 @@ public class Poly
         for (int i = 0; i <= a.Deg() - b.Deg(); i++)
         {
 
-            var aLc = a.Coefs[i];
+            var aLc = a._coefs[i];
             q[i] = aLc / b.LC();
 
             for (int j = 0; j <= b.Deg(); j++)
             {
-                a.Coefs[j + i] -= b.Coefs[j] * q[i];
+                a._coefs[j + i] -= b._coefs[j] * q[i];
             }
         }
-        
-        Console.WriteLine(a);
-        var rCoefs = Array.Empty<Expr>(); 
-        var debut = -1;
-        for (int i = 0; i < a.Coefs.Length; i++)
+
+        var r = new Poly(a._coefs).EnleveZeroInutile();
+
+        return (new Poly(q), r);
+    }
+
+    public static Poly operator -(Poly a)
+    {
+        for (int deg = 0; deg <= a.Deg(); deg++)
         {
-            var a_i = a.Coefs[i];
-            if (debut != -1)
-            {
-                rCoefs[i - debut] = a_i;
-                continue;
-            }
-
-            if (!a_i.IsZero())
-            {
-                debut = i;
-                rCoefs = new Expr[a.Coefs.Length - debut];
-                rCoefs[i - debut] = a_i;
-            }
+            a.SetCoefDeg(deg, -a.CoefDeg(deg));
         }
-        
 
-        return (new Poly(q), new Poly(rCoefs));
+        return a;
+    }
+    
+    public static Poly operator /(Poly a, Expr b)
+    {
+        for (int deg = 0; deg <= a.Deg(); deg++)
+        {
+            a.SetCoefDeg(deg, a.CoefDeg(deg) / b);
+        }
+
+        return a;
+    }
+    
+    public static Poly operator *(Poly a, Expr b)
+    {
+        for (int deg = 0; deg <= a.Deg(); deg++)
+        {
+            a.SetCoefDeg(deg, a.CoefDeg(deg) * b);
+        }
+
+        return a;
     }
     
     public static Poly operator -(Poly a, Poly b)
     {
-        var n = Math.Max(a.Coefs.Length, b.Coefs.Length);
-        var c = new Expr[n];
-        for (var i = 0; i < n; i++)
+        var newDeg = Math.Max(a.Deg(), b.Deg());
+        var result = VideDeg(newDeg);
+        for (int deg = 0; deg <= newDeg; deg++)
         {
-            var ai = i < a.Coefs.Length ? a.Coefs[i] : Zero;
-            var bi = i < b.Coefs.Length ? b.Coefs[i] : Zero;
-            c[i] = ai - bi;
+            result.SetCoefDeg( deg, a.CoefDeg(deg) - b.CoefDeg(deg) );
         }
-        return new Poly(c);
+
+        return result.EnleveZeroInutile();
     }
+    
     
     public static Poly operator +(Poly a, Poly b)
     {
-        var n = Math.Max(a.Coefs.Length, b.Coefs.Length);
-        var c = new Expr[n];
-        for (var i = 0; i < n; i++)
+        
+        var newDeg = Math.Max(a.Deg(), b.Deg());
+        var result = VideDeg(newDeg);
+        for (int deg = 0; deg <= newDeg; deg++)
         {
-            var ai = i < a.Coefs.Length ? a.Coefs[i] : Zero;
-            var bi = i < b.Coefs.Length ? b.Coefs[i] : Zero;
-            c[i] = ai + bi;
+            result.SetCoefDeg( deg, a.CoefDeg(deg) + b.CoefDeg(deg) );
         }
-        return new Poly(c);
+
+        return result.EnleveZeroInutile();
     }
     
     public static Poly operator *(Poly a, Poly b)
     {
-        var n = a.Coefs.Length + b.Coefs.Length - 1;
-        var c = new Expr[n];
-        for (var i = 0; i < a.Coefs.Length; i++)
-            for (var j = 0; j < b.Coefs.Length; j++)
-                c[i + j] += a.Coefs[i] * b.Coefs[j];
-        return new Poly(c);
+        var newDeg = a.Deg() + b.Deg();
+        var result = VideDeg(newDeg);
+        
+        for (int deg_a = 0; deg_a <= a.Deg(); deg_a++)
+        {
+            for (int deg_b = 0; deg_b <= b.Deg(); deg_b++)
+            {
+                result.SetCoefDeg(deg_a + deg_b, a.CoefDeg(deg_a) * b.CoefDeg(deg_b));
+            }
+        }
+
+        return result.EnleveZeroInutile();
     }
 
     public Expr[] Solve()
     {
-        // 1) c_i x^i + c_i-1 x^(i-1) + ... + c_0 x^m --> c_i x^(i-m) + c_i-1 x^(i-1-m) + ... + c_0
-
-        // [0,0,0,c,b,a] -> m=3
-        var m = MinDeg();
-        // [c,b,a]
-        var newLength = Coefs.Length - m;
-        var newCoefficients = new Expr[newLength];
-        Array.Copy(Coefs, m, newCoefficients, 0, newLength);
-        Coefs = newCoefficients;
-
         // TODO
-        // 2) c_i x^pi + c_i-1 x^p(i-1) + ... + c_0 --> c_i x^i + c_i-1 x^(i-1) + ... + c_0
-
-        // TODO
-        // 3) a c_i x^i + a c_i-1 x^(i-1) + ... + a c_0 --> c_i x^i + c_i-1 x^(i-1) + ... + c_0
-
-        // TODO
-        // 4) deg <= 4 -> Formula
-
-        // TODO
-
-        return null;
-    }
-
-    // [0,0,0,9] -> 3
-    // [9,4,3] -> 0
-    // [0,0,0] -> Error
-    public int MinDeg()
-    {
-        for (var deg = 0; deg < Coefs.Length; deg++)
-            if (!Coefs[deg].IsZero())
-                return deg;
-
-        throw new Exception("Polynome Zero");
+        throw new NotImplementedException();
     }
 
     public IEnumerable<(Expr, int)> AsCoefDeg()
     {
-        for (var deg = 0; deg < Coefs.Length; deg++)
-            if (!Coefs[deg].IsZero())
-                yield return (Coefs[deg], deg);
+        for (int deg = 0; deg <= Deg(); deg++)
+        {
+            yield return (CoefDeg(deg), deg);
+        }
+    }
+    
+    
+    public IEnumerable<(Expr, int)> AsCoefNotZeroDeg()
+    {
+        for (int deg = 0; deg <= Deg(); deg++)
+        {
+            var coef = CoefDeg(deg);
+            if (coef.IsNotZero())
+                yield return (coef, deg);
+        }
     }
 
     /// a x^2 + b x + c = 0

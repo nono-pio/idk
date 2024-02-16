@@ -1,4 +1,5 @@
 ﻿using ConsoleApp1.core;
+using ConsoleApp1.core.atoms;
 using ConsoleApp1.utils;
 
 static void print(object x)
@@ -8,16 +9,13 @@ static void print(object x)
 
 
 var x = Var("x");
-var a = Var("a");
-var b = Var("b");
-var c = Var("c");
+var poly1 = new Poly(1.Expr(), 2.Expr(), 1.Expr());
 
-var poly1 = new Poly(Un, 3.Expr(), Un);
-var poly2 = new Poly(Un, Un);
-
-var gcd = Poly.Div(poly1, poly2);
-print(gcd);
-
+var ans = Poly.YunSquareFree(poly1);
+foreach (var a in ans)
+{
+    print(a);
+}
 
 
 //

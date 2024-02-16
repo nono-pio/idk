@@ -112,6 +112,18 @@ public abstract class Expr : IComparable<Expr>, IEqualityComparer<Expr>
 
     // <-- Outils Mathématiques -->
 
+
+    public Expr Gcd(Expr b)
+    {
+        var a = this;
+        if (a is Number a_num && a_num.IsEntier() && b is Number b_num && b_num.IsEntier())
+        {
+            return Number.Gcd((uint) a_num.Num, (uint) b_num.Num).Expr();
+        }
+
+        throw new NotImplementedException();
+    }
+    
     /// Retourne la réciproque en
     /// <paramref name="argIndex" />
     /// de l'expression sur
@@ -134,6 +146,11 @@ public abstract class Expr : IComparable<Expr>, IEqualityComparer<Expr>
     public bool IsZero()
     {
         return this is Number { Num: 0 };
+    }
+    
+    public bool IsNotZero()
+    {
+        return !IsZero();
     }
 
     /// x == 1

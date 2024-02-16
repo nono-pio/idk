@@ -17,6 +17,11 @@ public static class Extension
     {
         return Num(d);
     }
+    public static Expr Expr(this uint d)
+    {
+        return Num(d);
+    }
+    
 
 
     public static Expr Expr(this long d)

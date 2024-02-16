@@ -19,6 +19,22 @@ public class Number : Atom
         Num = num;
     }
 
+    public static uint Gcd(uint a, uint b)
+    {
+        if (a < b)
+            (a, b) = (b, a);
+        
+        while (b > 0)
+            (a, b) = (b, a % b);
+
+        return a;
+    }
+
+    public bool IsEntier()
+    {
+        return Equal(Num, (int)Num);
+    }
+    
     // TODO
     public override Expr Inverse(Expr y, int argIndex)
     {
