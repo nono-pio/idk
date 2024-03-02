@@ -35,6 +35,11 @@ public class Number : Atom
         return Equal(Num, (int)Num);
     }
     
+    public override double N()
+    {
+        return Num;
+    }
+
     // TODO
     public override Expr Inverse(Expr y, int argIndex)
     {
@@ -46,7 +51,7 @@ public class Number : Atom
         return Zero;
     }
 
-    public override (double, Expr?) HasMulCoef()
+    public override (double, Expr?) AsMulCoef()
     {
         return (Num, null);
     }

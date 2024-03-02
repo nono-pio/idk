@@ -29,6 +29,11 @@ public class Multiplication : Expr
         return Add(therms);
     }
 
+    public override double N()
+    {
+        return Factors.Aggregate<Expr, double>(1, (current, factor) => current * factor.N());
+    }
+
     public override Expr Inverse(Expr y, int argIndex)
     {
         // a*b : inv(c, 0) -> c/b
@@ -85,7 +90,7 @@ public class Multiplication : Expr
 
         foreach (var factor in newFactors)
         {
-            var (coef, rest) = factor.HasMulCoef();
+            var (coef, rest) = factor.AsMulCoef();
 
 
             if (rest is null)
@@ -138,9 +143,9 @@ public class Multiplication : Expr
 
 
     // TODO
-    public override (double, Expr?) HasMulCoef()
+    public override (double, Expr?) AsMulCoef()
     {
-        return base.HasMulCoef();
+        return base.AsMulCoef();
     }
 
     public override string? ToString()

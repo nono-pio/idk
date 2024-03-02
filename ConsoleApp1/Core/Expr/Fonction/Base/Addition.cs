@@ -44,6 +44,11 @@ public class Addition : Expr
         ;
     }
 
+    public override double N()
+    {
+        return Therms.Sum(t => t.N());
+    }
+
     public Expr Eval()
     {
         var newTherms = new List<Expr>(Therms.Length);
@@ -75,7 +80,7 @@ public class Addition : Expr
 
         foreach (var term in newTherms)
         {
-            var (coef, rest) = term.HasMulCoef();
+            var (coef, rest) = term.AsMulCoef();
 
             if (rest is null)
             {

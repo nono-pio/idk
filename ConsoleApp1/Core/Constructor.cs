@@ -1,5 +1,6 @@
 ﻿using ConsoleApp1.core.atoms;
 using ConsoleApp1.core.expr.atoms;
+using ConsoleApp1.Core.Expr.Fonction.Trigonometrie;
 using ConsoleApp1.core.expr.fonctions;
 using ConsoleApp1.core.expr.fonctions.@base;
 using ConsoleApp1.core.expr.fonctions.trigonometrie;

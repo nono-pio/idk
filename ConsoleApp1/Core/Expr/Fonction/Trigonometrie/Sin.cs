@@ -1,6 +1,8 @@
-﻿namespace ConsoleApp1.core.expr.fonctions.trigonometrie;
+﻿using ConsoleApp1.Core.Expr.Fonction;
 
-public class Sin : Fonction
+namespace ConsoleApp1.core.expr.fonctions.trigonometrie;
+
+public class Sin : FonctionExpr
 {
     public Sin(Expr x) : base(x)
     {
@@ -19,5 +21,10 @@ public class Sin : Fonction
     public override Expr Reciproque(Expr y)
     {
         throw new NotImplementedException();
+    }
+    
+    public override double N()
+    {
+        return Math.Sin(x.N());
     }
 }

@@ -1,60 +1,38 @@
 ﻿using ConsoleApp1.core.atoms;
 using ConsoleApp1.core.expr.atoms;
+using ConsoleApp1.Core.Expr.Fonction;
 using ConsoleApp1.core.expr.fonctions;
 using ConsoleApp1.core.expr.fonctions.@base;
 
 namespace ConsoleApp1.core.expr;
 
-public abstract class Expr : IComparable<Expr>, IEqualityComparer<Expr>
+public abstract class Expr
 {
     /// Args = arguments/parametres de l'expression (thermes d'une addition, facteur d'un produit)
-    public Expr[] Args;
+    public Expr[] Args { get; protected set; }
 
     protected Expr(params Expr[] args)
     {
         Args = args;
     }
+    
+    # region <-- Conversion -->
 
-    public int CompareTo(Expr? expr)
+    public Fonction AsFonction(string variable)
     {
-        if (expr is null) return -1;
-
-        // cmp type
-        var cmpType = TypeId().CompareTo(expr.TypeId());
-        if (cmpType != 0) return cmpType;
-
-        if (this is Atom) return ((Atom)this).CompareAtom((Atom?)expr);
-
-        // cmp args length
-        var cmpLength = Args.Length.CompareTo(expr.Args.Length);
-        if (cmpLength != 0) return cmpLength;
-
-        // cmp args
-        for (var i = 0; i < Args.Length; i++)
-        {
-            var cmpArg = Args[i].CompareTo(expr.Args[i]);
-            if (cmpArg != 0) return cmpArg;
-        }
-
-        Console.WriteLine("cmp > " + this + "=" + expr);
-        return 0;
+        return new Fonction(this, variable);
+    }
+    
+    // TODO
+    /// Retourne l'expression sous la forme a * x où a est un nombre et x une expression
+    public virtual (double, Expr?) AsMulCoef()
+    {
+        return (1, this);
     }
 
-    // <-- Comparison -->
+    # endregion
 
-    public bool Equals(Expr? x, Expr? y)
-    {
-        if (x is null || y is null) return false;
-
-        return x.Equals(y);
-    }
-
-    public int GetHashCode(Expr obj)
-    {
-        return obj.GetHashCode();
-    }
-
-    // <-- String Méthodes -->
+    # region <-- String Méthodes -->
 
     /// Génère un string représentant l'expression en utilisant le Latex
     public abstract string? ToLatex();
@@ -72,7 +50,7 @@ public abstract class Expr : IComparable<Expr>, IEqualityComparer<Expr>
         return result;
     }
 
-    protected string? ElementWithParenthesis(int i)
+    private string? ElementWithParenthesis(int i)
     {
         var str = Args[i].ToString();
 
@@ -83,10 +61,10 @@ public abstract class Expr : IComparable<Expr>, IEqualityComparer<Expr>
 
     protected string? Parenthesis(string? str)
     {
-        return $"({str})";
+        return str == null ? null : $"({str})";
     }
 
-    protected string? ElementWithParenthesisLatex(int i)
+    private string? ElementWithParenthesisLatex(int i)
     {
         var str = Args[i].ToLatex();
 
@@ -97,7 +75,7 @@ public abstract class Expr : IComparable<Expr>, IEqualityComparer<Expr>
 
     protected string? ParenthesisLatex(string? str)
     {
-        return $"\\right({str}\\left)";
+        return str == null ? null : $@"\right({str}\left)";
     }
 
     protected string? JoinLatex(string separator)
@@ -109,9 +87,17 @@ public abstract class Expr : IComparable<Expr>, IEqualityComparer<Expr>
 
         return result;
     }
+    
+    # endregion
 
-    // <-- Outils Mathématiques -->
+    # region <-- Outils Mathématiques -->
 
+    public abstract double N();
+    
+    public Expr Substitue(string variable, Expr value)
+    {
+        return Map<Variable>(var => var.Name == variable ? value : var);
+    }
 
     public Expr Gcd(Expr b)
     {
@@ -140,46 +126,14 @@ public abstract class Expr : IComparable<Expr>, IEqualityComparer<Expr>
     /// <paramref name="variable" />
     public abstract Expr Derivee(string variable);
 
-    // <-- Comparaison Spéciales -->
-
-    /// x == 0
-    public bool IsZero()
+    public double N(Dictionary<string, double>? variables = null)
     {
-        return this is Number { Num: 0 };
+        throw new NotImplementedException("Expr.N");
     }
     
-    public bool IsNotZero()
-    {
-        return !IsZero();
-    }
+    # endregion
 
-    /// x == 1
-    public bool IsOne()
-    {
-        return this is Number { Num: 1 };
-    }
-
-    /// x == -1
-    public bool IsNegOne()
-    {
-        return this is Number { Num: -1 };
-    }
-
-    /// x == n avec n un nombre
-    public bool Is(double n)
-    {
-        return this is Number number && Number.Equal(n, number.Num);
-    }
-
-    /// Test si l'expression est une variable nommé
-    /// <paramref name="variable" />
-    public bool IsVar(string variable)
-    {
-        return this is Variable var && var.Name == variable;
-    }
-
-
-    // <-- Outils -->
+    # region <-- Outils -->
 
     /// Priorité des opérations
     /// <list type="table">
@@ -208,7 +162,7 @@ public abstract class Expr : IComparable<Expr>, IEqualityComparer<Expr>
     {
         return this switch
         {
-            Atom or Fonction => 0,
+            Atom or FonctionExpr => 0,
             Power => 1,
             Multiplication => 2,
             Addition => 3,
@@ -229,19 +183,12 @@ public abstract class Expr : IComparable<Expr>, IEqualityComparer<Expr>
         return true;
     }
 
-    // TODO
-    /// Retourne l'expression sous la forme a * x où a est un nombre et x une expression
-    public virtual (double, Expr?) HasMulCoef()
-    {
-        return (1, this);
-    }
-
     /// Test si un il y a un type
     /// <typeparamref name="T" />
     /// dans l'expression
     public bool Has<T>() where T : Expr
     {
-        if (IsType<T>())
+        if (this is T)
             return true;
 
         foreach (var arg in Args)
@@ -258,13 +205,13 @@ public abstract class Expr : IComparable<Expr>, IEqualityComparer<Expr>
     {
         var count = 0;
 
-        for (var i = 0; i < Args.Length; i++) count += Args[i].Count<T>();
+        foreach (var arg in Args)
+            count += arg.Count<T>();
 
-        if (IsType<T>()) count++;
+        if (this is T) count++;
 
         return count;
     }
-
 
     /// Map chaque type
     /// <typeparamref name="T" />
@@ -296,67 +243,14 @@ public abstract class Expr : IComparable<Expr>, IEqualityComparer<Expr>
         return func(this);
     }
 
-    public void SortArgs()
+    protected void SortArgs()
     {
         Args = Args.Order().ToArray();
     }
-
-    public long TypeId()
-    {
-        return GetType().TypeHandle.Value.ToInt64();
-    }
-
-    public bool IsType<T>()
-    {
-        return GetType() == typeof(T);
-    }
-
-    public override bool Equals(object? obj)
-    {
-        Console.WriteLine("Equals > " + this + ";" + obj);
-        if (obj is not Expr expr) return false;
-
-        return this == expr;
-    }
-
-    public override int GetHashCode()
-    {
-        return Args.GetHashCode();
-    }
-
-    public static bool operator ==(Expr expr1, Expr expr2)
-    {
-        return expr1.CompareTo(expr2) == 0;
-    }
-
-    public static bool operator !=(Expr expr1, Expr expr2)
-    {
-        return expr1.CompareTo(expr2) != 0;
-    }
-
-    public static bool operator >(Expr expr1, Expr expr2)
-    {
-        return expr1.CompareTo(expr2) == 1;
-    }
-
-    public static bool operator <(Expr expr1, Expr expr2)
-    {
-        return expr1.CompareTo(expr2) == -1;
-    }
-
-    public static bool operator >=(Expr expr1, Expr expr2)
-    {
-        var cmp = expr1.CompareTo(expr2);
-        return cmp == 0 || cmp == 1;
-    }
-
-    public static bool operator <=(Expr expr1, Expr expr2)
-    {
-        var cmp = expr1.CompareTo(expr2);
-        return cmp == 0 || cmp == -1;
-    }
-
-    // <-- Operator -->
+    
+    # endregion
+    
+    # region <-- Math Operator -->
 
     // Addition
     public static Expr operator +(double num, Expr expr)
@@ -428,4 +322,125 @@ public abstract class Expr : IComparable<Expr>, IEqualityComparer<Expr>
     {
         return Div(expr1, expr2);
     }
+    
+    # endregion
+    
+    # region <-- Comparaison -->
+    
+    protected long TypeId()
+    {
+        return GetType().TypeHandle.Value.ToInt64();
+    }
+    
+    public override int GetHashCode()
+    {
+        return Args.GetHashCode();
+    }
+    
+    public int CompareTo(Expr? expr)
+    {
+        if (expr is null) return -1;
+
+        // cmp type
+        var cmpType = TypeId().CompareTo(expr.TypeId());
+        if (cmpType != 0) return cmpType;
+
+        if (this is Atom) return ((Atom)this).CompareAtom((Atom?)expr);
+
+        // cmp args length
+        var cmpLength = Args.Length.CompareTo(expr.Args.Length);
+        if (cmpLength != 0) return cmpLength;
+
+        // cmp args
+        for (var i = 0; i < Args.Length; i++)
+        {
+            var cmpArg = Args[i].CompareTo(expr.Args[i]);
+            if (cmpArg != 0) return cmpArg;
+        }
+
+        Console.WriteLine("cmp > " + this + "=" + expr);
+        return 0;
+    }
+    
+    public override bool Equals(object? obj)
+    {
+        Console.WriteLine("Equals > " + this + ";" + obj);
+        if (obj is not Expr expr) return false;
+
+        return CompareTo(expr) == 0;
+    }
+
+    public static bool operator ==(Expr expr1, Expr expr2)
+    {
+        return expr1.CompareTo(expr2) == 0;
+    }
+
+    public static bool operator !=(Expr expr1, Expr expr2)
+    {
+        return expr1.CompareTo(expr2) != 0;
+    }
+
+    public static bool operator >(Expr expr1, Expr expr2)
+    {
+        return expr1.CompareTo(expr2) == 1;
+    }
+
+    public static bool operator <(Expr expr1, Expr expr2)
+    {
+        return expr1.CompareTo(expr2) == -1;
+    }
+
+    public static bool operator >=(Expr expr1, Expr expr2)
+    {
+        var cmp = expr1.CompareTo(expr2);
+        return cmp == 0 || cmp == 1;
+    }
+
+    public static bool operator <=(Expr expr1, Expr expr2)
+    {
+        var cmp = expr1.CompareTo(expr2);
+        return cmp == 0 || cmp == -1;
+    }
+    
+    # endregion
+    
+    # region <-- Comparaison Spéciales -->
+
+    /// x == 0
+    public bool IsZero()
+    {
+        return this is Number { Num: 0 };
+    }
+    
+    public bool IsNotZero()
+    {
+        return !IsZero();
+    }
+
+    /// x == 1
+    public bool IsOne()
+    {
+        return this is Number { Num: 1 };
+    }
+
+    /// x == -1
+    public bool IsNegOne()
+    {
+        return this is Number { Num: -1 };
+    }
+
+    /// x == n avec n un nombre
+    public bool Is(double n)
+    {
+        return this is Number number && Number.Equal(n, number.Num);
+    }
+
+    /// Test si l'expression est une variable nommé
+    /// <paramref name="variable" />
+    public bool IsVar(string variable)
+    {
+        return this is Variable var && var.Name == variable;
+    }
+    
+    # endregion
 }

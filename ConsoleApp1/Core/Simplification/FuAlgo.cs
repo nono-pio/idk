@@ -1,4 +1,5 @@
 ﻿using ConsoleApp1.core.atoms;
+using ConsoleApp1.Core.Expr.Fonction.Trigonometrie;
 using ConsoleApp1.core.expr.fonctions;
 using ConsoleApp1.core.expr.fonctions.trigonometrie;
 
@@ -47,9 +48,9 @@ public class FuAlgo
     {
         return expr.Map<Power>(pow =>
         {
-            if (pow.exp == Number.Two && pow.value.IsType<Sin>())
+            if (pow.Exp == Number.Two && pow.Base is Sin sin)
             {
-                var x = ((Sin)pow.value).x;
+                var x = sin.x;
                 return 1 - Pow(Cos(x), Num(2));
             }
 
@@ -62,9 +63,9 @@ public class FuAlgo
     {
         return expr.Map<Power>(pow =>
         {
-            if (pow.exp == Number.Two && pow.value.IsType<Cos>())
+            if (pow.Exp == Number.Two && pow.Base is Cos cos)
             {
-                var x = ((Cos)pow.value).x;
+                var x = cos.x;
                 return 1 - Pow(Sin(x), Num(2));
             }
 
@@ -77,9 +78,9 @@ public class FuAlgo
     {
         return expr.Map<Power>(pow =>
         {
-            if (pow.exp == Number.Two && pow.value.IsType<Cos>())
+            if (pow.Exp == Number.Two && pow.Base is Cos cos)
             {
-                var x = ((Cos)pow.value).x;
+                var x = cos.x;
                 return (1 + Cos(2 * x)) / 2;
             }
 

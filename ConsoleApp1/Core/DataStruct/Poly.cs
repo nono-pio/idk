@@ -15,10 +15,25 @@ public class Poly
         
         _coefs = coefs;
     }
+    
+    public Poly(params int[] coefs)
+    {
+        if (coefs.Length == 0)
+        {
+            _coefs = new[] { Zero };
+            return;
+        }
+        _coefs = new Expr[coefs.Length];
+        for (int i = 0; i < coefs.Length; i++)
+        {
+            _coefs[i] = coefs[i].Expr();
+        }
+        
+    }
 
     public static Poly VideDeg(int deg)
     {
-        var coefs = new Expr[deg];
+        var coefs = new Expr[deg + 1];
         Array.Fill(coefs, Zero);
 
         return new Poly(coefs);
@@ -39,7 +54,7 @@ public class Poly
 
     public void SetCoefDeg(int deg, Expr value)
     {
-        if (deg < Deg())
+        if (deg <= Deg())
             _coefs[Deg() - deg] = value;
     }
     
@@ -129,7 +144,17 @@ public class Poly
         return str;
     }
 
-    
+    public Poly Clone()
+    {
+        var coefs = new Expr[_coefs.Length];
+        for (int i = 0; i < coefs.Length; i++)
+        {
+            coefs[i] = _coefs[i];
+        }
+
+        return new Poly(coefs);
+    }
+
 
     public bool IsZero()
     {
@@ -148,6 +173,7 @@ public class Poly
         
         while (!r.IsZero())
         {
+            Console.WriteLine((old_r, r));
             var (q, new_r) = Div(old_r, r);
             (old_r, r) = (r, new_r);
             (old_s, s) = (s, old_s - q * s);
@@ -187,19 +213,24 @@ public class Poly
     public static Poly[] YunSquareFree(Poly f)
     {
         var df = f.Derivee();
-        var a = new List<Poly> { Gcd(f, df) };
+        Console.WriteLine((f,df));
+        var a = new List<Poly> { Gcd(f.Clone(), df.Clone()) };
 
         var (b, _) = Div(f, a[0]);
         var (c, _) = Div(df, a[0]);
         var d = c - b.Derivee();
         var i = 1;
+        
+        Console.WriteLine((a.Last(),b,c,d));
 
-        while (b.Deg() != 0 && !b._coefs[0].IsOne())
+        while (b.Deg() > 0)
         {
-            a.Add(Gcd(b, d));
+            a.Add(Gcd(b.Clone(), d.Clone()));
             (b, _) = Div(b, a[i]);
             (c, _) = Div(d, a[i]);
             d = c - b.Derivee();
+            Console.WriteLine((i,a.Last(),b,c,d));
+
             i++;
         }
         

@@ -1,6 +1,8 @@
-﻿namespace ConsoleApp1.core.expr.fonctions.trigonometrie;
+﻿using ConsoleApp1.Core.Expr.Fonction;
 
-public class Cot : Fonction
+namespace ConsoleApp1.core.expr.fonctions.trigonometrie;
+
+public class Cot : FonctionExpr
 {
     public Cot(Expr x) : base(x)
     {
@@ -19,5 +21,10 @@ public class Cot : Fonction
     public override Expr Reciproque(Expr y)
     {
         throw new NotImplementedException();
+    }
+    
+    public override double N()
+    {
+        return 1/Math.Tan(x.N());
     }
 }

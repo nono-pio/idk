@@ -1,12 +1,12 @@
-﻿namespace ConsoleApp1.core.expr.fonctions;
+﻿namespace ConsoleApp1.Core.Expr.Fonction;
 
-public abstract class Fonction : Expr
+public abstract class FonctionExpr : core.expr.Expr
 {
-    protected Fonction(Expr x) : base(x)
+    protected FonctionExpr(core.expr.Expr x) : base(x)
     {
     }
 
-    public Expr x => Args[0];
+    public core.expr.Expr x => Args[0];
 
 
     /// The name of the fonction
@@ -16,17 +16,17 @@ public abstract class Fonction : Expr
     ///     Derivée sans dérivée intérieur
     ///     <example>sin(x^2) -> cos(x^2)</example>
     /// </para>
-    protected abstract Expr BaseDerivee();
+    protected abstract core.expr.Expr BaseDerivee();
 
-    public override Expr Derivee(string variable)
+    public override core.expr.Expr Derivee(string variable)
     {
         return x.Derivee(variable) * BaseDerivee();
     }
 
     /// Retourne la reciproque de la fonction pour y : f^r(y)
-    public abstract Expr Reciproque(Expr y);
+    public abstract core.expr.Expr Reciproque(core.expr.Expr y);
 
-    public override Expr Inverse(Expr y, int argIndex)
+    public override core.expr.Expr Inverse(core.expr.Expr y, int argIndex)
     {
         return Reciproque(y);
     }

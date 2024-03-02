@@ -13,6 +13,11 @@ public class Variable : Atom
     {
         return Name == variable ? Un : Zero;
     }
+    
+    public override double N()
+    {
+        throw new Exception("Canot convert a variable to a number");
+    }
 
     // TODO
     public override Expr Inverse(Expr y, int argIndex)
