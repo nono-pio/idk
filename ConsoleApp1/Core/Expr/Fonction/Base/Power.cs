@@ -1,6 +1,6 @@
-﻿using ConsoleApp1.core.atoms;
+﻿using ConsoleApp1.Core.Atoms;
 
-namespace ConsoleApp1.core.expr.fonctions;
+namespace ConsoleApp1.Core.Expr.Fonctions;
 
 public class Power : Expr
 {

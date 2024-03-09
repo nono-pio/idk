@@ -21,11 +21,20 @@ public static class Extension
     {
         return Num(d);
     }
-    
-
 
     public static Expr Expr(this long d)
     {
         return Num(d);
+    }
+
+    public static TOut[] Map<TIn, TOut>(this TIn[] array, Func<TIn, TOut> func)
+    {
+        var newArray = new TOut[array.Length];
+        for (int i = 0; i < array.Length; i++)
+        {
+            newArray[i] = func(array[i]);
+        }
+
+        return newArray;
     }
 }

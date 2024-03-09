@@ -1,9 +1,9 @@
-﻿using ConsoleApp1.core.atoms;
+﻿using ConsoleApp1.Core.Atoms;
 using ConsoleApp1.Core.Expr.Fonction.Trigonometrie;
-using ConsoleApp1.core.expr.fonctions;
-using ConsoleApp1.core.expr.fonctions.trigonometrie;
+using ConsoleApp1.Core.Expr.Fonctions;
+using ConsoleApp1.Core.Expr.Fonctions.Trigonometrie;
 
-namespace ConsoleApp1.core.simplification;
+namespace ConsoleApp1.Core.simplification;
 
 // source: https://www.sciencedirect.com/science/article/pii/S0895717706001609
 
@@ -12,39 +12,39 @@ public class FuAlgo
     // <-- Basic Trigonometric Rules -->
 
     // simplify rational polynomial
-    public static Expr TR0(Expr expr)
+    public static Expr.Expr TR0(Expr.Expr expr)
     {
         return expr; //TODO
     }
 
     // sec, csc -> sin, cos
-    public static Expr TR1(Expr expr)
+    public static Expr.Expr TR1(Expr.Expr expr)
     {
         expr = expr.Map<Sec>(sec => 1 / Cos(sec.x));
         return expr.Map<Csc>(csc => 1 / Sin(csc.x));
     }
 
     // tan, cot -> sin, cos
-    public static Expr TR2(Expr expr)
+    public static Expr.Expr TR2(Expr.Expr expr)
     {
         expr = expr.Map<Tan>(tan => Sin(tan.x) / Cos(tan.x));
         return expr.Map<Cot>(cot => Sin(cot.x) / Cos(cot.x));
     }
 
     // Induced formula
-    public static Expr TR3(Expr expr)
+    public static Expr.Expr TR3(Expr.Expr expr)
     {
         return expr; //TODO
     }
 
     // Values of special angles
-    public static Expr TR4(Expr expr)
+    public static Expr.Expr TR4(Expr.Expr expr)
     {
         return expr; //TODO
     }
 
     // Sin^2 -> 1-Cos^2
-    public static Expr TR5(Expr expr)
+    public static Expr.Expr TR5(Expr.Expr expr)
     {
         return expr.Map<Power>(pow =>
         {
@@ -59,7 +59,7 @@ public class FuAlgo
     }
 
     // Cos^2 -> 1-Sin^2
-    public static Expr TR6(Expr expr)
+    public static Expr.Expr TR6(Expr.Expr expr)
     {
         return expr.Map<Power>(pow =>
         {
@@ -74,7 +74,7 @@ public class FuAlgo
     }
 
     // Cos^2 -> Cos
-    public static Expr TR7(Expr expr)
+    public static Expr.Expr TR7(Expr.Expr expr)
     {
         return expr.Map<Power>(pow =>
         {
@@ -88,45 +88,45 @@ public class FuAlgo
         });
     }
 
-    public static Expr TR8(Expr expr)
+    public static Expr.Expr TR8(Expr.Expr expr)
     {
         return expr; //TODO
     }
 
-    public static Expr TR9(Expr expr)
+    public static Expr.Expr TR9(Expr.Expr expr)
     {
         return expr; //TODO
     }
 
-    public static Expr TR10(Expr expr)
+    public static Expr.Expr TR10(Expr.Expr expr)
     {
         return expr; //TODO
     }
 
-    public static Expr TRN10(Expr expr)
+    public static Expr.Expr TRN10(Expr.Expr expr)
     {
         return expr; //TODO
     }
 
     // Double Angle
-    public static Expr TR11(Expr expr)
+    public static Expr.Expr TR11(Expr.Expr expr)
     {
         return expr; //TODO
     }
 
-    public static Expr TR12(Expr expr)
+    public static Expr.Expr TR12(Expr.Expr expr)
     {
         return expr; //TODO
     }
 
-    public static Expr TR13(Expr expr)
+    public static Expr.Expr TR13(Expr.Expr expr)
     {
         return expr; //TODO
     }
 
     // <-- 
 
-    public static int L(Expr expr)
+    public static int L(Expr.Expr expr)
     {
         return expr.Count<Sin>() +
                expr.Count<Cos>() +
@@ -136,7 +136,7 @@ public class FuAlgo
                expr.Count<Cot>();
     }
 
-    public static Expr TR(int i, Expr expr)
+    public static Expr.Expr TR(int i, Expr.Expr expr)
     {
         return i switch
         {
@@ -159,12 +159,12 @@ public class FuAlgo
         };
     }
 
-    public static Expr SmallestLTR(Expr expr)
+    public static Expr.Expr SmallestLTR(Expr.Expr expr)
     {
         var minL = L(expr);
         var min = expr;
 
-        Expr F;
+        Expr.Expr F;
         int LF;
 
         // TR 0-13
@@ -193,7 +193,7 @@ public class FuAlgo
 
     // <-- Combination Rules -->
 
-    public static Expr CTR1(Expr expr)
+    public static Expr.Expr CTR1(Expr.Expr expr)
     {
         var F1 = TR0(TR5(expr));
         var F2 = TR0(TR6(expr));
@@ -210,7 +210,7 @@ public class FuAlgo
     }
 
 
-    public static Expr CTR2(Expr expr)
+    public static Expr.Expr CTR2(Expr.Expr expr)
     {
         var F1 = TR5(TR11(expr));
         var F2 = TR6(TR11(expr));
@@ -227,7 +227,7 @@ public class FuAlgo
         return expr;
     }
 
-    public static Expr CTR3(Expr expr)
+    public static Expr.Expr CTR3(Expr.Expr expr)
     {
         var F1 = TR8(expr);
         var F2 = TRN10(TR8(expr));
@@ -243,7 +243,7 @@ public class FuAlgo
         return expr;
     }
 
-    public static Expr CTR4(Expr expr)
+    public static Expr.Expr CTR4(Expr.Expr expr)
     {
         var F1 = TRN10(TR4(expr));
 
@@ -258,20 +258,20 @@ public class FuAlgo
     // <--
 
     // 4 -> 3 -> 4 -> 12 -> 4 -> 13 -> 4 -> 0
-    public static Expr RL1(Expr expr)
+    public static Expr.Expr RL1(Expr.Expr expr)
     {
         return TR0(TR4(TR13(TR4(TR12(TR4(TR3(TR4(expr))))))));
     }
 
     // 4 -> 3 -> 10 -> 4 -> 3 -> 11 -> 5 -> 7 -> 11 (->) 4 -> C3 -> 0 -> C1 -> 9 -> C2 -> 4 -> 9 -> 0 -> 9 -> C4
-    public static Expr RL2(Expr expr)
+    public static Expr.Expr RL2(Expr.Expr expr)
     {
         expr = TR11(TR7(TR5(TR11(TR3(TR4(TR10(TR3(TR4(expr)))))))));
         return CTR4(TR9(TR0(TR9(TR4(CTR2(TR9(CTR1(TR0(CTR3(TR4(expr)))))))))));
     }
 
     // <-- Fu -->
-    public static Expr Fu(Expr expr)
+    public static Expr.Expr Fu(Expr.Expr expr)
     {
         if (expr.Has<Sec>() || expr.Has<Csc>()) expr = TR1(expr);
 

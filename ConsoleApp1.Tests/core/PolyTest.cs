@@ -1,5 +1,5 @@
 ﻿using System;
-using ConsoleApp1.core;
+using ConsoleApp1.Core;
 using ConsoleApp1.utils;
 using JetBrains.Annotations;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

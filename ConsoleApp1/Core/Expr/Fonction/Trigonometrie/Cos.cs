@@ -1,6 +1,6 @@
 ﻿using ConsoleApp1.Core.Expr.Fonction;
 
-namespace ConsoleApp1.core.expr.fonctions.trigonometrie;
+namespace ConsoleApp1.Core.Expr.Fonctions.Trigonometrie;
 
 public class Cos : FonctionExpr
 {

@@ -1,4 +1,4 @@
-﻿namespace ConsoleApp1.core.expr;
+﻿namespace ConsoleApp1.Core.Expr;
 
 public abstract class Tranformer : Expr
 {

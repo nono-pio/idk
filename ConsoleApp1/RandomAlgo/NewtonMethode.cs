@@ -43,9 +43,8 @@ public class NewtonMethode
 
     public static double RootOf(Expr function, string variable, int max_iter = MAX_ITER, double precision = PRECISION)
     {
-        throw new NotImplementedException("NewtonMethode.RootOf - version Expr");
-        // var f = function.AsFonction(variable).N;
-        // var f_ddx = function.Derivee(variable).AsFonction(variable).N;
-        // return RootOf(0d, f, f_ddx, precision: precision, max_iter: max_iter);
+        var f = function.AsFonction(variable);
+        var f_ddx = f.Derivee();
+        return RootOf(0d, f.N, f_ddx.N, precision: precision, max_iter: max_iter);
     }
 }

@@ -1,6 +1,6 @@
 ﻿using ConsoleApp1.utils;
 
-namespace ConsoleApp1.core.expr.fonctions.@base;
+namespace ConsoleApp1.Core.Expr.Fonctions.Base;
 
 public class Addition : Expr
 {

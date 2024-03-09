@@ -1,14 +1,14 @@
-﻿using ConsoleApp1.core.expr.atoms;
+﻿using ConsoleApp1.Core.Expr.Atoms;
 using ConsoleApp1.utils;
 
-namespace ConsoleApp1.core;
+namespace ConsoleApp1.Core;
 
 public class Poly
 {
     /// [a,b,c] -> ax^2+bx+c
-    private Expr[] _coefs;
+    private Expr.Expr[] _coefs;
 
-    public Poly(params Expr[] coefs)
+    public Poly(params Expr.Expr[] coefs)
     {
         if (coefs.Length == 0)
             coefs = new[] { Zero };
@@ -23,7 +23,7 @@ public class Poly
             _coefs = new[] { Zero };
             return;
         }
-        _coefs = new Expr[coefs.Length];
+        _coefs = new Expr.Expr[coefs.Length];
         for (int i = 0; i < coefs.Length; i++)
         {
             _coefs[i] = coefs[i].Expr();
@@ -33,7 +33,7 @@ public class Poly
 
     public static Poly VideDeg(int deg)
     {
-        var coefs = new Expr[deg + 1];
+        var coefs = new Expr.Expr[deg + 1];
         Array.Fill(coefs, Zero);
 
         return new Poly(coefs);
@@ -44,7 +44,7 @@ public class Poly
         return _coefs.Length - 1;
     }
 
-    public Expr CoefDeg(int deg)
+    public Expr.Expr CoefDeg(int deg)
     {
         if (deg > Deg())
             return Zero;
@@ -52,13 +52,13 @@ public class Poly
         return _coefs[Deg() - deg];
     }
 
-    public void SetCoefDeg(int deg, Expr value)
+    public void SetCoefDeg(int deg, Expr.Expr value)
     {
         if (deg <= Deg())
             _coefs[Deg() - deg] = value;
     }
     
-    public Expr LC()
+    public Expr.Expr LC()
     {
         return CoefDeg(Deg());
     }
@@ -105,7 +105,7 @@ public class Poly
     }
 
     // TODO
-    public static Poly? ToPoly(Expr expr)
+    public static Poly? ToPoly(Expr.Expr expr)
     {
         return null;
     }
@@ -146,7 +146,7 @@ public class Poly
 
     public Poly Clone()
     {
-        var coefs = new Expr[_coefs.Length];
+        var coefs = new Expr.Expr[_coefs.Length];
         for (int i = 0; i < coefs.Length; i++)
         {
             coefs[i] = _coefs[i];
@@ -241,7 +241,7 @@ public class Poly
     /// a = qb + r
     public static (Poly, Poly) Div(Poly a, Poly b)
     {
-        var q = new Expr[a.Deg() - b.Deg() + 1];
+        var q = new Expr.Expr[a.Deg() - b.Deg() + 1];
         for (int i = 0; i <= a.Deg() - b.Deg(); i++)
         {
 
@@ -269,7 +269,7 @@ public class Poly
         return a;
     }
     
-    public static Poly operator /(Poly a, Expr b)
+    public static Poly operator /(Poly a, Expr.Expr b)
     {
         for (int deg = 0; deg <= a.Deg(); deg++)
         {
@@ -279,7 +279,7 @@ public class Poly
         return a;
     }
     
-    public static Poly operator *(Poly a, Expr b)
+    public static Poly operator *(Poly a, Expr.Expr b)
     {
         for (int deg = 0; deg <= a.Deg(); deg++)
         {
@@ -331,13 +331,13 @@ public class Poly
         return result.EnleveZeroInutile();
     }
 
-    public Expr[] Solve()
+    public Expr.Expr[] Solve()
     {
         // TODO
         throw new NotImplementedException();
     }
 
-    public IEnumerable<(Expr, int)> AsCoefDeg()
+    public IEnumerable<(Expr.Expr, int)> AsCoefDeg()
     {
         for (int deg = 0; deg <= Deg(); deg++)
         {
@@ -346,7 +346,7 @@ public class Poly
     }
     
     
-    public IEnumerable<(Expr, int)> AsCoefNotZeroDeg()
+    public IEnumerable<(Expr.Expr, int)> AsCoefNotZeroDeg()
     {
         for (int deg = 0; deg <= Deg(); deg++)
         {
@@ -357,7 +357,7 @@ public class Poly
     }
 
     /// a x^2 + b x + c = 0
-    public static (Expr, Expr) SolveParabole(Expr a, Expr b, Expr c)
+    public static (Expr.Expr, Expr.Expr) SolveParabole(Expr.Expr a, Expr.Expr b, Expr.Expr c)
     {
         var delta = b*b - 4*a*c;
 

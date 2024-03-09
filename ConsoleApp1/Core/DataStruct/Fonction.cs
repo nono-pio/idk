@@ -1,26 +1,30 @@
-﻿namespace ConsoleApp1.core;
+﻿namespace ConsoleApp1.Core;
 
 public class Fonction
 {
-    public Expr Fx;
+    public Expr.Expr Fx;
     public string Variable;
     
-    public Fonction(Expr fx, string variable)
+    public Fonction(Expr.Expr fx, string variable)
     {
         Fx = fx;
         Variable = variable;
     }
 
-    public Expr Of(Expr x)
+    public Expr.Expr Of(Expr.Expr x)
     {
         return Fx.Substitue(Variable, x);
     }
     
     public double N(double x)
     {
-        throw new NotImplementedException("Fonction.Of");
-        //return Fx.Substitue(Variable, x).N();
+        return Of(x.Expr()).N();
         // TODO : optimiser
+    }
+
+    public Fonction Derivee()
+    {
+        return new Fonction(Fx.Derivee(Variable), Variable);
     }
     
 }

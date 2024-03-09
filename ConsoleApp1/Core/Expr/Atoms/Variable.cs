@@ -1,4 +1,4 @@
-﻿namespace ConsoleApp1.core.expr.atoms;
+﻿namespace ConsoleApp1.Core.Expr.Atoms;
 
 public class Variable : Atom
 {

@@ -2,7 +2,7 @@
 
 public class Tan : FonctionExpr
 {
-    public Tan(core.expr.Expr x) : base(x)
+    public Tan(Core.Expr.Expr x) : base(x)
     {
     }
 
@@ -11,12 +11,12 @@ public class Tan : FonctionExpr
         return "tan";
     }
 
-    protected override core.expr.Expr BaseDerivee()
+    protected override Core.Expr.Expr BaseDerivee()
     {
         return Pow(Sec(x), Deux);
     }
 
-    public override core.expr.Expr Reciproque(core.expr.Expr y)
+    public override Core.Expr.Expr Reciproque(Core.Expr.Expr y)
     {
         throw new NotImplementedException();
     }

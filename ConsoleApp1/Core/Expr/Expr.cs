@@ -1,10 +1,10 @@
-﻿using ConsoleApp1.core.atoms;
-using ConsoleApp1.core.expr.atoms;
+﻿using ConsoleApp1.Core.Atoms;
+using ConsoleApp1.Core.Expr.Atoms;
 using ConsoleApp1.Core.Expr.Fonction;
-using ConsoleApp1.core.expr.fonctions;
-using ConsoleApp1.core.expr.fonctions.@base;
+using ConsoleApp1.Core.Expr.Fonctions;
+using ConsoleApp1.Core.Expr.Fonctions.Base;
 
-namespace ConsoleApp1.core.expr;
+namespace ConsoleApp1.Core.Expr;
 
 public abstract class Expr
 {
@@ -18,9 +18,9 @@ public abstract class Expr
     
     # region <-- Conversion -->
 
-    public Fonction AsFonction(string variable)
+    public Core.Fonction AsFonction(string variable)
     {
-        return new Fonction(this, variable);
+        return new Core.Fonction(this, variable);
     }
     
     // TODO
@@ -104,7 +104,7 @@ public abstract class Expr
         var a = this;
         if (a is Number a_num && a_num.IsEntier() && b is Number b_num && b_num.IsEntier())
         {
-            return Number.Gcd((uint) a_num.Num, (uint) b_num.Num).Expr();
+            return Number.Gcd((int) a_num.Num, (int) b_num.Num).Expr();
         }
 
         throw new NotImplementedException();
@@ -125,11 +125,6 @@ public abstract class Expr
     /// Retourne la dérivee de l'expression en la variable
     /// <paramref name="variable" />
     public abstract Expr Derivee(string variable);
-
-    public double N(Dictionary<string, double>? variables = null)
-    {
-        throw new NotImplementedException("Expr.N");
-    }
     
     # endregion
 

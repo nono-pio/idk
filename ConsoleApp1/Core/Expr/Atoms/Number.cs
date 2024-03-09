@@ -1,6 +1,6 @@
-﻿using ConsoleApp1.core.expr.atoms;
+﻿using ConsoleApp1.Core.Expr.Atoms;
 
-namespace ConsoleApp1.core.atoms;
+namespace ConsoleApp1.Core.Atoms;
 
 public class Number : Atom
 {
@@ -19,17 +19,8 @@ public class Number : Atom
         Num = num;
     }
 
-    public static uint Gcd(uint a, uint b)
-    {
-        if (a < b)
-            (a, b) = (b, a);
-        
-        while (b > 0)
-            (a, b) = (b, a % b);
-
-        return a;
-    }
-
+    public static int Gcd(int a, int b) => NumberUtils.Gcd(a, b);
+    
     public bool IsEntier()
     {
         return Equal(Num, (int)Num);
@@ -41,17 +32,17 @@ public class Number : Atom
     }
 
     // TODO
-    public override Expr Inverse(Expr y, int argIndex)
+    public override Expr.Expr Inverse(Expr.Expr y, int argIndex)
     {
         throw new NotImplementedException();
     }
 
-    public override Expr Derivee(string variable)
+    public override Expr.Expr Derivee(string variable)
     {
         return Zero;
     }
 
-    public override (double, Expr?) AsMulCoef()
+    public override (double, Expr.Expr?) AsMulCoef()
     {
         return (Num, null);
     }

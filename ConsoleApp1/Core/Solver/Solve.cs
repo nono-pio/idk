@@ -1,9 +1,9 @@
-﻿namespace ConsoleApp1.core.solver;
+﻿namespace ConsoleApp1.Core.solver;
 
 public class Solve
 {
     // expr(var) = y(var) -> Expr
-    public static Expr SolveFor(Expr expr, Expr y, string variable)
+    public static Expr.Expr SolveFor(Expr.Expr expr, Expr.Expr y, string variable)
     {
         if (!y.Constant(variable) && !y.IsZero())
         {
@@ -47,7 +47,7 @@ public class Solve
     // TODO
     // Brute = expr relie plusieurs f(var)
     // expr(var) et y est une cste
-    public static Expr SolveBrute(Expr expr, Expr y, string variable)
+    public static Expr.Expr SolveBrute(Expr.Expr expr, Expr.Expr y, string variable)
     {
         /* Patternes :
          * - Polynome
