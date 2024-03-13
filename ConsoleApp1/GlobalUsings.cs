@@ -1,12 +1,12 @@
 ﻿// Global using directives
 
-global using ConsoleApp1.Core.Expr;
-global using ConsoleApp1.utils;
+global using ConsoleApp1.Core.Expressions;
+global using ConsoleApp1.Utils;
 
 // <-- Constructors -->
-global using static ConsoleApp1.Core.Expr.Atoms.ConstructorAtoms;
-global using static ConsoleApp1.Core.Expr.Geometrie.ConstructorGeo;
-global using static ConsoleApp1.Core.Expr.Complexe.ConstructorComplex;
-global using static ConsoleApp1.Core.Expr.Fonction.Base.ConstructorBase;
-global using static ConsoleApp1.Core.Expr.Fonction.Trigonometrie.ConstructorTrigo;
-global using static ConsoleApp1.Core.DataStruct.ConstructorDataStruct;
+global using static ConsoleApp1.Core.Expressions.Atoms.ConstructorAtoms;
+global using static ConsoleApp1.Core.Expressions.LinearAlgebra.ConstructorGeo;
+global using static ConsoleApp1.Core.Expressions.ComplexExpressions.ConstructorComplex;
+global using static ConsoleApp1.Core.Expressions.Base.ConstructorBase;
+global using static ConsoleApp1.Core.Expressions.Trigonometrie.ConstructorTrigo;
+global using static ConsoleApp1.Core.Models.ConstructorModels;

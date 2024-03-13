@@ -1,4 +1,4 @@
-﻿namespace ConsoleApp1.utils;
+﻿namespace ConsoleApp1.Utils;
 
 public static class Extension
 {

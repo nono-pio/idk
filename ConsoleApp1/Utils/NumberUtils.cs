@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-
-namespace ConsoleApp1.utils;
+﻿namespace ConsoleApp1.Utils;
 
 public static class NumberUtils
 {
@@ -77,8 +75,8 @@ public static class NumberUtils
 
         var (n, d) = AsNumDen(x);
 
-        var n_iter = AsFactorExp(n).GetEnumerator();
-        var d_iter = AsFactorExp(d).GetEnumerator();
+        using var n_iter = AsFactorExp(n).GetEnumerator();
+        using var d_iter = AsFactorExp(d).GetEnumerator();
         
         var is_d_empty = !d_iter.MoveNext();
         var (d_fac, d_exp) = d_iter.Current;
@@ -123,10 +121,8 @@ public static class NumberUtils
             }
             
             if (n_fac < d_fac)
-            {
                 yield return (n_fac, n_exp);
-                continue;
-            }
+            
         }
 
         do
