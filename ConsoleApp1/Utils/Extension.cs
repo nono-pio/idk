@@ -2,6 +2,26 @@
 
 public static class Extension
 {
+    public static string Join<T>(this List<T> exprs)
+    {
+        if (exprs.Count == 0)
+        {
+            return "[]";
+        }
+
+        var str = exprs[0].ToString();
+        for (int i = 1; i < exprs.Count; i++)
+        {
+            str += "," + exprs[i].ToString();
+        }
+
+        return "[" + str + "]";
+    }
+    public static Expr[] Exprs(this object[] objs)
+    {
+        return objs.Map(obj => (Expr) obj);
+    }
+    
     public static Expr Expr(this double d)
     {
         return Num(d);

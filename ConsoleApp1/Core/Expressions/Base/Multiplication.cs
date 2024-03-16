@@ -1,6 +1,8 @@
-﻿namespace ConsoleApp1.Core.Expressions.Base;
+﻿using ConsoleApp1.Core.Expressions.Atoms;
 
-public class Multiplication : Expr
+namespace ConsoleApp1.Core.Expressions.Base;
+
+public class Multiplication : Expr, ICoefGrouping<Multiplication>
 {
     public Multiplication(params Expr[] factors) : base(factors)
     {
@@ -52,95 +54,39 @@ public class Multiplication : Expr
         return y + Add(rest);
     }
 
+    public double Identity() => 1;
+    public double Absorbent() => 0;
+    public double GroupConstant(double a, double b) => a * b;
+    public (double, Expr?) AsCoefExpr(Expr expr) => expr is Number num ? (num.Num, null) : (1, expr); // TODO
+    public Multiplication FromArrayList(Expr[] exprs) => new Multiplication(exprs);
+    public Expr GroupCoefExpr(double coef, Expr expr) => coef == 0 ? Zero : Pow(expr, coef.Expr());
+
     public Expr Eval()
     {
-
-        var newFactors = new List<Expr>(Factors.Length);
-
-        // 1. Flatting                      mul(mul(x,y),z) -> mul(x,y,z)
-        // 2. Identity removing (One)       mul(1, x) -> x
-        // 3. Zero return                   mul(x, 0) -> 0
-
-        foreach (var factor in Factors)
-        {
-            if (factor.IsZero()) return 0.Expr();
-
-            if (factor.IsOne()) continue;
-
-            if (factor is Multiplication mul)
-                newFactors.AddRange(mul.Factors);
-            else
-                newFactors.Add(factor);
-        }
-
-        // 4. Coefficient Grouping      mul(x,y,x) -> mul(x^2,y)
-        // 5. Constant Grouping         mul(2,2) -> 4
-
-        /*
-         * Dictionary {
-         *  expr (Expr) : coefficient (Float)
-         * }
-         */
-
-        double constant = 1;
-        var coefficientMap = new Dictionary<Expr, double>();
-
-        foreach (var factor in newFactors)
-        {
-            var (coef, rest) = factor.AsMulCoef();
-
-
-            if (rest is null)
-            {
-                constant *= coef;
-                continue;
-            }
-
-            Console.WriteLine("Create dico > " + coef + ";" + rest);
-
-            Console.WriteLine("Has rest > " + coefficientMap.ContainsKey(rest));
-            if (!coefficientMap.TryAdd(rest, coef))
-            {
-                Console.WriteLine("Add");
-                coefficientMap[rest] += coef;
-            }
-        }
-
-        var i = 0;
-        if (constant == 1)
-        {
-            Factors = new Expr[coefficientMap.Count];
-        }
-        else
-        {
-            Factors = new Expr[coefficientMap.Count + 1];
-            Factors[0] = constant.Expr();
-            i = 1;
-        }
-
-        foreach (var (expr, coef) in coefficientMap)
-        {
-            Console.WriteLine("dico > " + expr + ";" + coef);
-            Factors[i] = coef == 1 ? expr : Pow(expr, coef.Expr());
-            i++;
-        }
-
-        // 6. Factors Length             0 -> 1; 1 -> therm
-
-        if (Factors.Length == 0) return 1.Expr();
-
-        if (Factors.Length == 1) return Factors[0];
-
-        // 7. Factors sorting            mul(x,y,2) -> mul(2,x,y)
-
-        SortArgs();
-
-        return this;
+        return ICoefGrouping<Multiplication>.GroupEval(this);
     }
     
     public override (double, Expr?) AsMulCoef()
     {
-        throw new NotImplementedException();
+        double coef = 1;
+        List<Expr> newFactors = new List<Expr>();
+        foreach (var factor in Factors)
+        {
+            if (factor is Number num)
+            {
+                coef *= num.Num;
+            } else
+            {
+              newFactors.Add(factor);  
+            }
+        }
+
+        return newFactors.Count switch
+        {
+            0 => ((double, Expr?))(coef, null),
+            1 => (coef, newFactors[0]),
+            _ => (coef, new Multiplication(newFactors.ToArray()))
+        };
     }
 
     public override string? ToString()

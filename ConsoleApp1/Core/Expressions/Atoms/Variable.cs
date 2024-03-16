@@ -9,20 +9,24 @@ public class Variable : Atom
     public readonly string Name;
     public VariableData Data => Variables[Name];
 
-    public Variable(string name, VariableData? data = null)
+    public Variable(string name)
     {
         Name = name;
         
-        // set/replace data
-        if (data != null)
+        if (!Variables.ContainsKey(name))
         {
-            Variables[name] = data;
-        } // create data if not exists
-        else if (!Variables.ContainsKey(name))
-        {
-            Variables[name] = VariableData.Default();
+            Variables[name] = VariableData.Default(name);
         }
     }
+    public Variable(VariableData data)
+    {
+        Name = data.Name;
+        Variables[Name] = data;
+    }
+    public Variable(string name, VariableData data) : this(data) { }
+    public Variable(string name, Expr value) : this(name, new ExprVar(name, value)) { }
+    public Variable(string name, double value) : this(name, new ScalarVar(name, value)) { }
+    public Variable(string name, Fonction fonction, Expr of) : this(name, new FunctionVar(name, fonction, of)) { }
 
     public override Expr Derivee(string variable)
     {
@@ -64,11 +68,12 @@ public class Variable : Atom
     }
 }
 
-public abstract class VariableData
+public abstract class VariableData(string name)
 {
     // public Set? NumberDomain;
-    
-    public static VariableData Default() => new ExprVar();
+    public string Name = name;
+
+    public static VariableData Default(string name) => new ExprVar(name);
 
     public virtual double N()
     {
@@ -76,29 +81,19 @@ public abstract class VariableData
     }
 }
 
-public class ScalarVar : VariableData
+public class ScalarVar(string name, double? value = null) : VariableData(name)
 {
-    public double? Value;
+    public double? Value = value;
 
-    public ScalarVar(double? value = null)
-    {
-        Value = value;
-    }
-    
     public override double N()
     {
         return Value ?? throw new Exception("Canot convert a variable to a number");
     }
 }
 
-public class ExprVar : VariableData
+public class ExprVar(string name, Expr? value = null) : VariableData(name)
 {
-    public Expr? Value;
-
-    public ExprVar(Expr? value = null)
-    {
-        Value = value;
-    }
+    public Expr? Value = value;
 
     public override double N()
     {
@@ -111,13 +106,13 @@ public class VectorVar : VariableData
     public int? Dim;
     public Expr[]? Value;
 
-    public VectorVar(int? dim = null)
+    public VectorVar(string name, int? dim = null) : base(name)
     {
         Dim = dim;
         Value = null;
     }
 
-    public VectorVar(params Expr[] value)
+    public VectorVar(string name, params Expr[] value) : base(name)
     {
         Dim = value.Length;
         Value = value;
@@ -134,13 +129,13 @@ public class MatrixVar : VariableData
     public (int, int)? Shape;
     public Expr[,]? Value;
 
-    public MatrixVar((int, int)? shape = null)
+    public MatrixVar(string name, (int, int)? shape = null) : base(name)
     {
         Shape = shape;
         Value = null;
     }
 
-    public MatrixVar(Expr[,] value)
+    public MatrixVar(string name, Expr[,] value) : base(name)
     {
         var rows = value.GetLength(0);
         var cols = value.GetLength(1);
@@ -159,19 +154,19 @@ public class FunctionVar : VariableData
     public Fonction? Func;
     public Expr Of;
 
-    public FunctionVar(Expr of)
+    public FunctionVar(string name, Expr of) : base(name)
     {
         Func = null;
         Of = of;
     }
 
-    public FunctionVar(Fonction func, Expr of)
+    public FunctionVar(string name, Fonction func, Expr of) : base(name)
     {
         Func = func;
         Of = of;
     }
 
-    public FunctionVar(Fonction func)
+    public FunctionVar(string name, Fonction func) : base(name)
     {
         Func = func;
         Of = new Variable(func.NameVariable);

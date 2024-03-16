@@ -5,6 +5,8 @@ static void print(object? x)
     Console.WriteLine(x);
 }
 
-var a = Var("a", new ScalarVar(6));
-var x = Var("x", new ExprVar( Pow(a, Deux) ));
-print(x.N());
+var x = Var("x");
+var y = Var("y");
+print(x*y*y*x*Deux);
+
+

@@ -1,6 +1,6 @@
 ﻿namespace ConsoleApp1.Core.Expressions.Base;
 
-public class Addition : Expr
+public class Addition : Expr, ICoefGrouping<Addition>
 {
     public Addition(params Expr[] therms) : base(therms)
     {
@@ -11,6 +11,18 @@ public class Addition : Expr
     {
         get => Args;
         set => Args = value;
+    }
+
+    public double Identity() => 0;
+    public double GroupConstant(double a, double b) => a + b;
+    public double Absorbent() => Double.NaN;
+    public (double, Expr?) AsCoefExpr(Expr expr) => expr.AsMulCoef();
+    public Addition FromArrayList(Expr[] exprs) => new Addition(exprs);
+    public Expr GroupCoefExpr(double coef, Expr expr) => coef == 1 ? expr : Mul(coef.Expr(), expr);
+
+    public Expr Construct(params Expr[] therms)
+    {
+        return Add(therms);
     }
 
     public override Expr Derivee(string variable)
@@ -48,75 +60,7 @@ public class Addition : Expr
 
     public Expr Eval()
     {
-        var newTherms = new List<Expr>(Therms.Length);
-
-        // 1. Flatting                      add(add(x,y),z) -> add(x,y,z)
-        // 2. Identity removing (Zero)      add(0, x) -> x
-
-        foreach (var therm in Therms)
-        {
-            if (therm.IsZero()) continue;
-
-            if (therm is Addition add)
-                newTherms.AddRange(add.Therms);
-            else
-                newTherms.Add(therm);
-        }
-
-        // 3. Coefficient Grouping      add(x,y,x) -> add(2x,y)
-        // 4. Constant Grouping         add(2,2) -> 4
-
-        /*
-         * Dictionary {
-         *  expr (Expr) : coefficient (Float)
-         * }
-         */
-
-        double constant = 0;
-        var coefficientMap = new Dictionary<Expr, double>();
-
-        foreach (var term in newTherms)
-        {
-            var (coef, rest) = term.AsMulCoef();
-
-            if (rest is null)
-            {
-                constant += coef;
-                continue;
-            }
-
-            if (!coefficientMap.TryAdd(rest, coef)) coefficientMap[rest] += coef;
-        }
-
-        var i = 0;
-        if (constant == 0)
-        {
-            Therms = new Expr[coefficientMap.Count];
-        }
-        else
-        {
-            Therms = new Expr[coefficientMap.Count + 1];
-            Therms[0] = constant.Expr();
-            i = 1;
-        }
-
-        foreach (var (expr, coef) in coefficientMap)
-        {
-            Therms[i] = coef == 1 ? expr : Mul(coef.Expr(), expr);
-            i++;
-        }
-
-        // 4. Therms Length             0 -> 0; 1 -> therm
-
-        if (Therms.Length == 0) return Num(0);
-
-        if (Therms.Length == 1) return Therms[0];
-
-        // 5. Therms sorting            add(x,y,2) -> add(2,x,y)
-
-        SortArgs();
-
-        return this;
+        return ICoefGrouping<Addition>.GroupEval(this);
     }
 
     public override string? ToString()

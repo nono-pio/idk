@@ -1,4 +1,6 @@
-﻿namespace ConsoleApp1.Core.Expressions.Atoms;
+﻿using ConsoleApp1.Core.Models;
+
+namespace ConsoleApp1.Core.Expressions.Atoms;
 
 public static class ConstructorAtoms
 {
@@ -14,10 +16,12 @@ public static class ConstructorAtoms
         return new Number(num);
     }
 
-    public static Expr Var(string id, VariableData? data = null)
-    {
-        return new Variable(id, data:data);
-    }
+    public static Variable Var(string name) => new Variable(name);
+    public static Variable Var(VariableData data) => new Variable(data);
+    public static Variable Var(string name, VariableData data) => new Variable(name, data);
+    public static Variable Var(string name, Expr value) => new Variable(name, value);
+    public static Variable Var(string name, double value) => new Variable(name, value);
+    public static Variable Var(string name, Fonction fonction, Expr of) => new Variable(name, fonction, of);
 
     public static Variable[] Vars(params string[] ids)
     {
