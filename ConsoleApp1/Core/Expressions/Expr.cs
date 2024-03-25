@@ -28,6 +28,11 @@ public abstract class Expr
         return (1, this);
     }
 
+    public virtual (Expr, Expr) AsComplex()
+    {
+        throw new Exception($"Cannot convert {GetType()} as complex");
+    }
+
     # endregion
 
     # region <-- String Méthodes -->
@@ -123,6 +128,15 @@ public abstract class Expr
     /// Retourne la dérivee de l'expression en la variable
     /// <paramref name="variable" />
     public abstract Expr Derivee(string variable);
+    
+    public virtual Expr Derivee(string variable, int n)
+    {
+        var result = this;
+        for (var i = 0; i < n; i++) 
+            result = result.Derivee(variable);
+
+        return result;
+    }
     
     # endregion
 

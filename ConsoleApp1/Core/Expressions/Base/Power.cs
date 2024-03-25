@@ -70,6 +70,40 @@ public class Power : Expr
 
         return this;
     }
+    
+    public static Expr NewtonBinomial(Expr a, Expr b, int n)
+    {
+        var therms = new Expr[n + 1];
+        for (int k = 0; k <= n; k++)
+        {
+            therms[k] = NumberUtils.Binomial(n, k) * Pow(a, Num(n - k)) * Pow(b, Num(k));
+        }
+
+        return Add(therms);
+    }
+    
+    public static Expr NewtonMultinomial(Expr[] values, int n)
+    {
+        List<Expr> therms = new();
+        foreach (var k_vec in ListTheory.SumAt(n, values.Length))
+        {
+
+            var factors = new Expr[values.Length + 1];
+            factors[0] = NumberUtils.Multinomial(k_vec).Expr();
+            
+            var i = 1;
+            foreach (var k in k_vec)
+            {
+                factors[i] = Pow(values[i - 1], k.Expr());
+
+                i++;
+            }
+            
+            therms.Add(Mul(factors));
+        }
+
+        return Add(therms.ToArray());
+    }
 
     // TODO
     private Expr SimplifyNumber(Number a, Number b)

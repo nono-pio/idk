@@ -18,6 +18,40 @@ public static class NumberUtils
     {
         return a * b / Gcd(a, b);
     }
+    
+    public static int Multinomial(params int[] values)
+    {
+        var n = values.Sum();
+        var result = 1;
+        foreach (var value in values)
+        {
+            result *= Binomial(n, value);
+            n -= value;
+        }
+
+        return result;
+    }
+    
+    public static int Binomial(int n, int k)
+    {
+        if (k < 0 || n < k)
+            return 0;
+        
+        if (k == 0 || k == n)
+            return 1;
+        
+        if (k > n / 2)
+            k = n - k;
+        
+        var result = 1;
+        for (int i = 1; i <= k; i++)
+        {
+            result *= n - k + i;
+            result /= i;
+        }
+
+        return result;
+    }
 
     public static (int, int) AsNumDen(double x, double precision=1e-10)
     {

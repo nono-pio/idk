@@ -4,16 +4,30 @@ namespace ConsoleApp1.Core.Expressions.Base;
 
 public class Multiplication : Expr, ICoefGrouping<Multiplication>
 {
+    public Expr[] Factors => Args;
+    
+    # region Constructors
+    
     public Multiplication(params Expr[] factors) : base(factors)
     {
         if (factors.Length < 2) throw new Exception("You must add two or more factor");
     }
-
-    public Expr[] Factors
+    
+    public static Expr Mul(params Expr[] factors) => factors.Length switch
     {
-        get => Args;
-        set => Args = value;
-    }
+        0 => Un,
+        1 => factors[0],
+        _ => new Multiplication(factors).Eval()
+    };
+    
+    public static Expr MulNotEval(params Expr[] factors) => factors.Length switch
+    {
+        0 => Un,
+        1 => factors[0],
+        _ => new Multiplication(factors)
+    };
+    
+    # endregion
 
     public override Expr Derivee(string variable)
     {
@@ -21,7 +35,10 @@ public class Multiplication : Expr, ICoefGrouping<Multiplication>
         for (var i = 0; i < Factors.Length; i++)
         {
             var facteurs = new Expr[Factors.Length];
-            for (var j = 0; j < Factors.Length; j++) facteurs[j] = i == j ? Factors[j].Derivee(variable) : Factors[j];
+            for (var j = 0; j < Factors.Length; j++)
+            {
+                facteurs[j] = i == j ? Factors[j].Derivee(variable) : Factors[j];
+            }
 
             therms[i] = Mul(facteurs);
         }
@@ -55,7 +72,17 @@ public class Multiplication : Expr, ICoefGrouping<Multiplication>
     }
 
     public double Identity() => 1;
+    public Expr IdentityExpr() => Un;
+    public (double, double) IdentityComplex() => (1, 0);
+    public (Expr, Expr) IdentityComplexExpr() => (Un, Zero);
+    
     public double Absorbent() => 0;
+    public Expr AbsorbentExpr() => Zero;
+    public (double, double) AbsorbentComplex() => (0, 0);
+    public (Expr, Expr) AbsorbentComplexExpr() => (Zero, Zero);
+    
+    
+    
     public double GroupConstant(double a, double b) => a * b;
     public (double, Expr?) AsCoefExpr(Expr expr) => expr is Number num ? (num.Num, null) : (1, expr); // TODO
     public Multiplication FromArrayList(Expr[] exprs) => new Multiplication(exprs);
@@ -69,24 +96,25 @@ public class Multiplication : Expr, ICoefGrouping<Multiplication>
     public override (double, Expr?) AsMulCoef()
     {
         double coef = 1;
-        List<Expr> newFactors = new List<Expr>();
+        var newFactors = new List<Expr>();
         foreach (var factor in Factors)
         {
             if (factor is Number num)
-            {
                 coef *= num.Num;
-            } else
-            {
-              newFactors.Add(factor);  
-            }
+            else
+              newFactors.Add(factor);
         }
+        
+        if (newFactors.Count == 0)
+            return (coef, null);
 
-        return newFactors.Count switch
-        {
-            0 => ((double, Expr?))(coef, null),
-            1 => (coef, newFactors[0]),
-            _ => (coef, new Multiplication(newFactors.ToArray()))
-        };
+        return (coef, MulNotEval(newFactors.ToArray()));
+    }
+
+    public override (Expr, Expr) AsComplex()
+    {
+        return Factors.Aggregate(IdentityComplexExpr(), 
+            (complexTuple, factor) => ComplexUtils.Mul(complexTuple, factor.AsComplex()));
     }
 
     public override string? ToString()

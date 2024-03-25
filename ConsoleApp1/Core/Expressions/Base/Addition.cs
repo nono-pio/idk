@@ -58,6 +58,12 @@ public class Addition : Expr, ICoefGrouping<Addition>
         return Therms.Sum(t => t.N());
     }
 
+    public override (Expr, Expr) AsComplex()
+    {
+        return Therms.Aggregate((Zero, Zero), 
+            (complexTuple, therm) => ComplexUtils.Add(complexTuple, therm.AsComplex()));
+    }
+
     public Expr Eval()
     {
         return ICoefGrouping<Addition>.GroupEval(this);
