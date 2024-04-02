@@ -28,7 +28,17 @@ public class Addition : Expr, ICoefGrouping<Addition>
     public override Expr Derivee(string variable)
     {
         var newThermes = new Expr[Therms.Length];
-        for (var i = 0; i < Therms.Length; i++) newThermes[i] = Therms[i].Derivee(variable);
+        for (var i = 0; i < Therms.Length; i++) 
+            newThermes[i] = Therms[i].Derivee(variable);
+
+        return Add(newThermes);
+    }
+
+    public override Expr Derivee(string variable, int n)
+    {
+        var newThermes = new Expr[Therms.Length];
+        for (var i = 0; i < Therms.Length; i++) 
+            newThermes[i] = Therms[i].Derivee(variable, n);
 
         return Add(newThermes);
     }

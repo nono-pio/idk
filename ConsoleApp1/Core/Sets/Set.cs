@@ -1,5 +1,23 @@
 ﻿namespace ConsoleApp1.Core.Sets;
 
+/*
+
+Different types of sets: (class derived from Set)
+1. Finite set {1,2,3} : Special case - empty set {} - Singleton set {1}
+2. Interval [1,2[
+3. Rule based set {x | x > 0}
+(4. Universal set U)
+
+Operations on sets: (class derived from Set)
+1. Union
+2. Intersection
+3. Complement
+4. Difference
+5. Symmetric difference
+6. Cartesian product
+7. Power set
+
+ */
 public abstract class Set
 {
 

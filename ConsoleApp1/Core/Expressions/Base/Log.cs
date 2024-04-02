@@ -39,6 +39,27 @@ public class Log : Expr
         throw new Exception("ArgIndex must be 0 (value) or 1 (base)");
     }
 
+    
+    public override (Expr, Expr) AsComplex()
+    {
+
+        var valueTuple = LnComplex(Value.AsComplex());
+        var baseTuple = LnComplex(Base.AsComplex());
+        
+        return ComplexUtils.Div(valueTuple, baseTuple); // log_b(a) = ln(a) / ln(b)
+    }
+
+    // ln(a + bi) = 1/2*ln(a^2 + b^2) + i * (arg(a+bi) + 2*PI*n)
+    public static (Expr, Expr) LnComplex((Expr, Expr) complexTuple)
+    {
+        var (r, t) = complexTuple;
+        
+        var real = Log(r*r + t*t)/2;
+        var complex = ComplexUtils.Arg(complexTuple); // TODO: + 2*PI*n 
+
+        return (real, complex);
+    }
+
     public override Expr Derivee(string variable)
     {
         throw new NotImplementedException();

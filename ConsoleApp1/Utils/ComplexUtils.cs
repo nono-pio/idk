@@ -12,8 +12,9 @@ public static class ComplexUtils
         var (r, theta) = polarTuple;
         return (r * Cos(theta), r * Sin(theta));
     }
-    
-    public static Expr Theta((Expr, Expr) complexTuple)
+
+    public static Expr Theta((Expr, Expr) complexTuple) => Arg(complexTuple);
+    public static Expr Arg((Expr, Expr) complexTuple)
     {
         throw new NotImplementedException("");
         // var (real, complex) = complexTuple;
@@ -40,5 +41,17 @@ public static class ComplexUtils
         var (r1, c1) = a;
         var (r2, c2) = b;
         return (r1*r2 - c1*c2, r1*c2 + c1*r2);
+    }
+    
+    public static (Expr, Expr) Div((Expr, Expr) a, (Expr, Expr) b)
+    {
+        var (r1, c1) = a;
+        var (r2, c2) = b;
+        
+        var m = r2 * r2 + c2 * c2;
+        var real = (r1*r2 + c1*c2) / m;
+        var complex = (c1*r2 - r1*c2) / m;
+        
+        return (real, complex);
     }
 }

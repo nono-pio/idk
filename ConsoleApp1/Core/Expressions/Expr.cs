@@ -258,7 +258,7 @@ public abstract class Expr
     # endregion
     
     # region <-- Math Operator -->
-
+    
     // Addition
     public static Expr operator +(double num, Expr expr)
     {
@@ -364,14 +364,12 @@ public abstract class Expr
             var cmpArg = Args[i].CompareTo(expr.Args[i]);
             if (cmpArg != 0) return cmpArg;
         }
-
-        Console.WriteLine("cmp > " + this + "=" + expr);
+        
         return 0;
     }
     
     public override bool Equals(object? obj)
     {
-        Console.WriteLine("Equals > " + this + ";" + obj);
         if (obj is not Expr expr) return false;
 
         return CompareTo(expr) == 0;

@@ -20,12 +20,68 @@ public class Power : Expr
 
     public override Expr Derivee(string variable)
     {
-        if (Exp.Constant(variable)) return Exp * Pow(Base, Exp - 1) * Base.Derivee(variable);
+        if (Exp.Constant(variable)) 
+            return Exp * Pow(Base, Exp - 1) * Base.Derivee(variable);
 
-        throw new NotImplementedException("Power.Derivee : Base non constant");
-        if (Base.Constant(variable)) return null /* Ln(value)*Pow(value, exp)*exp.Derivee(variable) */;
+       
+        if (Base.Constant(variable))
+            return Exp.Derivee(variable) * Log(Base) * this;
 
+        throw new NotImplementedException("Power.Derivee : Base et Exp non constant");
         return null /**/;
+    }
+
+    public override Expr Derivee(string variable, int n)
+    {
+        
+        if (n == 0)
+            return this;
+
+        if (Exp.Constant(variable))
+        {
+
+            if (Base.IsVar(variable)) // ddx base = 1
+            {
+                return NumberUtils.FactorialExpr(Exp, n - 1) * Pow(Base, Exp - n);
+            }
+            
+            // n > 0
+            // base != cste
+
+            var therms = new Expr[n];
+            var exp = Exp;
+            foreach (var (bin, (m, k)) in NumberUtils.BinomialCoefficients(n - 1))
+            {
+                var f_in = Base.Derivee(variable, m + 1);
+                var f_ddx = Pow(Base, Exp - (k + 1));
+                therms[k] = Mul(bin.Expr(), f_in, exp, f_ddx); // n=1 : bin=1 * f'(x) * exp * f(x)^(exp - 1)
+                
+                exp *= Exp - (k + 1);
+            }
+
+            return Add(therms);
+        }
+
+        if (Base.Constant(variable))
+        {
+            
+            if (Exp.IsVar(variable)) // ddx exp = 1
+            {
+                return Pow(Log(Base), n.Expr()) * this;
+            }
+            
+            var therms = new Expr[n];
+            foreach (var (bin, (m, k)) in NumberUtils.BinomialCoefficients(n - 1))
+            {
+                var f_in = Base.Derivee(variable, m + 1);
+                var f_ln = Pow(Log(Base), (k + 1).Expr());
+                therms[k] = Mul(bin.Expr(), f_in, f_ln); // n=1 : bin=1 * f'(x) * exp * f(x)^(exp - 1)
+            }
+
+            return Add(therms) * this;
+        }
+        
+        return base.Derivee(variable, n);
     }
 
     public override double N()
@@ -52,7 +108,8 @@ public class Power : Expr
         // b = 0 -> 1; b = 1 -> a
         // a, b is number -> a^b simplified
 
-        if (Base is Number a && Exp is Number b) return SimplifyNumber(a, b);
+        if (Base is Number a && Exp is Number b) 
+            return SimplifyNumber(a, b);
 
         if (Base.IsOne() || Exp.IsZero()) return Num(1);
 
@@ -84,22 +141,21 @@ public class Power : Expr
     
     public static Expr NewtonMultinomial(Expr[] values, int n)
     {
-        List<Expr> therms = new();
-        foreach (var k_vec in ListTheory.SumAt(n, values.Length))
+        int m = values.Length;
+        var therms = new Expr[NumberUtils.MultinomialCoefficientsLength(n, m)];
+        
+        int i = 0;
+        foreach (var (coef, k_vec) in NumberUtils.MultinomialCoefficients(n, m))
         {
-
             var factors = new Expr[values.Length + 1];
-            factors[0] = NumberUtils.Multinomial(k_vec).Expr();
-            
-            var i = 1;
-            foreach (var k in k_vec)
+            factors[0] = coef.Expr();
+            for (int j = 0; j < k_vec.Length; j++)
             {
-                factors[i] = Pow(values[i - 1], k.Expr());
-
-                i++;
+                factors[j + 1] = Pow(values[j], k_vec[j].Expr());
             }
             
-            therms.Add(Mul(factors));
+            therms[i] = Mul(factors);
+            i++;
         }
 
         return Add(therms.ToArray());

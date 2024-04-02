@@ -19,9 +19,37 @@ public static class NumberUtils
         return a * b / Gcd(a, b);
     }
     
-    public static int Multinomial(params int[] values)
+    public static int Factorial(int n)
     {
-        var n = values.Sum();
+        var result = 1;
+        for (int i = 2; i <= n; i++)
+            result *= i;
+
+        return result;
+    }
+    
+    /// n * (n-1) * ... * (n-k)
+    public static double FactorialFloat(double n, int k)
+    {
+        var result = 1d;
+        for (int i = 0; i <= k; i++)
+            result *= n - i;
+
+        return result;
+    }
+    
+    /// n * (n-1) * ... * (n-k)
+    public static Expr FactorialExpr(Expr n, int k)
+    {
+        var result = Un;
+        for (int i = 0; i <= k; i++)
+            result *= n - i;
+
+        return result;
+    }
+    
+    public static int Multinomial(int n, params int[] values)
+    {
         var result = 1;
         foreach (var value in values)
         {
@@ -30,6 +58,17 @@ public static class NumberUtils
         }
 
         return result;
+    }
+
+    public static int MultinomialCoefficientsLength(int n, int m)
+    {
+        return Binomial(n + m - 1, m - 1);
+    }
+    
+    public static IEnumerable<(int, int[])> MultinomialCoefficients(int n, int m)
+    {
+        return ListTheory.SumAt(n, m)
+            .Select(list => (Multinomial(n, list), list));
     }
     
     public static int Binomial(int n, int k)
@@ -51,6 +90,16 @@ public static class NumberUtils
         }
 
         return result;
+    }
+    
+    public static IEnumerable<( int, (int, int) )> BinomialCoefficients(int n)
+    {
+        int bin = 1;
+        for (int k = 0; k <= n; k++)
+        {
+            yield return (bin, (n, k));
+            bin = bin * (n + 1 - k) / k;
+        }
     }
 
     public static (int, int) AsNumDen(double x, double precision=1e-10)

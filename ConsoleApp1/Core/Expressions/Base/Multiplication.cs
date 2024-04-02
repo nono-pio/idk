@@ -45,6 +45,29 @@ public class Multiplication : Expr, ICoefGrouping<Multiplication>
 
         return Add(therms);
     }
+    
+    public override Expr Derivee(string variable, int n)
+    {
+
+        int m = Factors.Length;
+        var therms = new Expr[NumberUtils.MultinomialCoefficientsLength(n, m)];
+        
+        int i = 0;
+        foreach (var (coef, k_vec) in NumberUtils.MultinomialCoefficients(n, m))
+        {
+            var factors = new Expr[Factors.Length + 1];
+            factors[0] = coef.Expr();
+            for (int j = 0; j < k_vec.Length; j++)
+            {
+                factors[j + 1] = Factors[j].Derivee(variable, k_vec[j]);
+            }
+            
+            therms[i] = Mul(factors);
+            i++;
+        }
+
+        return Add(therms.ToArray());
+    }
 
     public override double N()
     {
