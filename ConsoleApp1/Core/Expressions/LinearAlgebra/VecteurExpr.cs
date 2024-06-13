@@ -1,6 +1,6 @@
 ﻿namespace ConsoleApp1.Core.Expressions.LinearAlgebra;
 
-public class Vecteur : Expr
+public class VecteurExpr : Expr
 {
 
     public int Dim => Args.Length;
@@ -12,7 +12,7 @@ public class Vecteur : Expr
     public Expr W => Args[3];
 
 
-    public Vecteur(params Expr[] args) : base(args) {}
+    public VecteurExpr(params Expr[] args) : base(args) {}
 
     public Expr Norme()
     {
@@ -22,11 +22,11 @@ public class Vecteur : Expr
     }
     
     
-    public Expr ScalarProduct(Vecteur b) => Dot(this, b);
-    public static Expr ScalarProduct(Vecteur a, Vecteur b) => Dot(a, b);
-    public Expr Dot(Vecteur b) => Dot(this, b);
+    public Expr ScalarProduct(VecteurExpr b) => Dot(this, b);
+    public static Expr ScalarProduct(VecteurExpr a, VecteurExpr b) => Dot(a, b);
+    public Expr Dot(VecteurExpr b) => Dot(this, b);
 
-    public static Expr Dot(Vecteur a, Vecteur b)
+    public static Expr Dot(VecteurExpr a, VecteurExpr b)
     {
         
         if (a.Dim != b.Dim)
@@ -41,8 +41,8 @@ public class Vecteur : Expr
         return sum;
     }
     
-    public Expr Cross(Vecteur b) => Cross(this, b);
-    public static Expr Cross(Vecteur a, Vecteur b)
+    public Expr Cross(VecteurExpr b) => Cross(this, b);
+    public static Expr Cross(VecteurExpr a, VecteurExpr b)
     {
         // TODO : Generaliser à n dimensions
         if (a.Dim != 3 || b.Dim != 3)

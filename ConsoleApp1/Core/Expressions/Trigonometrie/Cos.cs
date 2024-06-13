@@ -6,23 +6,14 @@ public class Cos : FonctionExpr
     {
     }
 
-    public override string Name()
-    {
-        return "cos";
-    }
+    public override string Name() => "cos";
 
-    protected override Expr BaseDerivee()
-    {
-        return -Sin(X);
-    }
+    protected override Expr BaseDerivee() => -Sin(X);
 
     public override Expr Reciproque(Expr y)
     {
         throw new NotImplementedException();
     }
 
-    public override double N()
-    {
-        return Math.Cos(X.N());
-    }
+    public override double N() => Math.Cos(X.N());
 }

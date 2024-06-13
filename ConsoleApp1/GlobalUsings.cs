@@ -2,6 +2,7 @@
 
 global using ConsoleApp1.Core.Expressions;
 global using ConsoleApp1.Utils;
+global using ConsoleApp1.Core;
 
 // <-- Constructors -->
 global using static ConsoleApp1.Core.Expressions.Atoms.ConstructorAtoms;

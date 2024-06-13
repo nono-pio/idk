@@ -3,12 +3,12 @@
 public class Poly
 {
     /// [a,b,c] -> ax^2+bx+c
-    private Expr[] _coefs;
+    private readonly Expr[] _coefs;
 
     public Poly(params Expr[] coefs)
     {
         if (coefs.Length == 0)
-            coefs = new[] { Zero };
+            coefs = [ Zero ];
         
         _coefs = coefs;
     }
@@ -34,6 +34,13 @@ public class Poly
         Array.Fill(coefs, Zero);
 
         return new Poly(coefs);
+    }
+    
+    public static Poly FromMonomial(Expr coef, int deg)
+    {
+        var poly = VideDeg(deg);
+        poly.SetCoefDeg(deg, coef);
+        return poly;
     }
     
     public int Deg()
@@ -105,6 +112,51 @@ public class Poly
     public static Poly? ToPoly(Expr expr)
     {
         return null;
+    }
+
+    // (x+1)(x^2+2) -> [1, x+1, x^2+2], x
+    // (e^(2x)+e^x+1) -> [(e^x)^2+e^x+1], e^x
+    // 2 -> [2], null
+    public static (Poly[], Expr?) AsPolyFactors(Expr expr, string variable)
+    {
+
+        Expr? variablePart = null;
+        List<Poly> polys = [new Poly(Un)];
+        
+        // (x+1)(x^2+2)
+        foreach (var factor in expr.GetEnumerableFactors())
+        {
+
+            if (!factor.Constant(variable))
+            {
+                polys[0] *= factor;
+                continue;
+            }
+
+            Poly poly = PolyZero;
+            // (x+1)
+            foreach (var monomial in factor.GetEnumerableTherms())
+            {
+                // monomial = coef * newVariablePart ^ deg
+                var (coef, variablePartPow) = monomial.AsMulCsteNCste(variable);
+                var (deg, newVariablePart) = variablePartPow.AsPowInt();
+
+                if (variablePart is null)
+                {
+                    variablePart = newVariablePart;
+                }
+                else if (variablePart != newVariablePart)
+                {
+                    throw new Exception("Multinomial not accepted");
+                }
+
+                poly += FromMonomial(coef, deg);
+            }
+            
+            polys.Add(poly);
+        }
+
+        return (polys.ToArray(), variablePart);
     }
 
     public override string ToString()

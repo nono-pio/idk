@@ -27,6 +27,71 @@ public abstract class Expr
     {
         return (1, this);
     }
+    
+    // 2x -> 2, x / 2 -> 2, 1
+    public (int, Expr) AsMulInt()
+    {
+        if (this is not Multiplication mul)
+            return (1, this);
+        
+        
+        var coef = 1;
+        List<Expr> rest = [];
+        var isChange = false;
+        foreach (var factor in mul.Factors)
+        {
+            if (factor is Number num && num.IsEntier())
+            {
+                isChange = true;
+                coef *= (int) num.Num;
+            }
+            else
+            {
+                rest.Add(factor);
+            }
+        }
+
+        return isChange ? (coef, Mul(rest.ToArray())) : (coef, mul);
+    }
+    
+    
+    // ax -> a, x / ae^x -> a, e^x
+    // (constant, not contant)
+    public (Expr, Expr) AsMulCsteNCste(string variable)
+    {
+        if (this is not Multiplication mul)
+            return Constant(variable) ? (this, Un) : (Un, this);
+        
+        
+        List<Expr> constantPart = [];
+        List<Expr> variablePart = [];
+        foreach (var factor in mul.Factors)
+        {
+            if (factor.Constant(variable))
+                constantPart.Add(factor);
+            else
+                variablePart.Add(factor);
+        }
+
+        if (constantPart.Count == 0)
+            return (Un, this);
+        
+        if (variablePart.Count == 0)
+            return (this, Un);
+        
+        return (Mul(constantPart.ToArray()), Mul(variablePart.ToArray()));
+    }
+
+    // e^(2x) -> (e^x)^2
+    public (int, Expr) AsPowInt()
+    {
+        if (this is not Power pow)
+            return (1, this);
+        
+        var (n, newExp) = pow.Exp.AsMulInt();
+        return (n, Pow(pow.Base, newExp));
+    }
+
 
     public virtual (Expr, Expr) AsComplex()
     {
@@ -142,29 +207,24 @@ public abstract class Expr
 
     # region <-- Outils -->
 
-    /// Priorité des opérations
-    /// <list type="table">
-    ///     <item>
-    ///         <term>0</term>
-    ///         <description>atome - fonction</description>
-    ///     </item>
-    ///     <item>
-    ///         <term>1</term>
-    ///         <description>puissance</description>
-    ///     </item>
-    ///     <item>
-    ///         <term>2</term>
-    ///         <description>multiplication</description>
-    ///     </item>
-    ///     <item>
-    ///         <term>3</term>
-    ///         <description>addition</description>
-    ///     </item>
-    ///     <item>
-    ///         <term>4</term>
-    ///         <description>autre</description>
-    ///     </item>
-    /// </list>
+    public IEnumerable<Expr> GetEnumerableTherms()
+    {
+        if (this is Addition add)
+        {
+            return add.Therms.SelectMany(factor => factor.GetEnumerableTherms());
+        }
+        return [ this ];
+    }
+    
+    public IEnumerable<Expr> GetEnumerableFactors()
+    {
+        if (this is Multiplication mul)
+        {
+            return mul.Factors.SelectMany(factor => factor.GetEnumerableFactors());
+        }
+        return [ this ];
+    }
+    
     public int OpPriorite()
     {
         return this switch

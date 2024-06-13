@@ -1,4 +1,6 @@
-﻿namespace ConsoleApp1.Core.Expressions;
+﻿using ConsoleApp1.Core.Models;
+
+namespace ConsoleApp1.Core.Expressions;
 
 public abstract class FonctionExpr : Expr
 {
@@ -41,4 +43,5 @@ public abstract class FonctionExpr : Expr
     {
         return Name() + ParenthesisLatex(X.ToLatex());
     }
+
 }

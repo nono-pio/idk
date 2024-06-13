@@ -7,6 +7,8 @@ public class Complex : Expr
     public Expr Imag => Args[1];
     
     public Complex(Expr real, Expr imag) : base(real, imag) {}
+    public Complex(ComplexStruct complex) : this(complex.Real.Expr(), complex.Imaginary.Expr()) {}
+    
 
     public Expr Eval()
     {
