@@ -1,4 +1,5 @@
 ﻿using ConsoleApp1.Core.Expressions.Atoms;
+using ConsoleApp1.Latex;
 
 namespace ConsoleApp1.Core.Expressions.Base;
 
@@ -17,7 +18,11 @@ public class Power : Expr
         get => Args[1];
         private set => Args[1] = value;
     }
-
+    
+    public override OrderOfOperation GetOrderOfOperation()
+    {
+        return OrderOfOperation.Power;
+    }
     public override Expr Derivee(string variable)
     {
         if (Exp.Constant(variable)) 
@@ -177,11 +182,11 @@ public class Power : Expr
 
     public override string ToLatex()
     {
-        return Base.ToLatex() + "^" + Exp.ToLatex();
+        return LatexUtils.Power(ParenthesisLatexIfNeeded(Base), Exp.ToLatex());
     }
 
     public override string ToString()
     {
-        return Base + "^" + Exp;
+        return ToLatex();
     }
 }

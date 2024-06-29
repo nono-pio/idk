@@ -5,6 +5,27 @@ public static class NumberUtils
     
     public static int Gcd(int a, int b)
     {
+        if (a < 0)
+            a = -a;
+        if (b < 0)
+            b = -b;
+        
+        if (a < b)
+            (a, b) = (b, a);
+        
+        while (b > 0)
+            (a, b) = (b, a % b);
+
+        return a;
+    }
+    
+    public static long Gcd(long a, long b)
+    {
+        if (a < 0)
+            a = -a;
+        if (b < 0)
+            b = -b;
+        
         if (a < b)
             (a, b) = (b, a);
         

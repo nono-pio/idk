@@ -1,4 +1,6 @@
-﻿namespace ConsoleApp1.Core.Expressions.ComplexExpressions;
+﻿using ConsoleApp1.Latex;
+
+namespace ConsoleApp1.Core.Expressions.ComplexExpressions;
 
 public class Imag : Expr
 {
@@ -13,12 +15,12 @@ public class Imag : Expr
 
     public override string ToLatex()
     {
-        return $"\\IM({X.ToLatex()})";
+        return LatexUtils.Fonction(Symbols.ImaginaryPart, X.ToLatex());
     }
 
     public override string ToString()
     {
-        return $"Im({X.ToLatex()})";
+        return ToLatex();
     }
 
     public override double N()

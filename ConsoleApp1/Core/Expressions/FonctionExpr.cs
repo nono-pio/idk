@@ -1,4 +1,5 @@
 ﻿using ConsoleApp1.Core.Models;
+using ConsoleApp1.Latex;
 
 namespace ConsoleApp1.Core.Expressions;
 
@@ -14,12 +15,17 @@ public abstract class FonctionExpr : Expr
     /// The name of the fonction
     public abstract string Name();
 
+    public override OrderOfOperation GetOrderOfOperation()
+    {
+        return OrderOfOperation.Atom;
+    }
+
     /// <para>
     ///     Derivée sans dérivée intérieur
     ///     <example>sin(x^2) -> cos(x^2)</example>
     /// </para>
     protected abstract Expr BaseDerivee();
-
+    
     public override Expr Derivee(string variable)
     {
         return X.Derivee(variable) * BaseDerivee();
@@ -36,12 +42,12 @@ public abstract class FonctionExpr : Expr
     // <-- String Methodes -->
     public override string ToString()
     {
-        return Name() + Parenthesis(X.ToString());
+        return ToLatex();
     }
 
     public override string ToLatex()
     {
-        return Name() + ParenthesisLatex(X.ToLatex());
+        return LatexUtils.Fonction(Name(), X.ToLatex());
     }
 
 }

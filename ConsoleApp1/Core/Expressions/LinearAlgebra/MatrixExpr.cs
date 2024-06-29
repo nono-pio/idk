@@ -1,4 +1,6 @@
-﻿namespace ConsoleApp1.Core.Expressions.LinearAlgebra;
+﻿using ConsoleApp1.Latex;
+
+namespace ConsoleApp1.Core.Expressions.LinearAlgebra;
 
 public class MatrixExpr : Expr
 {
@@ -20,6 +22,11 @@ public class MatrixExpr : Expr
     public MatrixExpr(Expr[,] values) : base(From2DTo1D(values))
     {
         Shape = (values.GetLength(0), values.GetLength(1));
+    }
+
+    public override OrderOfOperation GetOrderOfOperation()
+    {
+        return OrderOfOperation.Atom;
     }
 
     public static MatrixExpr FillWith(Expr item, (int, int) shape)
@@ -129,7 +136,18 @@ public class MatrixExpr : Expr
 
     public override string ToLatex()
     {
-        throw new NotImplementedException();
+        
+        var components = new string[Shape.Item1][];
+        for (int i = 0; i < Shape.Item1; i++)
+        {
+            components[i] = new string[Shape.Item2];
+            for (int j = 0; j < Shape.Item2; j++)
+            {
+                components[i][j] = Data[i * Shape.Item1 + j].ToLatex();
+            }
+        }
+        
+        return LatexUtils.Matrix(components);
     }
 
     public override double N()

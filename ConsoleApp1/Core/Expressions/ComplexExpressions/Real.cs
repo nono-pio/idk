@@ -1,4 +1,6 @@
-﻿namespace ConsoleApp1.Core.Expressions.ComplexExpressions;
+﻿using ConsoleApp1.Latex;
+
+namespace ConsoleApp1.Core.Expressions.ComplexExpressions;
 
 public class Real : Expr
 {
@@ -14,12 +16,12 @@ public class Real : Expr
 
     public override string ToLatex()
     {
-        return $"\\RE({X.ToLatex()})";
+        return LatexUtils.Fonction(Symbols.RealPart, X.ToLatex());
     }
 
     public override string ToString()
     {
-        return $"Re({X.ToLatex()})";
+        return ToLatex();
     }
 
     public override double N()

@@ -1,4 +1,6 @@
-﻿namespace ConsoleApp1.Core.Expressions.Base;
+﻿using ConsoleApp1.Latex;
+
+namespace ConsoleApp1.Core.Expressions.Base;
 
 public class Addition : Expr, ICoefGrouping<Addition>
 {
@@ -19,6 +21,11 @@ public class Addition : Expr, ICoefGrouping<Addition>
     public (double, Expr?) AsCoefExpr(Expr expr) => expr.AsMulCoef();
     public Addition FromArrayList(Expr[] exprs) => new Addition(exprs);
     public Expr GroupCoefExpr(double coef, Expr expr) => coef == 1 ? expr : Mul(coef.Expr(), expr);
+
+    public override OrderOfOperation GetOrderOfOperation()
+    {
+        return OrderOfOperation.Addition;
+    }
 
     public Expr Construct(params Expr[] therms)
     {
@@ -81,11 +88,21 @@ public class Addition : Expr, ICoefGrouping<Addition>
 
     public override string? ToString()
     {
-        return Join("+");
+        return ToLatex();
     }
 
     public override string? ToLatex()
     {
-        return JoinLatex("+");
+        if (Therms.Length < 2) throw new Exception("You must add two or more therms");
+
+        var result = ParenthesisLatexIfNeeded(Therms[0]);
+
+        for (var i = 1; i < Therms.Length; i++)
+        {
+            // TODO : Check if the term is negative : + -> -
+            result += Symbols.Add + ParenthesisLatexIfNeeded(Therms[i]);
+        }
+        
+        return result;
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace ConsoleApp1.Core.Expressions.Base;
+﻿using ConsoleApp1.Latex;
+
+namespace ConsoleApp1.Core.Expressions.Base;
 
 public class Log : Expr
 {
@@ -9,15 +11,24 @@ public class Log : Expr
     public Log(Expr value, Expr @base) : base(value, @base) {}
     public Log(Expr value) : base(value, Math.E.Expr()) {}
 
-
+    public override OrderOfOperation GetOrderOfOperation()
+    {
+        return OrderOfOperation.Atom;
+    }
+    
     public override string ToLatex()
     {
-        return @"\log_{" + Base.ToLatex() + "}(" + Value.ToLatex() + ")";
+        // TODO: if base = e -> ln
+        
+        if (Base.Is(10)) 
+            return LatexUtils.Fonction("\\log", Value.ToLatex());
+
+        return LatexUtils.Fonction("\\log", Value.ToLatex(), subscript: Base.ToLatex());
     }
 
     public override string ToString()
     {
-        return "log_{" + Base + "}(" + Value + ")";
+        return ToLatex();
     }
 
     public override double N()

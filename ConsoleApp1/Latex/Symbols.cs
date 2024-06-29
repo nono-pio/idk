@@ -74,6 +74,10 @@ public class Symbols
     public static string And = @"\land";
     public static string Or = @"\lor";
     
+    public static string Add = "+";
+    public static string Sub = "-";
+    public static string Mul = @"\times ";
+    
     // Equalities
     public static string Equal = "=";
     public static string NotEqual = @"\neq";
@@ -109,17 +113,17 @@ public class Symbols
     public static string RealNumbers = @"\R";
     public static string ComplexNumbers = @"\C";
     
-    // Delimiters
-    public static string OpenParenthesis = @"\left(";
-    public static string CloseParenthesis = @"\right)";
-    public static string OpenSquareBracket = @"\left[";
-    public static string CloseSquareBracket = @"\right]";
-    public static string OpenCurlyBracket = @"\left{";
-    public static string CloseCurlyBracket = @"\right}";
-    public static string OpenFloor = @"\lfloor";
-    public static string CloseFloor = @"\rfloor";
-    public static string OpenCeil = @"\lceil";
-    public static string CloseCeil = @"\rceil";
+    // Delimiters (L: Left, R: Right)
+    public static string LParen = @"\left(";
+    public static string RParen = @"\right)";
+    public static string LBrackets = @"\left[";
+    public static string RBrackets = @"\right]";
+    public static string LBraces = @"\left{";
+    public static string RBraces = @"\right}";
+    public static string LFloor = @"\lfloor";
+    public static string RFloor = @"\rfloor";
+    public static string LCeil = @"\lceil";
+    public static string RCeil = @"\rceil";
     
     // Complex
     public static string RealPart = @"\Re";
@@ -129,6 +133,9 @@ public class Symbols
     // Calculus
     public static string PartialDerivative = @"\partial";
     public static string Gradient = @"\nabla";
+    
+    // Separators
+    public static string FonctionSeparator = ";";
     
     // Others
     public static string Infinity = @"\infty";

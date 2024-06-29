@@ -1,4 +1,5 @@
 ﻿using ConsoleApp1.Core.Expressions.Atoms;
+using ConsoleApp1.Latex;
 
 namespace ConsoleApp1.Core.Expressions.Base;
 
@@ -104,7 +105,10 @@ public class Multiplication : Expr, ICoefGrouping<Multiplication>
     public (double, double) AbsorbentComplex() => (0, 0);
     public (Expr, Expr) AbsorbentComplexExpr() => (Zero, Zero);
     
-    
+    public override OrderOfOperation GetOrderOfOperation()
+    {
+        return OrderOfOperation.Multiplication;
+    }
     
     public double GroupConstant(double a, double b) => a * b;
     public (double, Expr?) AsCoefExpr(Expr expr) => expr is Number num ? (num.Num, null) : (1, expr); // TODO
@@ -142,11 +146,21 @@ public class Multiplication : Expr, ICoefGrouping<Multiplication>
 
     public override string? ToString()
     {
-        return Join("*");
+        return ToLatex();
     }
 
-    public override string? ToLatex()
+    public override string ToLatex()
     {
-        return JoinLatex("\\cdot");
+        if (Factors.Length < 2) throw new Exception("You must mul two or more factors");
+
+        var result = ParenthesisLatexIfNeeded(Factors[0]);
+
+        for (var i = 1; i < Factors.Length; i++)
+        {
+            // TODO : Check if the pow is negative : * -> /
+            result += Symbols.Mul + ParenthesisLatexIfNeeded(Factors[i]);
+        }
+        
+        return result;
     }
 }

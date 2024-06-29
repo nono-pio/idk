@@ -1,6 +1,7 @@
 ﻿using ConsoleApp1.Core.Expressions.Atoms;
 using ConsoleApp1.Core.Expressions.Base;
 using ConsoleApp1.Core.Models;
+using ConsoleApp1.Latex;
 
 namespace ConsoleApp1.Core.Expressions;
 
@@ -103,63 +104,35 @@ public abstract class Expr
     # region <-- String Méthodes -->
 
     /// Génère un string représentant l'expression en utilisant le Latex
-    public abstract string? ToLatex();
+    public abstract string ToLatex();
 
-    // Génère un string représentant l'expression
-    //public abstract new string? ToString();
-
-    protected string? Join(string separator)
+    public string ParenthesisLatexIfNeeded(Expr expr)
     {
-        if (Args.Length == 0) return "";
-
-        var result = ElementWithParenthesis(0);
-        for (var i = 1; i < Args.Length; i++) result += separator + ElementWithParenthesis(i);
-
-        return result;
-    }
-
-    private string? ElementWithParenthesis(int i)
-    {
-        var str = Args[i].ToString();
-
-        if (OpPriorite() < Args[i].OpPriorite()) return Parenthesis(str);
-
-        return str;
-    }
-
-    protected string? Parenthesis(string? str)
-    {
-        return str == null ? null : $"({str})";
-    }
-
-    private string? ElementWithParenthesisLatex(int i)
-    {
-        var str = Args[i].ToLatex();
-
-        if (OpPriorite() < Args[i].OpPriorite()) return ParenthesisLatex(str);
-
-        return str;
-    }
-
-    protected string? ParenthesisLatex(string? str)
-    {
-        return str == null ? null : $@"\right({str}\left)";
-    }
-
-    protected string? JoinLatex(string separator)
-    {
-        if (Args.Length == 0) return "";
-
-        var result = ElementWithParenthesisLatex(0);
-        for (var i = 1; i < Args.Length; i++) result += separator + ElementWithParenthesisLatex(i);
-
-        return result;
+        return expr.GetOrderOfOperation() < GetOrderOfOperation() ? LatexUtils.Parenthesis(expr.ToLatex()) : expr.ToLatex();
     }
     
     # endregion
 
     # region <-- Outils Mathématiques -->
 
+    public enum OrderOfOperation : int
+    {
+        Always = 0,             // Tous le temps des parenthèses
+        Addition = 1,           // Addition, Soustraction
+        Multiplication = 2,     // Multiplication, Division (scalaires et matriciels)
+        Power = 3,              // Puissance, Racine
+        Atom = int.MaxValue,    // Nombre, Variable, Fonction
+    }
+    public virtual OrderOfOperation GetOrderOfOperation()
+    {
+        return OrderOfOperation.Always;
+    }
+    
+    public bool ExprNeedParenthesis(Expr expr)
+    {
+        return expr.GetOrderOfOperation() < GetOrderOfOperation();
+    }
+    
     public abstract double N();
     
     public Expr Substitue(string variable, Expr value)
@@ -223,18 +196,6 @@ public abstract class Expr
             return mul.Factors.SelectMany(factor => factor.GetEnumerableFactors());
         }
         return [ this ];
-    }
-    
-    public int OpPriorite()
-    {
-        return this switch
-        {
-            Atom or FonctionExpr => 0,
-            Power => 1,
-            Multiplication => 2,
-            Addition => 3,
-            _ => 4
-        };
     }
 
     /// Test si l'expression dépend de la variable

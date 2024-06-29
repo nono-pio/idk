@@ -1,4 +1,6 @@
-﻿namespace ConsoleApp1.Core.Expressions.LinearAlgebra;
+﻿using ConsoleApp1.Latex;
+
+namespace ConsoleApp1.Core.Expressions.LinearAlgebra;
 
 public class VecteurExpr : Expr
 {
@@ -20,8 +22,12 @@ public class VecteurExpr : Expr
             Add( Comps.Map(comp => Pow(comp, Deux)) )
             );
     }
-    
-    
+
+    public override OrderOfOperation GetOrderOfOperation()
+    {
+        return OrderOfOperation.Atom;
+    }
+
     public Expr ScalarProduct(VecteurExpr b) => Dot(this, b);
     public static Expr ScalarProduct(VecteurExpr a, VecteurExpr b) => Dot(a, b);
     public Expr Dot(VecteurExpr b) => Dot(this, b);
@@ -62,12 +68,12 @@ public class VecteurExpr : Expr
     
     public override string ToLatex()
     {
-        throw new NotImplementedException();
+        return LatexUtils.Vector(Comps.Map(x => x.ToLatex()));
     }
 
     public override string ToString()
     {
-        throw new NotImplementedException();
+        return ToLatex();
     }
 
     public override double N()

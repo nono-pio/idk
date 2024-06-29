@@ -7,6 +7,11 @@ public abstract class Atom : Expr
     public abstract object[] GetArgs();
 
     public abstract int CompareSelf(Atom expr);
+    
+    public override OrderOfOperation GetOrderOfOperation()
+    {
+        return OrderOfOperation.Atom;
+    }
 
     public int CompareAtom(Atom? expr)
     {
