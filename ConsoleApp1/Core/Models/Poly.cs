@@ -1,4 +1,7 @@
-﻿namespace ConsoleApp1.Core.Models;
+﻿using ConsoleApp1.Core.Expressions.Atoms;
+using ConsoleApp1.Core.Expressions.Base;
+
+namespace ConsoleApp1.Core.Models;
 
 public class Poly
 {
@@ -26,6 +29,72 @@ public class Poly
             _coefs[i] = coefs[i].Expr();
         }
         
+    }
+
+    public static bool IsPolynomial(Expr expr, string variable)
+    {
+        if (expr.Constant(variable))
+            return true; // deg=0
+
+        return expr switch
+        {
+            Addition add => add.Therms.All(therm => IsPolynomial(therm, variable)), // deg=max(deg(therm))
+            Multiplication mul => mul.Factors.All(factor => IsPolynomial(factor, variable)), // deg=sum(deg(factor))
+            Number => true, // deg=0 
+            Power pow => IsPolynomial(pow.Base, variable) && pow.Exp.IsNumberIntPositif(), //deg=deg(base)*exp
+            Variable var => true, // var.Name == variable ? deg=1 : deg=0
+            _ => false
+        };
+    }
+    
+    public static Poly? ToPoly(Expr expr, string variable)
+    {
+        if (expr.Constant(variable))
+            return new Poly(expr);
+
+        switch (expr) 
+        {
+            case Addition add :
+
+                var poly = PolyZero;
+                add.Therms.Aggregate<Expr, Poly?>(poly, (sum, therm) =>
+                {
+                    var th = ToPoly(therm, variable);
+                    return th is null || sum is null ? null : sum + th;
+                });
+                return poly;
+            
+            case Multiplication mul :
+
+                poly = PolyOne;
+                mul.Factors.Aggregate<Expr, Poly?>(poly, (pro, therm) =>
+                {
+                    var th = ToPoly(therm, variable);
+                    return th is null || pro is null ? null : pro * th;
+                });
+                return poly;
+                
+            case Number num:
+                return new Poly(num); 
+            
+            case Power pow:
+                
+                var basePoly = ToPoly(pow.Base, variable);
+                if (basePoly is null)
+                    return null;
+                
+                if (!pow.Exp.IsNumberIntPositif())
+                    return null;
+                int exp = pow.Exp.ToInt();
+
+                return basePoly.Pow(exp);
+            
+            case Variable var: 
+                return var.Name == variable ? new Poly(1, 0) : new Poly(var); // var.Name == variable ? deg=1 : deg=0
+            
+            default:
+                return null;
+        };
     }
 
     public static Poly VideDeg(int deg)
@@ -106,12 +175,6 @@ public class Poly
         }
 
         return true;
-    }
-
-    // TODO
-    public static Poly? ToPoly(Expr expr)
-    {
-        return null;
     }
 
     // (x+1)(x^2+2) -> [1, x+1, x^2+2], x
@@ -378,6 +441,18 @@ public class Poly
         }
 
         return result.EnleveZeroInutile();
+    }
+    
+    // TODO
+    public Poly Pow(int exp)
+    {
+        var result = PolyOne;
+        for (int i = 0; i < exp; i++)
+        {
+            result *= this;
+        }
+
+        return result;
     }
 
     public Expr[] Solve()

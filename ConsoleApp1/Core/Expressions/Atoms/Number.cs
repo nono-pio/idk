@@ -26,6 +26,11 @@ public class Number : Atom
         return Equal(Num, (int)Num);
     }
     
+    public bool IsPositif()
+    {
+        return Num > 0;
+    }
+    
     public override double N()
     {
         return Num;

@@ -5,7 +5,7 @@ namespace ConsoleApp1.Utils;
 public static class ComplexUtils
 {
     
-    public static Complex AsComplex((Expr, Expr) complexTuple) => new(complexTuple.Item1, complexTuple.Item2);
+    //public static Complex AsComplex((Expr, Expr) complexTuple) => new(complexTuple.Item1, complexTuple.Item2);
     public static (Expr, Expr) AsPolar((Expr, Expr) complexTuple) => (R(complexTuple), Theta(complexTuple));
     public static (Expr, Expr) FromPolar((Expr, Expr) polarTuple)
     {

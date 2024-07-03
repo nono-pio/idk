@@ -2,10 +2,6 @@
 
 public static class ConstructorComplex
 {
-    public static Expr Complex(Expr a, Expr b)
-    {
-        return new Complex(a, b).Eval();
-    }
 
     public static Expr Re(Expr x)
     {

@@ -461,6 +461,23 @@ public abstract class Expr
         return this is Number number && Number.Equal(n, number.Num);
     }
 
+    public bool IsNumberInt()
+    {
+        return this is Number num && num.IsEntier();
+    }
+    public int ToInt()
+    {
+        if (this is not Number num)
+            throw new Exception("Cannot convert to int");
+        
+        return (int) num.Num;
+    }
+    
+    public bool IsNumberIntPositif()
+    {
+        return this is Number num && num.IsEntier() && num.IsPositif();
+    }
+
     /// Test si l'expression est une variable nommé
     /// <paramref name="variable" />
     public bool IsVar(string variable)
