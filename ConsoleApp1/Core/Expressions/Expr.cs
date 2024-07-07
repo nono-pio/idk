@@ -5,6 +5,18 @@ using ConsoleApp1.Latex;
 
 namespace ConsoleApp1.Core.Expressions;
 
+public enum ExprType
+{
+    Natural, // 0, 1, 2, 3, ...
+    Integer, // ..., -3, -2, -1, 0, 1, 2, 3, ...
+    Rational, // p/q
+    Real, // pi, e, sqrt(2), ...
+    Complex, // a + bi
+    Vector, // [1, 2, 3]
+    Matrix, // [[1, 2], [3, 4]]
+    Set, // {1, 2, 3}
+}
+
 public abstract class Expr
 {
     /// Args = arguments/parametres de l'expression (thermes d'une addition, facteur d'un produit)
@@ -14,6 +26,8 @@ public abstract class Expr
     {
         Args = args;
     }
+    
+    // public abstract ExprType GetType();
     
     # region <-- Conversion -->
 

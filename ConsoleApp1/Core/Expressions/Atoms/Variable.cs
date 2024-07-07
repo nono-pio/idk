@@ -5,9 +5,20 @@ namespace ConsoleApp1.Core.Expressions.Atoms;
 public class Variable : Atom
 {
     public static Dictionary<string, VariableData> Variables = new();
-    
+
     public readonly string Name;
-    public VariableData Data => Variables[Name];
+    public VariableData? _data = null;
+
+    public VariableData Data
+    {
+        get {
+            if (_data == null)
+            {
+                _data = Variables[Name];
+            }
+            return _data;
+        }
+    }
 
     public Variable(string name)
     {
@@ -24,10 +35,12 @@ public class Variable : Atom
         Variables[Name] = data;
     }
     public Variable(string name, VariableData data) : this(data) { }
-    public Variable(string name, Expr value) : this(name, new ExprVar(name, value)) { }
-    public Variable(string name, double value) : this(name, new ScalarVar(name, value)) { }
-    public Variable(string name, Fonction fonction, Expr of) : this(name, new FunctionVar(name, fonction, of)) { }
-
+    public Variable(string name, Expr value) : this(new ExprVar(name, value)) { }
+    public Variable(string name, double value) : this(new ScalarVar(name, value)) { }
+    public Variable(string name, Fonction fonction, Expr of) : this(new FunctionVar(name, fonction, of)) { }
+    
+    public static Variable CreateConstant(string name, double value) => new(new ConstantVar(name, value));
+    
     public override Expr Derivee(string variable)
     {
         return Name == variable ? Un : Zero;
@@ -53,6 +66,28 @@ public class Variable : Atom
     {
         return string.Compare(Name, ((Variable)expr).Name, StringComparison.Ordinal);
     }
+    
+    // <-- VariableData Functions -->
+    
+    public void AddDependency(string name)
+    {
+        Data.AddDependency(name);
+    }
+    
+    public void RemoveDependency(string name)
+    {
+        Data.RemoveDependency(name);
+    }
+    
+    public void RemoveDependencies()
+    {
+        Data.RemoveDependencies();
+    }
+    
+    public bool IsDependentOf(string name, bool deep=false)
+    {
+        return Data.IsDependentOf(name, deep);
+    }
 
     // <-- Display -->
 
@@ -60,8 +95,7 @@ public class Variable : Atom
     {
         return Name;
     }
-
-
+    
     public override string ToString()
     {
         return Name;
@@ -72,12 +106,56 @@ public abstract class VariableData(string name)
 {
     // public Set? NumberDomain;
     public string Name = name;
+    public List<string> Dependencies = new();
 
     public static VariableData Default(string name) => new ExprVar(name);
 
+    public void AddDependency(string name)
+    {
+        if (!Dependencies.Contains(name))
+        {
+            Dependencies.Add(name);
+        }
+    }
+    
+    public void RemoveDependency(string name)
+    {
+        if (Dependencies.Contains(name))
+        {
+            Dependencies.Remove(name);
+        }
+    }
+    
+    public void RemoveDependencies()
+    {
+        Dependencies.Clear();
+    }
+    
+    public bool IsDependentOf(string name, bool deep=false)
+    {
+        if (deep)
+        {
+            return Dependencies.Any(dep => dep == name || Variable.Variables[dep].IsDependentOf(name, true));
+        }
+        
+        return Dependencies.Contains(name);
+    }
+    
+    
     public virtual double N()
     {
         throw new NotImplementedException();
+    }
+}
+
+/* Constant (represented as Variable) */
+public class ConstantVar(string name, double value) : VariableData(name)
+{
+    public double Value = value;
+
+    public override double N()
+    {
+        return Value;
     }
 }
 

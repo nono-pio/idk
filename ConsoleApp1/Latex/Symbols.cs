@@ -139,6 +139,7 @@ public class Symbols
     
     // Others
     public static string Infinity = @"\infty";
+    public static string NegativeInfinity = @"-\infty";
     
     // Physics
     public static string HBar = @"\hbar";

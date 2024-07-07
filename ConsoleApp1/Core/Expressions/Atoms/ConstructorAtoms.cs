@@ -22,6 +22,8 @@ public static class ConstructorAtoms
     public static Variable Var(string name, Expr value) => new Variable(name, value);
     public static Variable Var(string name, double value) => new Variable(name, value);
     public static Variable Var(string name, Fonction fonction, Expr of) => new Variable(name, fonction, of);
+    
+    public static Variable Constant(string name, double value) => Variable.CreateConstant(name, value);
 
     public static Variable[] Vars(params string[] ids)
     {

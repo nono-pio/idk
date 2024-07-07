@@ -1,59 +1,99 @@
-﻿namespace ConsoleApp1.Core.Solvers;
+﻿using ConsoleApp1.Core.Models;
+
+namespace ConsoleApp1.Core.Solvers;
+
+public enum Solution
+{
+    None,
+    All,
+    Some,
+    Unsolved
+}
 
 public class Solve
 {
-    // expr(var) = y(var) -> Expr
-    public static Expr SolveFor(Expr expr, Expr y, string variable)
+
+    // expr(var) = y(var)
+    public static Solution SolveFor(Expr expr, Expr y, string variable) => FindRoots(expr - y, variable);
+    
+    // f(x) = 0 
+    public static Solution FindRoots(Expr f, string variable)
     {
-        if (!y.Constant(variable) && !y.IsZero())
+        // If f is constant : True or False (ex: 0 = 0 -> True or 1 = 0 -> False)
+        if (f.Constant(variable))
         {
-            expr = expr - y;
-            y = Zero;
+            return f.IsZero() ? Solution.All : Solution.None;
         }
-
-        if (expr.IsVar(variable)) return y;
-
-        // -1 -> pas de var; -2 -> plusieurs var; i>0 -> var a l'index i
-        var varIndex = -1;
-        for (var i = 0; i < expr.Args.Length; i++)
-            if (!expr.Args[i].Constant(variable))
-            {
-                // deja un var
-                if (varIndex != -1)
-                {
-                    varIndex = -2;
-                    break;
-                }
-
-                // pas de var
-                varIndex = i;
-            }
-
-        // pas de var
-        if (varIndex == -1) throw new Exception("pas de var");
-
-        if (varIndex == -2) // plusieurs var
-        {
-            return SolveBrute(expr, y, variable);
-        }
-
-        // 1) expr = 2*x + 3; y = 0
-        // 2) expr = 2x; y = 0-3
-        y = expr.Inverse(y, varIndex);
-        expr = expr.Args[varIndex];
-        return SolveFor(expr, y, variable);
+        
+        return UnfoldReciprocal(f, variable);
     }
 
     // TODO
     // Brute = expr relie plusieurs f(var)
     // expr(var) et y est une cste
-    public static Expr SolveBrute(Expr expr, Expr y, string variable)
+    public static Solution SolveBrute(Expr expr, Expr y, string variable)
     {
-        /* Patternes :
-         * - Polynome
-         * -
-         */
+        
+        // Polynomial
+        if (Poly.IsPolynomial(expr, variable))
+        {
+            return Solution.Some; //Poly.ToPoly(expr, variable).Solve();
+        }
+        
+        // change variable, exemple :
+        // f(x) = x^2 + x^4 + x^6 + x^8 + x^10
+        // u = x^2
+        // f(u) = u + u^2 + u^3 + u^4 + u^5
 
-        return expr;
+        // Find Paterns
+        
+        
+        return Solution.Unsolved;
+    }
+
+    public static Solution UnfoldReciprocal(Expr f, string variable)
+    {
+        Expr expr = f; // variable
+        Expr y = Zero; // constante
+        
+        while (true)
+        {
+            // expr = y
+            
+            // If expr = x -> x = y
+            if (expr.IsVar(variable))
+                return Solution.Some;//y;
+
+            // find the variable in the expression
+            var index = -1; // index of the variable in the expression (ex: x+3 -> x is at index 0)
+            for (var i = 0; i < expr.Args.Length; i++)
+            {
+                if (!expr.Args[i].Constant(variable))
+                {
+                    if (index != -1) // multiple variables (reciprocal dont work)
+                    {
+                        index = -2;
+                        break;
+                    }
+                    index = i;
+                }
+            }
+
+            switch (index)
+            {
+                case -1: // no variable (expr is constant)
+                    return expr == y ? Solution.All : Solution.None;
+                case -2: // multiple variables
+                    return SolveBrute(f, Zero, variable);
+                default:
+                {
+                    expr = f.Args[index];
+                    y = f.Args[index].Inverse(y, index);
+                    break;
+                }
+            }
+        }
+
+        return Solution.None; // unreachable
     }
 }
