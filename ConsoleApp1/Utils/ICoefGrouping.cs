@@ -1,22 +1,24 @@
-﻿namespace ConsoleApp1.Utils;
+﻿using ConsoleApp1.Core.Classes;
+
+namespace ConsoleApp1.Utils;
 
 // associative, commutative, identity, groupping, absorbant
 // (a+b)+c = a+(b+c) = a+b+c, a+b = b+a, a+0 = a, a+a = 2a, a*0 = 0
 
 public interface ICoefGrouping<out T> where T : Expr, ICoefGrouping<T>
 {
-    double Identity();
-    double Absorbent();
-    double GroupConstant(double a, double b);
-    (double, Expr?) AsCoefExpr(Expr expr);
+    NumberStruct Identity();
+    NumberStruct Absorbent();
+    NumberStruct GroupConstant(NumberStruct a, NumberStruct b);
+    (NumberStruct, Expr?) AsCoefExpr(Expr expr);
     T FromArrayList(Expr[] exprs);
-    Expr GroupCoefExpr(double coef, Expr expr);
+    Expr GroupCoefExpr(NumberStruct coef, Expr expr);
 
     public Expr GroupEval() => GroupEval((T) this);
     public static Expr GroupEval(T mainExpr)
     {
         
-        var values = new List<(double, Expr)>();
+        var values = new List<(NumberStruct, Expr)>();
         var id = mainExpr.Identity();
         
         var (is_absorb, constant) = AddRange(values, mainExpr);
@@ -52,13 +54,13 @@ public interface ICoefGrouping<out T> where T : Expr, ICoefGrouping<T>
         }
     }
 
-    private static Expr Build(T mainExpr, (double, Expr) value) => Build(mainExpr, value.Item1, value.Item2);
-    private static Expr Build(T mainExpr, double coef, Expr expr)
+    private static Expr Build(T mainExpr, (NumberStruct, Expr) value) => Build(mainExpr, value.Item1, value.Item2);
+    private static Expr Build(T mainExpr, NumberStruct coef, Expr expr)
     {
         return coef == mainExpr.Identity() ? expr : mainExpr.GroupCoefExpr(coef, expr);
     }
 
-    private static (bool, double) AddRange(List<(double, Expr)> values, T mainExpr)
+    private static (bool, NumberStruct) AddRange(List<(NumberStruct, Expr)> values, T mainExpr)
     {
         
         var constant = mainExpr.Identity();
@@ -94,7 +96,7 @@ public interface ICoefGrouping<out T> where T : Expr, ICoefGrouping<T>
         return (false, constant);
     }
 
-    private static void Add(List<(double, Expr)> values, double coef, Expr expr)
+    private static void Add(List<(NumberStruct, Expr)> values, NumberStruct coef, Expr expr)
     {
         for (int i = 0; i < values.Count; i++)
         {

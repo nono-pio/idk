@@ -1,13 +1,22 @@
 ﻿using System.Runtime.InteropServices;
+using ConsoleApp1.Core.Expressions.Atoms;
+using ConsoleApp1.Latex;
 
 namespace ConsoleApp1.Core.Classes;
 
 [StructLayout(LayoutKind.Explicit)]
 public struct NumberStruct
 {
+    
+    enum NumberType
+    {
+        Fraction,
+        Float,
+        Nan
+    }
 
     [FieldOffset(0)]
-    public NumberType Type;
+    private NumberType Type;
     
     // Fraction
     [FieldOffset(4)]
@@ -19,9 +28,12 @@ public struct NumberStruct
     [FieldOffset(4)]
     public double FloatValue;
     
-    public static NumberStruct Nan => new NumberStruct();
-    public NumberStruct Zero => new NumberStruct(0, 1);
-    public NumberStruct One => new NumberStruct(1, 1);
+    public static implicit operator NumberStruct(int value) => new NumberStruct(value);
+    public static implicit operator NumberStruct(long value) => new NumberStruct(value);
+    public static implicit operator NumberStruct(float value) => new NumberStruct(value);
+    public static implicit operator NumberStruct(double value) => new NumberStruct(value);
+    
+    public static NumberStruct Nan => new NumberStruct{ Type = NumberType.Nan };
 
     public bool IsNan => Type == NumberType.Nan;
     public bool IsFraction => Type == NumberType.Fraction;
@@ -33,6 +45,8 @@ public struct NumberStruct
     
     public bool IsPositive => (IsFraction && Numerator > 0) || (IsFloat && FloatValue > 0);
     public bool IsNegative => (IsFraction && Numerator < 0) || (IsFloat && FloatValue < 0);
+    
+    public bool Is(int n) => IsFraction && Numerator == n && Denominator == 1;
     
     public NumberStruct(long numerator, long denominator = 1)
     {
@@ -72,6 +86,8 @@ public struct NumberStruct
     {
         Type = NumberType.Nan;
     }
+
+    public Expr Expr() => new Number(this);
 
     public double N()
     {
@@ -191,6 +207,82 @@ public struct NumberStruct
         };
     }
 
+    public NumberStruct Pow(NumberStruct n)
+    {
+        if (IsNan || n.IsNan)
+            return Nan;
+
+        if (IsFloat || n.IsFloat)
+            return Math.Pow(N(), n.N());
+        
+        // (p/q) ^ (np/nq)
+        if (n.Denominator == 1)
+        {
+            return new NumberStruct((long) Math.Pow(Numerator, n.Numerator), (long) Math.Pow(Denominator, n.Numerator));
+        }
+        
+        //TODO
+        throw new NotImplementedException();
+    }
+
+    // x^n = a * sqrt[n](b)
+    // return (a, b)
+    public static (long, long) Sqrt(long x, long n)
+    {
+
+        if (n < 0)
+            throw new ArgumentException("n must be positive");
+        
+        if (n == 0)
+            return (1, 1);
+
+        if (n == 1)
+            return (x, 0);
+
+        int a = 1;
+        int b = 1;
+
+        // x = p1^i1 * p2^i2 * ... * pn^in
+        foreach (var (p, i) in NumberUtils.AsFactorExp(x))
+        {
+            var q = i / n;
+            var r = i % n;
+            
+            // p^(q*n + r)
+            // sqrt[n](p^(q*n + r)) = p^q * sqrt[n](p^r)
+            
+            a *= (int) Math.Pow(p, r);
+            b *= (int) Math.Pow(p, q);
+        }
+
+        return (a, b);
+    }
+    
+    /* Compare */
+
+    public int CompareTo(NumberStruct other)
+    {
+        int typeCompare = Type.CompareTo(other.Type);
+        if (typeCompare != 0)
+            return typeCompare;
+
+        return Type switch
+        {
+            NumberType.Nan => 0,
+            NumberType.Float => FloatValue.CompareTo(other.FloatValue),
+            NumberType.Fraction => (Numerator * other.Denominator).CompareTo(other.Numerator * Denominator),
+            _ => 0
+        };
+    }
+    
+    public static bool operator ==(NumberStruct a, NumberStruct b) => a.CompareTo(b) == 0;
+    public static bool operator !=(NumberStruct a, NumberStruct b) => a.CompareTo(b) != 0;
+    public static bool operator <(NumberStruct a, NumberStruct b) => a.CompareTo(b) < 0;
+    public static bool operator <=(NumberStruct a, NumberStruct b) => a.CompareTo(b) <= 0;
+    public static bool operator >(NumberStruct a, NumberStruct b) => a.CompareTo(b) > 0;
+    public static bool operator >=(NumberStruct a, NumberStruct b) => a.CompareTo(b) >= 0;
+
+    /* To String */
     public override string ToString()
     {
         return Type switch
@@ -201,11 +293,16 @@ public struct NumberStruct
         };
     
     }
-}
-
-public enum NumberType
-{
-    Fraction,
-    Float,
-    Nan
+    
+    public string ToLatex()
+    {
+        return Type switch
+        {
+            NumberType.Fraction => Denominator == 1 ? 
+                Numerator.ToString() : LatexUtils.Fraction(Numerator.ToString(), Denominator.ToString()),
+            NumberType.Float => FloatValue.ToString(),
+            _ => "NaN"
+        };
+    
+    }
 }

@@ -1,4 +1,5 @@
-﻿using ConsoleApp1.Core.Expressions.Atoms;
+﻿using ConsoleApp1.Core.Classes;
+using ConsoleApp1.Core.Expressions.Atoms;
 using ConsoleApp1.Latex;
 
 namespace ConsoleApp1.Core.Expressions.Base;
@@ -95,12 +96,12 @@ public class Multiplication : Expr, ICoefGrouping<Multiplication>
         return y + Add(rest);
     }
 
-    public double Identity() => 1;
+    public NumberStruct Identity() => 1;
     public Expr IdentityExpr() => Un;
     public (double, double) IdentityComplex() => (1, 0);
     public (Expr, Expr) IdentityComplexExpr() => (Un, Zero);
     
-    public double Absorbent() => 0;
+    public NumberStruct Absorbent() => 0;
     public Expr AbsorbentExpr() => Zero;
     public (double, double) AbsorbentComplex() => (0, 0);
     public (Expr, Expr) AbsorbentComplexExpr() => (Zero, Zero);
@@ -110,19 +111,19 @@ public class Multiplication : Expr, ICoefGrouping<Multiplication>
         return OrderOfOperation.Multiplication;
     }
     
-    public double GroupConstant(double a, double b) => a * b;
-    public (double, Expr?) AsCoefExpr(Expr expr) => expr is Number num ? (num.Num, null) : (1, expr); // TODO
+    public NumberStruct GroupConstant(NumberStruct a, NumberStruct b) => a * b;
+    public (NumberStruct, Expr?) AsCoefExpr(Expr expr) => expr is Number num ? (num.Num, null) : (1, expr); // TODO
     public Multiplication FromArrayList(Expr[] exprs) => new Multiplication(exprs);
-    public Expr GroupCoefExpr(double coef, Expr expr) => coef == 0 ? Zero : Pow(expr, coef.Expr());
+    public Expr GroupCoefExpr(NumberStruct coef, Expr expr) => coef.IsZero ? Zero : Pow(expr, coef.Expr());
 
     public Expr Eval()
     {
         return ICoefGrouping<Multiplication>.GroupEval(this);
     }
     
-    public override (double, Expr?) AsMulCoef()
+    public override (NumberStruct, Expr?) AsMulCoef()
     {
-        double coef = 1;
+        NumberStruct coef = 1;
         var newFactors = new List<Expr>();
         foreach (var factor in Factors)
         {

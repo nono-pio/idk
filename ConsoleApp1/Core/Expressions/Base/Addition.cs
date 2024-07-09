@@ -1,4 +1,5 @@
-﻿using ConsoleApp1.Latex;
+﻿using ConsoleApp1.Core.Classes;
+using ConsoleApp1.Latex;
 
 namespace ConsoleApp1.Core.Expressions.Base;
 
@@ -15,12 +16,12 @@ public class Addition : Expr, ICoefGrouping<Addition>
         set => Args = value;
     }
 
-    public double Identity() => 0;
-    public double GroupConstant(double a, double b) => a + b;
-    public double Absorbent() => Double.NaN;
-    public (double, Expr?) AsCoefExpr(Expr expr) => expr.AsMulCoef();
+    public NumberStruct Identity() => 0;
+    public NumberStruct GroupConstant(NumberStruct a, NumberStruct b) => a + b;
+    public NumberStruct Absorbent() => NumberStruct.Nan;
+    public (NumberStruct, Expr?) AsCoefExpr(Expr expr) => expr.AsMulCoef();
     public Addition FromArrayList(Expr[] exprs) => new Addition(exprs);
-    public Expr GroupCoefExpr(double coef, Expr expr) => coef == 1 ? expr : Mul(coef.Expr(), expr);
+    public Expr GroupCoefExpr(NumberStruct coef, Expr expr) => coef.IsOne ? expr : Mul(coef.Expr(), expr);
 
     public override OrderOfOperation GetOrderOfOperation()
     {

@@ -1,55 +1,102 @@
 ﻿using System.Globalization;
+using ConsoleApp1.Core.Classes;
 
 namespace ConsoleApp1.Core.Expressions.Atoms;
+
+/*
+
+From:
+- Both (default)
+- Minus
+- Plus
+Data: NumberStruct
+
+*/
+
+/* Use for limit */
+public enum From
+{
+    Both,
+    Minus,
+    Plus
+}
+
 
 public class Number : Atom
 {
     public static readonly double FloatPointTolerance = 1e-5;
 
-    public static readonly Number Zero = new(0);
-    public static readonly Number One = new(1);
-    public static readonly Number Two = new(2);
-    public static readonly Number NegOne = new(-1);
+    //public readonly From From;
+    public readonly NumberStruct Num;
 
-
-    public readonly double Num;
-
-    public Number(double num)
+    public Number(NumberStruct num, From from = From.Both)
     {
+        //From = from;
         Num = num;
     }
 
+    public static implicit operator Number(int value) => new(value);
+    public static implicit operator Number(long value) => new(value);
+    public static implicit operator Number(float value) => new(value);
+    public static implicit operator Number(double value) => new(value);
+    public static implicit operator Number(NumberStruct value) => new(value);
+
+    public bool IsZero => Num.IsZero;
+    public bool IsOne => Num.IsOne;
+    public bool IsNan => Num.IsNan;
+    public bool IsFloat => Num.IsFloat;
+    public bool IsInt => Num.IsInt;
+    
+    public bool Is(int n) => Num.Is(n);
+    
     public static int Gcd(int a, int b) => NumberUtils.Gcd(a, b);
     
-    public bool IsEntier()
-    {
-        return Equal(Num, (int)Num);
-    }
+    public bool IsEntier() => Num.IsInt;
+    public bool IsPositif() => Num.IsPositive;
+
+    public override double N() => Num.N();
     
-    public bool IsPositif()
-    {
-        return Num > 0;
-    }
-    
-    public override double N()
-    {
-        return Num;
-    }
+    public override Expr Inverse(Expr y, int argIndex) =>
+        throw new Exception("Cannot Inverse a Atom");
 
-    // TODO
-    public override Expr Inverse(Expr y, int argIndex)
-    {
-        throw new NotImplementedException();
-    }
+    public override Expr Derivee(string variable) => 0;
 
-    public override Expr Derivee(string variable)
-    {
-        return Zero;
-    }
-
-    public override (double, Expr?) AsMulCoef()
+    public override (NumberStruct, Expr?) AsMulCoef()
     {
         return (Num, null);
+    }
+
+    public static Expr SimplifyPow(Number a, Number b)
+    {
+        // TODO: Overflow
+        
+        if (a.Num.IsNan || b.Num.IsNan)
+            return (Number) NumberStruct.Nan;
+
+        if (a.Num.IsFloat || b.Num.IsFloat)
+            return Math.Pow(a.N(), b.N());
+
+        bool isNeg = b.Num.IsNegative;
+        NumberStruct n;
+        if (isNeg)
+            n = -b.Num;
+        else
+            n = b.Num;
+        
+        var p = a.Num.Numerator;
+        var q = a.Num.Denominator;
+        
+        p = (long) Math.Pow(p, n.Numerator);
+        q = (long) Math.Pow(q, n.Numerator);
+
+        if (n.Denominator == 1)
+            return isNeg ? Num(q, p) : Num(p, q);
+
+        (p, var sqrt_p) = NumberStruct.Sqrt(p, b.Num.Denominator);
+        (q, var sqrt_q) = NumberStruct.Sqrt(q, b.Num.Denominator);
+        
+        return isNeg ? Num(q, p) * Sqrt(Num(q, p), n.Denominator) 
+            : Num(p, q) * Sqrt(Num(p, q), n.Denominator);
     }
 
     public static bool Equal(double x, double y)
@@ -75,6 +122,6 @@ public class Number : Atom
 
     public override string ToLatex()
     {
-        return Num.ToString(CultureInfo.InvariantCulture);
+        return Num.ToLatex();
     }
 }

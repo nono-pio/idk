@@ -1,6 +1,8 @@
-﻿using ConsoleApp1.Core.Expressions.Atoms;
+﻿using ConsoleApp1.Core.Classes;
+using ConsoleApp1.Core.Expressions.Atoms;
 using ConsoleApp1.Core.Expressions.Base;
 using ConsoleApp1.Core.Models;
+using ConsoleApp1.Core.TestDir;
 using ConsoleApp1.Latex;
 
 namespace ConsoleApp1.Core.Expressions;
@@ -27,6 +29,18 @@ public abstract class Expr
         Args = args;
     }
     
+    public static implicit operator Expr(double value) => new Number(value);
+    public static implicit operator Expr(int value) => new Number(value);
+    public static implicit operator Expr(string variable) => new Variable(variable);
+
+    
+    // default eval
+    public DataEval Eval() => Eval<DataEval>();
+    public T Eval<T>() where T : IDataEval
+    {
+        return default;
+    }
+    
     // public abstract ExprType GetType();
     
     # region <-- Conversion -->
@@ -38,7 +52,7 @@ public abstract class Expr
     
     // TODO
     /// Retourne l'expression sous la forme a * x où a est un nombre et x une expression
-    public virtual (double, Expr?) AsMulCoef()
+    public virtual (NumberStruct, Expr?) AsMulCoef()
     {
         return (1, this);
     }
@@ -58,7 +72,7 @@ public abstract class Expr
             if (factor is Number num && num.IsEntier())
             {
                 isChange = true;
-                coef *= (int) num.Num;
+                coef *= num.ToInt();
             }
             else
             {
@@ -159,7 +173,7 @@ public abstract class Expr
         var a = this;
         if (a is Number a_num && a_num.IsEntier() && b is Number b_num && b_num.IsEntier())
         {
-            return Number.Gcd((int) a_num.Num, (int) b_num.Num).Expr();
+            return Number.Gcd(a_num.ToInt(), b_num.ToInt()).Expr();
         }
 
         throw new NotImplementedException();
@@ -295,73 +309,48 @@ public abstract class Expr
     # region <-- Math Operator -->
     
     // Addition
-    public static Expr operator +(double num, Expr expr)
-    {
-        return Add(Num(num), expr);
-    }
-
-    public static Expr operator +(Expr expr, double num)
-    {
-        return Add(expr, Num(num));
-    }
-
     public static Expr operator +(Expr expr1, Expr expr2)
     {
+        if (expr1 is Number num1 && expr2 is Number num2)
+            return (Number) (num1.Num + num2.Num);
+
         return Add(expr1, expr2);
     }
 
     // Subtraction
-    public static Expr operator -(double num, Expr expr)
-    {
-        return Sub(Num(num), expr);
-    }
-
-    public static Expr operator -(Expr expr, double num)
-    {
-        return Sub(expr, Num(num));
-    }
-
     public static Expr operator -(Expr expr1, Expr expr2)
     {
+        if (expr1 is Number num1 && expr2 is Number num2)
+            return (Number) (num1.Num - num2.Num);
+        
         return Sub(expr1, expr2);
     }
 
     // Negate
     public static Expr operator -(Expr expr)
     {
+        if (expr is Number num)
+            return (Number)(-num.Num);
+        
         return Neg(expr);
     }
 
     // Multiplication
-    public static Expr operator *(double num, Expr expr)
-    {
-        return Mul(Num(num), expr);
-    }
-
-    public static Expr operator *(Expr expr, double num)
-    {
-        return Mul(expr, Num(num));
-    }
-
     public static Expr operator *(Expr expr1, Expr expr2)
     {
+        if (expr1 is Number num1 && expr2 is Number num2)
+            return (Number) (num1.Num * num2.Num);
+
         return Mul(expr1, expr2);
     }
 
 
     // Division
-    public static Expr operator /(double num, Expr expr)
-    {
-        return Div(Num(num), expr);
-    }
-
-    public static Expr operator /(Expr expr, double num)
-    {
-        return Div(expr, Num(num));
-    }
-
     public static Expr operator /(Expr expr1, Expr expr2)
     {
+        if (expr1 is Number num1 && expr2 is Number num2)
+            return (Number) (num1.Num / num2.Num);
+
         return Div(expr1, expr2);
     }
     
@@ -446,58 +435,25 @@ public abstract class Expr
     
     # region <-- Comparaison Spéciales -->
 
-    /// x == 0
-    public bool IsZero()
-    {
-        return this is Number { Num: 0 };
-    }
+    public bool IsZero() => this is Number { IsZero: true };
+    public bool IsNotZero() => !IsZero();
+    public bool IsOne() => this is Number { IsOne: true };
+    public bool IsNegOne() => this is Number num && num.Is(-1);
+    public bool Is(double n) => this is Number num && num.Is(n);
     
-    public bool IsNotZero()
-    {
-        return !IsZero();
-    }
+    public bool IsVar(string variable) => this is Variable var && var.Name == variable;
 
-    /// x == 1
-    public bool IsOne()
-    {
-        return this is Number { Num: 1 };
-    }
+    public bool IsNumberInt() => this is Number num && num.IsEntier();
+    public bool IsNumberIntPositif() => this is Number num && num.IsEntier() && num.IsPositif();
 
-    /// x == -1
-    public bool IsNegOne()
-    {
-        return this is Number { Num: -1 };
-    }
 
-    /// x == n avec n un nombre
-    public bool Is(double n)
-    {
-        return this is Number number && Number.Equal(n, number.Num);
-    }
-
-    public bool IsNumberInt()
-    {
-        return this is Number num && num.IsEntier();
-    }
     public int ToInt()
     {
-        if (this is not Number num)
+        if (this is not Number num || !num.IsEntier())
             throw new Exception("Cannot convert to int");
         
-        return (int) num.Num;
-    }
-    
-    public bool IsNumberIntPositif()
-    {
-        return this is Number num && num.IsEntier() && num.IsPositif();
+        return num.ToInt();
     }
 
-    /// Test si l'expression est une variable nommé
-    /// <paramref name="variable" />
-    public bool IsVar(string variable)
-    {
-        return this is Variable var && var.Name == variable;
-    }
-    
     # endregion
 }

@@ -49,7 +49,7 @@ public class FuAlgo
     {
         return expr.Map<Power>(pow =>
         {
-            if (pow.Exp == Number.Two && pow.Base is Sin sin)
+            if (pow.Exp.Is(2) && pow.Base is Sin sin)
             {
                 var x = sin.X;
                 return 1 - Pow(Cos(x), Num(2));
@@ -64,7 +64,7 @@ public class FuAlgo
     {
         return expr.Map<Power>(pow =>
         {
-            if (pow.Exp == Number.Two && pow.Base is Cos cos)
+            if (pow.Exp.Is(2) && pow.Base is Cos cos)
             {
                 var x = cos.X;
                 return 1 - Pow(Sin(x), Num(2));
@@ -79,7 +79,7 @@ public class FuAlgo
     {
         return expr.Map<Power>(pow =>
         {
-            if (pow.Exp == Number.Two && pow.Base is Cos cos)
+            if (pow.Exp.Is(2) && pow.Base is Cos cos)
             {
                 var x = cos.X;
                 return (1 + Cos(2 * x)) / 2;

@@ -113,14 +113,16 @@ public class Power : Expr
         // b = 0 -> 1; b = 1 -> a
         // a, b is number -> a^b simplified
 
+
+        if (Base.IsOne() || Exp.IsZero()) 
+            return Num(1);
+        if (Base.IsZero()) 
+            return Num(0);
+        if (Exp.IsOne()) 
+            return Base;
+        
         if (Base is Number a && Exp is Number b) 
-            return SimplifyNumber(a, b);
-
-        if (Base.IsOne() || Exp.IsZero()) return Num(1);
-
-        if (Base.IsZero()) return Num(0);
-
-        if (Exp.IsOne()) return Base;
+            return Number.SimplifyPow(a, b);
 
         // 2. Power Tower       pow(pow(a,b),c) -> pow(a,bc)
         if (Base is Power pow)
@@ -164,20 +166,6 @@ public class Power : Expr
         }
 
         return Add(therms.ToArray());
-    }
-
-    // TODO
-    private Expr SimplifyNumber(Number a, Number b)
-    {
-        try
-        {
-            return Num(Math.Pow(a.Num, b.Num));
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-            return Pow(a, b);
-        }
     }
 
     public override string ToLatex()

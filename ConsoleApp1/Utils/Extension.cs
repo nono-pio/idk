@@ -22,30 +22,11 @@ public static class Extension
         return objs.Map(obj => (Expr) obj);
     }
     
-    public static Expr Expr(this double d)
-    {
-        return Num(d);
-    }
-
-    public static Expr Expr(this float d)
-    {
-        return Num(d);
-    }
-
-
-    public static Expr Expr(this int d)
-    {
-        return Num(d);
-    }
-    public static Expr Expr(this uint d)
-    {
-        return Num(d);
-    }
-
-    public static Expr Expr(this long d)
-    {
-        return Num(d);
-    }
+    public static Expr Expr(this double d) => Num(d);
+    public static Expr Expr(this float d) => Num(d);
+    public static Expr Expr(this int d) => Num(d);
+    public static Expr Expr(this uint d) => Num(d);
+    public static Expr Expr(this long d) => Num(d);
 
     public static TOut[] Map<TIn, TOut>(this TIn[] array, Func<TIn, TOut> func)
     {
