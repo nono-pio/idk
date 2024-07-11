@@ -62,6 +62,14 @@ public class Symbols
     public static string Omega = @"\Omega";
     public static string omega = @"\omega";
     
+    public static string[] GreekLetters = {
+        Alpha, alpha, Beta, beta, Gamma, gamma, Delta, delta, Epsilon, epsilon, varepsilon, 
+        Zeta, zeta, Eta, eta, Theta, theta, vartheta, Iota, iota, Kappa, kappa, varkappa, 
+        Lambda, lambda, Mu, mu, Nu, nu, Xi, xi, Omicron, omicron, Pi, pi, varpi, 
+        Rho, rho, varrho, Sigma, sigma, varsigma, Tau, tau, Upsilon, upsilon, Phi, phi, varphi, 
+        Chi, chi, Psi, psi, Omega, omega
+    };
+    
     // Value
     public static string True = @"\top";
     public static string False = @"\bot";
