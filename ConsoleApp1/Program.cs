@@ -9,6 +9,7 @@ static void print(object? x)
     Console.WriteLine(x);
 }
 
-string input = "-1.e-2";
-var test = Parser.GetFloat(input);
+string input = "xn";
+
+var test = Parser.GetExpr(input);
 print(test is null? "null" : test.Value);
