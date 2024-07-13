@@ -32,14 +32,6 @@ public abstract class Expr
     public static implicit operator Expr(double value) => new Number(value);
     public static implicit operator Expr(int value) => new Number(value);
     public static implicit operator Expr(string variable) => new Variable(variable);
-
-    
-    // default eval
-    public DataEval Eval() => Eval<DataEval>();
-    public T Eval<T>() where T : IDataEval
-    {
-        return default;
-    }
     
     // public abstract ExprType GetType();
     

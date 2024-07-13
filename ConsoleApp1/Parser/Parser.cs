@@ -88,6 +88,8 @@ public class Parser
             if (mulTest is null)
                 return null;
             
+            i += mulTest.Value.Length;
+            
             if (sign == '+')
                 currentExpr = Add(currentExpr, mulTest.Value.Mul);
             else // sign == '-'
@@ -162,11 +164,20 @@ public class Parser
     {
         // Fn -> Fonction | Sqrt | Intégrale | Abs | Arrondi | Atom
         
-        // TODO
         // Fonction -> Letter _ Sub ^ Pow \left( Expr, Expr, ..., Expr \right)
-        // Sqrt -> \sqrt [Expr]? \left( Expr \right)
-        // Intégrale -> \int _ Sub ^ Pow Expr dLetter
+        var functionTest = GetFunction(input);
+        if (functionTest is not null)
+            return (functionTest.Value.Function, functionTest.Value.Length);
         
+        // Sqrt -> \sqrt [Expr]? \left( Expr \right)
+        var sqrtTest = GetSqrt(input);
+        if (sqrtTest is not null)
+            return (sqrtTest.Value.Sqrt, sqrtTest.Value.Length);
+        
+        // Intégrale -> \int _ Sub ^ Pow Expr dLetter
+        var intTest = GetIntegral(input);
+        if (intTest is not null)
+            return (intTest.Value.Intergal, intTest.Value.Length);
         
         // Abs -> \left| Expr \right|
         var absTest = GetAbs(input);
@@ -188,22 +199,187 @@ public class Parser
 
     public static (Expr Function, int Length)? GetFunction(string input)
     {
-        throw new NotImplementedException();
+        // Fonction -> FuncName _ Sub ^ Pow \left( Expr, Expr, ..., Expr \right)
+            
+        var i = 0;
+        
+        var nameTest = GetFuncName(input);
+        if (nameTest is null)
+            return null;
+        
+        var name = nameTest.Value.FuncName;
+        i += nameTest.Value.Length;
+        
+        var subscriptTest = GetSubscript(input[i..]);
+        Expr? subscript = null;
+        if (subscriptTest is not null)
+        {
+            subscript = subscriptTest.Value.Expr;
+            i += subscriptTest.Value.Length;
+        }
+
+        Expr? power = null;
+        if (i < input.Length && input[i] == '^')
+        {
+            i++;
+            
+            var powerTest = GetShortOrBracesExpr(input[i..]);
+            if (powerTest is null)
+                return null;
+            
+            power = powerTest.Value.Expr;
+            i += powerTest.Value.Length;
+        }
+        
+        // \left( Expr, Expr, ..., Expr \right)
+        var exprsTest = GetExprs(input[i..], "(", ")", ",");
+        if (exprsTest is null)
+            return null;
+        
+        var exprs = exprsTest.Value.Exprs;
+        i += exprsTest.Value.Length;
+
+        var f = Var(name, new FunctionVar(name, exprs[0]));
+        return (power is null ? f : Pow(f, power), i); //TODO: Fix for multiple arguments
+    }
+
+    public static (string FuncName, int Length)? GetFuncName(string input)
+    {
+        // FuncName -> Letter | FuncNameList
+        var funcNameList = new string[]
+        {
+            "sin", "cos", "tan", "cot", "sec", "csc",
+            "arcsin", "arccos", "arctan", "arccot", "arcsec", "arccsc",
+            "sinh", "cosh", "tanh", "coth", "sech", "csch",
+            "arsinh", "arcosh", "artanh", "arcoth", "arsech", "arcsch",
+            "ln", "log", "exp",
+            "lim", "max", "min", "sup", "inf",
+            "det", "tr", "rank", "adj", "cof", "diag",
+            "dim", "ker", "im", "span", "null", "range",
+            "conv", "grad", "div", "curl", "lap", "hess",
+            "sgn", "abs", "floor", "ceil", "round",
+            "sqrt", "cbrt", "root",
+            "sum", "prod", "int", "oint", "iint", "iiint", "iiiint", "idotsint",
+            "vec", "mat", "det", "tr", "rank", "adj", "cof", "diag",
+            "dim", "ker", "im", "span", "null", "range",
+            "conv", "grad", "div", "curl", "lap", "hess",
+            "sgn", "abs", "floor", "ceil", "round",
+            "sqrt", "cbrt", "root",
+            "sum", "prod", "int", "oint", "iint", "iiint", "iiiint", "idotsint",
+            "vec", "mat"
+        };
+        
+        foreach (var funcName in funcNameList)
+        {
+            if (input.StartsWith(funcName))
+            {
+                return (funcName, funcName.Length);
+            }
+        }
+        
+        var letterTest = GetLetter(input);
+        if (letterTest is not null)
+            return (letterTest.Value.Letter, letterTest.Value.Length);
+
+        return null;
     }
     
     public static (Expr Sqrt, int Length)? GetSqrt(string input) 
     {
-        throw new NotImplementedException();
+        // Sqrt -> \sqrt [Expr]? \left( Expr \right)
+        
+        const string start = @"\sqrt";
+        
+        var i = 0;
+        if (input.Length <= start.Length || !input.StartsWith(start))
+            return null;
+        
+        i += start.Length;
+        
+        // [Expr]?
+        Expr n = 2;
+        if (input[i] == '[')
+        {
+            i++;
+            var expTest = GetExpr(input[i..]);
+            if (expTest is null)
+                return null;
+            
+            i += expTest.Value.Length;
+            n = expTest.Value.Expr;
+            
+            if (i >= input.Length || input[i] != ']')
+                return null;
+            
+            i++;
+        }
+        
+        // \left( Expr \right)
+        var exprTest = GetShortOrBracesExpr(input[i..]);
+        if (exprTest is null)
+            return null;
+        
+        var expr = exprTest.Value.Expr;
+        i += exprTest.Value.Length;
+        
+        return (Sqrt(expr, n), i);
     }
     
     public static (Expr Intergal, int Length)? GetIntegral(string input) 
     {
+        // Intégrale -> \int _ Sub ^ Pow Expr dLetter
+        
+        const string start = @"\int";
+        
+        var i = 0;
+        if (input.Length <= start.Length || !input.StartsWith(start))
+            return null;
+        
+        i += start.Length;
+        
+        // _ Sub
+        var subscriptTest = GetSubscript(input[i..]);
+        Expr? subscript = null;
+        if (subscriptTest is not null)
+        {
+            subscript = subscriptTest.Value.Expr;
+            i += subscriptTest.Value.Length;
+        }
+        
+        // ^ Pow
+        Expr? power = null;
+        if (input[i] == '^')
+        {
+            i++;
+            var powerTest = GetShortOrBracesExpr(input[i..]);
+            if (powerTest is not null)
+            {
+                power = powerTest.Value.Expr;
+                i += powerTest.Value.Length;
+            }
+        }
+        
+        // d
+        int j = input.IndexOf('d');
+        
+        // Expr
+        var exprTest = GetExpr(input[i..j]);
+        if (exprTest is null)
+            return null;
+        
+        var expr = exprTest.Value.Expr;
+        i += exprTest.Value.Length;
+        
+        // dLetter
+        var letterTest = GetLetter(input[j..]);
+        if (letterTest is null)
+            return null;
+        
+        var letter = letterTest.Value.Letter;
+        i += letterTest.Value.Length;
+
         throw new NotImplementedException();
-    }
-    
-    public static (Expr Function, int Length)? GetIntFunction(string input) 
-    {
-        throw new NotImplementedException();
+        //return (Integral(subscript, power, expr, letter), i);
     }
     
     public static (Expr Abs, int Length)? GetAbs(string input) 
@@ -388,13 +564,13 @@ public class Parser
         var exprsGrid = new Expr[rows.Length][];
         for (int j = 0; j < rows.Length; j++)
         {
-            var cols = input[i..endInd].Split(separator2);
+            var cols = rows[j].Split(separator2);
 
             var exprsRow = new Expr[cols.Length];
 
             for (int k = 0; k < cols.Length; k++)
             {
-                var exprTest = GetExpr(cols[j]);
+                var exprTest = GetExpr(cols[k]);
                 if (exprTest is null)
                     return null;
                 exprsRow[k] = exprTest.Value.Expr;    
@@ -451,8 +627,8 @@ public class Parser
         
         const string start = @"\begin{bmatrix}";
         const string end = @"\end{bmatrix}";
-        const string separator = @"&";
-        const string separator2 = @"\\";
+        const string separator = @"\\";
+        const string separator2 = "&";
         
         var exprsTest = GetExprs2D(input, start, end, separator, separator2);
         if (exprsTest is null)
@@ -588,9 +764,9 @@ public class Parser
 
         // [0-9] | [a-zA-Z]
         if (char.IsDigit(input[i]))
-            return (Num(input[i] - '0'), 2);
+            return (Num(input[i] - '0'), 1);
         if (char.IsLetter(input[i]))
-            return (Var(input[i].ToString()), 2);
+            return (Var(input[i].ToString()), 1);
         
         // LatexCommand (without parameters)
         var latexCommandTest = GetLatexCommand(input);
@@ -732,13 +908,13 @@ public class Parser
         if (input.Length == 0)
             return null;
         
-        var intTest = GetInt(input);
-        if (intTest is not null)
-            return (intTest.Value.Int, intTest.Value.Length);
-        
         var floatTest = GetFloat(input);
         if (floatTest is not null)
             return (floatTest.Value.Float, floatTest.Value.Length);
+        
+        var intTest = GetInt(input);
+        if (intTest is not null)
+            return (intTest.Value.Int, intTest.Value.Length);
         
         return null;
     }

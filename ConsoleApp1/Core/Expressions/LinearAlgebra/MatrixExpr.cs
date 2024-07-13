@@ -36,10 +36,7 @@ public class MatrixExpr : Expr
         return new MatrixExpr(shape, values);
     }
 
-    public Expr Eval()
-    {
-        return this;
-    }
+    public Expr Eval() => this;
 
     public static Expr[] From2DTo1D(Expr[,] values)
     {
@@ -50,7 +47,7 @@ public class MatrixExpr : Expr
         {
             for (int j = 0; j < col; j++)
             {
-                new_values[i * col + j] = values[line, col];
+                new_values[i * col + j] = values[i, j];
             }
         }
         

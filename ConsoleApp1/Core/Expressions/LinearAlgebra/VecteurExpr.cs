@@ -61,10 +61,7 @@ public class VecteurExpr : Expr
         );
     }
 
-    public Expr Eval()
-    {
-        throw new NotImplementedException();
-    }
+    public Expr Eval() => this;
     
     public override string ToLatex()
     {
