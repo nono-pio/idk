@@ -10,4 +10,5 @@ global using static ConsoleApp1.Core.Expressions.LinearAlgebra.ConstructorGeo;
 global using static ConsoleApp1.Core.Expressions.ComplexExpressions.ConstructorComplex;
 global using static ConsoleApp1.Core.Expressions.Base.ConstructorBase;
 global using static ConsoleApp1.Core.Expressions.Trigonometrie.ConstructorTrigo;
+global using static ConsoleApp1.Core.Expressions.Others.ConstructorOthers;
 global using static ConsoleApp1.Core.Models.ConstructorModels;

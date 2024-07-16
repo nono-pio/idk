@@ -1,4 +1,8 @@
-﻿namespace ConsoleApp1.Core.Sets;
+﻿using ConsoleApp1.Core.Expressions.ComplexExpressions;
+
+namespace ConsoleApp1.Core.Sets;
+using Boolean = Booleans.Boolean;
+
 
 /*
 
@@ -20,67 +24,138 @@ Operations on sets: (class derived from Set)
  */
 public abstract class Set
 {
+    public static Set EmptySet => new EmptySet();
 
-    /// return null if infinite else return length of the set
-    public abstract long? Length();
-    public bool IsFinite() => Length() is not null;
-    public bool IsInfinite() => Length() is null;
-    
-    public abstract bool IsEnumerable();
-    public bool IsEnumerableFinite() => IsFinite() && IsEnumerable();
-    public bool IsEnumerableInfinite() => IsInfinite() && IsEnumerable();
-    public virtual IEnumerable<double> GetEnumerable() => throw new Exception("Set is not enumerable.");
+    public bool? IsEmpty => IsEmptySet();
+    public virtual bool? IsEmptySet() => this is EmptySet;
 
-    public bool IsEmpty() => this is FiniteSet finiteSet && finiteSet.Length() == 0;
-    
-    public abstract double Max();
-    public abstract double Min();
+    public bool IsR => this is Real;
 
-    public abstract double PrincipalValue();
+    /* Set Creation */
 
-    public abstract bool Contain(double x);
+    public static Set CreateFiniteSet(params Expr[] elements)
+    {
+        return FiniteSet.CreateFiniteSet(elements);
+    }
 
-    public Set Union(Set b)
+    public static Set CreateInterval(Expr start, Expr end, bool startInclusive = true, bool endInclusive = true)
+    {
+        return Interval.CreateInterval(start, end, startInclusive, endInclusive);
+    }
+    
+    public static Set CreateUnion(params Set[] sets)
+    {
+        throw new NotImplementedException(); // return Union.CreateUnion(sets);
+    }
+    
+    public static Set CreateIntersection(params Set[] sets)
+    {
+        throw new NotImplementedException(); // return Intersection.CreateIntersection(elements);
+    }
+    
+    public static Set CreateComplement(Set set, Set universe)
+    {
+        throw new NotImplementedException(); // return Complement.CreateComplement(set, universe);
+    }
+
+    /* Operation on Sets */
+
+    public Set Union(Set other)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Set Intersection(Set other)
+    {
+        throw new NotImplementedException();
+    }
+
+    public virtual Set Complement(Set universe)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Set SymmetricDifference(Set other)
+    {
+        throw new NotImplementedException();
+    }
+
+    // Power Set of this set
+
+    public Set PowerSet()
+    {
+        throw new NotImplementedException();
+    }
+
+    /**/
+    public virtual bool IsEnumerable => false;
+    public virtual IEnumerable<Expr> GetEnumerable() => throw new NotImplementedException();
+
+    /**/
+
+    public bool IsDisjoint(Set other)
+    {
+        return Intersection(other).IsEmpty ?? false;
+    }
+    
+    /**/   
+    public virtual Expr? Supremum()
+    {
+        throw new NotImplementedException($"{this}.Supremum() is not implemented.");
+    }
+    
+    public virtual Expr? Infimum()
+    {
+        throw new NotImplementedException($"{this}.Infimum() is not implemented.");
+    }
+    
+    /**/
+    public virtual Set Boundary()
+    {
+        throw new NotImplementedException($"{this}.Boundary() is not implemented.");
+    }
+    
+    public Set Closure()
+    {
+        return Union(Boundary());
+    }
+    
+    public Set Interior()
+    {
+        return Intersection(Closure());
+    }
+    
+    /*  */
+    public abstract Boolean? Contains(Expr x);
+    
+    // TODO
+    public Boolean? IsSubset(Set other)
     {
         throw new NotImplementedException();
     }
     
-    public Set Complement(Set b)
+    public Boolean? IsProperSubset(Set other)
     {
         throw new NotImplementedException();
     }
     
-    public Set Intersection(Set b)
+    public Boolean? IsSuperset(Set other)
     {
         throw new NotImplementedException();
     }
     
-    public Set SetDifference(Set b)
+    public Boolean? IsProperSuperset(Set other)
     {
         throw new NotImplementedException();
     }
-    public Set SymmetricDifference(Set b)
+
+    public bool? IsOpen()
     {
-        throw new NotImplementedException();
+        return Intersection(Boundary()).IsEmpty;
     }
     
-    public Set CartesianProduct(Set b)
+    public Boolean? IsClosed()
     {
-        throw new NotImplementedException();
-    }
-    
-    // <-- Utils -->
-    
-    public static Set EmptySet() => new FiniteSet();
-    
-    public static IEnumerable<Set> GetEnumerableUnionSets(params Set[] sets) 
-        => sets.SelectMany(GetEnumerableUnionSets);
-    public static IEnumerable<Set> GetEnumerableUnionSets(Set set)
-    {
-        if (set is Union union)
-        {
-            return union.Sets.SelectMany(GetEnumerableUnionSets);
-        }
-        return new[] {set};
+        return Boundary().IsSubset(this);
     }
 }

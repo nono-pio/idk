@@ -1,150 +1,203 @@
-﻿namespace ConsoleApp1.Core.Sets;
+﻿using Boolean = ConsoleApp1.Core.Booleans.Boolean;
 
-public class Union : Set
+namespace ConsoleApp1.Core.Sets;
+
+public class Union(params Set[] sets) : Set
 {
+    public Set[] Sets = sets;
     
-    public Set[] Sets;
-    
-    public Union(params Set[] sets)
+    public new static Set CreateUnion(params Set[] sets)
     {
+        // TODO
         if (sets.Length == 0)
-        {
-            throw new Exception("Union of no sets is not allowed.");
-        }
-        Sets = sets;
+            return EmptySet;
+        
+        return new Union(sets);
     }
 
-    /*
-    
-    Rules : 
-    1. Empty set : A U {} = A
-    2. Union of Union : A U (B U C) = A U B U C
-    3. Universal set U : U U A = U
-    4. Concat FiniteSet : [1,2] U [3,4] = [1,2,3,4]
-    5. Concat Interval : [1,2] U [2,3] = [1,3]
-    6. TODO ... 
-    
-    */
-    public static Set ConstructEval(params Set[] sets)
+    public Set UnionOf(Set a, Set b)
     {
-        
-        switch (sets.Length)
+        switch (a, b)
         {
-            case 0:
-                return EmptySet();
-            case 1:
-                return sets[0];
-        }
-
-        var newSets = new List<Set>();
-        var concatFiniteSets = new List<double>();
-        foreach (var set in GetEnumerableUnionSets(sets)) // 2. Union of Union
-        {
-
-            if (set.IsEmpty()) // 1. Empty set
-                continue;
             
-            switch (set)
-            {
-                case UniversalSet: // 2. Concat FiniteSet
-                    return set;
-                
-                case FiniteSet finiteSet: // 4. Concat FiniteSet
-                    concatFiniteSets.AddRange(finiteSet.Elements);
-                    continue;
-                
-                case Interval interval: // 5. Concat Interval
-                    // TODO ...
-                    continue;
-                
-                default: // 6. TODO ...
-                    newSets.Add(set);
-                    break;
-            }
-        }
-        
-        if (concatFiniteSets.Count > 0)
-        {
-            newSets.Add(new FiniteSet(concatFiniteSets.ToArray()));
-        }
+            // case (Naturals0, Naturals):
+            //     return a;
 
-        return newSets.Count switch
-        {
-            0 => EmptySet(),
-            1 => newSets[0],
-            _ => new Union(newSets.ToArray())
-        };
-    }
-    
-    public override long? Length()
-    {
-        
-        long length = 0;
-        foreach (var set in Sets)
-        {
-            var setLength = set.Length();
-            if (setLength is null)
+            case (Rational, Natural):
+                return a;
+
+            // case (Rationals, Naturals0):
+            //     return a;
+
+            case (Real, Natural):
+                return a;
+            
+            // case (Reals, Naturals0):
+            //     return a;
+
+            case (Real, Rational):
+                return a;
+
+            case (Integer, Set):
+                var intersect = CreateIntersection(a, b);
+                if (intersect == a)
+                    return b;
+                else if(intersect == b)
+                    return a;
                 return null;
+
+            case (EmptySet, Set):
+                return b;
+
+            case (UniversalSet, Set):
+                return a;
+
+            case (ProductSet, ProductSet):
+                if (b.isSubset(a))
+                    return a;
+                if (b.Sets.Lenght != a.Sets.Lenght)
+                    return null;
+                if (a.Sets.Lenght == 2)
+                {
+                    var (a1, a2) = (a.Sets[0], a.Sets[1]);
+                    var (b1, b2) = (b.Sets[0], b.Sets[1]);
+                    if (a1 == b1)
+                        return a1 * CreateUnion(a2, b2);
+                    if (a2 == b2)
+                        return CreateUnion(a1, b1) * a2;
+                }
+
+                return null;
+
+            case (ProductSet, Set):
+                if (b.isSubset(a))
+                    return a;
+                return null;
+
+            case (Interval intA, Interval intB):
+                // TODO
+                
+                // if (a._is_comparable(b))
+                // {
+                //     // Non-overlapping intervals
+                //     var end = Min(intA.End, intB.End);
+                //     var start = Max(intA.Start, intB.Start);
+                //     if (end < start || (end == start && (!intA.Contains(end) && intB.Contains(end))))
+                //         return null;
+                //     else
+                //     {
+                //         start = Min(intA.Start, intB.Start);
+                //         end = Max(intA.End, intB.End);
+                //
+                //         left_open = ((intA.start != start or intA.left_open) and
+                //             (b.start != start or b.left_open))
+                //         right_open = ((intA.end != end or intA.right_open) and
+                //             (b.end != end or b.right_open))
+                //         return Interval(start, end, left_open, right_open)
+                //     }
+                // }
+
+                return null;
+                    
+
+            case (Interval, UniversalSet):
+                return UniversalSet;
+
+            case (Interval intA, Set):
+                // # If I have open end points and these endpoints are contained in b
+                // # But only in case, when endpoints are finite. Because
+                // # interval does not contain oo or -oo.
+                var open_left_in_b_and_finite = intA.left_open && b.Contains(intA.Start) == true && intA.Start.IsFinite;
+                var open_right_in_b_and_finite = intA.right_open && b.Contains(intA.End)) == true && intA.End.IsFinite;
+                if (open_left_in_b_and_finite || open_right_in_b_and_finite)
+                {
+                    // Fill in my end points and return
+                    var open_left = a.left_open and a.start not in b; 
+                    var open_right = a.right_open and a.end not in b;
+                    var new_a = Interval(a.start, a.end, open_left, open_right);
+                    return {new_a, b}
+                }
+                    
+                return null;
+
+@union_sets.register(FiniteSet, FiniteSet)
+def _(a, b):
+    return FiniteSet(*(a._elements | b._elements))
+
+@union_sets.register(FiniteSet, Set)
+def _(a, b):
+    # If `b` set contains one of my elements, remove it from `a`
+    if any(b.contains(x) == True for x in a):
+        return {
+            FiniteSet(*[x for x in a if b.contains(x) != True]), b}
+    return None
+
+@union_sets.register(Set, Set)
+def _(a, b):
+    return None
+
             
-            length += setLength.Value;
         }
-
-        return length;
     }
 
-    public override bool IsEnumerable()
+    public override Expr? Infimum()
     {
-        return Sets.All(set => set.IsEnumerable());
-    }
-
-    public override IEnumerable<double> GetEnumerable()
-    {
-        return Sets.SelectMany(set => set.GetEnumerable());
-    }
-
-    public override double Max()
-    {
-        
-        if (Sets.Length == 0)
-            return double.NaN;
-
-        double max = double.NegativeInfinity;
-        foreach (var set in Sets)
+        var infSets = new Expr[Sets.Length];
+        for (int i = 0; i < Sets.Length; i++)
         {
-            var setMax = set.Max();
-            if (setMax > max)
-                max = setMax;
+            var inf = Sets[i].Infimum();
+            if (inf is null)
+                return null;
+            infSets[i] = inf;
         }
-        
-        return max;
+
+        return Min(infSets);
     }
 
-    public override double Min()
+    public override Expr? Supremum()
     {
-        if (Sets.Length == 0)
-            return double.NaN;
-        
-        double min = double.PositiveInfinity;
-        foreach (var set in Sets)
+        var supSets = new Expr[Sets.Length];
+        for (int i = 0; i < Sets.Length; i++)
         {
-            var setMin = set.Min();
-            if (setMin < min)
-                min = setMin;
+            var sup = Sets[i].Supremum();
+            if (sup is null)
+                return null;
+            supSets[i] = sup;
         }
-        
-        return min;
+
+        return Max(supSets);
     }
 
-    public override double PrincipalValue()
+    public override Set Complement(Set universe)
     {
-        if (Sets.Length == 0)
-            return double.NaN;
-        
-        return Sets[0].PrincipalValue();
+        return CreateIntersection(Sets.Select(set => set.Complement(universe)).ToArray());
     }
 
-    public override bool Contain(double x)
+    public override Set Boundary()
     {
-        return Sets.Any(set => set.Contain(x));
+        throw new NotImplementedException();
+    }
+
+    public override Boolean? Contains(Expr x)
+    {
+        var contain = new Boolean[Sets.Length];
+        for (int i = 0; i < Sets.Length; i++)
+        {
+            var c = Sets[i].Contains(x);
+            if (c is null)
+                return null;
+            contain[i] = c;
+        }
+        return Boolean.Or(contain);
+    }
+    
+    public Boolean AsCondition(Expr x)
+    {
+        var contain = new Boolean[Sets.Length];
+        for (int i = 0; i < Sets.Length; i++)
+        {
+            contain[i] = Sets[i].Contains(x) ?? throw new Exception("Invalid condition.");
+        }
+        return Boolean.Or(contain);
     }
 }

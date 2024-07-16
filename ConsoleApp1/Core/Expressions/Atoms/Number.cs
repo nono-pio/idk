@@ -47,6 +47,12 @@ public class Number : Atom
     public bool IsFloat => Num.IsFloat;
     public bool IsInt => Num.IsInt;
     
+    public new bool IsPositive => Num.IsPositive;
+    public new bool IsNegative => Num.IsNegative;
+    
+    public new bool IsInfinity => Num.IsInfinity;
+    public new bool IsNegativeInfinity => Num.IsNegativeInfinity;
+    
     public bool Is(int n) => Num.Is(n);
     
     public static int Gcd(int a, int b) => NumberUtils.Gcd(a, b);

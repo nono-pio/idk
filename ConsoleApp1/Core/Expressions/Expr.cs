@@ -28,12 +28,27 @@ public abstract class Expr
     {
         Args = args;
     }
-    
+
     public static implicit operator Expr(double value) => new Number(value);
     public static implicit operator Expr(int value) => new Number(value);
     public static implicit operator Expr(string variable) => new Variable(variable);
-    
+
     // public abstract ExprType GetType();
+
+    public static Number Inf => new(double.PositiveInfinity);
+    public static Number NegInf => new(double.NegativeInfinity);
+    
+    public bool IsExtendedReal => IsReal || IsInfinity || IsNegativeInfinity;
+    public bool IsNatural => this is Number; //TODO
+    public bool IsInteger => this is Number; //TODO
+    public bool IsRational => this is Number; //TODO
+    public bool IsReal => this is Number; //TODO
+
+    public bool IsInfinity => this is Number num && num.IsInfinity; //TODO
+    public bool IsNegativeInfinity => this is Number num && num.IsNegativeInfinity; //TODO
+    public bool IsPositive => this is Number num && num.IsPositive; //TODO
+    public bool IsNegative => this is Number num && num.IsNegative; //TODO
+    
     
     # region <-- Conversion -->
 
