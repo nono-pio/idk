@@ -6,6 +6,15 @@ public abstract class Boolean
     
     public static Boolean True => new BooleanValue(true);
     public static Boolean False => new BooleanValue(false);
+    
+    public bool IsTrue => this is BooleanValue { Value: true };
+    public bool IsFalse => this is BooleanValue { Value: false };
+    public bool IsIndeterminate => this is not BooleanValue;
+    public bool IsDeterminate => this is BooleanValue;
+    public bool IsTrueOrFalse => this is BooleanValue;
+    public bool IsTrueOrIndeterminate => IsTrue || IsIndeterminate;
+    public bool IsFalseOrIndeterminate => IsFalse || IsIndeterminate;
+    
 
     public abstract bool? GetValue();
     

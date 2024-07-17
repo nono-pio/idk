@@ -1,4 +1,5 @@
 ﻿using ConsoleApp1.Core.Models;
+using ConsoleApp1.Core.Sets;
 
 namespace ConsoleApp1.Core.Expressions.Atoms;
 
@@ -104,7 +105,7 @@ public class Variable : Atom
 
 public abstract class VariableData(string name)
 {
-    // public Set? NumberDomain;
+    public Set? Domain = null;
     public string Name = name;
     public List<string> Dependencies = new();
 

@@ -47,6 +47,17 @@ public class Interval : Set
         return new Interval(start, end, startInclusive, endInclusive);
     }
 
+    public Set UnionSelf(Interval other)
+    {
+        throw new NotImplementedException();
+    }
+    
+    public Boolean IsOverlapping(Interval other)
+    {
+        throw new NotImplementedException();
+    }
+    
+    
     public override Expr? Infimum() => Start;
     public override Expr? Supremum() => End;
     
@@ -66,22 +77,22 @@ public class Interval : Set
     {
         return (Start.IsNegativeInfinity, End.IsInfinity) switch
         {
-            (true, true) => Set.EmptySet,
+            (true, true) => EmptySet,
             (true, false) => CreateFiniteSet(End),
             (false, true) => CreateFiniteSet(Start),
             (false, false) => CreateFiniteSet(Start, End)
         };
     }
     
-    public override ConsoleApp1.Core.Booleans.Boolean? Contains(Expr x)
+    public override Boolean Contains(Expr x)
     {
         return AsCondition(x);
     }
 
-    public ConsoleApp1.Core.Booleans.Boolean AsCondition(Expr x)
+    public Boolean AsCondition(Expr x)
     {
-        var start = StartInclusive ? ConsoleApp1.Core.Booleans.Boolean.GE(x, Start) : ConsoleApp1.Core.Booleans.Boolean.G(x, Start);
-        var end = EndInclusive ? ConsoleApp1.Core.Booleans.Boolean.LE(x, End) : Boolean.L(x, End);
+        var start = StartInclusive ? Boolean.GE(x, Start) : Boolean.G(x, Start);
+        var end = EndInclusive ? Boolean.LE(x, End) : Boolean.L(x, End);
         return start & end;
     }
     

@@ -1,23 +1,15 @@
-﻿using ConsoleApp1.Core.Classes;
+﻿using ConsoleApp1.Core.Booleans;
+using ConsoleApp1.Core.Classes;
 using ConsoleApp1.Core.Expressions.Atoms;
 using ConsoleApp1.Core.Expressions.Base;
 using ConsoleApp1.Core.Models;
+using ConsoleApp1.Core.Sets;
 using ConsoleApp1.Core.TestDir;
 using ConsoleApp1.Latex;
+using Boolean = ConsoleApp1.Core.Booleans.Boolean;
 
 namespace ConsoleApp1.Core.Expressions;
 
-public enum ExprType
-{
-    Natural, // 0, 1, 2, 3, ...
-    Integer, // ..., -3, -2, -1, 0, 1, 2, 3, ...
-    Rational, // p/q
-    Real, // pi, e, sqrt(2), ...
-    Complex, // a + bi
-    Vector, // [1, 2, 3]
-    Matrix, // [[1, 2], [3, 4]]
-    Set, // {1, 2, 3}
-}
 
 public abstract class Expr
 {
@@ -33,8 +25,6 @@ public abstract class Expr
     public static implicit operator Expr(int value) => new Number(value);
     public static implicit operator Expr(string variable) => new Variable(variable);
 
-    // public abstract ExprType GetType();
-
     public static Number Inf => new(double.PositiveInfinity);
     public static Number NegInf => new(double.NegativeInfinity);
     
@@ -49,6 +39,17 @@ public abstract class Expr
     public bool IsPositive => this is Number num && num.IsPositive; //TODO
     public bool IsNegative => this is Number num && num.IsNegative; //TODO
     
+    public virtual Boolean IsContinue(string variable, Set set)
+    {
+        return this switch
+        {
+            Number => true,
+            Variable var => var.Name != variable || var.Data.Domain is null ? true : set.IsSubset(var.Data.Domain),
+            Addition add => And.Eval(add.Therms.Select(therm => therm.IsContinue(variable, set))),
+            Multiplication mul => And.Eval(mul.Factors.Select(factor => factor.IsContinue(variable, set))),
+            _ => throw new NotImplementedException()
+        };
+    }
     
     # region <-- Conversion -->
 

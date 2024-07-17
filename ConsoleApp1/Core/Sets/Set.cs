@@ -25,6 +25,7 @@ Operations on sets: (class derived from Set)
 public abstract class Set
 {
     public static Set EmptySet => new EmptySet();
+    public static UniversalSet U => new UniversalSet();
 
     public bool? IsEmpty => IsEmptySet();
     public virtual bool? IsEmptySet() => this is EmptySet;
@@ -32,6 +33,7 @@ public abstract class Set
     public bool IsR => this is Real;
 
     /* Set Creation */
+    public static implicit operator Set(Expr expr) => CreateFiniteSet(expr);
 
     public static Set CreateFiniteSet(params Expr[] elements)
     {
@@ -126,25 +128,25 @@ public abstract class Set
     }
     
     /*  */
-    public abstract Boolean? Contains(Expr x);
+    public abstract Boolean Contains(Expr x);
     
     // TODO
-    public Boolean? IsSubset(Set other)
+    public Boolean IsSubset(Set other)
     {
         throw new NotImplementedException();
     }
     
-    public Boolean? IsProperSubset(Set other)
+    public Boolean IsProperSubset(Set other)
     {
         throw new NotImplementedException();
     }
     
-    public Boolean? IsSuperset(Set other)
+    public Boolean IsSuperset(Set other)
     {
         throw new NotImplementedException();
     }
     
-    public Boolean? IsProperSuperset(Set other)
+    public Boolean IsProperSuperset(Set other)
     {
         throw new NotImplementedException();
     }

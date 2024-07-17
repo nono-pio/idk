@@ -1,108 +1,94 @@
-﻿// namespace ConsoleApp1.Core.Sets;
-//
-// public class Intersection : Set
-// {
-//
-//     public Set[] Sets;
-//     public Intersection(params Set[] sets)
-//     {
-//         Sets = sets;
-//     }
-//
-//     /*
-//     Rules :
-//     1. Empty set : A ∩ {} = {}
-//     2. Intersection of Intersection : A ∩ (B ∩ C) = A ∩ B ∩ C
-//     3. Universal set U : U ∩ A = A
-//     4. FiniteSet Intersection : [1,2] ∩ [2,3] = [2]
-//     5. Interval Intersection : [1,2] ∩ [2,4] = {2}
-//     6. TODO ...
-//     */
-//     public static Set EvalIntersection(params Set[] sets)
-//     {
-//         
-//         if (sets.Length == 0)
-//             return EmptySet;
-//         if (sets.Length == 1)
-//             return sets[0];
-//         
-//         List<Set> newSets = new();
-//         FiniteSet? concatFiniteSets = null;
-//         foreach (var set in GetEnumerableIntersectionSets(sets)) // 2. Intersection of Intersection
-//         {
-//             if (set.IsEmpty) // 1. Empty set
-//                 return EmptySet;
-//
-//             
-//             switch (set)
-//             {
-//                 case UniversalSet: // 3. Universal set
-//                     continue;
-//                 
-//                 case FiniteSet finiteSet: // 4. FiniteSet Intersection
-//                     
-//                     if (concatFiniteSets is null)
-//                         concatFiniteSets = finiteSet.Copy();
-//                     else 
-//                         concatFiniteSets.IntersectionFiniteSet(finiteSet);
-//                     
-//                     break;
-//                 
-//                 case Interval interval: // 5. Interval Intersection
-//                     throw new NotImplementedException();
-//                     break;
-//                 
-//                 default: // 6. TODO ...
-//                     newSets.Add(set);
-//                     break;
-//             }
-//         }
-//
-//         if (concatFiniteSets is not null)
-//         {
-//             if (concatFiniteSets.IsEmpty)
-//                 return EmptySet;
-//             
-//             newSets.Add(concatFiniteSets);
-//         }
-//
-//         return newSets.Count switch
-//         {
-//             0 => EmptySet,
-//             1 => newSets[0],
-//             _ => new Intersection(newSets.ToArray())
-//         };
-//     }
-//
-//     public override long? Length() => throw new NotImplementedException();
-//
-//     public override bool IsEnumerable()
-//     {
-//         return Sets.All(set => set.IsEnumerable());
-//     }
-//     
-//     public override IEnumerable<double> GetEnumerable()
-//     {
-//         return Sets[0].GetEnumerable().Where(Contain);
-//     }
-//
-//     public override double Max()
-//     {
-//         throw new NotImplementedException();
-//     }
-//
-//     public override double Min()
-//     {
-//         throw new NotImplementedException();
-//     }
-//
-//     public override double PrincipalValue()
-//     {
-//         throw new NotImplementedException();
-//     }
-//
-//     public override bool Contain(double x)
-//     {
-//         return Sets.All(set => set.Contain(x));
-//     }
-// }
+﻿using ConsoleApp1.Core.Booleans;
+using Boolean = ConsoleApp1.Core.Booleans.Boolean;
+
+namespace ConsoleApp1.Core.Sets;
+
+public class Intersection(params Set[] sets) : Set
+{
+    public Set[] Sets = sets;
+    
+    public new static Set CreateIntersection(params Set[] sets)
+    {
+        if (sets.Length == 0)
+            return EmptySet;
+        
+        // TODO
+        
+        return new Intersection(sets);
+    }
+
+    public static Set? EvalIntersection(Set A, Set B)
+    {
+        // Empty Set
+        if (A is EmptySet || B is EmptySet)
+            return EmptySet;
+        
+        // Universal Set
+        if (A is UniversalSet)
+            return B;
+        if (B is UniversalSet)
+            return A;
+        
+        // Basic Number Sets
+        if (A is BasicNumberSet bA && B is BasicNumberSet bB)
+            return BasicNumberSet.GetIntersectionOf(bA, bB);
+        
+        // Interval Sets
+        if (A is Interval intA && B is Interval intB)
+            return OverlapIntervals(intA, intB);
+
+        if (A is BasicNumberSet bA2 && B is Interval intB2)
+            return IntersectionIntervalBasicNumberSet(intB2, bA2);
+        if (A is Interval intA2 && B is BasicNumberSet bB2)
+            return IntersectionIntervalBasicNumberSet(intA2, bB2);
+
+        // Finite Sets
+        if (A is FiniteSet fA && B is FiniteSet fB)
+            return fA.IntersectionSelf(fB);
+        
+        if (A is FiniteSet fA2)
+            return fA2.IntersectionSet(B);
+        if (B is FiniteSet fB2)
+            return fB2.IntersectionSet(A);
+        
+        return null;
+    }
+    
+    public static Interval? OverlapIntervals(Interval a, Interval b)
+    {
+        // TODO
+        return null;
+    }
+    
+    public static Set? IntersectionIntervalBasicNumberSet(Interval a, BasicNumberSet b)
+    {
+        return b._Level < Real.Level ? null/*TODO:Range*/ : a;
+    }
+
+    public override Expr? Infimum()
+    {
+        throw new NotImplementedException();
+    }
+
+    public override Expr? Supremum()
+    {
+        throw new NotImplementedException();
+    }
+
+    public override Set Complement(Set universe)
+    {
+        return CreateUnion(Sets.Select(set => set.Complement(universe)).ToArray());
+    }
+
+    public override Set Boundary()
+    {
+        throw new NotImplementedException();
+    }
+
+    public override Boolean Contains(Expr x) => AsCondition(x);
+    
+    public Boolean AsCondition(Expr x)
+    {
+        return And.Eval(Sets.Select(s => s.Contains(x)));
+    }
+}

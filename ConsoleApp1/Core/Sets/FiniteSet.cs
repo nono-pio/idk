@@ -3,13 +3,14 @@ using Boolean = ConsoleApp1.Core.Booleans.Boolean;
 
 namespace ConsoleApp1.Core.Sets;
 
-public class FiniteSet(params Expr[] elements) : Set
+public class FiniteSet(HashSet<Expr> elements) : Set
 {
-    public readonly List<Expr> Elements = elements.ToList();
+    public readonly HashSet<Expr> Elements = elements.ToHashSet();
 
-    public new static Set CreateFiniteSet(params Expr[] elements)
+    public new static Set CreateFiniteSet(params Expr[] elements) => CreateFiniteSet(elements.ToHashSet());
+    public new static Set CreateFiniteSet(HashSet<Expr> elements)
     {
-        if (elements.Length == 0)
+        if (elements.Count == 0)
             return EmptySet;
         
         return new FiniteSet(elements);
@@ -78,7 +79,60 @@ public class FiniteSet(params Expr[] elements) : Set
         return base.Complement(universe);
     }
     
-    public override Boolean? Contains(Expr x)
+    public Set UnionSelf(FiniteSet other)
+    {
+        var newElements = new HashSet<Expr>(Elements);
+        newElements.UnionWith(other.Elements);
+        
+        return CreateFiniteSet(newElements);
+    }
+    
+    // {1,2,3} U [3,6] = [3,6] U {1,2} (3 is in [3, 6])
+    public Set UnionSet(Set b)
+    {
+        var newElements = new HashSet<Expr>(Elements);
+        newElements.RemoveWhere(x => b.Contains(x).IsFalse);
+
+        if (newElements.Count == 0)
+            return b;
+        
+        return CreateUnion(b, CreateFiniteSet(newElements));
+    }
+    
+    public Set IntersectionSelf(FiniteSet other)
+    {
+        var newElements = new HashSet<Expr>(Elements);
+        newElements.IntersectWith(other.Elements);
+
+        if (newElements.Count == 0)
+            return EmptySet;
+        
+        return CreateFiniteSet(newElements);
+    }
+    
+    public Set IntersectionSet(Set b)
+    {
+        var newElements = new HashSet<Expr>(Elements);
+        var newElementsIndeterminate = new HashSet<Expr>();
+        foreach (var elm in Elements)
+        {
+            var contains = b.Contains(elm);
+            if (contains.IsTrue)
+                newElements.Add(elm);
+            else if (contains.IsIndeterminate)
+                newElementsIndeterminate.Add(elm);
+        }
+
+        return (newElements.Count == 0, newElementsIndeterminate.Count == 0) switch
+        {
+            (true, true) => EmptySet,
+            (true, false) => CreateIntersection(CreateFiniteSet(newElementsIndeterminate), b),
+            (false, true) => CreateFiniteSet(newElements),
+            (false, false) => CreateUnion(CreateFiniteSet(newElements), CreateIntersection(CreateFiniteSet(newElementsIndeterminate), b))
+        };
+    }
+    
+    public override Boolean Contains(Expr x)
     {
         return AsCondition(x);
     }
