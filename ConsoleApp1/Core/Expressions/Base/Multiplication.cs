@@ -47,7 +47,44 @@ public class Multiplication : Expr, ICoefGrouping<Multiplication>
 
         return Add(therms);
     }
-    
+
+    public override Expr Develop()
+    {
+        var therms = new List<Expr>();
+        foreach (var factor in Factors)
+        {
+            if (factor is Addition add)
+            {
+                if (therms.Count == 0)
+                {
+                    therms.AddRange(add.Args);
+                }
+                else
+                {
+                    var newTherms = new List<Expr>();
+                    foreach (var term in therms)
+                    {
+                        foreach (var addTerm in add.Args)
+                        {
+                            newTherms.Add(Mul(term, addTerm));
+                        }
+                    }
+
+                    therms = newTherms;
+                }
+            }
+            else
+            {
+                for (int i = 0; i < therms.Count; i++)
+                {
+                    therms[i] = Mul(therms[i], factor);
+                }
+            }
+        }
+
+        return Add(therms.ToArray());
+    }
+
     public override Expr Derivee(string variable, int n)
     {
 

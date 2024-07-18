@@ -26,6 +26,11 @@ public class Log : Expr
         return LatexUtils.Fonction("\\log", Value.ToLatex(), subscript: Base.ToLatex());
     }
 
+    public override Expr Develop()
+    {
+        return Log(Value) / Log(Base);
+    }
+
     public override string ToString()
     {
         return ToLatex();

@@ -2,6 +2,7 @@
 using ConsoleApp1.Core.Classes;
 using ConsoleApp1.Core.Expressions.Atoms;
 using ConsoleApp1.Core.Expressions.Base;
+using ConsoleApp1.Core.Expressions.Others;
 using ConsoleApp1.Core.Models;
 using ConsoleApp1.Core.Sets;
 using ConsoleApp1.Core.TestDir;
@@ -49,6 +50,16 @@ public abstract class Expr
             Multiplication mul => And.Eval(mul.Factors.Select(factor => factor.IsContinue(variable, set))),
             _ => throw new NotImplementedException()
         };
+    }
+    
+    public virtual Expr Develop()
+    {
+        return this;
+    }
+
+    public bool IsEqualStrong(Expr expr)
+    {
+        return Develop() == expr.Develop();
     }
     
     # region <-- Conversion -->
@@ -211,6 +222,12 @@ public abstract class Expr
 
         return result;
     }
+
+    public Expr Derivee(string variable, Expr n)
+    {
+        return new Derivative(this, variable, n);
+    }
+
     
     # endregion
 

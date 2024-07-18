@@ -1,58 +1,30 @@
 ﻿namespace ConsoleApp1.Core;
 
-public interface IType
+public abstract record ExprType
 {
-    public static readonly UnknownType Unknown = new UnknownType();
-    public static readonly IntType Int = new IntType();
-    public static readonly RationalType Rational = new RationalType();
-    public static readonly RealType Real = new RealType();
-    public static readonly ComplexType Complex = new ComplexType();
-    public static readonly VectorType Vector = new VectorType();
-    public static readonly TupleType Tuple = new TupleType(2);
-    public static readonly MatrixType Matrix = new MatrixType();
+    public static readonly UnknownType UnknownType = new UnknownType();
+    public static readonly NumberType NumberType = new NumberType();
+    public static readonly VectorType UnknownVectorType = new VectorType(UnknownType);
+    public static readonly VectorType VectorType = new VectorType(NumberType);
+    public static readonly MatrixType UnknownMatrixType = new MatrixType(UnknownType);
+    public static readonly MatrixType MatrixType = new MatrixType(NumberType);
 }
 
-public interface IScalarType;
+public record UnknownType : ExprType;
 
-public record UnknownType : IType;
+public record NumberType : ExprType;
 
-public record IntType : IType, IScalarType; // {1,2,3}
-public record RationalType : IType, IScalarType; // {1/2, 2/3, 3/4}
-public record RealType : IType, IScalarType; // {1.0, 2.0, 3.0}
-public record ComplexType : IType, IScalarType; // {1.0 + 2.0i, 2.0 + 3.0i, 3.0 + 4.0i}
-
-public record VectorType : IType
+public record VectorType(ExprType? DataType = null) : ExprType
 {
-    public VectorType(IType? dataType = null, int? dim = null)
-    {
-        DataType = dataType ?? IType.Unknown;
-        Dim = dim;
-    }
-
-    public int? Dim;
-    public IType DataType;
+    public ExprType DataType = DataType ?? UnknownType;
 }
 
-public record TupleType : IType
+public record TupleType(params ExprType[] DataTypes) : ExprType
 {
-    public TupleType(int dim, IType? dataType = null)
-    {
-        DataType = dataType ?? IType.Unknown;
-        Dim = dim;
-    }
-
-    public int? Dim;
-    public IType DataType;
+    public ExprType[] DataTypes = DataTypes;
 }
 
-public record MatrixType : IType
+public record MatrixType(ExprType? DataType = null) : ExprType
 {
-    public MatrixType(IType? dataType = null, (int?, int?)? shape = null)
-    {
-        DataType = dataType ?? IType.Unknown;
-        Shape = shape ?? (null, null);
-    }
-
-    public (int?, int?) Shape;
-    public IType DataType;
+    public ExprType DataType = DataType ?? UnknownType;
 }

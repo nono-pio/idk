@@ -84,7 +84,7 @@ public class Symbols
     
     public static string Add = "+";
     public static string Sub = "-";
-    public static string Mul = @"\times ";
+    public static string Mul = @"\cdot ";
     
     // Equalities
     public static string Equal = "=";

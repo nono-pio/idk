@@ -4,31 +4,31 @@ public static class ConstructorTrigo
 {
     public static Expr Cos(Expr expr)
     {
-        return new Cos(expr);
+        return new CosExpr(expr);
     }
 
     public static Expr Sin(Expr expr)
     {
-        return new Sin(expr);
-    }
-
-    public static Expr Csc(Expr expr)
-    {
-        return new Csc(expr);
-    }
-
-    public static Expr Sec(Expr expr)
-    {
-        return new Sec(expr);
+        return new SinExpr(expr);
     }
 
     public static Expr Tan(Expr expr)
     {
-        return new Tan(expr);
+        return new TanExpr(expr);
+    }
+    
+    public static Expr ACos(Expr expr)
+    {
+        return new ACosExpr(expr);
     }
 
-    public static Expr Cot(Expr expr)
+    public static Expr ASin(Expr expr)
     {
-        return new Cot(expr);
+        return new ASinExpr(expr);
+    }
+
+    public static Expr ATan(Expr expr)
+    {
+        return new ATanExpr(expr);
     }
 }

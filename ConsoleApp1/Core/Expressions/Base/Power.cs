@@ -145,7 +145,17 @@ public class Power : Expr
 
         return Add(therms);
     }
-    
+
+    public override Expr Develop()
+    {
+        return Base switch
+        {
+            Addition add => Exp.IsInteger ? NewtonMultinomial(add.Therms, (int)Exp.N()) : this,
+            Multiplication mul => Mul(mul.Factors.Select(fac => Pow(fac, Exp)).ToArray()),
+            _ => this
+        };
+    }
+
     public static Expr NewtonMultinomial(Expr[] values, int n)
     {
         int m = values.Length;

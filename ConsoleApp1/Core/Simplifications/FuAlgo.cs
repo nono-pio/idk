@@ -21,15 +21,16 @@ public class FuAlgo
     // sec, csc -> sin, cos
     public static Expr TR1(Expr expr)
     {
-        expr = expr.Map<Sec>(sec => 1 / Cos(sec.X));
-        return expr.Map<Csc>(csc => 1 / Sin(csc.X));
+        // expr = expr.Map<Sec>(sec => 1 / Cos(sec.X));
+        // return expr.Map<Csc>(csc => 1 / Sin(csc.X));
+        return null;
     }
 
     // tan, cot -> sin, cos
     public static Expr TR2(Expr expr)
     {
-        expr = expr.Map<Tan>(tan => Sin(tan.X) / Cos(tan.X));
-        return expr.Map<Cot>(cot => Sin(cot.X) / Cos(cot.X));
+        expr = expr.Map<TanExpr>(tan => Sin(tan.X) / Cos(tan.X));
+        return null; //expr.Map<Cot>(cot => Sin(cot.X) / Cos(cot.X));
     }
 
     // Induced formula
@@ -49,7 +50,7 @@ public class FuAlgo
     {
         return expr.Map<Power>(pow =>
         {
-            if (pow.Exp.Is(2) && pow.Base is Sin sin)
+            if (pow.Exp.Is(2) && pow.Base is SinExpr sin)
             {
                 var x = sin.X;
                 return 1 - Pow(Cos(x), Num(2));
@@ -64,7 +65,7 @@ public class FuAlgo
     {
         return expr.Map<Power>(pow =>
         {
-            if (pow.Exp.Is(2) && pow.Base is Cos cos)
+            if (pow.Exp.Is(2) && pow.Base is CosExpr cos)
             {
                 var x = cos.X;
                 return 1 - Pow(Sin(x), Num(2));
@@ -79,7 +80,7 @@ public class FuAlgo
     {
         return expr.Map<Power>(pow =>
         {
-            if (pow.Exp.Is(2) && pow.Base is Cos cos)
+            if (pow.Exp.Is(2) && pow.Base is CosExpr cos)
             {
                 var x = cos.X;
                 return (1 + Cos(2 * x)) / 2;
@@ -129,12 +130,12 @@ public class FuAlgo
 
     public static int L(Expr expr)
     {
-        return expr.Count<Sin>() +
-               expr.Count<Cos>() +
-               expr.Count<Tan>() +
-               expr.Count<Sec>() +
-               expr.Count<Csc>() +
-               expr.Count<Cot>();
+        return expr.Count<SinExpr>() +
+               expr.Count<CosExpr>() +
+               expr.Count<TanExpr>();
+        // expr.Count<Sec>() +
+        // expr.Count<Csc>() +
+        // expr.Count<Cot>();
     }
 
     public static Expr TR(int i, Expr expr)
@@ -274,17 +275,17 @@ public class FuAlgo
     // <-- Fu -->
     public static Expr Fu(Expr expr)
     {
-        if (expr.Has<Sec>() || expr.Has<Csc>()) expr = TR1(expr);
+        // if (expr.Has<Sec>() || expr.Has<Csc>()) expr = TR1(expr);
 
-        if (expr.Has<Tan>() || expr.Has<Cot>()) expr = RL1(expr);
+        if (expr.Has<TanExpr>() /*|| expr.Has<Cot>()*/) expr = RL1(expr);
 
         expr = SmallestLTR(expr);
 
-        if (expr.Has<Tan>() || expr.Has<Cot>()) expr = TR2(expr);
+        if (expr.Has<TanExpr>() /*|| expr.Has<Cot>()*/) expr = TR2(expr);
 
         expr = TR0(expr);
 
-        if (expr.Has<Sin>() || expr.Has<Cos>()) expr = RL2(expr);
+        if (expr.Has<SinExpr>() || expr.Has<CosExpr>()) expr = RL2(expr);
 
         return expr;
     }

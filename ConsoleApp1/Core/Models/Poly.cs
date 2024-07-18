@@ -31,6 +31,36 @@ public class Poly
         
     }
 
+    public Poly Integral()
+    {
+        var coefs = new Expr[_coefs.Length + 1];
+        coefs[^1] = Zero;
+        for (int i = 0; i < _coefs.Length; i++)
+        {
+            coefs[i] = _coefs[i] / (Deg() - i + 1);
+        }
+
+        return new Poly(coefs);
+    }
+
+    public Expr Of(Expr x)
+    {
+        var result = Zero;
+        foreach (var (coef, deg) in AsCoefDeg())
+        {
+            var therm = deg switch
+            {
+                0 => coef,
+                1 => coef * x,
+                _ => coef * new Power(x, deg).Eval()
+            };
+            
+            result += therm;
+        }
+
+        return result;
+    }
+
     public static bool IsPolynomial(Expr expr, string variable)
     {
         if (expr.Constant(variable))
@@ -436,11 +466,11 @@ public class Poly
         {
             for (int deg_b = 0; deg_b <= b.Deg(); deg_b++)
             {
-                result.SetCoefDeg(deg_a + deg_b, a.CoefDeg(deg_a) * b.CoefDeg(deg_b));
+                result.SetCoefDeg(deg_a + deg_b, a.CoefDeg(deg_a) * b.CoefDeg(deg_b) + result.CoefDeg(deg_a + deg_b));
             }
         }
 
-        return result.EnleveZeroInutile();
+        return result;
     }
     
     // TODO

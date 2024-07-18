@@ -1,19 +1,17 @@
-﻿using ConsoleApp1.Core.Models;
+﻿using ConsoleApp1.Core.Expressions.Others;
+using ConsoleApp1.Core.Models;
 using ConsoleApp1.Latex;
 
 namespace ConsoleApp1.Core.Expressions;
 
-public abstract class FonctionExpr : Expr
+public abstract class FonctionExpr(Expr x) : Expr(x)
 {
-    protected FonctionExpr(Expr x) : base(x)
-    {
-    }
-
     public Expr X => Args[0];
 
 
     /// The name of the fonction
-    public abstract string Name();
+    public abstract string Name { get; }
+    public virtual string LatexName => Name;
 
     public override OrderOfOperation GetOrderOfOperation()
     {
@@ -24,15 +22,15 @@ public abstract class FonctionExpr : Expr
     ///     Derivée sans dérivée intérieur
     ///     <example>sin(x^2) -> cos(x^2)</example>
     /// </para>
-    protected abstract Expr BaseDerivee();
-    
+    protected virtual Expr? BaseDerivee() => null;
     public override Expr Derivee(string variable)
     {
-        return X.Derivee(variable) * BaseDerivee();
+        var baseDerivee = BaseDerivee();
+        return baseDerivee is null ? new Derivative(this, variable) : X.Derivee(variable) * baseDerivee;
     }
 
     /// Retourne la reciproque de la fonction pour y : f^r(y)
-    public abstract Expr Reciproque(Expr y);
+    public virtual Expr Reciproque(Expr y) => throw new Exception("This function does not have a reciprocal");
 
     public override Expr Inverse(Expr y, int argIndex)
     {
@@ -42,12 +40,12 @@ public abstract class FonctionExpr : Expr
     // <-- String Methodes -->
     public override string ToString()
     {
-        return ToLatex();
+        return $"{Name}({X})";
     }
 
     public override string ToLatex()
     {
-        return LatexUtils.Fonction(Name(), X.ToLatex());
+        return LatexUtils.Fonction(LatexName, X.ToLatex());
     }
 
 }
