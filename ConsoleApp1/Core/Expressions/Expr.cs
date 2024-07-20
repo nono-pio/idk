@@ -11,7 +11,6 @@ using Boolean = ConsoleApp1.Core.Booleans.Boolean;
 
 namespace ConsoleApp1.Core.Expressions;
 
-
 public abstract class Expr
 {
     /// Args = arguments/parametres de l'expression (thermes d'une addition, facteur d'un produit)
@@ -392,26 +391,45 @@ public abstract class Expr
     {
         return Args.GetHashCode();
     }
+
+    public int CompareType(Expr expr)
+    {
+        var compare = TypeId().CompareTo(expr.TypeId());
+        if (compare == 0)
+            return compare;
+
+        if (this is Number)
+            return -1;
+        if (expr is Number)
+            return 1;
+
+        return compare;
+    }
     
     public int CompareTo(Expr? expr)
     {
-        if (expr is null) return -1;
+        if (expr is null) 
+            return -1;
 
         // cmp type
-        var cmpType = TypeId().CompareTo(expr.TypeId());
-        if (cmpType != 0) return cmpType;
+        var cmpType = CompareType(expr);
+        if (cmpType != 0) 
+            return cmpType;
 
-        if (this is Atom) return ((Atom)this).CompareAtom((Atom?)expr);
+        if (this is Atom atom) 
+            return atom.CompareAtom((Atom)expr);
 
         // cmp args length
         var cmpLength = Args.Length.CompareTo(expr.Args.Length);
-        if (cmpLength != 0) return cmpLength;
+        if (cmpLength != 0) 
+            return cmpLength;
 
         // cmp args
         for (var i = 0; i < Args.Length; i++)
         {
             var cmpArg = Args[i].CompareTo(expr.Args[i]);
-            if (cmpArg != 0) return cmpArg;
+            if (cmpArg != 0) 
+                return cmpArg;
         }
         
         return 0;
