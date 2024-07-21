@@ -4,7 +4,7 @@ using ConsoleApp1.Latex;
 
 namespace ConsoleApp1.Core.Expressions.Base;
 
-public class Multiplication : Expr, ICoefGrouping<Multiplication>
+public class Multiplication : Expr
 {
     public Expr[] Factors => Args;
     
@@ -12,23 +12,99 @@ public class Multiplication : Expr, ICoefGrouping<Multiplication>
     
     public Multiplication(params Expr[] factors) : base(factors)
     {
-        if (factors.Length < 2) throw new Exception("You must add two or more factor");
+        if (factors.Length < 2) 
+            throw new Exception("You must add two or more factor");
     }
-    
-    public static Expr Mul(params Expr[] factors) => factors.Length switch
+
+    public static Expr Construct(params Expr[] exprs)
     {
-        0 => Un,
-        1 => factors[0],
-        _ => new Multiplication(factors).Eval()
-    };
-    
-    public static Expr MulNotEval(params Expr[] factors) => factors.Length switch
+        // Rules
+        // 1. x * x = x^2
+        // 2. x * 0 = 0
+        // 4. x * 1 = x
+        // 4. x * (y * z) = x * y * z
+        // 5. Sort the factors
+        
+        if (exprs.Length == 0)
+            return 1;
+        if (exprs.Length == 1)
+            return exprs[0];
+
+        NumberStruct numbersProduct = 1;
+        var exprsFactors = new List<Expr>();
+        foreach (var expr in exprs.SelectMany(e => e is Multiplication mul ? mul.Factors : [e]))
+        {
+            if (expr is Number num)
+            {
+                if (num.IsZero)
+                    return 0;
+                
+                numbersProduct *= num.Num;
+                continue;
+            }
+
+            var hasCombined = false;
+            for (int i = 0; i < exprsFactors.Count; i++)
+            {
+                Expr? combine = Combine(expr, exprsFactors[i]);
+                if (combine is not null)
+                {
+                    exprsFactors[i] = combine;
+                    hasCombined = true;
+                    break;
+                }
+            }
+        
+            if (!hasCombined)
+                exprsFactors.Add(expr);
+        }
+
+        if (!numbersProduct.IsOne)
+            exprsFactors.Add(Num(numbersProduct));
+
+        return exprsFactors.Count switch
+        {
+            0 => 0,
+            1 => exprsFactors[0],
+            _ => new Multiplication(Sorting.BubbleSort(exprsFactors.ToArray()))
+        };
+    }
+    private static Expr? Combine(Expr a, Expr b)
     {
-        0 => Un,
-        1 => factors[0],
-        _ => new Multiplication(factors)
-    };
-    
+        if (a is not Power && b is not Power)
+            return null;
+
+        if (a is Power aPow && b is Power bPow)
+            return aPow.Base == bPow.Base ? Pow(aPow.Base, aPow.Exp + bPow.Exp) : null;
+
+        Power pow;
+        Expr expr;
+        if (a is Power ap)
+        {
+            pow = ap;
+            expr = b;
+        }
+        else
+        {
+            pow = (Power)b;
+            expr = a;
+        }
+
+        if (pow.Base == expr)
+        {
+            var newExp = pow.Exp + 1;
+            if (newExp.IsZero())
+                return 1;
+            
+            return Pow(pow.Base, newExp);
+        }
+
+        return null;
+    }
+
+    public override Expr Eval(Expr[] exprs, object[]? objects = null) => Construct(exprs);
+    public override Expr NotEval(Expr[] exprs, object[]? objects = null) => new Multiplication(exprs);
+
     # endregion
 
     public override Expr Derivee(string variable)
@@ -132,30 +208,10 @@ public class Multiplication : Expr, ICoefGrouping<Multiplication>
 
         return y + Add(rest);
     }
-
-    public NumberStruct Identity() => 1;
-    public Expr IdentityExpr() => Un;
-    public (double, double) IdentityComplex() => (1, 0);
-    public (Expr, Expr) IdentityComplexExpr() => (Un, Zero);
-    
-    public NumberStruct Absorbent() => 0;
-    public Expr AbsorbentExpr() => Zero;
-    public (double, double) AbsorbentComplex() => (0, 0);
-    public (Expr, Expr) AbsorbentComplexExpr() => (Zero, Zero);
     
     public override OrderOfOperation GetOrderOfOperation()
     {
         return OrderOfOperation.Multiplication;
-    }
-    
-    public NumberStruct GroupConstant(NumberStruct a, NumberStruct b) => a * b;
-    public (NumberStruct, Expr?) AsCoefExpr(Expr expr) => expr is Number num ? (num.Num, null) : (1, expr); // TODO
-    public Multiplication FromArrayList(Expr[] exprs) => new Multiplication(exprs);
-    public Expr GroupCoefExpr(NumberStruct coef, Expr expr) => coef.IsZero ? Zero : Pow(expr, coef.Expr());
-
-    public Expr Eval()
-    {
-        return ICoefGrouping<Multiplication>.GroupEval(this);
     }
     
     public override (NumberStruct, Expr?) AsMulCoef()
@@ -173,13 +229,7 @@ public class Multiplication : Expr, ICoefGrouping<Multiplication>
         if (newFactors.Count == 0)
             return (coef, null);
 
-        return (coef, MulNotEval(newFactors.ToArray()));
-    }
-
-    public override (Expr, Expr) AsComplex()
-    {
-        return Factors.Aggregate(IdentityComplexExpr(), 
-            (complexTuple, factor) => ComplexUtils.Mul(complexTuple, factor.AsComplex()));
+        return (coef, NotEval(newFactors.ToArray()));
     }
 
     public override string? ToString()

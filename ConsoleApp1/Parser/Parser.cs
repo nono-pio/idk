@@ -56,9 +56,6 @@ public class Parser
     Fn -> Fonction | Sqrt | Intégrale | Abs | Arrondi | Atom
     Atom -> Number | Variable | (Expr) | Set | Vecteur | Matrice
     
-    // TODO IDK: f(x) -> fonction f de x ou f * x
-    // TODO IDK: uv -> u * v ou variable uv
-    
     */
     public static (Expr Expr, int Length)? GetExpr(string input)
     {

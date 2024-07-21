@@ -23,6 +23,11 @@ public class MatrixExpr : Expr
     {
         Shape = (values.GetLength(0), values.GetLength(1));
     }
+    
+    public static Expr Construct((int, int) shape, params Expr[] values) => new MatrixExpr(shape, values);
+    public static Expr Construct(Expr[,] values) => new MatrixExpr(values);
+    public override Expr Eval(Expr[] exprs, object[]? objects = null) => Construct(((int, int))objects[0], exprs);
+    public override Expr NotEval(Expr[] exprs, object[]? objects = null) => new MatrixExpr(((int, int))objects[0], exprs);
 
     public override OrderOfOperation GetOrderOfOperation()
     {
@@ -35,8 +40,6 @@ public class MatrixExpr : Expr
         Array.Fill(values, item);
         return new MatrixExpr(shape, values);
     }
-
-    public Expr Eval() => this;
 
     public static Expr[] From2DTo1D(Expr[,] values)
     {

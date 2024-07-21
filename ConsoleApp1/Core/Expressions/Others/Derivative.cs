@@ -6,6 +6,11 @@ public class Derivative(Expr function, string variable, Expr? n = null) : Expr(f
     public string Variable = variable;
     public Expr n => Args[1];
     
+    public static Expr Construct(Expr function, string variable, Expr n) => new Derivative(function, variable, n);
+    public static Expr Construct(Expr function, string variable) => new Derivative(function, variable);
+    public override Expr Eval(Expr[] exprs, object[]? objects = null) => Construct(exprs[0], (string)objects[0], exprs[1]);
+    public override Expr NotEval(Expr[] exprs, object[]? objects = null) => new Derivative(exprs[0], (string)objects[0], exprs[1]);
+
     public Expr DoIt()
     {
         if (n.IsInteger)

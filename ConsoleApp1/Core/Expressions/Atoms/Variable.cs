@@ -9,7 +9,6 @@ public class Variable : Atom
 
     public readonly string Name;
     public VariableData? _data = null;
-
     public VariableData Data
     {
         get {
@@ -21,6 +20,30 @@ public class Variable : Atom
         }
     }
 
+    public static bool SetValue(string variable, double value)
+    {
+        var data = Variables[variable];
+        if (data is ConstantVar cd)
+        {
+            cd.Value = value;
+            return true;
+        } else if (data is ScalarVar sd)
+        {
+            sd.Value = value;
+            return true;
+        }
+        
+        return false;
+    }
+    
+    public override Expr Eval(Expr[] exprs, object[]? objects = null)
+    {
+        var value = objects?[0];
+        return value is not null ? new Variable((string)value) : throw new Exception();
+    }
+    public override Expr NotEval(Expr[] exprs, object[]? objects = null) => Eval(exprs, objects);
+
+    
     public Variable(string name)
     {
         Name = name;

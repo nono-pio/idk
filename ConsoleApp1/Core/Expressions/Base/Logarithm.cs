@@ -2,14 +2,21 @@
 
 namespace ConsoleApp1.Core.Expressions.Base;
 
-public class Log : Expr
+public class Logarithm : Expr
 {
 
     public Expr Value => Args[0];
     public Expr Base => Args[1];
     
-    public Log(Expr value, Expr @base) : base(value, @base) {}
-    public Log(Expr value) : base(value, Math.E.Expr()) {}
+    public Logarithm(Expr value, Expr @base) : base(value, @base) {}
+    public Logarithm(Expr value) : base(value, Math.E.Expr()) {}
+
+    
+    public static Expr Construct(Expr value, Expr @base) => new Logarithm(value, @base);
+    public static Expr Construct(Expr value) => new Logarithm(value);
+    public override Expr Eval(Expr[] exprs, object[]? objects = null) => Construct(exprs[0], exprs[1]);
+    public override Expr NotEval(Expr[] exprs, object[]? objects = null) => new Logarithm(exprs[0], exprs[1]);
+
 
     public override OrderOfOperation GetOrderOfOperation()
     {
@@ -28,7 +35,7 @@ public class Log : Expr
 
     public override Expr Develop()
     {
-        return Log(Value) / Log(Base);
+        return Ln(Value) / Ln(Base);
     }
 
     public override string ToString()
@@ -55,33 +62,7 @@ public class Log : Expr
         throw new Exception("ArgIndex must be 0 (value) or 1 (base)");
     }
 
-    
-    public override (Expr, Expr) AsComplex()
-    {
-
-        var valueTuple = LnComplex(Value.AsComplex());
-        var baseTuple = LnComplex(Base.AsComplex());
-        
-        return ComplexUtils.Div(valueTuple, baseTuple); // log_b(a) = ln(a) / ln(b)
-    }
-
-    // ln(a + bi) = 1/2*ln(a^2 + b^2) + i * (arg(a+bi) + 2*PI*n)
-    public static (Expr, Expr) LnComplex((Expr, Expr) complexTuple)
-    {
-        var (r, t) = complexTuple;
-        
-        var real = Log(r*r + t*t)/2;
-        var complex = ComplexUtils.Arg(complexTuple); // TODO: + 2*PI*n 
-
-        return (real, complex);
-    }
-
     public override Expr Derivee(string variable)
-    {
-        throw new NotImplementedException();
-    }
-    
-    public Expr Eval()
     {
         throw new NotImplementedException();
     }

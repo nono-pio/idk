@@ -1,11 +1,12 @@
 ﻿namespace ConsoleApp1.Core.Expressions.Trigonometrie;
 
-public class SinExpr : FonctionExpr
+public class SinExpr(Expr x) : FonctionExpr(x)
 {
-    public SinExpr(Expr x) : base(x)
-    {
-    }
 
+    public static Expr Construct(Expr x) => new SinExpr(x);
+    public override Expr Eval(Expr[] exprs, object[]? objects = null) => Construct(exprs[0]);
+    public override Expr NotEval(Expr[] exprs, object[]? objects = null) => new SinExpr(exprs[0]);
+    
     public override string Name => "sin";
 
     protected override Expr BaseDerivee()

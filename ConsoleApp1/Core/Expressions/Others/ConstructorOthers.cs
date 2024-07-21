@@ -2,6 +2,6 @@
 
 public static class ConstructorOthers
 {
-    public static Expr Max(params Expr[] elements) => new Max(elements);
-    public static Expr Min(params Expr[] elements) => new Min(elements);
+    public static Expr Max(params Expr[] elements) => MaxExpr.Construct(elements);
+    public static Expr Min(params Expr[] elements) => MinExpr.Construct(elements);
 }

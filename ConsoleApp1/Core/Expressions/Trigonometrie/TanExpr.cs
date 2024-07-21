@@ -1,11 +1,12 @@
 ﻿namespace ConsoleApp1.Core.Expressions.Trigonometrie;
 
-public class TanExpr : FonctionExpr
+public class TanExpr(Expr x) : FonctionExpr(x)
 {
-    public TanExpr(Expr x) : base(x)
-    {
-    }
 
+    public static Expr Construct(Expr x) => new TanExpr(x);
+    public override Expr Eval(Expr[] exprs, object[]? objects = null) => Construct(exprs[0]);
+    public override Expr NotEval(Expr[] exprs, object[]? objects = null) => new TanExpr(exprs[0]);
+    
     public override string Name => "tan";
 
     protected override Expr BaseDerivee()

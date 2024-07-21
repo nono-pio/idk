@@ -16,6 +16,10 @@ public class VecteurExpr : Expr
 
     public VecteurExpr(params Expr[] args) : base(args) {}
 
+    public static Expr Construct(params Expr[] args) => new VecteurExpr(args);
+    public override Expr Eval(Expr[] exprs, object[]? objects = null) => Construct(exprs);
+    public override Expr NotEval(Expr[] exprs, object[]? objects = null) => new VecteurExpr(exprs);
+    
     public Expr Norme()
     {
         return Sqrt(
@@ -60,8 +64,6 @@ public class VecteurExpr : Expr
             a.X * b.Y - a.Y * b.X
         );
     }
-
-    public Expr Eval() => this;
     
     public override string ToLatex()
     {

@@ -20,8 +20,8 @@ public class Fonction
     
     public double N(double x)
     {
-        return Of(x.Expr()).N();
-        // TODO : optimiser
+        var isSet = Variable.SetValue(NameVariable, x);
+        return isSet ? Fx.N() : Of(x).N();
     }
 
     public Fonction Derivee()

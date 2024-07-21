@@ -5,19 +5,50 @@ namespace ConsoleApp1.Core.Expressions.Base;
 
 public class Power : Expr
 {
+    public Expr Base
+     {
+         get => Args[0];
+         private set => Args[0] = value;
+     }
+ 
+     public Expr Exp
+     {
+         get => Args[1];
+         private set => Args[1] = value;
+     }
+     
     public Power(Expr value, Expr exp) : base(value, exp) { }
 
-    public Expr Base
+    public static Expr Construct(Expr @base, Expr exp)
     {
-        get => Args[0];
-        private set => Args[0] = value;
-    }
+        // 1. Special Values    a^b
+        // a = 1 -> 1; a = 0 -> 0
+        // b = 0 -> 1; b = 1 -> a
+        // a, b is number -> a^b simplified
 
-    public Expr Exp
-    {
-        get => Args[1];
-        private set => Args[1] = value;
+
+        if (@base.IsOne() || exp.IsZero()) 
+            return Num(1);
+        if (@base.IsZero()) 
+            return Num(0);
+        if (exp.IsOne()) 
+            return @base;
+        
+        if (@base is Number a && exp is Number b) 
+            return Number.SimplifyPow(a, b);
+
+        // 2. Power Tower       pow(pow(a,b),c) -> pow(a,bc)
+        if (@base is Power pow)
+        {
+            @base = pow.Base;
+            exp = exp * pow.Exp;
+            return new Power(@base, exp);
+        }
+
+        return new Power(@base, exp);
     }
+    public override Expr Eval(Expr[] exprs, object[]? objects = null) => Construct(exprs[0], exprs[1]);
+    public override Expr NotEval(Expr[] exprs, object[]? objects = null) => new Power(exprs[0], exprs[1]);
     
     public override OrderOfOperation GetOrderOfOperation()
     {
@@ -30,7 +61,7 @@ public class Power : Expr
 
        
         if (Base.Constant(variable))
-            return Exp.Derivee(variable) * Log(Base) * this;
+            return Exp.Derivee(variable) * Ln(Base) * this;
 
         throw new NotImplementedException("Power.Derivee : Base et Exp non constant");
         return null /**/;
@@ -72,14 +103,14 @@ public class Power : Expr
             
             if (Exp.IsVar(variable)) // ddx exp = 1
             {
-                return Pow(Log(Base), n.Expr()) * this;
+                return Pow(Ln(Base), n.Expr()) * this;
             }
             
             var therms = new Expr[n];
             foreach (var (bin, (m, k)) in NumberUtils.BinomialCoefficients(n - 1))
             {
                 var f_in = Base.Derivee(variable, m + 1);
-                var f_ln = Pow(Log(Base), (k + 1).Expr());
+                var f_ln = Pow(Ln(Base), (k + 1).Expr());
                 therms[k] = Mul(bin.Expr(), f_in, f_ln); // n=1 : bin=1 * f'(x) * exp * f(x)^(exp - 1)
             }
 
@@ -104,35 +135,6 @@ public class Power : Expr
             1 => throw new Exception("not implemented"),
             _ => throw new Exception("Power as only 2 args (value:0, exp:1), not " + argIndex)
         };
-    }
-
-    public Expr Eval()
-    {
-        // 1. Special Values    a^b
-        // a = 1 -> 1; a = 0 -> 0
-        // b = 0 -> 1; b = 1 -> a
-        // a, b is number -> a^b simplified
-
-
-        if (Base.IsOne() || Exp.IsZero()) 
-            return Num(1);
-        if (Base.IsZero()) 
-            return Num(0);
-        if (Exp.IsOne()) 
-            return Base;
-        
-        if (Base is Number a && Exp is Number b) 
-            return Number.SimplifyPow(a, b);
-
-        // 2. Power Tower       pow(pow(a,b),c) -> pow(a,bc)
-        if (Base is Power pow)
-        {
-            Base = pow.Base;
-            Exp = Exp * pow.Exp;
-            return this;
-        }
-
-        return this;
     }
     
     public static Expr NewtonBinomial(Expr a, Expr b, int n)

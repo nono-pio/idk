@@ -2,17 +2,16 @@
 
 namespace ConsoleApp1.Core.Expressions.ComplexExpressions;
 
-public class Real : Expr
+public class ComplexReal : Expr
 {
 
     public Expr X => Args[0];
     
-    public Real(Expr x) : base(x) {}
+    public ComplexReal(Expr x) : base(x) {}
 
-    public Expr Eval()
-    {
-        return this;
-    }
+    public static Expr Construct(Expr x) => new ComplexReal(x);
+    public override Expr Eval(Expr[] exprs, object[]? objects = null) => Construct(exprs[0]);
+    public override Expr NotEval(Expr[] exprs, object[]? objects = null) => new ComplexReal(exprs[0]);
 
     public override string ToLatex()
     {

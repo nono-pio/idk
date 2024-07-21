@@ -5,7 +5,6 @@ using ConsoleApp1.Core.Expressions.Base;
 using ConsoleApp1.Core.Expressions.Others;
 using ConsoleApp1.Core.Models;
 using ConsoleApp1.Core.Sets;
-using ConsoleApp1.Core.TestDir;
 using ConsoleApp1.Latex;
 using Boolean = ConsoleApp1.Core.Booleans.Boolean;
 
@@ -14,8 +13,11 @@ namespace ConsoleApp1.Core.Expressions;
 public abstract class Expr
 {
     /// Args = arguments/parametres de l'expression (thermes d'une addition, facteur d'un produit)
-    public Expr[] Args { get; protected set; }
+    public readonly Expr[] Args;
+    public virtual object[]? GetArgs() => null;
 
+    # region Constructors
+    
     protected Expr(params Expr[] args)
     {
         Args = args;
@@ -25,6 +27,8 @@ public abstract class Expr
     public static implicit operator Expr(int value) => new Number(value);
     public static implicit operator Expr(string variable) => new Variable(variable);
 
+    # endregion
+    
     public static Number Inf => new(double.PositiveInfinity);
     public static Number NegInf => new(double.NegativeInfinity);
     
@@ -38,6 +42,13 @@ public abstract class Expr
     public bool IsNegativeInfinity => this is Number num && num.IsNegativeInfinity; //TODO
     public bool IsPositive => this is Number num && num.IsPositive; //TODO
     public bool IsNegative => this is Number num && num.IsNegative; //TODO
+    
+    # region Evaluate
+
+    public abstract Expr Eval(Expr[] exprs, object[]? objects = null);
+    public abstract Expr NotEval(Expr[] exprs, object[]? objects = null);
+    
+    # endregion
     
     public virtual Boolean IsContinue(string variable, Set set)
     {
@@ -61,7 +72,7 @@ public abstract class Expr
         return Develop() == expr.Develop();
     }
     
-    # region <-- Conversion -->
+    # region Conversion
 
     public Fonction AsFonction(string variable)
     {
@@ -147,11 +158,16 @@ public abstract class Expr
 
     # endregion
 
-    # region <-- String Méthodes -->
+    # region String Méthodes
 
     /// Génère un string représentant l'expression en utilisant le Latex
     public abstract string ToLatex();
 
+    public string? ParenthesisIfNeeded(Expr expr)
+    {
+        return expr.GetOrderOfOperation() < GetOrderOfOperation() ? '(' + expr.ToString() + ')' : expr.ToString();
+    }
+    
     public string ParenthesisLatexIfNeeded(Expr expr)
     {
         return expr.GetOrderOfOperation() < GetOrderOfOperation() ? LatexUtils.Parenthesis(expr.ToLatex()) : expr.ToLatex();
@@ -159,9 +175,9 @@ public abstract class Expr
     
     # endregion
 
-    # region <-- Outils Mathématiques -->
+    # region Outils Mathématiques
 
-    public enum OrderOfOperation : int
+    public enum OrderOfOperation
     {
         Always = 0,             // Tous le temps des parenthèses
         Addition = 1,           // Addition, Soustraction
@@ -174,17 +190,7 @@ public abstract class Expr
         return OrderOfOperation.Always;
     }
     
-    public bool ExprNeedParenthesis(Expr expr)
-    {
-        return expr.GetOrderOfOperation() < GetOrderOfOperation();
-    }
-    
     public abstract double N();
-    
-    public Expr Substitue(string variable, Expr value)
-    {
-        return Map<Variable>(var => var.Name == variable ? value : var);
-    }
 
     public Expr Gcd(Expr b)
     {
@@ -209,6 +215,10 @@ public abstract class Expr
     /// </example>
     public abstract Expr Inverse(Expr y, int argIndex);
 
+    # endregion
+    
+    # region Derivee
+    
     /// Retourne la dérivee de l'expression en la variable
     /// <paramref name="variable" />
     public abstract Expr Derivee(string variable);
@@ -230,8 +240,13 @@ public abstract class Expr
     
     # endregion
 
-    # region <-- Outils -->
-
+    # region Outils
+    
+    public Expr Substitue(string variable, Expr value)
+    {
+        return Map<Variable>(var => var.Name == variable ? value : var);
+    }
+    
     public IEnumerable<Expr> GetEnumerableTherms()
     {
         if (this is Addition add)
@@ -254,7 +269,8 @@ public abstract class Expr
     /// <paramref name="variable" />
     public bool Constant(string variable)
     {
-        if (IsVar(variable)) return false;
+        if (IsVar(variable)) 
+            return false;
 
         foreach (var arg in Args)
             if (!arg.Constant(variable))
@@ -288,7 +304,8 @@ public abstract class Expr
         foreach (var arg in Args)
             count += arg.Count<T>();
 
-        if (this is T) count++;
+        if (this is T) 
+            count++;
 
         return count;
     }
@@ -299,40 +316,30 @@ public abstract class Expr
     /// <paramref name="func" />
     public Expr Map<T>(Func<T, Expr> func) where T : Expr
     {
-        for (var i = 0; i < Args.Length; i++) Args[i] = Args[i].Map(func);
-
-
-        if (GetType() == typeof(T)) return func((T)this);
-
-        return this;
+        return MapBottomUp(expr => expr is T t ? func(t) : expr);
     }
 
     public Expr MapAtoms(Func<Atom, Expr> func)
     {
-        if (this is Atom) return func((Atom)this);
-
-        for (var i = 0; i < Args.Length; i++) Args[i] = Args[i].MapAtoms(func);
-
-        return this;
+        return Map(func);
     }
 
     public Expr MapBottomUp(Func<Expr, Expr> func)
     {
-        for (var i = 0; i < Args.Length; i++) Args[i] = Args[i].MapBottomUp(func);
 
-        return func(this);
-    }
+        var objects = GetArgs();
+        var newArgs = new Expr[Args.Length];
+        
+        for (var i = 0; i < Args.Length; i++) 
+            newArgs[i] = Args[i].MapBottomUp(func);
 
-    protected void SortArgs()
-    {
-        Args = Args.Order().ToArray();
+        return func(Eval(newArgs, objects));
     }
     
     # endregion
     
-    # region <-- Math Operator -->
+    # region Math Operator
     
-    // Addition
     public static Expr operator +(Expr expr1, Expr expr2)
     {
         if (expr1 is Number num1 && expr2 is Number num2)
@@ -341,7 +348,6 @@ public abstract class Expr
         return Add(expr1, expr2);
     }
 
-    // Subtraction
     public static Expr operator -(Expr expr1, Expr expr2)
     {
         if (expr1 is Number num1 && expr2 is Number num2)
@@ -350,7 +356,6 @@ public abstract class Expr
         return Sub(expr1, expr2);
     }
 
-    // Negate
     public static Expr operator -(Expr expr)
     {
         if (expr is Number num)
@@ -359,7 +364,6 @@ public abstract class Expr
         return Neg(expr);
     }
 
-    // Multiplication
     public static Expr operator *(Expr expr1, Expr expr2)
     {
         if (expr1 is Number num1 && expr2 is Number num2)
@@ -369,7 +373,6 @@ public abstract class Expr
     }
 
 
-    // Division
     public static Expr operator /(Expr expr1, Expr expr2)
     {
         if (expr1 is Number num1 && expr2 is Number num2)
@@ -380,7 +383,7 @@ public abstract class Expr
     
     # endregion
     
-    # region <-- Comparaison -->
+    # region Comparaison
     
     protected long TypeId()
     {
@@ -476,12 +479,11 @@ public abstract class Expr
     
     # endregion
     
-    # region <-- Comparaison Spéciales -->
+    # region Comparaison Spéciales
 
     public bool IsZero() => this is Number { IsZero: true };
     public bool IsNotZero() => !IsZero();
     public bool IsOne() => this is Number { IsOne: true };
-    public bool IsNegOne() => this is Number num && num.Is(-1);
     public bool Is(double n) => this is Number num && num.Is(n);
     
     public bool IsVar(string variable) => this is Variable var && var.Name == variable;

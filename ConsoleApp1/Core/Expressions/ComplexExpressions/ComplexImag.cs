@@ -2,16 +2,15 @@
 
 namespace ConsoleApp1.Core.Expressions.ComplexExpressions;
 
-public class Imag : Expr
+public class ComplexImag : Expr
 {
     public Expr X => Args[0];
     
-    public Imag(Expr x) : base(x) {}
-
-    public Expr Eval()
-    {
-        return this;
-    }
+    public ComplexImag(Expr x) : base(x) {}
+    
+    public static Expr Construct(Expr x) => new ComplexImag(x);
+    public override Expr Eval(Expr[] exprs, object[]? objects = null) => Construct(exprs[0]);
+    public override Expr NotEval(Expr[] exprs, object[]? objects = null) => new ComplexImag(exprs[0]);
 
     public override string ToLatex()
     {

@@ -41,6 +41,14 @@ public class Number : Atom
     public static implicit operator Number(double value) => new(value);
     public static implicit operator Number(NumberStruct value) => new(value);
 
+    public override Expr Eval(Expr[] exprs, object[]? objects = null)
+    {
+        var value = objects?[0];
+        return value is not null ? new Number((NumberStruct)value) : throw new Exception();
+    }
+    public override Expr NotEval(Expr[] exprs, object[]? objects = null) => Eval(exprs, objects);
+
+
     public bool IsZero => Num.IsZero;
     public bool IsOne => Num.IsOne;
     public bool IsNan => Num.IsNan;

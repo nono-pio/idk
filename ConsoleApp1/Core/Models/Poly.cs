@@ -52,7 +52,7 @@ public class Poly
             {
                 0 => coef,
                 1 => coef * x,
-                _ => coef * new Power(x, deg).Eval()
+                _ => coef * Power.Construct(x, deg)
             };
             
             result += therm;

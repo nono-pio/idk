@@ -2,10 +2,6 @@
 
 public abstract class Atom : Expr
 {
-    public object[] Leafs => GetArgs();
-
-    public abstract object[] GetArgs();
-
     public abstract int CompareSelf(Atom expr);
     
     public override OrderOfOperation GetOrderOfOperation()

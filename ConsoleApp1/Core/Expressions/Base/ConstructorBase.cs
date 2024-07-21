@@ -4,74 +4,42 @@ namespace ConsoleApp1.Core.Expressions.Base;
 
 public static class ConstructorBase
 {
-    // TODO
-    public static Expr Add(params Expr[] therms)
-    {
-        return therms.Length switch
-        {
-            0 => new Number(0),
-            1 => therms[0],
-            _ => new Addition(therms).Eval()
-        };
-    }
+    
+    public static Expr Add(params Expr[] therms) => Addition.Construct(therms);
 
-    public static Expr Sub(Expr num, Expr den)
+    public static Expr Sub(Expr a, Expr b)
     {
-        return Add(num, Mul(Num(-1), den));
+        return Add(a, Mul(-1, b));
     }
 
     public static Expr Neg(Expr expr)
     {
-        return Mul(Num(-1), expr);
+        return Mul(-1, expr);
     }
-
-    // TODO
-    public static Expr Mul(params Expr[] factors)
-    {
-        return factors.Length switch
-        {
-            0 => new Number(1),
-            1 => factors[0],
-            _ => new Multiplication(factors).Eval()
-        };
-    }
-
-    // TODO
+    
+    public static Expr Mul(params Expr[] factors) => Multiplication.Construct(factors);
+    
     public static Expr Div(Expr num, Expr den)
     {
-        return Mul(num, Pow(den, Num(-1)));
+        return Mul(num, Pow(den, -1));
     }
 
-    public static Expr Pow(Expr value, Expr exp)
-    {
-        return new Power(value, exp).Eval();
-    }
-
+    public static Expr Pow(Expr value, Expr exp) => Power.Construct(value, exp);
     
-
     public static Expr Sqrt(Expr value)
     {
-        return new Power(value, Div(1.Expr(), 2.Expr())).Eval();
+        return Pow(value, Num(1, 2));
     }
 
     public static Expr Sqrt(Expr value, Expr n)
     {
-        return new Power(value, Div(1.Expr(), n)).Eval();
+        return Pow(value, Div(1, n));
     }
     
-    public static Expr Exp(Expr value)
-    {
-        return new Power(value, Math.E.Expr()).Eval();
-    }
+    public static Expr Exp(Expr value) => Pow(Constants.E, value);
 
-    public static Expr Log(Expr value, Expr @base)
-    {
-        return new Log(value, @base).Eval();
-    }
-    
-    
-    public static Expr Log(Expr value)
-    {
-        return new Log(value).Eval();
-    }
+    public static Expr Log(Expr value, Expr @base) => Logarithm.Construct(value, @base);    
+    public static Expr Log10(Expr value) => Logarithm.Construct(value, 10);
+    public static Expr Log2(Expr value) => Logarithm.Construct(value, 2);
+    public static Expr Ln(Expr value) => Logarithm.Construct(value, Constants.E);
 }
