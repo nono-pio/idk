@@ -28,7 +28,7 @@ public class Derivative(Expr function, string variable, Expr? n = null) : Expr(f
         throw new NotImplementedException();
     }
 
-    public override Expr Inverse(Expr y, int argIndex)
+    public override Expr Reciprocal(Expr y, int argIndex)
     {
         throw new NotImplementedException();
     }

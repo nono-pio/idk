@@ -27,7 +27,7 @@ public class ComplexImag : Expr
         throw new NotImplementedException();
     }
 
-    public override Expr Inverse(Expr y, int argIndex)
+    public override Expr Reciprocal(Expr y, int argIndex)
     {
         throw new Exception("Cannot take Inverse of the function Im(z)");
     }

@@ -88,7 +88,7 @@ public class Solve
                 default:
                 {
                     expr = f.Args[index];
-                    y = f.Args[index].Inverse(y, index);
+                    y = f.Args[index].Reciprocal(y, index);
                     break;
                 }
             }

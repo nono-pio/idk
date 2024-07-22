@@ -189,7 +189,7 @@ public class Multiplication : Expr
         return Factors.Aggregate<Expr, double>(1, (current, factor) => current * factor.N());
     }
 
-    public override Expr Inverse(Expr y, int argIndex)
+    public override Expr Reciprocal(Expr y, int argIndex)
     {
         // a*b : inv(c, 0) -> c/b
         // a*b : inv(c, 1) -> c/a
@@ -239,8 +239,9 @@ public class Multiplication : Expr
 
     public override string ToLatex()
     {
-        if (Factors.Length < 2) throw new Exception("You must mul two or more factors");
-
+        if (Factors.Length < 2) 
+            throw new Exception("You must mul two or more factors");
+        
         var result = ParenthesisLatexIfNeeded(Factors[0]);
 
         for (var i = 1; i < Factors.Length; i++)

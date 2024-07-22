@@ -1,4 +1,5 @@
-﻿using ConsoleApp1.Latex;
+﻿using ConsoleApp1.Core.Expressions.Atoms;
+using ConsoleApp1.Latex;
 
 namespace ConsoleApp1.Core.Expressions.Base;
 
@@ -25,7 +26,8 @@ public class Logarithm : Expr
     
     public override string ToLatex()
     {
-        // TODO: if base = e -> ln
+        if (Base == Constants.E)
+            return LatexUtils.Fonction("\\ln", Value.ToLatex());
         
         if (Base.Is(10)) 
             return LatexUtils.Fonction("\\log", Value.ToLatex());
@@ -48,7 +50,7 @@ public class Logarithm : Expr
         return Math.Log(Value.N(), Base.N());
     }
 
-    public override Expr Inverse(Expr y, int argIndex)
+    public override Expr Reciprocal(Expr y, int argIndex)
     {
         if (argIndex == 0)
         {

@@ -54,7 +54,6 @@ public class VecteurExpr : Expr
     public Expr Cross(VecteurExpr b) => Cross(this, b);
     public static Expr Cross(VecteurExpr a, VecteurExpr b)
     {
-        // TODO : Generaliser à n dimensions
         if (a.Dim != 3 || b.Dim != 3)
             throw new Exception("Les vecteurs doivent être de dimension 3");
 
@@ -80,7 +79,7 @@ public class VecteurExpr : Expr
         throw new Exception("Cannot convert a vector to a scalar");
     }
 
-    public override Expr Inverse(Expr y, int argIndex)
+    public override Expr Reciprocal(Expr y, int argIndex)
     {
         throw new NotImplementedException();
     }

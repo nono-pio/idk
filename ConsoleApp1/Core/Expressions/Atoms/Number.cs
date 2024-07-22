@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using ConsoleApp1.Core.Classes;
+using ConsoleApp1.Core.Expressions.Base;
 
 namespace ConsoleApp1.Core.Expressions.Atoms;
 
@@ -70,7 +71,7 @@ public class Number : Atom
 
     public override double N() => Num.N();
     
-    public override Expr Inverse(Expr y, int argIndex) =>
+    public override Expr Reciprocal(Expr y, int argIndex) =>
         throw new Exception("Cannot Inverse a Atom");
 
     public override Expr Derivee(string variable) => 0;
@@ -82,13 +83,16 @@ public class Number : Atom
 
     public static Expr SimplifyPow(Number a, Number b)
     {
-        // TODO: Overflow
-        
         if (a.Num.IsNan || b.Num.IsNan)
             return (Number) NumberStruct.Nan;
 
         if (a.Num.IsFloat || b.Num.IsFloat)
-            return Math.Pow(a.N(), b.N());
+        {
+            var pow = Math.Pow(a.Num.FloatValue, b.Num.FloatValue);
+            if (double.IsInfinity(pow))
+                return Power.ConstructNotEval(a, b);
+            return (Number) pow;
+        }
 
         bool isNeg = b.Num.IsNegative;
         NumberStruct n;

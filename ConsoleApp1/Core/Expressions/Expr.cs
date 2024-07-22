@@ -79,7 +79,6 @@ public abstract class Expr
         return new Fonction(this, variable);
     }
     
-    // TODO
     /// Retourne l'expression sous la forme a * x où a est un nombre et x une expression
     public virtual (NumberStruct, Expr?) AsMulCoef()
     {
@@ -213,7 +212,7 @@ public abstract class Expr
     ///     <para />
     ///     x + 1 = y --> y - x avec <paramref name="argIndex" /> = 1
     /// </example>
-    public abstract Expr Inverse(Expr y, int argIndex);
+    public abstract Expr Reciprocal(Expr y, int argIndex);
 
     # endregion
     
@@ -484,7 +483,7 @@ public abstract class Expr
     public bool IsZero() => this is Number { IsZero: true };
     public bool IsNotZero() => !IsZero();
     public bool IsOne() => this is Number { IsOne: true };
-    public bool Is(double n) => this is Number num && num.Is(n);
+    public bool Is(double n) => this is Number num && num.Num == n;
     
     public bool IsVar(string variable) => this is Variable var && var.Name == variable;
 

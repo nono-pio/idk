@@ -38,7 +38,7 @@ public class MinExpr : Expr
         return Elements.Min(e => e.N());
     }
 
-    public override Expr Inverse(Expr y, int argIndex)
+    public override Expr Reciprocal(Expr y, int argIndex)
     {
         throw new Exception("Min is not reciprocal");
     }

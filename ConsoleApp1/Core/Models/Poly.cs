@@ -336,8 +336,6 @@ public class Poly
         return gcd;
     }
     
-    
-    // TODO
     public Poly Derivee()
     {
 
@@ -473,7 +471,6 @@ public class Poly
         return result;
     }
     
-    // TODO
     public Poly Pow(int exp)
     {
         var result = PolyOne;

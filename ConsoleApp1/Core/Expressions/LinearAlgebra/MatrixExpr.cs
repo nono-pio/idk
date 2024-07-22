@@ -155,7 +155,7 @@ public class MatrixExpr : Expr
         throw new NotImplementedException();
     }
 
-    public override Expr Inverse(Expr y, int argIndex)
+    public override Expr Reciprocal(Expr y, int argIndex)
     {
         throw new NotImplementedException();
     }

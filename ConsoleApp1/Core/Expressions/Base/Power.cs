@@ -47,8 +47,10 @@ public class Power : Expr
 
         return new Power(@base, exp);
     }
+    public static Expr ConstructNotEval(Expr @base, Expr exp) => new Power(@base, exp);
+
     public override Expr Eval(Expr[] exprs, object[]? objects = null) => Construct(exprs[0], exprs[1]);
-    public override Expr NotEval(Expr[] exprs, object[]? objects = null) => new Power(exprs[0], exprs[1]);
+    public override Expr NotEval(Expr[] exprs, object[]? objects = null) => ConstructNotEval(exprs[0], exprs[1]);
     
     public override OrderOfOperation GetOrderOfOperation()
     {
@@ -127,7 +129,7 @@ public class Power : Expr
     
     /// a^b : inv(c, 0) -> c^(1/b)
     /// a^b : inv(c, 1) -> ln_a(c)
-    public override Expr Inverse(Expr y, int argIndex)
+    public override Expr Reciprocal(Expr y, int argIndex)
     {
         return argIndex switch
         {

@@ -157,7 +157,7 @@ public class Addition : Expr
     
     # endregion
 
-    public override Expr Inverse(Expr y, int argIndex)
+    public override Expr Reciprocal(Expr y, int argIndex)
     {
         // a+b : inv(c, 0) -> c-b
         // a+b : inv(c, 1) -> c-a
@@ -188,8 +188,12 @@ public class Addition : Expr
 
         for (var i = 1; i < Therms.Length; i++)
         {
-            // TODO : Check if the term is negative : + -> -
-            result += '+' + ParenthesisIfNeeded(Therms[i]);
+            var str = ParenthesisIfNeeded(Therms[i]);
+
+            if (str.StartsWith('-')) // if str = -... add it directly
+                result += str;
+            else
+                result += '+' + str;
         }
         
         return result;
@@ -201,10 +205,15 @@ public class Addition : Expr
 
         for (var i = 1; i < Therms.Length; i++)
         {
-            // TODO : Check if the term is negative : + -> -
-            result += Symbols.Add + ParenthesisLatexIfNeeded(Therms[i]);
+            var str = ParenthesisLatexIfNeeded(Therms[i]);
+
+            if (str.StartsWith(Symbols.Sub)) // if str = -... add it directly
+                result += str;
+            else
+                result += Symbols.Add + str;
         }
         
         return result;
     }
+
 }

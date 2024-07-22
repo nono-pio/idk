@@ -37,7 +37,7 @@ public class MaxExpr : Expr
         return Elements.Max(e => e.N());
     }
 
-    public override Expr Inverse(Expr y, int argIndex)
+    public override Expr Reciprocal(Expr y, int argIndex)
     {
         throw new Exception("Max is not reciprocal");
     }

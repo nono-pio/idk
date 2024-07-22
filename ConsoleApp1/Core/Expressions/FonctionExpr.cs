@@ -32,7 +32,7 @@ public abstract class FonctionExpr(Expr x) : Expr(x)
     /// Retourne la reciproque de la fonction pour y : f^r(y)
     public virtual Expr Reciproque(Expr y) => throw new Exception("This function does not have a reciprocal");
 
-    public override Expr Inverse(Expr y, int argIndex)
+    public override Expr Reciprocal(Expr y, int argIndex)
     {
         return Reciproque(y);
     }
