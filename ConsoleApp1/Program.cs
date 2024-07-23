@@ -16,64 +16,33 @@ static void print(object? x)
     Console.WriteLine(x);
 }
 
-double f(double x) => Math.Cos(x);
-double f_ddx(double x) => -Math.Sin(x);
-
-var a = 0;
-var b = Math.PI;
-var x0 = 0;
-var x1 = Math.PI / 4;
-double x;
-var n = 10_000_000;
-
-var time = Stopwatch.StartNew();
-for (int i = 0; i < n; i++)
+static void eval(Func<double> f, int n = 100_000)
 {
-    x = RootFinding.Bisection(a, b, f);
+    var time = Stopwatch.StartNew();
+    double x = 0;
+    for (int i = 0; i < n; i++)
+    {
+        x = f();
+    }
+    time.Stop();
+    
+    print($"x = {x} ({(double)time.ElapsedMilliseconds/n}ms)");
 }
-time.Stop();
-print($"{time.ElapsedMilliseconds}ms");
- 
-time = Stopwatch.StartNew();
-for (int i = 0; i < n; i++)
-{
-    x = RootFinding.FalsePosition(a, b, f);
-}
-time.Stop();
-print($"{time.ElapsedMilliseconds}ms");
 
-time = Stopwatch.StartNew();
-for (int i = 0; i < n; i++)
-{
-    x = RootFinding.ITPMethod(b, a, f);
-}
-time.Stop();
-print($"{time.ElapsedMilliseconds}ms");
+double f(double x) => Math.Cos(x); // I cosx dx = sinx (sinb - sina) a=0 b=pi/2 I cosx dx = 1
+double f_inf(double x) => Math.Exp(-x * x); // I e^-x^2 dx 0->INF = sqrt{pi}/2
+double a = 0;
+double b = Math.PI / 2;
 
-time = Stopwatch.StartNew();
-for (int i = 0; i < n; i++)
-{
-    x = RootFinding.SteffensenMethod(x0, f);
-}
-time.Stop();
-print($"{time.ElapsedMilliseconds}ms");
+int n = 500;
+double epsilon = 1e-10;
+var sqrtpi = Math.Sqrt(Math.PI);
+var sqrtpi_2 = Math.Sqrt(Math.PI)/2;
 
-time = Stopwatch.StartNew();
-for (int i = 0; i < n; i++)
-{
-    x = RootFinding.SecantMethod(x0, x1, f);
-}
-time.Stop();
-print($"{time.ElapsedMilliseconds}ms");
-
-time = Stopwatch.StartNew();
-for (int i = 0; i < n; i++)
-{
-    x = RootFinding.NewtonMethod(x1, f, f_ddx);
-}
-time.Stop();
-print($"{time.ElapsedMilliseconds}ms");
-
-// cos(x) = x
-// x = RootFinding.FixedPointIteration(x0, f);
-// print($"x = {x}, f(x) = {f(x)}");
+// eval(() => IntegralApproximation.RectangleUp(a, b, f, n: n));
+// eval(() => IntegralApproximation.RectangleDown(a, b, f, n: n));
+// eval(() => IntegralApproximation.Trapezoidal(a, b, f, n: n));
+// eval(() => IntegralApproximation.SimpsonOneThird(a, b, f, n: n));
+eval(() => IntegralApproximation.NegInfToInfIntegral(f_inf, epsilon: epsilon, n: n) - sqrtpi);
+eval(() => IntegralApproximation.AToInfIntegral(0, f_inf, epsilon: epsilon, n: n) - sqrtpi_2);
+eval(() => IntegralApproximation.NegInfToBIntegral(0, f_inf, epsilon: epsilon, n: n) - sqrtpi_2);
