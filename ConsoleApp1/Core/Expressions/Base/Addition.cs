@@ -162,7 +162,7 @@ public class Addition : Expr
         // a+b : inv(c, 0) -> c-b
         // a+b : inv(c, 1) -> c-a
 
-        var rest = new Expr[Therms.Length - 1];
+        var rest = new Expr[Therms.Length];
         for (var i = 0; i < Therms.Length; i++)
         {
             if (i == argIndex) 
@@ -174,7 +174,9 @@ public class Addition : Expr
                 rest[i - 1] = -Therms[i];
         }
 
-        return y + NotEval(rest);
+        rest[^1] = y;
+
+        return Add(rest);
     }
 
     public override double N()

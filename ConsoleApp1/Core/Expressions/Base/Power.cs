@@ -184,11 +184,27 @@ public class Power : Expr
 
     public override string ToLatex()
     {
-        return LatexUtils.Power(ParenthesisLatexIfNeeded(Base), Exp.ToLatex());
+        var exp = Exp.ToLatex();
+
+        if (exp.StartsWith("-"))
+            return LatexUtils.Fraction("1", LatexUtils.Power(ParenthesisLatexIfNeeded(Base), exp[1..]));
+        
+        return LatexUtils.Power(ParenthesisLatexIfNeeded(Base), exp);
     }
 
     public override string ToString()
     {
-        return ToLatex();
+        var exp = Exp.ToString();
+
+        if (exp.StartsWith("-"))
+        {
+            exp = exp[1..];
+            if (exp == "1")
+                return $"1/{ParenthesisIfNeeded(Base)}";
+            
+            return $"1/{ParenthesisIfNeeded(Base)}^{exp}";
+        }
+
+        return $"{ParenthesisIfNeeded(Base)}^{ParenthesisIfNeeded(Exp)}";
     }
 }

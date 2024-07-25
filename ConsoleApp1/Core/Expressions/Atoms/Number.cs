@@ -112,9 +112,14 @@ public class Number : Atom
 
         (p, var sqrt_p) = NumberStruct.Sqrt(p, b.Num.Denominator);
         (q, var sqrt_q) = NumberStruct.Sqrt(q, b.Num.Denominator);
+
+        Expr? sqrt_frac = null;
+        if (sqrt_p != 1 || sqrt_q != 1)
+            sqrt_frac = isNeg ? Num(sqrt_q, sqrt_p) : Num(sqrt_p, sqrt_q);
         
-        return isNeg ? Num(q, p) * Sqrt(Num(q, p), n.Denominator) 
-            : Num(p, q) * Sqrt(Num(p, q), n.Denominator);
+        var frac = isNeg ? Num(q, p) : Num(p, q);
+        
+        return sqrt_frac is null ? frac : frac * Power.ConstructNotEval(sqrt_frac, Num(1, n.Denominator));
     }
 
     public static bool Equal(double x, double y)
@@ -135,7 +140,7 @@ public class Number : Atom
     // <-- Display -->
     public override string ToString()
     {
-        return ToLatex();
+        return Num.ToString();
     }
 
     public override string ToLatex()

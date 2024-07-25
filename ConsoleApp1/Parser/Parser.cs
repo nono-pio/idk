@@ -33,7 +33,7 @@ Parser Grammar:
    \begin{bmatrix} ... & ... \\ ... & ... \end{bmatrix} -> Matrice
 
    greek letters, variables -> Variable
- X numbers -> Number
+   numbers -> Number
    \pi, \e -> Constant
 
 */
@@ -107,27 +107,52 @@ public class Parser
         var currentExpr = powTest.Value.Pow;
         i += powTest.Value.Length;
 
-        // TODO: \cdot, \times, \frac{}{}
         while (i < input.Length)
         {
-            var sign = input[i];
-            if (sign != '*' && sign != '/')
-                return (currentExpr, i);
+            var sepTest = GetMulSeparator(input[i..]);
+            if (sepTest is null)
+                return null;
             
-            i++;
+            var mulType = sepTest.Value.MulType;
+            i += sepTest.Value.Length;
             
             powTest = GetPow(input[i..]);
             if (powTest is null)
-                return null;
+                return mulType == 0 ? (currentExpr, i) : null;
             
             i += powTest.Value.Length;
-            if (sign == '*')
+            if (mulType <= 1)
                 currentExpr = Mul(currentExpr, powTest.Value.Pow);
-            else // sign == '/'
+            else
                 currentExpr = Div(currentExpr, powTest.Value.Pow);
         }
 
         return (currentExpr, i);
+    }
+
+    // MulType: 0: None, 1: *, 2: /
+    public static (int MulType, int Length)? GetMulSeparator(string input)
+    {
+        // separators: * / None \cdot, \times
+        const string cdot = @"\cdot";
+        const string times = @"\times";
+        
+        if (input.Length == 0)
+            return null;
+
+        if (input[0] == '*')
+            return (1, 1);
+        
+        if (input[0] == '/')
+            return (2, 1);
+        
+        if (input.StartsWith(cdot))
+            return (1, cdot.Length);
+        
+        if (input.StartsWith(times))
+            return (1, times.Length);
+
+        return (0, 0); // None
     }
     
     public static (Expr Pow, int Length)? GetPow(string input)
@@ -237,7 +262,7 @@ public class Parser
         i += exprsTest.Value.Length;
 
         var f = Var(name, new FunctionVar(name, exprs[0]));
-        return (power is null ? f : Pow(f, power), i); //TODO: Fix for multiple arguments
+        return (power is null ? f : Pow(f, power), i);
     }
 
     public static (string FuncName, int Length)? GetFuncName(string input)
@@ -652,31 +677,45 @@ public class Parser
     public static (Expr Expr, int Length)? GetParentheses(string input)
     {
         // Parentheses -> ( Expr )
-        // TODO: \left(, \right)
+
+        const string left = "\\left(";
+        const string right = "\\right)";
+
+        int Left(int i) => input[i] == '(' ? 1 : (input.ContainsAt(left, i) ? left.Length : -1);
+        int Right(int i) => input[i] == ')' ? 1 : (input.ContainsAt(right, i) ? right.Length : -1);
+        
         
         var i = 0;
-        if (input.Length <= 2 || input[0] != '(')
+        var leftLength = Left(i);
+        if (input.Length <= 2 || leftLength == -1)
             return null;
 
         var deep = 0;
-        foreach (var c in input)
+        for (int j = 0; j < input.Length; j++)
         {
-            if (c == '(')
+            var l = Left(j);
+            if (l != -1)
+            {
                 deep++;
-            else if (c == ')')
+                j += l;
+                continue;
+            }
+
+            var rightLength = Right(j);
+            if (rightLength != -1)
             {
                 deep--;
                 if (deep == 0)
                 {
-                    var exprTest = GetExpr(input[1..i]);
+                    var exprTest = GetExpr(input[leftLength..j]);
                     if (exprTest is null)
                         return null;
-                    // TODO: test if exprTest length is i+1
-                    return (exprTest.Value.Expr, i+1);
+                    
+                    // TODO: Test length
+                    return (exprTest.Value.Expr, j+rightLength);
                 }
+                j += rightLength;
             }
-
-            i++;
         }
         
         return null;

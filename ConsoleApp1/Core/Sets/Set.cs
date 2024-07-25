@@ -26,9 +26,10 @@ public abstract class Set
 {
     public static Set EmptySet => new EmptySet();
     public static UniversalSet U => new UniversalSet();
+    public static Real R => new Real();
 
-    public bool? IsEmpty => IsEmptySet();
-    public virtual bool? IsEmptySet() => this is EmptySet;
+    public bool IsEmpty => IsEmptySet();
+    public bool IsEmptySet() => this is EmptySet;
 
     public bool IsR => this is Real;
 
@@ -97,7 +98,7 @@ public abstract class Set
 
     public bool IsDisjoint(Set other)
     {
-        return Intersection(other).IsEmpty ?? false;
+        return Intersection(other).IsEmpty;
     }
     
     /**/   
@@ -159,5 +160,11 @@ public abstract class Set
     public Boolean? IsClosed()
     {
         return Boundary().IsSubset(this);
+    }
+    
+    public string ToLatex()
+    {
+        // TODO
+        return ToString();
     }
 }

@@ -496,7 +496,7 @@ public abstract class Expr
         if (this is not Number num || !num.IsEntier())
             throw new Exception("Cannot convert to int");
         
-        return num.ToInt();
+        return num.Num.ToInt();
     }
 
     # endregion

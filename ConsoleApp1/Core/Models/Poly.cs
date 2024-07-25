@@ -77,7 +77,7 @@ public class Poly
         };
     }
     
-    public static Poly? ToPoly(Expr expr, string variable)
+    public static Poly ToPoly(Expr expr, string variable)
     {
         if (expr.Constant(variable))
             return new Poly(expr);
@@ -86,21 +86,19 @@ public class Poly
         {
             case Addition add :
 
-                var poly = PolyZero;
-                add.Therms.Aggregate<Expr, Poly?>(poly, (sum, therm) =>
+                var poly = add.Therms.Aggregate(PolyZero, (sum, therm) =>
                 {
                     var th = ToPoly(therm, variable);
-                    return th is null || sum is null ? null : sum + th;
+                    return sum + th;
                 });
                 return poly;
             
             case Multiplication mul :
 
-                poly = PolyOne;
-                mul.Factors.Aggregate<Expr, Poly?>(poly, (pro, therm) =>
+                poly = mul.Factors.Aggregate(PolyOne, (pro, therm) =>
                 {
                     var th = ToPoly(therm, variable);
-                    return th is null || pro is null ? null : pro * th;
+                    return pro * th;
                 });
                 return poly;
                 
@@ -110,11 +108,10 @@ public class Poly
             case Power pow:
                 
                 var basePoly = ToPoly(pow.Base, variable);
-                if (basePoly is null)
-                    return null;
-                
+
                 if (!pow.Exp.IsNumberIntPositif())
-                    return null;
+                    throw new Exception("This is not a polynomial"); 
+                
                 int exp = pow.Exp.ToInt();
 
                 return basePoly.Pow(exp);
@@ -123,7 +120,7 @@ public class Poly
                 return var.Name == variable ? new Poly(1, 0) : new Poly(var); // var.Name == variable ? deg=1 : deg=0
             
             default:
-                return null;
+                throw new Exception("This is not a polynomial"); 
         };
     }
 
@@ -482,9 +479,18 @@ public class Poly
         return result;
     }
 
-    public Expr[] Solve()
+    public Expr[] Solve() // P[x] = 0 -> x = [x1, x2, ...]
     {
-        // TODO
+        if (Deg() == 0)
+            return Array.Empty<Expr>();
+
+        if (Deg() == 1)
+            return [SolveLinear(_coefs[0], _coefs[1])];
+        
+        if (Deg() == 2)
+            return SolveQuadratic(_coefs[0], _coefs[1], _coefs[2]);
+        
+        // TODO: Factorization
         throw new NotImplementedException();
     }
 
@@ -507,14 +513,20 @@ public class Poly
         }
     }
 
+    /// a x + b = 0
+    public static Expr SolveLinear(Expr a, Expr b)
+    {
+        return -b / a;
+    }
+    
     /// a x^2 + b x + c = 0
-    public static (Expr, Expr) SolveParabole(Expr a, Expr b, Expr c)
+    public static Expr[] SolveQuadratic(Expr a, Expr b, Expr c)
     {
         var delta = b*b - 4*a*c;
 
         var mb = -b;
         var a2 = 2*a;
 
-        return ((mb + Sqrt(delta)) / a2, (mb - Sqrt(delta)) / a2);
+        return [(mb + Sqrt(delta)) / a2, (mb - Sqrt(delta)) / a2];
     }
 }

@@ -206,7 +206,7 @@ public class Multiplication : Expr
                 rest[i - 1] = 1 / Factors[i];
         }
 
-        return y + Add(rest);
+        return y * Mul(rest);
     }
     
     public override OrderOfOperation GetOrderOfOperation()
@@ -234,7 +234,19 @@ public class Multiplication : Expr
 
     public override string? ToString()
     {
-        return ToLatex();
+        if (Factors.Length < 2) 
+            throw new Exception("You must mul two or more factors");
+        
+        var result = ParenthesisIfNeeded(Factors[0]);
+        var isM1 = result == "-1";
+
+        for (var i = 1; i < Factors.Length; i++)
+        {
+            // TODO : Check if the pow is negative : * -> /
+            result += '*' + ParenthesisIfNeeded(Factors[i]);
+        }
+        
+        return isM1 && result is not null ? '-' + result[3..] : result;
     }
 
     public override string ToLatex()
@@ -243,6 +255,7 @@ public class Multiplication : Expr
             throw new Exception("You must mul two or more factors");
         
         var result = ParenthesisLatexIfNeeded(Factors[0]);
+        var isM1 = result == "-1";
 
         for (var i = 1; i < Factors.Length; i++)
         {
@@ -250,6 +263,6 @@ public class Multiplication : Expr
             result += Symbols.Mul + ParenthesisLatexIfNeeded(Factors[i]);
         }
         
-        return result;
+        return isM1 ? '-' + result[3..] : result;
     }
 }

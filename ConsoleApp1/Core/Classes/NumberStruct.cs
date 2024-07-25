@@ -210,24 +210,6 @@ public struct NumberStruct
         };
     }
 
-    public NumberStruct Pow(NumberStruct n)
-    {
-        if (IsNan || n.IsNan)
-            return Nan;
-
-        if (IsFloat || n.IsFloat)
-            return Math.Pow(N(), n.N());
-        
-        // (p/q) ^ (np/nq)
-        if (n.Denominator == 1)
-        {
-            return new NumberStruct((long) Math.Pow(Numerator, n.Numerator), (long) Math.Pow(Denominator, n.Numerator));
-        }
-        
-        //TODO
-        throw new NotImplementedException();
-    }
-
     // x^n = a * sqrt[n](b)
     // return (a, b)
     public static (long, long) Sqrt(long x, long n)
@@ -254,8 +236,8 @@ public struct NumberStruct
             // p^(q*n + r)
             // sqrt[n](p^(q*n + r)) = p^q * sqrt[n](p^r)
             
-            a *= (int) Math.Pow(p, r);
-            b *= (int) Math.Pow(p, q);
+            a *= (int) Math.Pow(p, q);
+            b *= (int) Math.Pow(p, r);
         }
 
         return (a, b);
@@ -307,5 +289,12 @@ public struct NumberStruct
             _ => "NaN"
         };
     
+    }
+
+    public int ToInt()
+    {
+        if (Type != NumberType.Fraction || Denominator != 1)
+            throw new InvalidCastException("Cannot convert to int");
+        return (int) Numerator;
     }
 }

@@ -1,5 +1,6 @@
 ﻿using ConsoleApp1.Core.Models;
 using ConsoleApp1.Core.Sets;
+using ConsoleApp1.Latex;
 
 namespace ConsoleApp1.Core.Expressions.Atoms;
 
@@ -116,12 +117,12 @@ public class Variable : Atom
 
     public override string ToLatex()
     {
-        return Name;
+        return Data is FunctionVar f ? LatexUtils.Fonction(Name, f.Of.ToLatex()) : Name;
     }
     
     public override string ToString()
     {
-        return Name;
+        return Data is FunctionVar f ? $"{Name}({f.Of})" : Name;
     }
 }
 
