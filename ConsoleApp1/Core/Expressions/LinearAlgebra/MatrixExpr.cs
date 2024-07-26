@@ -7,6 +7,23 @@ public class MatrixExpr : Expr
 
     public (int, int) Shape;
     public Expr[] Data => Args;
+    public Expr[,] Data2D
+    {
+        get
+        {
+            var (line, col) = Shape;
+            var values = new Expr[line, col];
+            for (int i = 0; i < line; i++)
+            {
+                for (int j = 0; j < col; j++)
+                {
+                    values[i, j] = Data[i * col + j];
+                }
+            }
+
+            return values;
+        }
+    }
     
     public MatrixExpr((int, int) shape, params Expr[] values) : base(values)
     {

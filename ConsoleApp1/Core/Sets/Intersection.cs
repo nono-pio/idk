@@ -1,4 +1,5 @@
 ﻿using ConsoleApp1.Core.Booleans;
+using ConsoleApp1.Latex;
 using Boolean = ConsoleApp1.Core.Booleans.Boolean;
 
 namespace ConsoleApp1.Core.Sets;
@@ -90,5 +91,15 @@ public class Intersection(params Set[] sets) : Set
     public Boolean AsCondition(Expr x)
     {
         return And.Eval(Sets.Select(s => s.Contains(x)));
+    }
+    
+    public override string ToString()
+    {
+        return string.Join('\u2229', Sets.Select(s => s.ToString()));
+    }
+
+    public override string ToLatex()
+    {
+        return string.Join(Symbols.Intersection, Sets.Select(s => s.ToLatex()));
     }
 }

@@ -189,6 +189,18 @@ public abstract class Expr
         return OrderOfOperation.Always;
     }
     
+    public double? SafeN()
+    {
+        try
+        {
+            return N();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.Message);
+            return null;
+        }
+    }
     public abstract double N();
 
     public Expr Gcd(Expr b)

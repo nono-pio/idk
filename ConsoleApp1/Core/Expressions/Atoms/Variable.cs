@@ -1,4 +1,6 @@
-﻿using ConsoleApp1.Core.Models;
+﻿using ConsoleApp1.Core.Classes;
+using ConsoleApp1.Core.Expressions.LinearAlgebra;
+using ConsoleApp1.Core.Models;
 using ConsoleApp1.Core.Sets;
 using ConsoleApp1.Latex;
 
@@ -21,6 +23,31 @@ public class Variable : Atom
         }
     }
 
+    public static void SetData(string varName, Expr? value = null, Set? domain = null, List<string>? dependencies = null)
+    {
+        if (value is not null)
+        {
+            var _data = VariableData.FromValue(varName, value);
+            _data.Dependencies = dependencies ?? [];
+            _data.Domain = domain;
+            Variables[varName] = _data;
+            return;
+        }
+
+        VariableData data;
+        if (Variables.ContainsKey(varName))
+            data = Variables[varName];
+        else 
+            data = VariableData.Default(varName);
+        
+        if (domain is not null)
+            data.Domain = domain;
+        
+        if (dependencies is not null)
+            data.Dependencies = dependencies;
+        
+        Variables[varName] = data;
+    }
     public static bool SetValue(string variable, double value)
     {
         var data = Variables[variable];
@@ -128,9 +155,24 @@ public class Variable : Atom
 
 public abstract class VariableData(string name)
 {
+    
     public Set? Domain = null;
     public string Name = name;
     public List<string> Dependencies = new();
+
+    public static VariableData FromValue(string name, Expr? value)
+    {
+        if (value is Number num)
+            return new ScalarVar(name, num.Num);
+        
+        if (value is VecteurExpr vec)
+            return new VectorVar(name, vec.Comps);        
+        
+        if (value is MatrixExpr mat)
+            return new MatrixVar(name, mat.Data2D);
+
+        return new ExprVar(name, value);
+    }
 
     public static VariableData Default(string name) => new ExprVar(name);
 
@@ -183,13 +225,13 @@ public class ConstantVar(string name, double value) : VariableData(name)
     }
 }
 
-public class ScalarVar(string name, double? value = null) : VariableData(name)
+public class ScalarVar(string name, NumberStruct? value = null) : VariableData(name)
 {
-    public double? Value = value;
+    public NumberStruct? Value = value;
 
     public override double N()
     {
-        return Value ?? throw new Exception("Canot convert a variable to a number");
+        return Value?.N() ?? throw new Exception("Canot convert a variable to a number");
     }
 }
 

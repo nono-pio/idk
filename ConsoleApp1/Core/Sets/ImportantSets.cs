@@ -1,4 +1,5 @@
-﻿using Boolean = ConsoleApp1.Core.Booleans.Boolean;
+﻿using ConsoleApp1.Latex;
+using Boolean = ConsoleApp1.Core.Booleans.Boolean;
 
 namespace ConsoleApp1.Core.Sets;
 
@@ -29,6 +30,16 @@ public class Natural : BasicNumberSet
     {
         return x.IsNatural;
     }
+
+    public override string ToString()
+    {
+        return "N";
+    }
+
+    public override string ToLatex()
+    {
+        return Symbols.NaturalNumbers;
+    }
 }
 
 public class Integer : BasicNumberSet
@@ -39,6 +50,15 @@ public class Integer : BasicNumberSet
     public override Boolean? Contains(Expr x)
     {
         return x.IsInteger;
+    }
+
+    public override string ToString()
+    {
+        return "Z";
+    }
+    public override string ToLatex()
+    {
+        return Symbols.Integers;
     }
 }
 
@@ -51,6 +71,16 @@ public class Rational : BasicNumberSet
     {
         return x.IsRational;
     }
+    
+    public override string ToString()
+    {
+        return "Q";
+    }
+    
+    public override string ToLatex()
+    {
+        return Symbols.RationalNumbers;
+    }
 }
 
 public class Real : BasicNumberSet
@@ -61,5 +91,15 @@ public class Real : BasicNumberSet
     public override Boolean? Contains(Expr x)
     {
         return x.IsReal;
+    }
+    
+    public override string ToString()
+    {
+        return "R";
+    }
+    
+    public override string ToLatex()
+    {
+        return Symbols.RealNumbers;
     }
 }

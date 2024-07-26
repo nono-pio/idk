@@ -1,4 +1,5 @@
 ﻿using ConsoleApp1.Core.Expressions.Atoms;
+using ConsoleApp1.Latex;
 using Boolean = ConsoleApp1.Core.Booleans.Boolean;
 
 namespace ConsoleApp1.Core.Sets;
@@ -161,5 +162,10 @@ public class FiniteSet(HashSet<Expr> elements) : Set
     public override string ToString()
     {
         return "{" + string.Join(", ", Elements) + "}";
+    }
+    
+    public override string ToLatex()
+    {
+        return Symbols.LBraces + string.Join("; ", Elements) + Symbols.RBraces;
     }
 }

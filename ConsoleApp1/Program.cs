@@ -35,7 +35,7 @@ Expr x = "x";
 Expr a = "a";
 Expr b = "b";
 
-var f = Cos(a* Pow(x, 2)+b);
+var f = (x+1)*(x-1);
 
 var solution = Solve.FindRoots(f, "x");
 print(solution);

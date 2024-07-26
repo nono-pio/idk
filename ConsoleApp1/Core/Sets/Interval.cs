@@ -101,4 +101,8 @@ public class Interval : Set
         return $"{(StartInclusive ? "[" : "]")}{Start}, {End}{(EndInclusive ? "]" : "[")}";
     }
     
+    public override string ToLatex()
+    {
+        return $"{(StartInclusive ? "[" : "]")}{Start.ToLatex()}, {End.ToLatex()}{(EndInclusive ? "]" : "[")}";
+    }
 }

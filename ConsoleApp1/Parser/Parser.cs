@@ -1,5 +1,7 @@
 ﻿using ConsoleApp1.Core.Classes;
 using ConsoleApp1.Core.Expressions.Atoms;
+using ConsoleApp1.Core.Expressions.Others;
+using ConsoleApp1.Core.Sets;
 using ConsoleApp1.Latex;
 
 namespace ConsoleApp1.Parser;
@@ -40,6 +42,24 @@ Parser Grammar:
 
 public class Parser
 {
+    public static Expr? Parse(string input)
+    {
+        var parse = GetExpr(input);
+        if (parse is null)
+            return null;
+
+        return parse.Value.Expr;
+    } 
+    
+    
+    public static Set? ParseSet(string input)
+    {
+        var parse = GetSet(input);
+        if (parse is null)
+            return null;
+
+        return parse.Value.Set;
+    } 
 
     // (T, int)? GetT(string input)
     // input: input string
@@ -530,7 +550,7 @@ public class Parser
         // Set
         var setTest = GetSet(input);
         if (setTest is not null)
-            return (setTest.Value.Set, setTest.Value.Length);
+            return (SetExpr.Construct(setTest.Value.Set), setTest.Value.Length);
         
         // Vecteur
         var vectorTest = GetVector(input);
@@ -604,8 +624,9 @@ public class Parser
         return (exprsGrid, endInd + end.Length);
     }
     
-    public static (Expr Set, int Length)? GetSet(string input)
+    public static (Set Set, int Length)? GetSet(string input)
     {
+        // TODO: Interval, ...
         const string start = @"\left{";
         const string end = @"\right}";
         const string separator = @",";
@@ -619,8 +640,7 @@ public class Parser
         var exprs = exprsTest.Value.Exprs;
         i += exprsTest.Value.Length;
 
-        throw new NotImplementedException();
-        //return (Set(exprs), exprsTest.Value.Length);
+        return (Set.CreateFiniteSet(exprs), exprsTest.Value.Length);
     }
     
     public static (Expr Vector, int Length)? GetVector(string input)

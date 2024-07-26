@@ -7,4 +7,14 @@ public class EmptySet : Set
     {
         return Boolean.False;
     }
+
+    public override string ToString()
+    {
+        return "∅";
+    }
+
+    public override string ToLatex()
+    {
+        return @"\emptyset";
+    }
 }

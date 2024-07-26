@@ -48,7 +48,7 @@ public abstract class Set
     
     public static Set CreateUnion(params Set[] sets)
     {
-        throw new NotImplementedException(); // return Union.CreateUnion(sets);
+        return Sets.Union.CreateUnion(sets);
     }
     
     public static Set CreateIntersection(params Set[] sets)
@@ -161,10 +161,6 @@ public abstract class Set
     {
         return Boundary().IsSubset(this);
     }
-    
-    public string ToLatex()
-    {
-        // TODO
-        return ToString();
-    }
+
+    public abstract string ToLatex();
 }

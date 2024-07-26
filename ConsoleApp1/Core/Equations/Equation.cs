@@ -17,7 +17,7 @@ public class Equation(Expr lhs, Expr rhs)
         return solution;
     }
 
-    public bool SolveNumericallyFor(string variable)
+    public double SolveNumericallyFor(string variable)
     {
         throw new NotImplementedException();
     }

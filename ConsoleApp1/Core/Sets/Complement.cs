@@ -12,4 +12,9 @@ public class Complement(Set x, Set? univers = null) : Set
     {
         return Boolean.And(Univers.Contains(x), !X.Contains(x));
     }
+
+    public override string ToLatex()
+    {
+        return $"{X.ToLatex()}^C";
+    }
 }

@@ -1,4 +1,5 @@
 ﻿using ConsoleApp1.Core.Booleans;
+using ConsoleApp1.Latex;
 using Boolean = ConsoleApp1.Core.Booleans.Boolean;
 
 namespace ConsoleApp1.Core.Sets;
@@ -108,5 +109,15 @@ public class Union(params Set[] sets) : Set
     public Boolean AsCondition(Expr x)
     {
         return Or.Eval(Sets.Select(s => s.Contains(x)));
+    }
+
+    public override string ToLatex()
+    {
+        return string.Join(Symbols.Union, Sets.Select(s => s.ToLatex()));
+    }
+
+    public override string ToString()
+    {
+        return string.Join(" U ", Sets.Select(s => s.ToString()));
     }
 }
