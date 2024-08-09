@@ -278,4 +278,23 @@ public static class NumberUtils
         
     }
     
+
+    /// Extended Gcd of a and b in the ring
+    public static (int Gcd, int s, int t) ExtendedGcd(int a, int b)
+    {
+        int s = 0, old_s = 1;
+        int t = 1, old_t = 0;
+        int r = b, old_r = a;
+
+        while (r != 0)
+        {
+            var quotient = old_r / r;
+            (old_r, r) = (r, old_r - quotient * r);
+            (old_s, s) = (s, old_s - quotient * s);
+            (old_t, t) = (t, old_t - quotient * t);
+        }
+
+        return (old_r, old_s, old_t);
+    }
+    
 }

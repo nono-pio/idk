@@ -19,6 +19,131 @@ public struct MultiNomial
     }
 }
 
+public class PolyOfMultiPoly
+{
+    public MultiPoly[] Coefs;
+    
+    public PolyOfMultiPoly(params MultiPoly[] coefs)
+    {
+        Coefs = coefs;
+    }
+    
+    public static PolyOfMultiPoly FromMultiPoly(MultiPoly poly, int varIndex)
+    {
+        MultiPoly RemoveVar(MultiNomial mono)
+        {
+            var powers = mono.Powers.ToList();
+            powers.RemoveAt(varIndex);
+            return new(new MultiNomial(mono.Coef, powers.ToArray()));
+        }
+        
+        var coefs = new MultiPoly[poly.Deg(varIndex) + 1];
+        Array.Fill(coefs, MultiPoly.Zero);
+        foreach (var term in poly.Terms)
+        {
+            coefs[term.Powers[varIndex]] += RemoveVar(term);
+        }
+
+        return new PolyOfMultiPoly(coefs);
+    }
+
+    public (MultiPoly, PolyOfMultiPoly) Primitive()
+    {
+        var c = MultiPoly.Gcd(Coefs);
+        var newCoefs = Coefs.Select(coef => coef / c).ToArray();
+        return (c, new PolyOfMultiPoly(newCoefs));
+    }
+    
+    public MultiPoly ToMultiPoly(int varIndex)
+    {
+        var terms = new List<MultiNomial>();
+        for (int i = 0; i < Coefs.Length; i++)
+        {
+            var mono = Coefs[i];
+            if (mono.IsZero())
+                continue;
+
+            for (int k = 0; k < mono.Terms.Length; k++)
+            {
+                var powers = new int[mono.nVars + 1];
+                for (int j = 0; j < mono.nVars; j++)
+                {
+                    if (j < varIndex)
+                        powers[j] = mono.Terms[k].Powers[j];
+                    else
+                        powers[j+1] = mono.Terms[k].Powers[j];
+                }
+                powers[varIndex] = i;
+                terms.Add(new MultiNomial(mono.Terms[k].Coef, powers));    
+            }
+        }
+
+        return new MultiPoly(terms.ToArray());
+    }
+
+    public static PolyOfMultiPoly Gcd(PolyOfMultiPoly a, PolyOfMultiPoly b)
+    {
+        throw new NotImplementedException();
+    }
+
+    public int Deg()
+    {
+        return Coefs.Length - 1;
+    }
+    
+    public PolyOfMultiPoly Derivee()
+    {
+        throw new NotImplementedException();
+    }
+    
+    public static PolyOfMultiPoly operator +(PolyOfMultiPoly a, PolyOfMultiPoly b)
+    {
+        if (a.Coefs.Length != b.Coefs.Length)
+            throw new ArgumentException("Both polynomials must have the same number of coefficients");
+        
+        var coefs = new MultiPoly[a.Coefs.Length];
+        for (int i = 0; i < a.Coefs.Length; i++)
+        {
+            coefs[i] = a.Coefs[i] + b.Coefs[i];
+        }
+
+        return new PolyOfMultiPoly(coefs);
+    }
+    
+    public static PolyOfMultiPoly operator -(PolyOfMultiPoly a, PolyOfMultiPoly b)
+    {
+        if (a.Coefs.Length != b.Coefs.Length)
+            throw new ArgumentException("Both polynomials must have the same number of coefficients");
+        
+        var coefs = new MultiPoly[a.Coefs.Length];
+        for (int i = 0; i < a.Coefs.Length; i++)
+        {
+            coefs[i] = a.Coefs[i] - b.Coefs[i];
+        }
+
+        return new PolyOfMultiPoly(coefs);
+    }
+    
+    public static PolyOfMultiPoly operator *(PolyOfMultiPoly a, PolyOfMultiPoly b)
+    {
+        var coefs = new MultiPoly[a.Coefs.Length + b.Coefs.Length - 1];
+        for (int i = 0; i < a.Coefs.Length; i++)
+        {
+            for (int j = 0; j < b.Coefs.Length; j++)
+            {
+                coefs[i+j] += a.Coefs[i] * b.Coefs[j];
+            }
+        }
+
+        return new PolyOfMultiPoly(coefs);
+    }
+    
+    public static PolyOfMultiPoly operator /(PolyOfMultiPoly a, PolyOfMultiPoly b)
+    {
+        throw new NotImplementedException();
+    }
+}
+
 public class MultiPoly
 {
     public static MultiPoly Zero => new(MultiNomial.Zero);    
@@ -67,17 +192,37 @@ public class MultiPoly
         
         throw new ArgumentException("Variable not found");
     }
+
+    public bool DependsOn(int varIndex)
+    {
+        return Terms.Any(mono => mono.Powers[varIndex] != 0);
+    }
+
+    public PolyOfMultiPoly ToPoly(int varIndex)
+    {
+        return PolyOfMultiPoly.FromMultiPoly(this, varIndex);
+    }
+
     
     public Poly? ToPoly()
     {
-        if (nVars != 1)
-            return null;
+        var varIndex = -1;
+        for (int i = 0; i < nVars; i++)
+        {
+            if (DependsOn(i))
+            {
+                if (varIndex != -1)
+                    return null;
+                varIndex = i;
+            }
+        }
         
-        var deg = Deg(0);
+        
+        var deg = Deg(varIndex);
         var poly = Poly.VideDeg(deg);
         foreach (var mono in Terms)
         {
-            poly.SetCoefDeg(mono.Powers[0], mono.Coef);
+            poly.SetCoefDeg(mono.Powers[varIndex], mono.Coef);
         }
         
         return poly;
