@@ -67,7 +67,16 @@ public abstract class Ring<TElem>
     }
 
     /// Divide a and b in the ring
-    public abstract TElem Div(TElem a, TElem b);
+    public abstract (bool isNull, TElem Value) SafeDiv(TElem a, TElem b);
+
+    public TElem Div(TElem a, TElem b)
+    {
+        var (isNull, v) = SafeDiv(a, b);
+        if (isNull)
+            throw new ArithmeticException($"Cannot Divide {a} by {b}");
+        
+        return v;
+    }
 
     /// Remainder of a and b in the ring
     public abstract TElem Rem(TElem a, TElem b);

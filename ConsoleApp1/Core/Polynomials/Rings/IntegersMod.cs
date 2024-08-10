@@ -40,16 +40,18 @@ public class IntegersMod : Ring<int>
         return (a * b) % Mod;
     }
 
-    public override int Div(int a, int b)
+    public override (bool, int) SafeDiv(int a, int b)
     {
-        return a * ModInv(b);
+        var inv = ModInv(b);
+        
+        return inv is null ? (true, -1) : (false, a * inv.Value);
     }
     
-    public int ModInv(int a)
+    public int? ModInv(int a)
     {
         var ex = NumberUtils.ExtendedGcd(a, Mod); // O(log^2 Mod)
         if (ex.Gcd != 1)
-            throw new Exception("Modular inverse does not exist");
+            return null;
         
         return ex.s;
         // O(Mod)

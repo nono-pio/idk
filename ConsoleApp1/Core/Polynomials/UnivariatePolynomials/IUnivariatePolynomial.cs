@@ -17,7 +17,7 @@ public interface IUnivariatePolynomial<TSelf> where TSelf : IUnivariatePolynomia
     public TSelf Mul(TSelf a, TSelf b);
     public TSelf MulInt(TSelf a, int b);
     public TSelf MMul(TSelf a, TSelf b);
-    public TSelf Div(TSelf a, TSelf b);
+    public (bool isNull, TSelf Value) SafeDiv(TSelf a, TSelf b);
     public TSelf Rem(TSelf a, TSelf b);
     public (TSelf Quotient, TSelf Remainder) DivRem(TSelf a, TSelf b);
     public TSelf Gcd(TSelf a, TSelf b);

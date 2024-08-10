@@ -39,3 +39,7 @@ static void eval<T>(Func<T> f, int n = 1_000)
 var Z = RingsList.ZZ;
 var Zp = RingsList.Zp(2);
 var PolyRing = RingsList.UnivariateRing(Z);
+
+var poly = new UnivariatePolynomial<int>(Z, [4, 8, 5, 1]); 
+print(poly.YunSquareFree());
+

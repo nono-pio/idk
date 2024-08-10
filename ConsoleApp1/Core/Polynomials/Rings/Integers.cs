@@ -39,10 +39,12 @@ public class Integers : Ring<int>
         return a * b;
     }
 
-    public override int Div(int a, int b)
+
+    public override (bool, int) SafeDiv(int a, int b)
     {
-        return a / b;
+        return (a % b != 0, a / b);
     }
+
 
     public override int Rem(int a, int b)
     {

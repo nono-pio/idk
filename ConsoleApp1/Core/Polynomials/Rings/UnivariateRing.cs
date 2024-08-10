@@ -28,7 +28,7 @@ public class UnivariateRing<TPoly> : Ring<TPoly> where TPoly : IUnivariatePolyno
     public override TPoly Mul(TPoly a, TPoly b) => Factory.Mul(a, b);
     public override TPoly MulInt(TPoly a, int b) => Factory.MulInt(a, b);
     public override TPoly MMul(TPoly a, TPoly b) => Factory.MMul(a, b);
-    public override TPoly Div(TPoly a, TPoly b) => Factory.Div(a, b);
+    public override (bool isNull, TPoly Value) SafeDiv(TPoly a, TPoly b) => Factory.SafeDiv(a, b);
     public override TPoly Rem(TPoly a, TPoly b) => Factory.Rem(a, b);
     public override (TPoly Quotient, TPoly Remainder) DivRem(TPoly a, TPoly b) => Factory.DivRem(a, b);
 
