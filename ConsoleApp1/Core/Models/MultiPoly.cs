@@ -364,7 +364,7 @@ public class MultiPoly
             else
             {
                 var newCoef = terms[index].Coef + term.Coef;
-                if (newCoef.IsZero())
+                if (newCoef.IsZero)
                 {
                     terms.RemoveAt(index);
                     continue;
@@ -389,7 +389,7 @@ public class MultiPoly
             else
             {
                 var newCoef = terms[index].Coef - term.Coef;
-                if (newCoef.IsZero())
+                if (newCoef.IsZero)
                 {
                     terms.RemoveAt(index);
                     continue;

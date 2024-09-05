@@ -43,8 +43,8 @@ public struct NumberStruct
     public bool IsZero => (IsFraction && Numerator == 0) || (IsFloat && FloatValue == 0);
     public bool IsOne => (IsFraction && Numerator == 1 && Denominator == 1) || (IsFloat && FloatValue == 1);
     
-    public bool IsPositive => (IsFraction && Numerator > 0) || (IsFloat && FloatValue > 0);
-    public bool IsNegative => (IsFraction && Numerator < 0) || (IsFloat && FloatValue < 0);
+    public bool IsPositive => (IsFraction && Numerator >= 0) || (IsFloat && FloatValue >= 0);
+    public bool IsNegative => (IsFraction && Numerator <= 0) || (IsFloat && FloatValue <= 0);
     
     public bool IsInfinity => IsFloat && double.IsInfinity(FloatValue);
     public bool IsNegativeInfinity => IsFloat && double.IsNegativeInfinity(FloatValue);
@@ -273,7 +273,12 @@ public struct NumberStruct
         return Type switch
         {
             NumberType.Fraction => Denominator == 1 ? Numerator.ToString() : $"{Numerator}/{Denominator}",
-            NumberType.Float => FloatValue.ToString(),
+            NumberType.Float => FloatValue switch
+            {
+                double.PositiveInfinity => "oo",
+                double.NegativeInfinity => "-oo",
+                _ => FloatValue.ToString()
+            },
             _ => "NaN"
         };
     
@@ -285,7 +290,12 @@ public struct NumberStruct
         {
             NumberType.Fraction => Denominator == 1 ? 
                 Numerator.ToString() : LatexUtils.Fraction(Numerator.ToString(), Denominator.ToString()),
-            NumberType.Float => FloatValue.ToString(),
+            NumberType.Float => FloatValue switch
+            {
+                double.PositiveInfinity => @"\infty",
+                double.NegativeInfinity => @"-\infty",
+                _ => FloatValue.ToString()
+            },
             _ => "NaN"
         };
     

@@ -1,4 +1,5 @@
-﻿using ConsoleApp1.Core.Booleans;
+﻿using System.Diagnostics;
+using ConsoleApp1.Core.Booleans;
 using ConsoleApp1.Core.Classes;
 using ConsoleApp1.Core.Expressions.Atoms;
 using ConsoleApp1.Core.Expressions.Base;
@@ -14,7 +15,7 @@ public abstract class Expr
 {
     /// Args = arguments/parametres de l'expression (thermes d'une addition, facteur d'un produit)
     public readonly Expr[] Args;
-    public virtual object[]? GetArgs() => null;
+    public virtual object[] GetArgs() => null;
 
     # region Constructors
     
@@ -32,23 +33,21 @@ public abstract class Expr
     public static Number Inf => new(double.PositiveInfinity);
     public static Number NegInf => new(double.NegativeInfinity);
     
+    # region Condition
+
+    public virtual bool IsNatural => throw new NotImplementedException();
+    public virtual bool IsInteger => IsNatural;
+    public virtual bool IsRational => IsInteger;
+    public virtual bool IsReal => IsRational;
+    public virtual bool IsComplex => IsReal;
     public bool IsExtendedReal => IsReal || IsInfinity || IsNegativeInfinity;
-    public bool IsNatural => this is Number; //TODO
-    public bool IsInteger => this is Number; //TODO
-    public bool IsRational => this is Number; //TODO
-    public bool IsReal => this is Number; //TODO
 
-    public bool IsInfinity => this is Number num && num.IsInfinity; //TODO
-    public bool IsNegativeInfinity => this is Number num && num.IsNegativeInfinity; //TODO
-    public bool IsPositive => this is Number num && num.IsPositive; //TODO
-    public bool IsNegative => this is Number num && num.IsNegative; //TODO
+    public bool IsInfinite => IsInfinity || IsNegativeInfinity;
+    public virtual bool IsInfinity => throw new NotImplementedException();
+    public virtual bool IsNegativeInfinity => throw new NotImplementedException();
     
-    # region Evaluate
-
-    public abstract Expr Eval(Expr[] exprs, object[]? objects = null);
-    public abstract Expr NotEval(Expr[] exprs, object[]? objects = null);
-    
-    # endregion
+    public virtual bool IsPositive => throw new NotImplementedException();
+    public virtual bool IsNegative => throw new NotImplementedException();
     
     public virtual Boolean IsContinue(string variable, Set set)
     {
@@ -62,6 +61,50 @@ public abstract class Expr
         };
     }
     
+    public virtual bool IsZero
+    {
+        get
+        {
+            Debug.WriteLine($"The {GetType()} hasn't define the fonction IsZero");
+            return false;
+        }
+    }
+
+    public virtual bool IsOne
+    {
+        get
+        {
+            Debug.WriteLine($"The {GetType()} hasn't define the fonction IsOne");
+            return false;
+        }
+    }
+
+    public bool Is(double n) => this is Number num && num.Num == n;
+    
+    public virtual bool IsNaN => this is Number { Num.IsNan: true };
+    
+    public bool IsVar(string variable) => this is Variable var && var.Name == variable;
+
+    public bool IsNumberInt() => this is Number num && num.IsInteger;
+    public bool IsNumberIntPositif() => this is Number num && num.IsNatural;
+    
+    public int ToInt()
+    {
+        if (this is Number num && num.IsInteger)
+            return num.Num.ToInt();
+        
+        throw new Exception("Cannot convert to int");
+    }
+    
+    # endregion
+    
+    # region Evaluate
+
+    public abstract Expr Eval(Expr[] exprs, object[]? objects = null);
+    public abstract Expr NotEval(Expr[] exprs, object[]? objects = null);
+    
+    # endregion
+    
     public virtual Expr Develop()
     {
         return this;
@@ -74,6 +117,11 @@ public abstract class Expr
     
     # region Conversion
 
+    public virtual (Expr Num, Expr Den) AsFraction() => (this, 1);
+
+    // af(x) -> a, f(x)
+    public virtual (Expr Constant, Expr Variate) SeparateConstant(string var) => Constant(var) ? (this, 1) : (1, this);
+    
     public Fonction AsFonction(string variable)
     {
         return new Fonction(this, variable);
@@ -88,6 +136,14 @@ public abstract class Expr
     // 2x -> 2, x / 2 -> 2, 1
     public (int, Expr) AsMulInt()
     {
+        if (this is Number n)
+        {
+            if (n.IsInteger)
+                return (n.ToInt(), 1);
+
+            return (1, this);
+        }
+        
         if (this is not Multiplication mul)
             return (1, this);
         
@@ -97,7 +153,7 @@ public abstract class Expr
         var isChange = false;
         foreach (var factor in mul.Factors)
         {
-            if (factor is Number num && num.IsEntier())
+            if (factor is Number num && num.IsInteger)
             {
                 isChange = true;
                 coef *= num.ToInt();
@@ -206,7 +262,7 @@ public abstract class Expr
     public Expr Gcd(Expr b)
     {
         var a = this;
-        if (a is Number a_num && a_num.IsEntier() && b is Number b_num && b_num.IsEntier())
+        if (a is Number a_num && a_num.IsInteger && b is Number b_num && b_num.IsInteger)
         {
             return Number.Gcd(a_num.ToInt(), b_num.ToInt()).Expr();
         }
@@ -214,24 +270,12 @@ public abstract class Expr
         throw new NotImplementedException();
     }
     
-    /// Retourne la réciproque en
-    /// <paramref name="argIndex" />
-    /// de l'expression sur
-    /// <paramref name="y" />
-    /// .
-    /// <example>
-    ///     x + 1 = y --> y - 1 avec <paramref name="argIndex" /> = 0
-    ///     <para />
-    ///     x + 1 = y --> y - x avec <paramref name="argIndex" /> = 1
-    /// </example>
     public abstract Expr Reciprocal(Expr y, int argIndex);
 
     # endregion
     
     # region Derivee
     
-    /// Retourne la dérivee de l'expression en la variable
-    /// <paramref name="variable" />
     public abstract Expr Derivee(string variable);
     
     public virtual Expr Derivee(string variable, int n)
@@ -275,9 +319,7 @@ public abstract class Expr
         }
         return [ this ];
     }
-
-    /// Test si l'expression dépend de la variable
-    /// <paramref name="variable" />
+    
     public bool Constant(string variable)
     {
         if (IsVar(variable)) 
@@ -289,10 +331,7 @@ public abstract class Expr
 
         return true;
     }
-
-    /// Test si un il y a un type
-    /// <typeparamref name="T" />
-    /// dans l'expression
+    
     public bool Has<T>() where T : Expr
     {
         if (this is T)
@@ -304,10 +343,7 @@ public abstract class Expr
 
         return false;
     }
-
-    /// Compte le nombre de type
-    /// <typeparamref name="T" />
-    /// dans l'expression
+    
     public int Count<T>() where T : Expr
     {
         var count = 0;
@@ -320,11 +356,7 @@ public abstract class Expr
 
         return count;
     }
-
-    /// Map chaque type
-    /// <typeparamref name="T" />
-    /// avec la fonction
-    /// <paramref name="func" />
+    
     public Expr Map<T>(Func<T, Expr> func) where T : Expr
     {
         return MapBottomUp(expr => expr is T t ? func(t) : expr);
@@ -490,26 +522,4 @@ public abstract class Expr
     
     # endregion
     
-    # region Comparaison Spéciales
-
-    public bool IsZero() => this is Number { IsZero: true };
-    public bool IsNotZero() => !IsZero();
-    public bool IsOne() => this is Number { IsOne: true };
-    public bool Is(double n) => this is Number num && num.Num == n;
-    
-    public bool IsVar(string variable) => this is Variable var && var.Name == variable;
-
-    public bool IsNumberInt() => this is Number num && num.IsEntier();
-    public bool IsNumberIntPositif() => this is Number num && num.IsEntier() && num.IsPositif();
-
-
-    public int ToInt()
-    {
-        if (this is not Number num || !num.IsEntier())
-            throw new Exception("Cannot convert to int");
-        
-        return num.Num.ToInt();
-    }
-
-    # endregion
 }

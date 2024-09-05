@@ -1,0 +1,29 @@
+﻿namespace ConsoleApp1.Core.Expressions.Others;
+
+public class CeilExpr(Expr x) : FonctionExpr(x)
+{
+    public static Expr Eval(Expr x)
+    {
+        if (x.IsInteger)
+            return x;
+        
+        return new CeilExpr(x);
+    }
+    
+    public override Expr Eval(Expr[] exprs, object[]? objects = null)
+    {
+        return Eval(exprs[0]);
+    }
+
+    public override Expr NotEval(Expr[] exprs, object[]? objects = null)
+    {
+        return new CeilExpr(exprs[0]);
+    }
+
+    public override double N()
+    {
+        return Math.Ceiling(x.N());
+    }
+
+    public override string Name => "ceil";
+}

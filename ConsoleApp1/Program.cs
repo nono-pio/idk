@@ -8,6 +8,7 @@ using ConsoleApp1.Core.Expressions.Atoms;
 using ConsoleApp1.Core.Expressions.Base;
 using ConsoleApp1.Core.Expressions.Trigonometrie;
 using ConsoleApp1.Core.Integrals;
+using ConsoleApp1.Core.Limits;
 using ConsoleApp1.Core.Models;
 using ConsoleApp1.Core.NumericalAnalysis;
 using ConsoleApp1.Core.Polynomials.Rings;
@@ -23,23 +24,7 @@ static void print(object? x)
     Console.WriteLine(x is null ? "null" : x.ToString());
 }
 
-static void eval<T>(Func<T> f, int n = 1_000)
-{
-    var time = Stopwatch.StartNew();
-    T? x = default;
-    for (int i = 0; i < n; i++)
-    {
-        x = f();
-    }
-    time.Stop();
-    
-    print($"x = {x} ({(double)time.ElapsedMilliseconds/n}ms)");
-}
+Expr x = "x";
+var expr = x + Pow(x + 1, -2); // x + 1/x^2
 
-var Z = RingsList.ZZ;
-var Zp = RingsList.Zp(2);
-var PolyRing = RingsList.UnivariateRing(Z);
-
-var poly = new UnivariatePolynomial<int>(Z, [4, 8, 5, 1]); 
-print(poly.YunSquareFree());
-
+print(Limit.LimitOf(expr, "x", Expr.Inf));

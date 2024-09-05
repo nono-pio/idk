@@ -1,4 +1,5 @@
-﻿using ConsoleApp1.Core.Expressions.Others;
+﻿using ConsoleApp1.Core.Expressions.FunctionMethods;
+using ConsoleApp1.Core.Expressions.Others;
 using ConsoleApp1.Core.Models;
 using ConsoleApp1.Latex;
 
@@ -8,6 +9,12 @@ public abstract class FonctionExpr(Expr x) : Expr(x)
 {
     public Expr X => Args[0];
 
+    public virtual FuncAttributes Attributes { get; } = new FuncAttributes();
+    
+    public override bool IsPositive => Attributes.Positive;
+    public override bool IsNegative => Attributes.Negative;
+
+    public override bool IsZero => Attributes.YInterceptZero && X.IsZero;
 
     /// The name of the fonction
     public abstract string Name { get; }
@@ -17,11 +24,7 @@ public abstract class FonctionExpr(Expr x) : Expr(x)
     {
         return OrderOfOperation.Atom;
     }
-
-    /// <para>
-    ///     Derivée sans dérivée intérieur
-    ///     <example>sin(x^2) -> cos(x^2)</example>
-    /// </para>
+    
     protected virtual Expr? BaseDerivee() => null;
     public override Expr Derivee(string variable)
     {

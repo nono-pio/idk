@@ -14,6 +14,30 @@ public class Addition : Expr
             throw new Exception("You must add two or more therms");
     }
 
+    public override (Expr Num, Expr Den) AsFraction()
+    {
+        var fracs = Therms.Select(t => t.AsFraction()).ToArray();
+
+        Expr num = 0;
+        for (int i = 0; i < fracs.Length; i++)
+        {
+            var therm = fracs[i].Num;
+            for (int j = 0; j < fracs.Length; j++)
+            {
+                if (i == j)
+                    continue;
+
+                therm *= fracs[j].Den;
+            }
+
+            num += therm;
+        }
+
+        var den = fracs.Aggregate((Expr) 1, (pro, frac) => pro * frac.Den);
+
+        return (num, den);
+    }
+
     # region Constructors / Eval
     
     public static Expr Construct(params Expr[] exprs)

@@ -166,7 +166,7 @@ public class Poly
     public Poly EnleveZeroInutile()
     {
 
-        if (!LC().IsZero())
+        if (!LC().IsZero)
             return this;
 
         Poly? newPoly = null;
@@ -180,9 +180,10 @@ public class Poly
                 continue;
             }
 
-            if (!CoefDeg(deg).IsZero())
+            if (!CoefDeg(deg).IsZero)
             {
                 newPoly = VideDeg(deg);
+                newPoly.SetCoefDeg(deg, CoefDeg(deg));
                 noZero = true;
             }
         }
@@ -257,9 +258,9 @@ public class Poly
         {
             var coef = _coefs[i];
             var deg = Deg() - i; 
-            if (coef.IsZero())
+            if (coef.IsZero)
                 continue;
-            var coef_str = coef.IsOne() && deg != 0 ? "" : coef.ToString();
+            var coef_str = coef.IsOne && deg != 0 ? "" : coef.ToString();
             switch (deg)
             {
                 case 0:
@@ -297,7 +298,7 @@ public class Poly
 
     public bool IsZero()
     {
-        return Deg() == 0 && CoefDeg(0).IsZero();
+        return Deg() == 0 && CoefDeg(0).IsZero;
     }
 
     /// (g, (u, v))
@@ -312,7 +313,6 @@ public class Poly
         
         while (!r.IsZero())
         {
-            Console.WriteLine((old_r, r));
             var (q, new_r) = Div(old_r, r);
             (old_r, r) = (r, new_r);
             (old_s, s) = (s, old_s - q * s);
@@ -467,6 +467,18 @@ public class Poly
 
         return result;
     }
+
+    public static Poly operator /(Poly a, Poly b)
+    {
+        var (q, _) = Div(a, b);
+        return q;
+    }
+
+    public static Poly operator %(Poly a, Poly b)
+    {
+        var (_, r) = Div(a, b);
+        return r;
+    }
     
     public Poly Pow(int exp)
     {
@@ -508,7 +520,7 @@ public class Poly
         for (int deg = 0; deg <= Deg(); deg++)
         {
             var coef = CoefDeg(deg);
-            if (coef.IsNotZero())
+            if (!coef.IsZero)
                 yield return (coef, deg);
         }
     }

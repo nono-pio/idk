@@ -50,24 +50,28 @@ public class Number : Atom
     public override Expr NotEval(Expr[] exprs, object[]? objects = null) => Eval(exprs, objects);
 
 
-    public bool IsZero => Num.IsZero;
-    public bool IsOne => Num.IsOne;
-    public bool IsNan => Num.IsNan;
-    public bool IsFloat => Num.IsFloat;
-    public bool IsInt => Num.IsInt;
+    public override bool IsZero => Num.IsZero;
+    public override bool IsOne => Num.IsOne;
     
-    public new bool IsPositive => Num.IsPositive;
-    public new bool IsNegative => Num.IsNegative;
+    public override bool IsPositive => Num.IsPositive;
+    public override bool IsNegative => Num.IsNegative;
     
-    public new bool IsInfinity => Num.IsInfinity;
-    public new bool IsNegativeInfinity => Num.IsNegativeInfinity;
-    
-    public bool Is(int n) => Num.Is(n);
-    
+    public override bool IsInfinity => Num.IsInfinity;
+    public override bool IsNegativeInfinity => Num.IsNegativeInfinity;
+
+    public override bool IsNatural => Num.IsInt && IsPositive;
+    public override bool IsInteger => Num.IsInt;
+    public override bool IsRational => true;
+
+    public override (Expr Num, Expr Den) AsFraction()
+    {
+        if (Num.IsFraction && Num.Denominator != 1)
+            return (Num.Numerator, Num.Denominator);
+        
+        return base.AsFraction();
+    }
+
     public static int Gcd(int a, int b) => NumberUtils.Gcd(a, b);
-    
-    public bool IsEntier() => Num.IsInt;
-    public bool IsPositif() => Num.IsPositive;
 
     public override double N() => Num.N();
     

@@ -17,7 +17,7 @@ public class Solve
         // If f is constant : True or False (ex: 0 = 0 -> True or 1 = 0 -> False)
         if (f.Constant(variable))
         {
-            return f.IsZero() ? Set.R/*return x domain or R*/ : Set.EmptySet;
+            return f.IsZero ? Set.R/*return x domain or R*/ : Set.EmptySet;
         }
         
         return UnfoldReciprocal(f, variable);
@@ -30,7 +30,7 @@ public class Solve
     {
         // Multiplication
         // f1(x) * f2(x) = 0 -> f1(x) = 0 or f2(x) = 0
-        if (expr is Multiplication mul && y.IsZero())
+        if (expr is Multiplication mul && y.IsZero)
         {
             List<Set> solutions = new();
             var isAllSolvable = true;

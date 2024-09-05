@@ -16,6 +16,36 @@ public class Multiplication : Expr
             throw new Exception("You must add two or more factor");
     }
 
+    public override (Expr Constant, Expr Variate) SeparateConstant(string var)
+    {
+
+        var cstes = new Expr[Factors.Length];
+        var vars = new Expr[Factors.Length];
+
+        for (int i = 0; i < Factors.Length; i++)
+        {
+            var cv = Factors[i].SeparateConstant(var);
+            cstes[i] = cv.Constant;
+            vars[i] = cv.Variate;
+        }
+
+        return (Mul(cstes), Mul(vars));
+    }
+
+    public override (Expr Num, Expr Den) AsFraction()
+    {
+        var nums = new Expr[Factors.Length];
+        var dens = new Expr[Factors.Length];
+        for (int i = 0; i < Factors.Length; i++)
+        {
+            var frac = Factors[i].AsFraction();
+            nums[i] = frac.Num;
+            dens[i] = frac.Den;
+        }
+
+        return (Mul(nums), Mul(dens));
+    }
+
     public static Expr Construct(params Expr[] exprs)
     {
         // Rules
@@ -64,7 +94,7 @@ public class Multiplication : Expr
 
         return exprsFactors.Count switch
         {
-            0 => 0,
+            0 => 1,
             1 => exprsFactors[0],
             _ => new Multiplication(Sorting.BubbleSort(exprsFactors.ToArray()))
         };
@@ -93,7 +123,7 @@ public class Multiplication : Expr
         if (pow.Base == expr)
         {
             var newExp = pow.Exp + 1;
-            if (newExp.IsZero())
+            if (newExp.IsZero)
                 return 1;
             
             return Pow(pow.Base, newExp);

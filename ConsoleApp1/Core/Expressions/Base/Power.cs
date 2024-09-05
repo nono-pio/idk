@@ -19,6 +19,22 @@ public class Power : Expr
      
     public Power(Expr value, Expr exp) : base(value, exp) { }
 
+    public override (Expr Num, Expr Den) AsFraction()
+    {
+        // (n/d)^b
+        // b>0 -> n^b, d^b
+        // b<0 -> d^-b, n^-b
+        var base_frac = Base.AsFraction();
+        
+        if (Exp.IsNegative)
+            return (Pow(base_frac.Den, -Exp), Pow(base_frac.Num, -Exp));
+
+        if (base_frac.Den.IsOne)
+            return (this, 1);
+        
+        return (Pow(base_frac.Num, Exp), Pow(base_frac.Den, Exp));
+    }
+
     public static Expr Construct(Expr @base, Expr exp)
     {
         // 1. Special Values    a^b
@@ -27,11 +43,11 @@ public class Power : Expr
         // a, b is number -> a^b simplified
 
 
-        if (@base.IsOne() || exp.IsZero()) 
+        if (@base.IsOne || exp.IsZero) 
             return Num(1);
-        if (@base.IsZero()) 
+        if (@base.IsZero) 
             return Num(0);
-        if (exp.IsOne()) 
+        if (exp.IsOne) 
             return @base;
         
         if (@base is Number a && exp is Number b) 
