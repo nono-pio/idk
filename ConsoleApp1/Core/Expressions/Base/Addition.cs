@@ -1,4 +1,5 @@
 ﻿using ConsoleApp1.Core.Classes;
+using ConsoleApp1.Core.Complexes;
 using ConsoleApp1.Core.Expressions.Atoms;
 using ConsoleApp1.Latex;
 
@@ -153,6 +154,11 @@ public class Addition : Expr
     public override Expr NotEval(Expr[] args, object[]? objects = null) => new Addition(args);
     
     # endregion
+
+    public override Complex AsComplex()
+    {
+        return Therms.Aggregate<Expr, Complex>(0, (current, term) => current + term.AsComplex());
+    }
 
     public override OrderOfOperation GetOrderOfOperation()
     {

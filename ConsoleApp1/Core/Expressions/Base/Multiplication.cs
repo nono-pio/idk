@@ -1,4 +1,5 @@
 ﻿using ConsoleApp1.Core.Classes;
+using ConsoleApp1.Core.Complexes;
 using ConsoleApp1.Core.Expressions.Atoms;
 using ConsoleApp1.Latex;
 
@@ -136,6 +137,11 @@ public class Multiplication : Expr
     public override Expr NotEval(Expr[] exprs, object[]? objects = null) => new Multiplication(exprs);
 
     # endregion
+
+    public override Complex AsComplex()
+    {
+        return Factors.Aggregate<Expr, Complex>(1, (product, factor) => product * factor.AsComplex());
+    }
 
     public override Expr Derivee(string variable)
     {

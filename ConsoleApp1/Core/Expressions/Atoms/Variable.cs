@@ -1,4 +1,5 @@
 ﻿using ConsoleApp1.Core.Classes;
+using ConsoleApp1.Core.Complexes;
 using ConsoleApp1.Core.Expressions.LinearAlgebra;
 using ConsoleApp1.Core.Models;
 using ConsoleApp1.Core.Sets;
@@ -92,7 +93,9 @@ public class Variable : Atom
     public Variable(string name, Fonction fonction, Expr of) : this(new FunctionVar(name, fonction, of)) { }
     
     public static Variable CreateConstant(string name, double value) => new(new ConstantVar(name, value));
-    
+
+    public override Complex AsComplex() => new(this, 0);
+
     public override Expr Derivee(string variable)
     {
         return Name == variable ? Un : Zero;

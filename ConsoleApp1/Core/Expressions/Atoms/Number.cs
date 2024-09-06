@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using ConsoleApp1.Core.Classes;
+using ConsoleApp1.Core.Complexes;
 using ConsoleApp1.Core.Expressions.Base;
 
 namespace ConsoleApp1.Core.Expressions.Atoms;
@@ -49,6 +50,7 @@ public class Number : Atom
     }
     public override Expr NotEval(Expr[] exprs, object[]? objects = null) => Eval(exprs, objects);
 
+    public override Complex AsComplex() => new(this, 0);
 
     public override bool IsZero => Num.IsZero;
     public override bool IsOne => Num.IsOne;

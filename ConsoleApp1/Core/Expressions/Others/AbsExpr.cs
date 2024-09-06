@@ -1,4 +1,6 @@
-﻿namespace ConsoleApp1.Core.Expressions.Others;
+﻿using ConsoleApp1.Core.Complexes;
+
+namespace ConsoleApp1.Core.Expressions.Others;
 
 public class AbsExpr(Expr x) : FonctionExpr(x)
 {
@@ -24,6 +26,16 @@ public class AbsExpr(Expr x) : FonctionExpr(x)
     public override Expr NotEval(Expr[] exprs, object[]? objects = null)
     {
         return new AbsExpr(exprs[0]);
+    }
+
+    public override Complex AsComplex()
+    {
+        var complex = x.AsComplex();
+
+        if (complex.Imaginary.IsZero)
+            return new(this, 0);
+        
+        return new(complex.Norm, 0);
     }
 
     public override double N()

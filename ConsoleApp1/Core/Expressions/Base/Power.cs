@@ -1,4 +1,5 @@
-﻿using ConsoleApp1.Core.Expressions.Atoms;
+﻿using ConsoleApp1.Core.Complexes;
+using ConsoleApp1.Core.Expressions.Atoms;
 using ConsoleApp1.Latex;
 
 namespace ConsoleApp1.Core.Expressions.Base;
@@ -33,6 +34,14 @@ public class Power : Expr
             return (this, 1);
         
         return (Pow(base_frac.Num, Exp), Pow(base_frac.Den, Exp));
+    }
+
+    public override Complex AsComplex()
+    {
+        var base_c = Base.AsComplex();
+        var exp_c = Exp.AsComplex();
+        
+        return base_c.Pow(exp_c);
     }
 
     public static Expr Construct(Expr @base, Expr exp)

@@ -1,4 +1,5 @@
-﻿using ConsoleApp1.Core.Expressions.Atoms;
+﻿using ConsoleApp1.Core.Complexes;
+using ConsoleApp1.Core.Expressions.Atoms;
 using ConsoleApp1.Latex;
 
 namespace ConsoleApp1.Core.Expressions.Base;
@@ -18,6 +19,17 @@ public class Logarithm : Expr
     public override Expr Eval(Expr[] exprs, object[]? objects = null) => Construct(exprs[0], exprs[1]);
     public override Expr NotEval(Expr[] exprs, object[]? objects = null) => new Logarithm(exprs[0], exprs[1]);
 
+    public Complex LnComplex(Complex z)
+    {
+        var real = Ln(z.SqrNorm)/2;
+        var imag = z.Argument + 2*Constants.PI*"n";
+        
+        return new Complex(real, imag);
+    }
+    public override Complex AsComplex()
+    {
+        return LnComplex(Value.AsComplex()) / LnComplex(Base.AsComplex());
+    }
 
     public override OrderOfOperation GetOrderOfOperation()
     {

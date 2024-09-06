@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using ConsoleApp1.Core.Booleans;
 using ConsoleApp1.Core.Classes;
+using ConsoleApp1.Core.Complexes;
 using ConsoleApp1.Core.Expressions.Atoms;
 using ConsoleApp1.Core.Expressions.Base;
 using ConsoleApp1.Core.Expressions.Others;
@@ -206,9 +207,9 @@ public abstract class Expr
     }
 
 
-    public virtual (Expr, Expr) AsComplex()
+    public virtual Complex AsComplex()
     {
-        throw new Exception($"Cannot convert {GetType()} as complex");
+        throw new NotImplementedException($"Complex not implemented for {GetType()}");
     }
 
     # endregion
