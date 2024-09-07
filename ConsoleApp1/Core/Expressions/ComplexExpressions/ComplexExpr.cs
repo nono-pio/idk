@@ -2,9 +2,17 @@
 
 namespace ConsoleApp1.Core.Expressions.ComplexExpressions;
 
-public class ComplexExpr(Expr real, Expr imaginary) : Expr
+// ComplexExpr(real, imaginary) = real + i*imaginary        for real, imaginary in R
+public class ComplexExpr(Expr real, Expr imaginary) : Expr(real, imaginary)
 {
+    public override bool IsNatural => real.IsNatural && imaginary.IsZero;
+    public override bool IsInteger => real.IsInteger && imaginary.IsZero;
+    public override bool IsRational => real.IsRational && imaginary.IsZero;
+    public override bool IsReal => real.IsReal && imaginary.IsZero;
+    public override bool IsComplex => true;
     
+    public override bool IsZero => real.IsZero && imaginary.IsZero;
+
     public override Complex AsComplex()
     {
         return new(real, imaginary);
@@ -45,5 +53,10 @@ public class ComplexExpr(Expr real, Expr imaginary) : Expr
     public override Expr Derivee(string variable)
     {
         throw new NotImplementedException();
+    }
+
+    public override string? ToString()
+    {
+        return $"{real}+i*{imaginary}";
     }
 }

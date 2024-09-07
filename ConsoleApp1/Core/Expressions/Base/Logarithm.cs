@@ -6,6 +6,9 @@ namespace ConsoleApp1.Core.Expressions.Base;
 
 public class Logarithm : Expr
 {
+    public override bool IsReal => Base.IsPositive && Value.IsPositive;
+    public override bool IsComplex => true;
+
 
     public Expr Value => Args[0];
     public Expr Base => Args[1];

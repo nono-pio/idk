@@ -11,6 +11,15 @@ public class Variable : Atom
 {
     public static Dictionary<string, VariableData> Variables = new();
 
+    public override bool IsNatural => Data.Domain?.IsElementsNatural ?? false;
+    public override bool IsInteger  => Data.Domain?.IsElementsInteger ?? false;
+    public override bool IsRational  => Data.Domain?.IsElementsRational ?? false;
+    public override bool IsReal  => Data.Domain?.IsElementsReal ?? false;
+    public override bool IsComplex  => Data.Domain?.IsElementsComplex ?? false;
+
+    public override bool IsPositive  => Data.Domain?.IsElementsPositive ?? false;
+    public override bool IsNegative  => Data.Domain?.IsElementsNegative ?? false;
+
     public readonly string Name;
     public VariableData? _data = null;
     public VariableData Data

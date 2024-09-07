@@ -5,6 +5,8 @@ namespace ConsoleApp1.Core.Expressions.ComplexExpressions;
 
 public class ComplexImag : Expr
 {
+    public override bool IsReal => true;
+
     public Expr X => Args[0];
     
     public ComplexImag(Expr x) : base(x) {}

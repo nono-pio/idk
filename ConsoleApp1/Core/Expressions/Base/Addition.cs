@@ -155,6 +155,13 @@ public class Addition : Expr
     
     # endregion
 
+    public override bool IsNatural => Therms.All(therm => therm.IsNatural);
+    public override bool IsInteger => Therms.All(therm => therm.IsInteger);
+    public override bool IsRational => Therms.All(therm => therm.IsRational);
+    public override bool IsReal => Therms.All(therm => therm.IsReal);
+    public override bool IsComplex => Therms.All(therm => therm.IsComplex);
+    
+
     public override Complex AsComplex()
     {
         return Therms.Aggregate<Expr, Complex>(0, (current, term) => current + term.AsComplex());

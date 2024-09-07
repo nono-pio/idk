@@ -142,6 +142,12 @@ public class Multiplication : Expr
     {
         return Factors.Aggregate<Expr, Complex>(1, (product, factor) => product * factor.AsComplex());
     }
+    
+    public override bool IsNatural => Factors.All(factor => factor.IsNatural);
+    public override bool IsInteger => Factors.All(factor => factor.IsInteger);
+    public override bool IsRational => Factors.All(factor => factor.IsRational);
+    public override bool IsReal => Factors.All(factor => factor.IsReal);
+    public override bool IsComplex => Factors.All(factor => factor.IsComplex);
 
     public override Expr Derivee(string variable)
     {

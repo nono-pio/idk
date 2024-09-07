@@ -2,6 +2,13 @@
 
 public class MinExpr : Expr
 {
+    
+    public override bool IsNatural => Elements.All(el => el.IsNatural);
+    public override bool IsInteger => Elements.All(el => el.IsInteger);
+    public override bool IsReal => Elements.All(el => el.IsReal);
+
+    public override bool IsPositive => Elements.All(el => el.IsPositive);
+    public override bool IsNegative => Elements.Any(el => el.IsNegative);
 
     public Expr[] Elements { get; }
     

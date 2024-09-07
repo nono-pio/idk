@@ -24,7 +24,7 @@ static void print(object? x)
     Console.WriteLine(x is null ? "null" : x.ToString());
 }
 
-Expr x = "x";
-var expr = x + Pow(x + 1, -2); // x + 1/x^2
+var x = "x";
 
-print(Limit.LimitOf(expr, "x", Expr.Inf));
+var complex = x + i * 2;
+print(complex);

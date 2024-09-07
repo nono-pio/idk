@@ -7,6 +7,14 @@ namespace ConsoleApp1.Core.Sets;
 public class FiniteSet(HashSet<Expr> elements) : Set
 {
     public readonly HashSet<Expr> Elements = elements.ToHashSet();
+    
+    public override bool IsElementsNatural => Elements.All(el => el.IsNatural);
+    public override bool IsElementsInteger =>  Elements.All(el => el.IsInteger);
+    public override bool IsElementsRational =>  Elements.All(el => el.IsRational);
+    public override bool IsElementsReal =>  Elements.All(el => el.IsReal);
+    
+    public override bool IsElementsPositive =>  Elements.All(el => el.IsPositive);
+    public override bool IsElementsNegative =>  Elements.All(el => el.IsNegative);
 
     public new static Set CreateFiniteSet(params Expr[] elements) => CreateFiniteSet(elements.ToHashSet());
     public new static Set CreateFiniteSet(HashSet<Expr> elements)

@@ -9,6 +9,15 @@ public class Interval : Set
     
     public bool StartInclusive;
     public bool EndInclusive;
+
+    public override bool IsElementsNatural => false;
+    public override bool IsElementsInteger => false;
+    public override bool IsElementsRational => false;
+    public override bool IsElementsReal => true;
+    
+    public override bool IsElementsPositive => Start.IsPositive && End.IsPositive;
+    public override bool IsElementsNegative => Start.IsNegative && End.IsNegative;
+
     private Interval(Expr start, Expr end, bool startInclusive, bool endInclusive)
     {
         Start = start;

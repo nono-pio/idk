@@ -3,7 +3,8 @@
 public class ArgExpr(Expr x) : Expr(x)
 {
     public Expr X => Args[0];
-    
+
+    public override bool IsReal => true;
     
     public static Expr Construct(Expr x) => new ArgExpr(x);
     public override Expr Eval(Expr[] exprs, object[]? objects = null)

@@ -2,6 +2,9 @@
 
 public class RoundExpr(Expr x) : FonctionExpr(x)
 {
+    public override bool IsNatural => IsPositive;
+    public override bool IsInteger => true;
+
     public static Expr Eval(Expr x)
     {
         if (x.IsInteger)

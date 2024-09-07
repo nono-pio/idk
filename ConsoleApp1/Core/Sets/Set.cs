@@ -28,6 +28,15 @@ public abstract class Set
     public static UniversalSet U => new UniversalSet();
     public static Real R => new Real();
 
+    public virtual bool IsElementsNatural => throw new NotImplementedException();
+    public virtual bool IsElementsInteger => IsElementsNatural;
+    public virtual bool IsElementsRational => IsElementsInteger;
+    public virtual bool IsElementsReal => IsElementsRational;
+    public virtual bool IsElementsComplex => IsElementsReal;
+
+    public virtual bool IsElementsPositive => throw new NotImplementedException();
+    public virtual bool IsElementsNegative => throw new NotImplementedException();
+
     public bool IsEmpty => IsEmptySet();
     public bool IsEmptySet() => this is EmptySet;
 

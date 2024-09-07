@@ -5,6 +5,14 @@ namespace ConsoleApp1.Core.Expressions.Others;
 public class AbsExpr(Expr x) : FonctionExpr(x)
 {
 
+    public override bool IsNatural => X.IsInteger;
+    public override bool IsInteger => X.IsInteger;
+    public override bool IsReal => X.IsReal;
+
+    public override bool IsPositive => true;
+    public override bool IsNegative => false;
+    
+    
     public override string Name => "abs";
 
     public static Expr Eval(Expr x)

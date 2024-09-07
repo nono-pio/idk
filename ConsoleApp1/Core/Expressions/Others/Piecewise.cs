@@ -5,6 +5,16 @@ namespace ConsoleApp1.Core.Expressions.Others;
 
 public class Piecewise : Expr
 {
+    public override bool IsNatural => Values.All(el => el.value.IsNatural);
+    public override bool IsInteger => Values.All(el => el.value.IsInteger);
+    public override bool IsRational => Values.All(el => el.value.IsRational);
+    public override bool IsReal => Values.All(el => el.value.IsReal);
+    public override bool IsComplex => Values.All(el => el.value.IsComplex);
+
+    public override bool IsPositive => Values.All(el => el.value.IsPositive);
+    public override bool IsNegative => Values.All(el => el.value.IsNegative);
+
+    public override bool IsZero => Values.All(el => el.value.IsZero);
 
     public (Expr value, Boolean condition)[] Values;
 

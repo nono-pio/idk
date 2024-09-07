@@ -6,6 +6,16 @@ namespace ConsoleApp1.Core.Expressions.Base;
 
 public class Power : Expr
 {
+    public override bool IsNatural => Base.IsNatural && Exp.IsNatural;
+    public override bool IsInteger => Base.IsInteger && Exp.IsNatural;
+    public override bool IsRational => Base.IsRational && Exp.IsInteger;
+    public override bool IsReal => Base.IsReal && Exp.IsInteger; // todo: (-1)^0.5
+    public override bool IsComplex => true;
+
+    public override bool IsPositive => Base.IsPositive;
+    public override bool IsNegative => throw new NotImplementedException(); // todo: (-1)^(2n+1)
+
+
     public Expr Base
      {
          get => Args[0];

@@ -10,6 +10,14 @@ public abstract class BasicNumberSet : Set
     // The level of the set in the hierarchy (Natural = 1, Integer = 2, Rational = 3, Real = 4)
     public abstract int _Level { get; }
     
+    public override bool IsElementsNatural => _Level <= Natural.Level;
+    public override bool IsElementsInteger => _Level <= Integer.Level;
+    public override bool IsElementsRational => _Level <= Rational.Level;
+    public override bool IsElementsReal => _Level <= Real.Level;
+    
+    public override bool IsElementsPositive => _Level == Natural.Level;
+    public override bool IsElementsNegative => false;
+    
     public static BasicNumberSet GetUnionOf(BasicNumberSet a, BasicNumberSet b)
     {
         return a._Level > b._Level ? a : b;

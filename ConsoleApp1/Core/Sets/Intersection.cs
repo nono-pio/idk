@@ -8,6 +8,14 @@ public class Intersection(params Set[] sets) : Set
 {
     public Set[] Sets = sets;
     
+    public override bool IsElementsNatural => Sets.All(set => set.IsElementsNatural);
+    public override bool IsElementsInteger => Sets.All(set => set.IsElementsInteger);
+    public override bool IsElementsRational => Sets.All(set => set.IsElementsRational);
+    public override bool IsElementsReal => Sets.All(set => set.IsElementsReal);
+    
+    public override bool IsElementsPositive => Sets.All(set => set.IsElementsPositive);
+    public override bool IsElementsNegative => Sets.All(set => set.IsElementsNegative);
+    
     public new static Set CreateIntersection(params Set[] sets)
     {
         if (sets.Length == 0)
