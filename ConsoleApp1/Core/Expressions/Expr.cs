@@ -118,6 +118,8 @@ public abstract class Expr
     
     # region Conversion
 
+    public virtual Set AsSet() => throw new NotImplementedException();
+
     public virtual (Expr Num, Expr Den) AsFraction() => (this, 1);
 
     // af(x) -> a, f(x)

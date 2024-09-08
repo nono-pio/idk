@@ -25,6 +25,11 @@ public class Interval : Set
         StartInclusive = startInclusive;
         EndInclusive = endInclusive;
     }
+
+    public Set ArithmeticAdd(Interval other)
+    {
+        return CreateInterval(Start + other.Start, End + other.End, StartInclusive || other.StartInclusive, EndInclusive || other.EndInclusive);
+    }
     
     public new static Set CreateInterval(Expr start, Expr end, bool startInclusive = true, bool endInclusive = true)
     {

@@ -20,6 +20,8 @@ public class Variable : Atom
     public override bool IsPositive  => Data.Domain?.IsElementsPositive ?? false;
     public override bool IsNegative  => Data.Domain?.IsElementsNegative ?? false;
 
+    public override Set AsSet() => Set.CreateFiniteSet(this);
+
     public readonly string Name;
     public VariableData? _data = null;
     public VariableData Data

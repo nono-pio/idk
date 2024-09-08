@@ -1,6 +1,7 @@
 ﻿using ConsoleApp1.Core.Classes;
 using ConsoleApp1.Core.Complexes;
 using ConsoleApp1.Core.Expressions.Atoms;
+using ConsoleApp1.Core.Sets;
 using ConsoleApp1.Latex;
 
 namespace ConsoleApp1.Core.Expressions.Base;
@@ -160,7 +161,29 @@ public class Addition : Expr
     public override bool IsRational => Therms.All(therm => therm.IsRational);
     public override bool IsReal => Therms.All(therm => therm.IsReal);
     public override bool IsComplex => Therms.All(therm => therm.IsComplex);
-    
+
+
+    public override Set AsSet()
+    {
+        Set SetAAddSetB(Set setA, Set setB) => ArithmeticOnSet.BiCommutativeFunctionOnSet(
+            (el1, el2) => el1 + el2, setA, setB, 
+            interval: (interval, interval1) => interval.ArithmeticAdd(interval1),
+            expr_interval: (expr, interval) => Set.CreateInterval(interval.Start + expr, interval.End+expr, interval.StartInclusive, interval.EndInclusive),
+            bns: (bnsA, bnsB) => bnsA._Level >= bnsB._Level ? bnsA : bnsB,
+            bns_integral: (bns, interval) => bns is Real ? bns : null, // question: Q + [x1,x2] = R x1 != x2; TODO: N/Z + [x1, x2] = R si x2-x1 > 1
+            expr_bns: (expr, bns) => bns switch
+            {
+                Natural => throw new NotImplementedException(), // si x in Z -> range(x, oo)
+                Integer => expr.IsInteger ? bns : throw new NotImplementedException(), // si x in Q/R/.., ex x=1/2 -> {-oo...-3/2,-1/2,1/2,3/2...oo}
+                Rational => expr.IsRational ? bns : throw new NotImplementedException(), // idem R/..
+                Real => expr.IsReal ? bns : throw new NotImplementedException(), // idem C/..
+                _ => throw new NotImplementedException()
+            }
+            );
+
+
+        return Therms.Skip(1).Aggregate(Therms[0].AsSet(), (result, therm) => SetAAddSetB(result, therm.AsSet()));
+    }
 
     public override Complex AsComplex()
     {

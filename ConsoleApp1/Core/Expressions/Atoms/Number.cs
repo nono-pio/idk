@@ -2,6 +2,7 @@
 using ConsoleApp1.Core.Classes;
 using ConsoleApp1.Core.Complexes;
 using ConsoleApp1.Core.Expressions.Base;
+using ConsoleApp1.Core.Sets;
 
 namespace ConsoleApp1.Core.Expressions.Atoms;
 
@@ -72,6 +73,8 @@ public class Number : Atom
         
         return base.AsFraction();
     }
+
+    public override Set AsSet() => Set.CreateFiniteSet(this);
 
     public static int Gcd(int a, int b) => NumberUtils.Gcd(a, b);
 

@@ -1,4 +1,5 @@
 ﻿using System.Data;
+using ConsoleApp1.Core.Sets;
 
 namespace ConsoleApp1.Core.Expressions.Others;
 
@@ -18,7 +19,19 @@ public class SignExpr(Expr x) : FonctionExpr(x)
         
         return new SignExpr(x);
     }
-    
+
+    public override Set AsSet()
+    {
+        return ArithmeticOnSet.FunctionOnSet(Eval, X.AsSet(), 
+            ArithmeticOnSet.FunctionBasicNumber(
+                natural: Set.CreateFiniteSet([0, 1]), 
+                integer: Set.CreateFiniteSet([-1, 0, 1]), 
+                rational: Set.CreateFiniteSet([-1, 0, 1]), 
+                real: Set.CreateFiniteSet([-1, 0, 1])
+                )
+            );
+    }
+
     public override Expr Eval(Expr[] exprs, object[]? objects = null)
     {
         return Eval(exprs[0]);

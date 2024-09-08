@@ -1,4 +1,5 @@
 ﻿using ConsoleApp1.Core.Complexes;
+using ConsoleApp1.Core.Sets;
 
 namespace ConsoleApp1.Core.Expressions.Others;
 
@@ -11,8 +12,15 @@ public class AbsExpr(Expr x) : FonctionExpr(x)
 
     public override bool IsPositive => true;
     public override bool IsNegative => false;
-    
-    
+
+    public override Set AsSet()
+    {
+        return ArithmeticOnSet.FunctionOnSet(Eval, X.AsSet(),
+            (abs_start, abs_end) => Set.CreateInterval(Min(0, abs_start, abs_end), Max(abs_start, abs_end)),
+            ArithmeticOnSet.FunctionBasicNumber(natural: Set.N, integer: Set.N, rational: Set.Q.Positive, real: Set.R.Positive)
+            );
+    }
+
     public override string Name => "abs";
 
     public static Expr Eval(Expr x)

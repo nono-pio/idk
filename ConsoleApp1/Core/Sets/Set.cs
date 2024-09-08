@@ -26,8 +26,14 @@ public abstract class Set
 {
     public static Set EmptySet => new EmptySet();
     public static UniversalSet U => new UniversalSet();
+    public static Natural N => new Natural();
+    public static Integer Z => new Integer();
+    public static Rational Q => new Rational();
     public static Real R => new Real();
 
+    public Set Positive => CreateIntersection(this, CreateInterval(0, Expr.Inf));
+    public Set Negative => CreateIntersection(this, CreateInterval(Expr.NegInf, 0));
+    
     public virtual bool IsElementsNatural => throw new NotImplementedException();
     public virtual bool IsElementsInteger => IsElementsNatural;
     public virtual bool IsElementsRational => IsElementsInteger;
