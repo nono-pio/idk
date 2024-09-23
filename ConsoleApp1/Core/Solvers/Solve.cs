@@ -7,26 +7,25 @@ namespace ConsoleApp1.Core.Solvers;
 
 public class Solve
 {
-
-    // expr(var) = y(var)
+    
     public static Set? SolveFor(Expr expr, Expr y, string variable) => FindRoots(expr - y, variable);
     
-    // f(x) = 0 
     public static Set? FindRoots(Expr f, string variable)
     {
-        // If f is constant : True or False (ex: 0 = 0 -> True or 1 = 0 -> False)
         if (f.Constant(variable))
         {
             return f.IsZero ? Set.R/*return x domain or R*/ : Set.EmptySet;
         }
-        
-        return UnfoldReciprocal(f, variable);
-    }
 
-    // TODO
-    // Brute = expr relie plusieurs f(var)
-    // expr(var) et y est une cste
-    public static Set? SolveBrute(Expr expr, Expr y, string variable)
+        (f, var y) = Reciprocal.Unfold(f, 0, variable);
+
+        if (f.IsVar(variable))
+            return y.AsSet();
+        
+        return MatchPattern(f, y, variable);
+    }
+    
+    public static Set? MatchPattern(Expr expr, Expr y, string variable)
     {
         // Multiplication
         // f1(x) * f2(x) = 0 -> f1(x) = 0 or f2(x) = 0
@@ -70,52 +69,5 @@ public class Solve
         
         
         return null;
-    }
-
-    public static Set? UnfoldReciprocal(Expr f, string variable)
-    {
-        Expr expr = f; // variable
-        Expr y = Zero; // constante
-        
-        while (true)
-        {
-            // expr = y
-            
-            // If expr = x -> x = y
-            if (expr.IsVar(variable))
-                return Set.CreateFiniteSet(y);
-
-            // find the variable in the expression
-            var index = -1; // index of the variable in the expression (ex: x+3 -> x is at index 0)
-            for (var i = 0; i < expr.Args.Length; i++)
-            {
-                if (!expr.Args[i].Constant(variable))
-                {
-                    if (index != -1) // multiple variables (reciprocal dont work)
-                    {
-                        index = -2;
-                        break;
-                    }
-                    index = i;
-                }
-            }
-
-            switch (index)
-            {
-                case -1: // no variable (expr is constant)
-                    return expr == y ? Set.R/*x domain or R*/: Set.EmptySet;
-                case -2: // multiple variables
-                    return SolveBrute(expr, y, variable);
-                default:
-                {
-                    var new_expr = expr.Args[index];
-                    y = expr.Reciprocal(y, index);
-                    expr = new_expr;
-                    break;
-                }
-            }
-        }
-
-        return null; // unreachable
     }
 }

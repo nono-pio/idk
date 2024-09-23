@@ -14,6 +14,11 @@ public class SetExpr(Set set) : Expr
         return new SetExpr(set);
     }
 
+    public override Set AsSet()
+    {
+        return Set;
+    }
+
     public override Expr Eval(Expr[] exprs, object[]? objects = null) => Construct((Set)objects[0]);
     public override Expr NotEval(Expr[] exprs, object[]? objects = null) => new SetExpr((Set)objects[0]);
 

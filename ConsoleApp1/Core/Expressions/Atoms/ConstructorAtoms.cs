@@ -1,5 +1,6 @@
 ﻿using ConsoleApp1.Core.Classes;
 using ConsoleApp1.Core.Models;
+using ConsoleApp1.Core.Sets;
 
 namespace ConsoleApp1.Core.Expressions.Atoms;
 
@@ -10,8 +11,6 @@ public static class ConstructorAtoms
     public static Expr Un => Num(1);
     public static Expr Deux => Num(2);
 
-    public static Expr NUn => Num(-1);
-
     public static Expr Num(double num) => new Number(num);
     public static Expr Num(float num) => new Number(num);
     public static Expr Num(long num) => new Number(num);
@@ -19,20 +18,37 @@ public static class ConstructorAtoms
     public static Expr Num(NumberStruct num) => new Number(num);
     public static Expr Num(long p, long q) => new Number(new NumberStruct(p, q));
 
-    public static Variable Var(string name) => new Variable(name);
-    public static Variable Var(VariableData data) => new Variable(data);
-    public static Variable Var(string name, VariableData data) => new Variable(name, data);
-    public static Variable Var(string name, Expr value) => new Variable(name, value);
-    public static Variable Var(string name, double value) => new Variable(name, value);
-    public static Variable Var(string name, Fonction fonction, Expr of) => new Variable(name, fonction, of);
+    // Var: Name, real, natural, integer, rational, complex, positive, negative, domain, dependencies, default value
     
-    public static Variable Constant(string name, double value) => Variable.CreateConstant(name, value);
 
-    public static Variable[] Vars(params string[] ids)
+    public static Variable Var(string name, 
+        bool real = true, bool natural = false, bool integer = false, bool rational = false, bool complex = false, 
+        bool positive = false, bool negative = false, 
+        Set? domain = null, 
+        string[]? dependencies = null, 
+        Expr? value = null)
     {
-        var vars = new Variable[ids.Length];
-        for (var i = 0; i < ids.Length; i++) vars[i] = new Variable(ids[i]);
+        Set? domain_ = domain;
+        if (real)
+            domain_ = Set.R;
+        if (natural)
+            domain_ = Set.N;
+        if (integer)
+            domain_ = Set.Z;
+        if (rational)
+            domain_ = Set.Q;
+        if (complex)
+            throw new NotImplementedException();
 
-        return vars;
+        if (positive)
+            domain_ = domain_?.Positive;
+        if (negative)
+            domain_ = domain_?.Negative;
+        
+        VariableData data = VariableData.FromValue(name, value);
+        data.Domain = domain_;
+        data.Dependencies = dependencies?.ToList() ?? new();
+        
+        return new Variable(name, data);
     }
 }

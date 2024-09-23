@@ -9,7 +9,7 @@ public class CosExpr(Expr x) : TrigonometrieExpr(x)
 
     public override string Name => "cos";
 
-    protected override Expr BaseDerivee() => -Sin(X);
+    public override Expr fDerivee() => -Sin(X);
 
     public override Expr Reciproque(Expr y) => ACos(y);
 

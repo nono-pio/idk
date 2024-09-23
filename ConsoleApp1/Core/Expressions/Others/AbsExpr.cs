@@ -59,8 +59,8 @@ public class AbsExpr(Expr x) : FonctionExpr(x)
         return Math.Abs(x.N());
     }
 
-    public override Expr Derivee(string variable)
+    public override Expr fDerivee()
     {
-        return Sign(x);
+        return Sign(X);
     }
 }

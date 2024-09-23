@@ -10,8 +10,8 @@ public class ASinExpr(Expr x) : TrigonometrieExpr(x)
     public override string Name => "asin";
     public override string LatexName => "sin^{-1}";
 
-    protected override Expr BaseDerivee() => 1/Sqrt(1 - Pow(x, 2));
-
+    public override Expr fDerivee() => 1 / Sqrt(1 - Pow(X, 2));
+    
     public override Expr Reciproque(Expr y) => Sin(y);
 
     public override double N() => Math.Asin(X.N());

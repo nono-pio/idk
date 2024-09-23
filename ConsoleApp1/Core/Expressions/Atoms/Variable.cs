@@ -1,4 +1,5 @@
-﻿using ConsoleApp1.Core.Classes;
+﻿using System.Runtime.CompilerServices;
+using ConsoleApp1.Core.Classes;
 using ConsoleApp1.Core.Complexes;
 using ConsoleApp1.Core.Expressions.LinearAlgebra;
 using ConsoleApp1.Core.Models;
@@ -6,6 +7,8 @@ using ConsoleApp1.Core.Sets;
 using ConsoleApp1.Latex;
 
 namespace ConsoleApp1.Core.Expressions.Atoms;
+
+// TODO : redone all
 
 public class Variable : Atom
 {
@@ -23,6 +26,9 @@ public class Variable : Atom
     public override Set AsSet() => Set.CreateFiniteSet(this);
 
     public readonly string Name;
+    public readonly bool Dummy = false;
+    
+    
     public VariableData? _data = null;
     public VariableData Data
     {
@@ -84,9 +90,10 @@ public class Variable : Atom
     public override Expr NotEval(Expr[] exprs, object[]? objects = null) => Eval(exprs, objects);
 
     
-    public Variable(string name)
+    public Variable(string name, bool dummy = false)
     {
         Name = name;
+        Dummy = dummy;
         
         if (!Variables.ContainsKey(name))
         {
@@ -129,7 +136,16 @@ public class Variable : Atom
 
     public override int CompareSelf(Atom expr)
     {
-        return string.Compare(Name, ((Variable)expr).Name, StringComparison.Ordinal);
+        var other = (Variable) expr;
+        if (other.Dummy || Dummy)
+        {
+            int adr1 = RuntimeHelpers.GetHashCode(this);
+            int adr2 = RuntimeHelpers.GetHashCode(other);
+
+            return adr1.CompareTo(adr2);
+        }
+        
+        return string.Compare(Name, other.Name, StringComparison.Ordinal);
     }
     
     // <-- VariableData Functions -->

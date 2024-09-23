@@ -25,11 +25,15 @@ public abstract class FonctionExpr(Expr x) : Expr(x)
         return OrderOfOperation.Atom;
     }
     
-    protected virtual Expr? BaseDerivee() => null;
-    public override Expr Derivee(string variable)
+    public virtual Expr fDerivee() => throw new NotImplementedException();
+    public override Expr fDerivee(int argIndex)
     {
-        var baseDerivee = BaseDerivee();
-        return baseDerivee is null ? new Derivative(this, variable) : X.Derivee(variable) * baseDerivee;
+        if (argIndex == 0)
+        {
+            return fDerivee();
+        }
+
+        throw new ArgumentException("ArgIndex must be 0 for a univariate function");
     }
 
     /// Retourne la reciproque de la fonction pour y : f^r(y)

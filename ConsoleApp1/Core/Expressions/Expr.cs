@@ -279,7 +279,21 @@ public abstract class Expr
     
     # region Derivee
     
-    public abstract Expr Derivee(string variable);
+    public virtual Expr fDerivee(int argIndex) => throw new NotImplementedException("fDerivee not implemented for " + GetType());
+
+    public virtual Expr Derivee(string variable)
+    {
+        Expr result = 0;
+        for (int i = 0; i < Args.Length; i++)
+        {
+            if (Args[i].Constant(variable))
+                continue;
+            
+            result += fDerivee(i) * Args[i].Derivee(variable);
+        }
+
+        return result;
+    }
     
     public virtual Expr Derivee(string variable, int n)
     {

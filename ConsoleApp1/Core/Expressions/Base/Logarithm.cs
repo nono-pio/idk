@@ -76,11 +76,20 @@ public class Logarithm : Expr
             return Pow(Value, 1 / y);
         }
         
-        throw new Exception("ArgIndex must be 0 (value) or 1 (base)");
+        throw new ArgumentException("ArgIndex must be 0 (value) or 1 (base)");
     }
 
-    public override Expr Derivee(string variable)
+    public override Expr fDerivee(int argIndex)
     {
-        throw new NotImplementedException();
+        if (argIndex == 0)
+        {
+            return 1 / (Value * Ln(Base));
+        }
+        else if (argIndex == 1)
+        {
+            return - this / (Base * Ln(Base));
+        }
+        
+        throw new ArgumentException("ArgIndex must be 0 (value) or 1 (base)");
     }
 }

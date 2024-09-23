@@ -9,10 +9,7 @@ public class SinExpr(Expr x) : FonctionExpr(x)
     
     public override string Name => "sin";
 
-    protected override Expr BaseDerivee()
-    {
-        return Cos(X);
-    }
+    public override Expr fDerivee() => Cos(X);
 
     public override Expr Reciproque(Expr y) => ASin(y);
     

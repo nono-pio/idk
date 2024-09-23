@@ -9,10 +9,7 @@ public class TanExpr(Expr x) : FonctionExpr(x)
     
     public override string Name => "tan";
 
-    protected override Expr BaseDerivee()
-    {
-        return 1 - Pow(Tan(X), 2);
-    }
+    public override Expr fDerivee() => 1 - Pow(Tan(X), 2);
 
     public override Expr Reciproque(Expr y) => ATan(y);
     

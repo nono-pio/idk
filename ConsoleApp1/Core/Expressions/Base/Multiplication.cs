@@ -172,6 +172,11 @@ public class Multiplication : Expr
         return Factors.Skip(1).Aggregate(Factors[0].AsSet(), (result, factor) => SetAAddSetB(result, factor.AsSet()));
     }
 
+    public override Expr fDerivee(int argIndex)
+    {
+        return Mul(Factors.Where((_, i) => i != argIndex).ToArray());
+    }
+
     public override Expr Derivee(string variable)
     {
         var therms = new Expr[Factors.Length];

@@ -91,17 +91,19 @@ public class Power : Expr
     {
         return OrderOfOperation.Power;
     }
-    public override Expr Derivee(string variable)
+
+    public override Expr fDerivee(int argIndex)
     {
-        if (Exp.Constant(variable)) 
-            return Exp * Pow(Base, Exp - 1) * Base.Derivee(variable);
-
-       
-        if (Base.Constant(variable))
-            return Exp.Derivee(variable) * Ln(Base) * this;
-
-        throw new NotImplementedException("Power.Derivee : Base et Exp non constant");
-        return null /**/;
+        if (argIndex == 0)
+        {
+            return Exp * Pow(Base, Exp - 1);
+        }
+        if (argIndex == 1)
+        {
+            return Ln(Base) * this;
+        }
+        
+        throw new ArgumentException("ArgIndex must be 0 (base) or 1 (exp)");
     }
 
     public override Expr Derivee(string variable, int n)

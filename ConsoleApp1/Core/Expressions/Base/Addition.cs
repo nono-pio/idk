@@ -197,6 +197,8 @@ public class Addition : Expr
     
     # region Derivee
 
+    public override Expr fDerivee(int argIndex) => 1;
+
     public override Expr Derivee(string variable)
     {
         var newThermes = new Expr[Therms.Length];
