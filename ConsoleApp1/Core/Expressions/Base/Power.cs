@@ -106,7 +106,7 @@ public class Power : Expr
         throw new ArgumentException("ArgIndex must be 0 (base) or 1 (exp)");
     }
 
-    public override Expr Derivee(string variable, int n)
+    public override Expr Derivee(Variable variable, int n)
     {
         
         if (n == 0)

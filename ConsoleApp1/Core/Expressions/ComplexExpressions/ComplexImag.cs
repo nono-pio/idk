@@ -1,4 +1,5 @@
 ﻿using ConsoleApp1.Core.Complexes;
+using ConsoleApp1.Core.Expressions.Atoms;
 using ConsoleApp1.Latex;
 
 namespace ConsoleApp1.Core.Expressions.ComplexExpressions;
@@ -40,7 +41,7 @@ public class ComplexImag : Expr
         throw new Exception("Cannot take Inverse of the function Im(z)");
     }
 
-    public override Expr Derivee(string variable)
+    public override Expr Derivee(Variable variable)
     {
         return Im(X.Derivee(variable));
     }

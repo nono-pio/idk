@@ -8,9 +8,9 @@ namespace ConsoleApp1.Core.Solvers;
 public class Solve
 {
     
-    public static Set? SolveFor(Expr expr, Expr y, string variable) => FindRoots(expr - y, variable);
+    public static Set? SolveFor(Expr expr, Expr y, Variable variable) => FindRoots(expr - y, variable);
     
-    public static Set? FindRoots(Expr f, string variable)
+    public static Set? FindRoots(Expr f, Variable variable)
     {
         if (f.Constant(variable))
         {
@@ -25,7 +25,7 @@ public class Solve
         return MatchPattern(f, y, variable);
     }
     
-    public static Set? MatchPattern(Expr expr, Expr y, string variable)
+    public static Set? MatchPattern(Expr expr, Expr y, Variable variable)
     {
         // Multiplication
         // f1(x) * f2(x) = 0 -> f1(x) = 0 or f2(x) = 0

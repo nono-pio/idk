@@ -1,15 +1,17 @@
-﻿namespace ConsoleApp1.Core.Expressions.Others;
+﻿using ConsoleApp1.Core.Expressions.Atoms;
 
-public class Derivative(Expr function, string variable, Expr? n = null) : Expr(function, n ?? Num(1))
+namespace ConsoleApp1.Core.Expressions.Others;
+
+public class Derivative(Expr function, Variable variable, Expr? n = null) : Expr(function, n ?? Num(1))
 {
     public Expr Function => Args[0];
-    public string Variable = variable;
+    public Variable Variable = variable;
     public Expr n => Args[1];
     
-    public static Expr Construct(Expr function, string variable, Expr n) => new Derivative(function, variable, n);
-    public static Expr Construct(Expr function, string variable) => new Derivative(function, variable);
-    public override Expr Eval(Expr[] exprs, object[]? objects = null) => Construct(exprs[0], (string)objects[0], exprs[1]);
-    public override Expr NotEval(Expr[] exprs, object[]? objects = null) => new Derivative(exprs[0], (string)objects[0], exprs[1]);
+    public static Expr Construct(Expr function, Variable variable, Expr n) => new Derivative(function, variable, n);
+    public static Expr Construct(Expr function, Variable variable) => new Derivative(function, variable);
+    public override Expr Eval(Expr[] exprs, object[]? objects = null) => Construct(exprs[0], (Variable)objects[0], exprs[1]);
+    public override Expr NotEval(Expr[] exprs, object[]? objects = null) => new Derivative(exprs[0], (Variable)objects[0], exprs[1]);
 
     public Expr DoIt()
     {
@@ -33,7 +35,7 @@ public class Derivative(Expr function, string variable, Expr? n = null) : Expr(f
         throw new NotImplementedException();
     }
 
-    public override Expr Derivee(string variable)
+    public override Expr Derivee(Variable variable)
     {
         if (variable == Variable)
             return new Derivative(Function, Variable, n + 1);

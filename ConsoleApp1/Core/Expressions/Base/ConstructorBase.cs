@@ -36,11 +36,11 @@ public static class ConstructorBase
         return Pow(value, Div(1, n));
     }
     
-    public static Expr Exp(Expr value) => Pow(Constants.E, value);
+    public static Expr Exp(Expr value) => Pow(Constant.E, value);
 
     public static Expr Log(Expr value, Expr @base) => Logarithm.Construct(value, @base);    
     public static Expr Log(Expr value) => Log10(value);
     public static Expr Log10(Expr value) => Logarithm.Construct(value, 10);
     public static Expr Log2(Expr value) => Logarithm.Construct(value, 2);
-    public static Expr Ln(Expr value) => Logarithm.Construct(value, Constants.E);
+    public static Expr Ln(Expr value) => Logarithm.Construct(value, Constant.E);
 }

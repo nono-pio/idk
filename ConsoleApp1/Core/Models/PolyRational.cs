@@ -31,7 +31,7 @@ public class PolyRational
         return new PolyRational(Num / gcd, Den / gcd);
     }
 
-    public static bool IsPolyRational(Expr expr, string var)
+    public static bool IsPolyRational(Expr expr, Variable var)
     {
         if (expr.Constant(var))
             return true; // deg=0
@@ -47,7 +47,7 @@ public class PolyRational
 
     }
     
-    public static PolyRational ToPolyRational(Expr expr, string variable)
+    public static PolyRational ToPolyRational(Expr expr, Variable variable)
     {
         if (expr.Constant(variable))
             return new PolyRational(new Poly(expr));

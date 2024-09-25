@@ -1,13 +1,15 @@
-﻿namespace ConsoleApp1.Core.Expressions.Others;
+﻿using ConsoleApp1.Core.Expressions.Atoms;
+
+namespace ConsoleApp1.Core.Expressions.Others;
 
 public class LimitExpr : Expr
 {
 
     public Expr f;
-    public string var;
+    public Variable var;
     public Expr lim;
     
-    public LimitExpr(Expr f, string var, Expr lim)
+    public LimitExpr(Expr f, Variable var, Expr lim)
     {
         this.f = f;
         this.var = var;
@@ -44,7 +46,7 @@ public class LimitExpr : Expr
         throw new NotImplementedException();
     }
 
-    public override Expr Derivee(string variable)
+    public override Expr Derivee(Variable variable)
     {
         throw new NotImplementedException();
     }

@@ -39,8 +39,6 @@ app.MapPost("/eval", ([FromBody] EvalRequest request) =>
     var input = Parser.Parse(request.Expr);
     if (input is null)
         return Results.BadRequest();
-    
-    SetVariables(request.Variables);
 
     return Results.Ok(new EvalResponse(input.ToLatex(), input.SafeN()));
 });
@@ -50,10 +48,8 @@ app.MapPost("/derivative", ([FromBody] DerivativeRequest request) =>
     var func = Parser.Parse(request.Expr);
     if (func is null)
         return Results.BadRequest();
-    
-    SetVariables(request.Variables);
 
-    var derivative = func.Derivee(request.Var);
+    var derivative = func.Derivee((Variable) request.Var);
     return Results.Ok(new DerivativeResponse(derivative.ToLatex(), derivative.SafeN()));
 });
 
@@ -62,8 +58,6 @@ app.MapPost("/integral", ([FromBody] IntegralRequest request) =>
     var func = Parser.Parse(request.Expr);
     if (func is null)
         return Results.BadRequest();
-    
-    SetVariables(request.Variables);
 
     Expr integral = double.NaN;//func.Integrate(request.Var);
     return Results.Ok(new IntegralResponse(integral.ToLatex(), integral.SafeN()));
@@ -74,8 +68,6 @@ app.MapPost("/limit", ([FromBody] LimitRequest request) =>
     var func = Parser.Parse(request.Expr);
     if (func is null)
         return Results.BadRequest();
-    
-    SetVariables(request.Variables);
 
     Expr limit = double.NaN; //func.Limit(request.Var, Parser.Parse(request.To));
     return Results.Ok(new LimitResponse(limit.ToLatex(), limit.SafeN()));
@@ -86,8 +78,6 @@ app.MapPost("/simplify", ([FromBody] SimplifyRequest request) =>
     var func = Parser.Parse(request.Expr);
     if (func is null)
         return Results.BadRequest();
-    
-    SetVariables(request.Variables);
 
     Expr simplified = double.NaN; //func.Simplify();
     return Results.Ok(new SimplifyResponse(simplified.ToLatex(), simplified.SafeN()));
@@ -98,12 +88,10 @@ app.MapPost("/analyse", ([FromBody] AnalyzeFunctionRequest request) =>
     var func = Parser.Parse(request.Expr);
     if (func is null)
         return Results.BadRequest();
-    
-    SetVariables(request.Variables);
 
     Expr domain = double.NaN; //func.Domain();
     Expr range = double.NaN; //func.Range();
-    Expr derivative = func.Derivee(request.Var); //func.Derivee(request.Var);
+    Expr derivative = func.Derivee((Variable) request.Var); //func.Derivee(request.Var);
     Expr integral = double.NaN; //func.Integrate(request.Var);
     Expr reciprocal = double.NaN; //func.Reciprocal();
     Expr seriesExpansion = double.NaN; //func.SeriesExpansion();
@@ -118,11 +106,9 @@ app.MapPost("/equation", ([FromBody] EquationRequest request) =>
     var func2 = Parser.Parse(request.RHS);
     if (func1 is null || func2 is null)
         return Results.BadRequest();
-    
-    SetVariables(request.Variables);
 
     Equation equation = new(func1, func2);
-    var sol = equation.SolveFor(request.Var);
+    var sol = equation.SolveFor((Variable) request.Var);
     var numValue = double.NaN;//equation.SolveNumericallyFor(request.Var);
     
     return Results.Ok(new EquationResponse(sol.ToLatex(), double.IsNaN(numValue) ? null : numValue));
@@ -135,8 +121,6 @@ app.MapPost("/inequality", ([FromBody] InequalityRequest request) =>
     var func2 = Parser.Parse(request.RHS);
     if (func1 is null || func2 is null)
         return Results.BadRequest();
-    
-    SetVariables(request.Variables);
     
     InequationType? sign = request.Sign switch
     {
@@ -161,10 +145,8 @@ app.MapPost("/graph", ([FromBody] GraphRequest request) =>
     var func = Parser.Parse(request.Expr);
     if (func is null)
         return Results.BadRequest();
-    
-    SetVariables(request.Variables);
 
-    var f = new Fonction(func, request.Var);
+    var f = new Fonction(func, (Variable) request.Var);
 
     var n = 1_000;
     if (request.NumPoints is not null && request.NumPoints > 0)
@@ -187,28 +169,6 @@ app.MapPost("/graph", ([FromBody] GraphRequest request) =>
 });
 
 app.Run();
-
-void SetVariables(VariableModel[]? variables)
-{
-    if (variables is null)
-        return;
-    
-    for (int i = 0; i < variables.Length; i++)
-    {
-        var variable = variables[i];
-        
-        var name = variable.Name;
-        var dependencies = variable.Dependencies ?? Array.Empty<string>();
-        var value = variable.Value is null ? null : Parser.Parse(variable.Value);
-        var domain = variable.Domain is null ? null : Parser.ParseSet(variable.Domain);
-
-        var data = VariableData.FromValue(name, value);
-        data.Dependencies = dependencies.ToList();
-        data.Domain = domain;
-        
-        Variable.Variables[name] = data;
-    }
-}
 
 /*
 All things that you can do with the API are:

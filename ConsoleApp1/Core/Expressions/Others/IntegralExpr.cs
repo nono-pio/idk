@@ -1,4 +1,5 @@
-﻿using ConsoleApp1.Core.NumericalAnalysis;
+﻿using ConsoleApp1.Core.Expressions.Atoms;
+using ConsoleApp1.Core.NumericalAnalysis;
 
 namespace ConsoleApp1.Core.Expressions.Others;
 
@@ -6,10 +7,10 @@ public class IntegralExpr : Expr
 {
 
     public Expr f;
-    public string var;
+    public Variable var;
     public (Expr a, Expr b)? Bornes; 
     
-    public IntegralExpr(Expr f, string var, (Expr a, Expr b)? bornes = null) : base(f)
+    public IntegralExpr(Expr f, Variable var, (Expr a, Expr b)? bornes = null) : base(f)
     {
         this.f = f;
         this.var = var;
@@ -21,7 +22,7 @@ public class IntegralExpr : Expr
         return [var, Bornes];
     }
 
-    public static Expr Eval(Expr f, string var, (Expr a, Expr b)? bornes = null)
+    public static Expr Eval(Expr f, Variable var, (Expr a, Expr b)? bornes = null)
     {
 
         if (f.IsZero)
@@ -39,19 +40,19 @@ public class IntegralExpr : Expr
     }
     public override Expr Eval(Expr[] exprs, object[]? objects = null)
     {
-        return Eval(exprs[0], (string) objects[1], ((Expr, Expr)) objects[2]);
+        return Eval(exprs[0], (Variable) objects[1], ((Expr, Expr)) objects[2]);
     }
 
     public override Expr NotEval(Expr[] exprs, object[]? objects = null)
     {
-        return new IntegralExpr(exprs[0], (string) objects[1], ((Expr, Expr)) objects[2]);
+        return new IntegralExpr(exprs[0], (Variable) objects[1], ((Expr, Expr)) objects[2]);
     }
 
     public override string ToLatex()
     {
         string bornes_latex = Bornes is null ? "" : "_{" + Bornes.Value.a.ToLatex() + "}^{" + Bornes.Value.b.ToLatex() + "}";
         
-        return "\\int" + bornes_latex + " " + f.ToLatex() + " d" + var;
+        return "\\int" + bornes_latex + " " + f.ToLatex() + " d" + var.ToLatex();
     }
 
     public override double N()
@@ -72,7 +73,7 @@ public class IntegralExpr : Expr
         throw new NotImplementedException();
     }
 
-    public override Expr Derivee(string variable)
+    public override Expr Derivee(Variable variable)
     {
         throw new NotImplementedException();
     }

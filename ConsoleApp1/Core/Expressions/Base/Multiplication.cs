@@ -18,7 +18,7 @@ public class Multiplication : Expr
             throw new Exception("You must add two or more factor");
     }
 
-    public override (Expr Constant, Expr Variate) SeparateConstant(string var)
+    public override (Expr Constant, Expr Variate) SeparateConstant(Variable var)
     {
 
         var cstes = new Expr[Factors.Length];
@@ -177,7 +177,7 @@ public class Multiplication : Expr
         return Mul(Factors.Where((_, i) => i != argIndex).ToArray());
     }
 
-    public override Expr Derivee(string variable)
+    public override Expr Derivee(Variable variable)
     {
         var therms = new Expr[Factors.Length];
         for (var i = 0; i < Factors.Length; i++)
@@ -231,7 +231,7 @@ public class Multiplication : Expr
         return Add(therms.ToArray());
     }
 
-    public override Expr Derivee(string variable, int n)
+    public override Expr Derivee(Variable variable, int n)
     {
 
         int m = Factors.Length;

@@ -1,4 +1,5 @@
 ﻿using ConsoleApp1.Core.Complexes;
+using ConsoleApp1.Core.Expressions.Atoms;
 
 namespace ConsoleApp1.Core.Expressions.ComplexExpressions;
 
@@ -50,7 +51,7 @@ public class ComplexExpr(Expr real, Expr imaginary) : Expr(real, imaginary)
         throw new NotImplementedException();
     }
 
-    public override Expr Derivee(string variable)
+    public override Expr Derivee(Variable variable)
     {
         throw new NotImplementedException();
     }

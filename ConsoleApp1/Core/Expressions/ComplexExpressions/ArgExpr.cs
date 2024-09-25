@@ -1,4 +1,6 @@
-﻿namespace ConsoleApp1.Core.Expressions.ComplexExpressions;
+﻿using ConsoleApp1.Core.Expressions.Atoms;
+
+namespace ConsoleApp1.Core.Expressions.ComplexExpressions;
 
 public class ArgExpr(Expr x) : Expr(x)
 {
@@ -32,7 +34,7 @@ public class ArgExpr(Expr x) : Expr(x)
         throw new NotImplementedException();
     }
 
-    public override Expr Derivee(string variable)
+    public override Expr Derivee(Variable variable)
     {
         throw new NotImplementedException();
     }

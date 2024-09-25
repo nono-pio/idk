@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using ConsoleApp1.Core.Expressions.Atoms;
 using Boolean = ConsoleApp1.Core.Booleans.Boolean;
 
 namespace ConsoleApp1.Core.Expressions.Others;
@@ -77,7 +78,7 @@ public class Piecewise : Expr
         throw new NotImplementedException();
     }
 
-    public override Expr Derivee(string variable)
+    public override Expr Derivee(Variable variable)
     {
         throw new NotImplementedException();
     }

@@ -199,7 +199,7 @@ public class Addition : Expr
 
     public override Expr fDerivee(int argIndex) => 1;
 
-    public override Expr Derivee(string variable)
+    public override Expr Derivee(Variable variable)
     {
         var newThermes = new Expr[Therms.Length];
         for (var i = 0; i < Therms.Length; i++) 
@@ -208,7 +208,7 @@ public class Addition : Expr
         return Add(newThermes);
     }
 
-    public override Expr Derivee(string variable, int n)
+    public override Expr Derivee(Variable variable, int n)
     {
         var newThermes = new Expr[Therms.Length];
         for (var i = 0; i < Therms.Length; i++) 

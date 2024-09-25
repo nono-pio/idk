@@ -1,4 +1,5 @@
-﻿using ConsoleApp1.Core.Models;
+﻿using ConsoleApp1.Core.Expressions.Atoms;
+using ConsoleApp1.Core.Models;
 using ConsoleApp1.Core.Sets;
 
 namespace ConsoleApp1.Core.Limits;
@@ -6,7 +7,7 @@ namespace ConsoleApp1.Core.Limits;
 public static class Limit
 {
     // lim x->a f(x) = L
-    public static Expr? LimitOf(Expr expr, string variable, Expr value)
+    public static Expr? LimitOf(Expr expr, Variable variable, Expr value)
     {
         if (expr.Constant(variable))
             return expr;
@@ -19,7 +20,7 @@ public static class Limit
         return LimitFinite(expr, variable, value);
     }
 
-    public static Expr? LimitInf(Expr expr, string variable, bool negativeInf = false)
+    public static Expr? LimitInf(Expr expr, Variable variable, bool negativeInf = false)
     {
         if (PolyRational.IsPolyRational(expr, variable))
         {
@@ -52,7 +53,7 @@ public static class Limit
         return null;
     }
 
-    public static Expr? LimitFinite(Expr expr, string variable, Expr value)
+    public static Expr? LimitFinite(Expr expr, Variable variable, Expr value)
     {
         if (expr.IsContinue(variable, value).IsTrue)
             return expr.Substitue(variable, value);

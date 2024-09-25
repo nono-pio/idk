@@ -83,7 +83,7 @@ public class Number : Atom
     public override Expr Reciprocal(Expr y, int argIndex) =>
         throw new Exception("Cannot Inverse a Atom");
 
-    public override Expr Derivee(string variable) => 0;
+    public override Expr Derivee(Variable variable) => 0;
 
     public override (NumberStruct, Expr?) AsMulCoef()
     {

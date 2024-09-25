@@ -281,7 +281,7 @@ public class Parser
         var exprs = exprsTest.Value.Exprs;
         i += exprsTest.Value.Length;
 
-        var f = new Variable(name, new FunctionVar(name, exprs[0]));
+        var f = new UndefineFunction(name, exprs[0]);
         return (power is null ? f : Pow(f, power), i);
     }
 

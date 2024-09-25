@@ -1,4 +1,6 @@
-﻿namespace ConsoleApp1.Algorithms;
+﻿using ConsoleApp1.Core.Expressions.Atoms;
+
+namespace ConsoleApp1.Algorithms;
 
 public class NewtonMethode
 {
@@ -41,7 +43,7 @@ public class NewtonMethode
         return x;
     }
 
-    public static double RootOf(Expr function, string variable, int max_iter = MAX_ITER, double precision = PRECISION)
+    public static double RootOf(Expr function, Variable variable, int max_iter = MAX_ITER, double precision = PRECISION)
     {
         var f = function.AsFonction(variable);
         var f_ddx = f.Derivee();

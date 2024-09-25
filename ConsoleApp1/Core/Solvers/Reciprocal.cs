@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using ConsoleApp1.Core.Expressions.Atoms;
 using ConsoleApp1.Core.Expressions.Others;
 using ConsoleApp1.Core.Models;
 using ConsoleApp1.Core.Sets;
@@ -7,7 +8,7 @@ namespace ConsoleApp1.Core.Solvers;
 
 public class Reciprocal
 {
-    public static (Expr expr, Expr y) Unfold(Expr expr, Expr y, string variable)
+    public static (Expr expr, Expr y) Unfold(Expr expr, Expr y, Variable variable)
     {
         if (expr.Constant(variable))
             throw new ArgumentException("expr must contain the variable.");
@@ -51,7 +52,7 @@ public class Reciprocal
         throw new UnreachableException();
     }
 
-    public static Expr? ReciprocalPattern(Expr expr, string variable)
+    public static Expr? ReciprocalPattern(Expr expr, Variable variable)
     {
         
         // TODO: Subtitution cos(x)+e^cos(x) -> Xe^X où X=cos(x)

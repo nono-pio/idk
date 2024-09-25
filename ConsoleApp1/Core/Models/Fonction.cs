@@ -5,28 +5,28 @@ namespace ConsoleApp1.Core.Models;
 public class Fonction
 {
     public Expr Fx;
-    public string NameVariable;
+    public Variable Variable;
     
-    public Fonction(Expr fx, string variable)
+    public Fonction(Expr fx, Variable variable)
     {
         Fx = fx;
-        NameVariable = variable;
+        Variable = variable;
     }
 
     public Expr Of(Expr x)
     {
-        return Fx.Substitue(NameVariable, x);
+        return Fx.Substitue(Variable, x);
     }
     
     public double N(double x)
     {
-        var isSet = Variable.SetValue(NameVariable, x);
-        return isSet ? Fx.N() : Of(x).N();
+        Variable.Value = x;
+        return Fx.N();
     }
 
     public Fonction Derivee()
     {
-        return new Fonction(Fx.Derivee(NameVariable), NameVariable);
+        return new Fonction(Fx.Derivee(Variable), Variable);
     }
     
 }

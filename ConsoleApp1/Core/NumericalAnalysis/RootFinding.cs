@@ -64,11 +64,11 @@ public static class RootFinding
         return double.NaN;
     }
 
-    /// find a root of a continuous function f in [a, b]
-    /// k1 (0, INF) k2 (1, 1 + golden ratio) n0 (0, INF)
-    /// f(a) < 0 < f(b)
-    /// Fastest
-    /// https://en.wikipedia.org/wiki/ITP_method
+    // find a root of a continuous function f in [a, b]
+    // k1 (0, INF) k2 (1, 1 + golden ratio) n0 (0, INF)
+    // f(a) < 0 < f(b)
+    // Fastest
+    // https://en.wikipedia.org/wiki/ITP_method
     public static double ITPMethod(double a, double b, Func<double, double> f, double precision = PRECISION, double k1 = 0.1, double k2 = 2, int n0 = 1, int maxIter = 1_000)
     {
 

@@ -1,4 +1,5 @@
-﻿using ConsoleApp1.Latex;
+﻿using ConsoleApp1.Core.Expressions.Atoms;
+using ConsoleApp1.Latex;
 
 namespace ConsoleApp1.Core.Expressions.LinearAlgebra;
 
@@ -177,7 +178,7 @@ public class MatrixExpr : Expr
         throw new NotImplementedException();
     }
 
-    public override Expr Derivee(string variable)
+    public override Expr Derivee(Variable variable)
     {
 
         Expr[] ddx = new Expr[Data.Length];

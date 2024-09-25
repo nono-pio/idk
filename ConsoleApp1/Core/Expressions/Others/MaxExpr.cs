@@ -1,4 +1,6 @@
-﻿namespace ConsoleApp1.Core.Expressions.Others;
+﻿using ConsoleApp1.Core.Expressions.Atoms;
+
+namespace ConsoleApp1.Core.Expressions.Others;
 
 public class MaxExpr : Expr
 {
@@ -49,7 +51,7 @@ public class MaxExpr : Expr
         throw new Exception("Max is not reciprocal");
     }
 
-    public override Expr Derivee(string variable)
+    public override Expr Derivee(Variable variable)
     {
         throw new Exception("Max is not derivable");
     }

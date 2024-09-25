@@ -25,7 +25,7 @@ public static class ConstructorAtoms
         bool real = true, bool natural = false, bool integer = false, bool rational = false, bool complex = false, 
         bool positive = false, bool negative = false, 
         Set? domain = null, 
-        string[]? dependencies = null, 
+        List<Variable>? dependencies = null, 
         Expr? value = null)
     {
         Set? domain_ = domain;
@@ -45,10 +45,6 @@ public static class ConstructorAtoms
         if (negative)
             domain_ = domain_?.Negative;
         
-        VariableData data = VariableData.FromValue(name, value);
-        data.Domain = domain_;
-        data.Dependencies = dependencies?.ToList() ?? new();
-        
-        return new Variable(name, data);
+        return new Variable(name, domain: domain_, dependency: dependencies, value: value);
     }
 }

@@ -50,12 +50,12 @@ public abstract class Expr
     public virtual bool IsPositive => throw new NotImplementedException();
     public virtual bool IsNegative => throw new NotImplementedException();
     
-    public virtual Boolean IsContinue(string variable, Set set)
+    public virtual Boolean IsContinue(Variable variable, Set set)
     {
         return this switch
         {
             Number => true,
-            Variable var => var.Name != variable || var.Data.Domain is null ? true : set.IsSubset(var.Data.Domain),
+            Variable var => var != variable || var.Domain is null ? true : set.IsSubset(var.Domain),
             Addition add => And.Eval(add.Therms.Select(therm => therm.IsContinue(variable, set))),
             Multiplication mul => And.Eval(mul.Factors.Select(factor => factor.IsContinue(variable, set))),
             _ => throw new NotImplementedException()
@@ -84,7 +84,7 @@ public abstract class Expr
     
     public virtual bool IsNaN => this is Number { Num.IsNan: true };
     
-    public bool IsVar(string variable) => this is Variable var && var.Name == variable;
+    public bool IsVar(Variable variable) => this is Variable var && var.Name == variable;
 
     public bool IsNumberInt() => this is Number num && num.IsInteger;
     public bool IsNumberIntPositif() => this is Number num && num.IsNatural;
@@ -123,9 +123,9 @@ public abstract class Expr
     public virtual (Expr Num, Expr Den) AsFraction() => (this, 1);
 
     // af(x) -> a, f(x)
-    public virtual (Expr Constant, Expr Variate) SeparateConstant(string var) => Constant(var) ? (this, 1) : (1, this);
+    public virtual (Expr Constant, Expr Variate) SeparateConstant(Variable var) => Constant(var) ? (this, 1) : (1, this);
     
-    public Fonction AsFonction(string variable)
+    public Fonction AsFonction(Variable variable)
     {
         return new Fonction(this, variable);
     }
@@ -173,7 +173,7 @@ public abstract class Expr
     
     // ax -> a, x / ae^x -> a, e^x
     // (constant, not contant)
-    public (Expr, Expr) AsMulCsteNCste(string variable)
+    public (Expr, Expr) AsMulCsteNCste(Variable variable)
     {
         if (this is not Multiplication mul)
             return Constant(variable) ? (this, Un) : (Un, this);
@@ -281,7 +281,7 @@ public abstract class Expr
     
     public virtual Expr fDerivee(int argIndex) => throw new NotImplementedException("fDerivee not implemented for " + GetType());
 
-    public virtual Expr Derivee(string variable)
+    public virtual Expr Derivee(Variable variable)
     {
         Expr result = 0;
         for (int i = 0; i < Args.Length; i++)
@@ -295,7 +295,7 @@ public abstract class Expr
         return result;
     }
     
-    public virtual Expr Derivee(string variable, int n)
+    public virtual Expr Derivee(Variable variable, int n)
     {
         var result = this;
         for (var i = 0; i < n; i++) 
@@ -304,7 +304,7 @@ public abstract class Expr
         return result;
     }
 
-    public Expr Derivee(string variable, Expr n)
+    public Expr Derivee(Variable variable, Expr n)
     {
         return new Derivative(this, variable, n);
     }
@@ -314,9 +314,9 @@ public abstract class Expr
 
     # region Outils
     
-    public Expr Substitue(string variable, Expr value)
+    public Expr Substitue(Variable variable, Expr value)
     {
-        return Map<Variable>(var => var.Name == variable ? value : var);
+        return Map<Variable>(var => var == variable ? value : var);
     }
     
     public IEnumerable<Expr> GetEnumerableTherms()
@@ -337,7 +337,7 @@ public abstract class Expr
         return [ this ];
     }
     
-    public bool Constant(string variable)
+    public bool Constant(Variable variable)
     {
         if (IsVar(variable)) 
             return false;

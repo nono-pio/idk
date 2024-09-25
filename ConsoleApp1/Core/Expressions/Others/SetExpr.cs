@@ -1,4 +1,5 @@
-﻿using ConsoleApp1.Core.Sets;
+﻿using ConsoleApp1.Core.Expressions.Atoms;
+using ConsoleApp1.Core.Sets;
 
 namespace ConsoleApp1.Core.Expressions.Others;
 
@@ -89,7 +90,7 @@ public class SetExpr(Set set) : Expr
         throw new NotImplementedException();
     }
 
-    public override Expr Derivee(string variable)
+    public override Expr Derivee(Variable variable)
     {
         throw new NotImplementedException();
     }

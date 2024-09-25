@@ -1,4 +1,5 @@
-﻿using ConsoleApp1.Core.Expressions.Base;
+﻿using ConsoleApp1.Core.Expressions.Atoms;
+using ConsoleApp1.Core.Expressions.Base;
 using ConsoleApp1.Core.Expressions.Trigonometrie;
 using ConsoleApp1.Core.Models;
 
@@ -7,7 +8,7 @@ namespace ConsoleApp1.Core.Integrals;
 public class Integral
 {
     // return null if fail
-    public static Expr? Integrate(Expr f, string var, (Expr a, Expr b)? bornes = null, Expr? constant = null, bool useConstant = true)
+    public static Expr? Integrate(Expr f, Variable var, (Expr a, Expr b)? bornes = null, Expr? constant = null, bool useConstant = true)
     {
         if (constant is null)
             constant = "C";
@@ -29,7 +30,7 @@ public class Integral
         return F;
     }
 
-    public static Expr? AntiDerive(Expr f, string var)
+    public static Expr? AntiDerive(Expr f, Variable var)
     {
         /*
         - I af(x) = a If(x)
@@ -80,7 +81,7 @@ public class Integral
         return null;
     }
 
-    private static Expr? SinCosCase(Expr f, string var)
+    private static Expr? SinCosCase(Expr f, Variable var)
     {
         // I sin^n cos^m
         

@@ -61,7 +61,7 @@ public class Poly
         return result;
     }
 
-    public static bool IsPolynomial(Expr expr, string variable)
+    public static bool IsPolynomial(Expr expr, Variable variable)
     {
         if (expr.Constant(variable))
             return true; // deg=0
@@ -77,7 +77,7 @@ public class Poly
         };
     }
     
-    public static Poly ToPoly(Expr expr, string variable)
+    public static Poly ToPoly(Expr expr, Variable variable)
     {
         if (expr.Constant(variable))
             return new Poly(expr);
@@ -117,7 +117,7 @@ public class Poly
                 return basePoly.Pow(exp);
             
             case Variable var: 
-                return var.Name == variable ? new Poly(1, 0) : new Poly(var); // var.Name == variable ? deg=1 : deg=0
+                return var == variable ? new Poly(1, 0) : new Poly(var); // var.Name == variable ? deg=1 : deg=0
             
             default:
                 throw new Exception("This is not a polynomial"); 
@@ -208,7 +208,7 @@ public class Poly
     // (x+1)(x^2+2) -> [1, x+1, x^2+2], x
     // (e^(2x)+e^x+1) -> [(e^x)^2+e^x+1], e^x
     // 2 -> [2], null
-    public static (Poly[], Expr?) AsPolyFactors(Expr expr, string variable)
+    public static (Poly[], Expr?) AsPolyFactors(Expr expr, Variable variable)
     {
 
         Expr? variablePart = null;

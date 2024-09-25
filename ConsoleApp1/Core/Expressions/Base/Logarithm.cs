@@ -25,7 +25,7 @@ public class Logarithm : Expr
     public Complex LnComplex(Complex z)
     {
         var real = Ln(z.SqrNorm)/2;
-        var imag = z.Argument + 2*Constants.PI*"n";
+        var imag = z.Argument + 2*Atoms.Constant.PI*"n";
         
         return new Complex(real, imag);
     }
@@ -41,7 +41,7 @@ public class Logarithm : Expr
     
     public override string ToLatex()
     {
-        if (Base == Constants.E)
+        if (Base == Atoms.Constant.E)
             return LatexUtils.Fonction("\\ln", Value.ToLatex());
         
         if (Base.Is(10)) 

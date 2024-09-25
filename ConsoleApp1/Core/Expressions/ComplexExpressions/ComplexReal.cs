@@ -1,4 +1,5 @@
 ﻿using ConsoleApp1.Core.Complexes;
+using ConsoleApp1.Core.Expressions.Atoms;
 using ConsoleApp1.Latex;
 
 namespace ConsoleApp1.Core.Expressions.ComplexExpressions;
@@ -41,7 +42,7 @@ public class ComplexReal : Expr
         throw new Exception("Cannot take Inverse of the function Re(z)");
     }
 
-    public override Expr Derivee(string variable)
+    public override Expr Derivee(Variable variable)
     {
         return Re(X.Derivee(variable));
     }
