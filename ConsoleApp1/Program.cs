@@ -12,8 +12,7 @@ using ConsoleApp1.Core.Integrals;
 using ConsoleApp1.Core.Limits;
 using ConsoleApp1.Core.Models;
 using ConsoleApp1.Core.NumericalAnalysis;
-using ConsoleApp1.Core.Polynomials.Rings;
-using ConsoleApp1.Core.Polynomials.UnivariatePolynomials;
+using ConsoleApp1.Core.Polynomials;
 using ConsoleApp1.Core.Sets;
 using ConsoleApp1.Core.Solvers;
 using ConsoleApp1.Core.TestDir;
@@ -26,7 +25,12 @@ static void print(object? x)
     Console.WriteLine(x is null ? "null" : x.ToString());
 }
 
-var x = new Variable("x", dummy:true);
-var x2 = x;
+// var poly = new Polynomial([1, 1])*new Polynomial([1, 1])*new Polynomial([2, 1])*2;//new Polynomial([0, 0, 1, 1]);
+// foreach (var (p, i) in poly.YunSquareFree().Select((p, i)=>(p, i)))
+// {
+//     print($"({p})^{i+1}\t{string.Join(";", p.Coefs.Select(c=>c.ToString()))}");
+// }
+// print(poly.YunSquareFree().Aggregate("", (acc, p) => acc + ";" + p));
+// print(poly);
 
-print(x == x2);
+print(new Polynomial([1,4,6,4,1]).SolveDegree().Aggregate("", (acc, p) => acc + ";" + p.ToString()));

@@ -262,9 +262,14 @@ public abstract class Expr
     }
     public abstract double N();
 
-    public Expr Gcd(Expr b)
+    public static Expr Gcd(IEnumerable<Expr> exprs)
     {
-        var a = this;
+        return exprs.Aggregate(Gcd);
+    }
+
+    
+    public static Expr Gcd(Expr a, Expr b)
+    {
         if (a is Number a_num && a_num.IsInteger && b is Number b_num && b_num.IsInteger)
         {
             return Number.Gcd(a_num.ToInt(), b_num.ToInt()).Expr();

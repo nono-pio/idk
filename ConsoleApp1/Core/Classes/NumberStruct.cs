@@ -60,14 +60,14 @@ public struct NumberStruct
         }
 
         Type = NumberType.Fraction;
+        
+        if (denominator < 0)
+        {
+            numerator = -numerator;
+            denominator = -denominator;
+        }
 
         var gcd = NumberUtils.Gcd(numerator, denominator);
-
-        if (Denominator < 0)
-        {
-            Numerator = - Numerator / gcd;
-            Denominator = - Denominator / gcd;
-        }
 
         Numerator = numerator / gcd;
         Denominator = denominator / gcd;
