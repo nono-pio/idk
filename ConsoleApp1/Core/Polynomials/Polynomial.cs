@@ -364,7 +364,7 @@ public class Polynomial
         var n = CTDeg();
         if (n > 0)
             P = P.ShiftRight(n);
-        // todo: add to fac obj
+        // todo: add to fac objects
         
         if (P.Deg == 0) // cste
             return new PolyFactors(P.Coefs[0], []);
