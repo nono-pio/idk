@@ -12,4 +12,5 @@ public static class ConstructorOthers
     public static Expr Round(Expr x) => RoundExpr.Eval(x);
     public static Expr Sign(Expr x) => SignExpr.Eval(x);
     public static Expr Piece(params (Expr, Boolean)[] values) => Piecewise.Eval(values);
+    public static Expr Factorial(Expr x) => FactorialExpr.Eval(x);
 }

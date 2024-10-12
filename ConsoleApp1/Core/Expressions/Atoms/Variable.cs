@@ -34,6 +34,16 @@ public class Variable : Atom
         Value = value;
     }
     
+    public static Variable CreateDummy(string name)
+    {
+        return new Variable(name, dummy: true);
+    }
+    
+    public static Variable CreateUnique()
+    {
+        return CreateDummy("Dummy_" + Guid.NewGuid().ToString("N"));
+    }
+    
     public override object[] GetArgs()
     {
         return new object[] { Name, LatexName, Dummy, Domain, Dependencies, Value };

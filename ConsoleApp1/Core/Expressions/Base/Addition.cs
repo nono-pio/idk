@@ -149,7 +149,49 @@ public class Addition : Expr
         }
     
         return null;
-    } 
+    }
+
+    public static Expr AddOpti(Expr a, Expr b)
+    {
+        if (a is Addition || b is Addition)
+            return Construct(a, b);
+
+        // if (a.IsInfinite || b.IsInfinite)
+        // {
+        //     var aPosInf = a.IsInfinity;
+        //     var bPosInf = b.IsInfinity;
+        //     var aNegInf = a.IsNegativeInfinity;
+        //     var bNegInf = b.IsNegativeInfinity;
+        //     
+        //     // oo + x = oo if x != -oo
+        //     // -oo + x = -oo if x != oo
+        //     // oo + -oo = 0
+        //     
+        //     if ((aPosInf && bNegInf) || (aNegInf && bPosInf))
+        //         return Num(NumberStruct.Nan);
+        //
+        //     if (aPosInf || bPosInf)
+        //         return Inf;
+        //
+        //     if (aNegInf || bNegInf)
+        //         return NegInf;
+        // }
+        
+        if (a is Number numA && b is Number numB)
+            return new Number(numA.Num + numB.Num);
+        
+        if (a.IsNumZero)
+            return b;
+        if (b.IsNumZero)
+            return a;
+
+
+        var result = Combine(a, b);
+        if (result is not null)
+            return result;
+
+        return new Addition(a, b);
+    }
     
     public override Expr Eval(Expr[] args, object[]? objects = null) => Construct(args);
     public override Expr NotEval(Expr[] args, object[]? objects = null) => new Addition(args);

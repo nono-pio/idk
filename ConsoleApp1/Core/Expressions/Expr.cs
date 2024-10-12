@@ -62,6 +62,8 @@ public abstract class Expr
         };
     }
     
+    public bool IsNumZero => this is Number num && num.Num.IsZero;
+
     public virtual bool IsZero
     {
         get
@@ -70,6 +72,8 @@ public abstract class Expr
             return false;
         }
     }
+    
+    public bool IsNumOne => this is Number num && num.Num.IsOne;
 
     public virtual bool IsOne
     {
@@ -324,6 +328,17 @@ public abstract class Expr
         return Map<Variable>(var => var == variable ? value : var);
     }
     
+    public Expr Substitue(Dictionary<Variable,Expr> maps)
+    {
+        Expr expr = this;
+        foreach (var (key, value) in maps)
+        {
+            expr = expr.Substitue(key, value);
+        }
+
+        return expr;
+    }
+    
     public IEnumerable<Expr> GetEnumerableTherms()
     {
         if (this is Addition add)
@@ -407,43 +422,28 @@ public abstract class Expr
     
     public static Expr operator +(Expr expr1, Expr expr2)
     {
-        if (expr1 is Number num1 && expr2 is Number num2)
-            return (Number) (num1.Num + num2.Num);
-
-        return Add(expr1, expr2);
+        return Addition.AddOpti(expr1, expr2);
     }
 
     public static Expr operator -(Expr expr1, Expr expr2)
     {
-        if (expr1 is Number num1 && expr2 is Number num2)
-            return (Number) (num1.Num - num2.Num);
-        
-        return Sub(expr1, expr2);
+        return expr1 + -expr2;
     }
 
     public static Expr operator -(Expr expr)
     {
-        if (expr is Number num)
-            return (Number)(-num.Num);
-        
-        return Neg(expr);
+        return -1 * expr;
     }
 
     public static Expr operator *(Expr expr1, Expr expr2)
     {
-        if (expr1 is Number num1 && expr2 is Number num2)
-            return (Number) (num1.Num * num2.Num);
-
-        return Mul(expr1, expr2);
+        return Multiplication.MulOpti(expr1, expr2);
     }
 
 
     public static Expr operator /(Expr expr1, Expr expr2)
     {
-        if (expr1 is Number num1 && expr2 is Number num2)
-            return (Number) (num1.Num / num2.Num);
-
-        return Div(expr1, expr2);
+        return expr1 * Pow(expr2, -1);
     }
     
     # endregion

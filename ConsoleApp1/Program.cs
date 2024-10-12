@@ -13,6 +13,7 @@ using ConsoleApp1.Core.Limits;
 using ConsoleApp1.Core.Models;
 using ConsoleApp1.Core.NumericalAnalysis;
 using ConsoleApp1.Core.Polynomials;
+using ConsoleApp1.Core.Series;
 using ConsoleApp1.Core.Sets;
 using ConsoleApp1.Core.Solvers;
 using ConsoleApp1.Core.TestDir;
@@ -25,12 +26,25 @@ static void print(object? x)
     Console.WriteLine(x is null ? "null" : x.ToString());
 }
 
-// var poly = new Polynomial([1, 1])*new Polynomial([1, 1])*new Polynomial([2, 1])*2;//new Polynomial([0, 0, 1, 1]);
-// foreach (var (p, i) in poly.YunSquareFree().Select((p, i)=>(p, i)))
-// {
-//     print($"({p})^{i+1}\t{string.Join(";", p.Coefs.Select(c=>c.ToString()))}");
-// }
-// print(poly.YunSquareFree().Aggregate("", (acc, p) => acc + ";" + p));
-// print(poly);
+var f = Sin(x);
+var a = 0;
+var n = 5;
 
-print(new Polynomial([1,4,6,4,1]).SolveDegree().Aggregate("", (acc, p) => acc + ";" + p.ToString()));
+print(TaylorSeries.TaylorSeriesOf(f, x, a, n));
+
+// /// n = c*sqrt^2
+// O(sqrt(n/2))
+static (int, int) sqrt(int n)
+{
+    var sqrt = (int) Math.Floor(Math.Sqrt(n));
+
+    if (n % sqrt * sqrt == 0) // c = 1 case
+        return (1, sqrt);
+
+    sqrt = (int) Math.Ceiling(sqrt / 1.41421356237); // c is min 2
+    
+    for (;n % (sqrt * sqrt) != 0; sqrt--) 
+    {}
+
+    return (n / (sqrt * sqrt), sqrt);
+}

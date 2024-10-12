@@ -133,6 +133,41 @@ public class Multiplication : Expr
 
         return null;
     }
+    
+    public static Expr MulOpti(Expr a, Expr b)
+    {
+        if (a is Multiplication || b is Multiplication)
+            return Construct(a, b);
+
+        // if (a.IsInfinite || b.IsInfinite)
+        // {
+        //     // +-oo * 0 = Nan
+        //     // oo * x = sign(x) * oo
+        //     // -oo * x = -sign(x) * oo
+        //     
+        //     if (a.IsInfinite && b.IsZero || b.IsInfinite && a.IsZero)
+        //         return Num(NumberStruct.Nan);
+        //
+        //     return Sign(a) * Sign(b) * Inf;
+        // }
+        
+        if (a.IsNumZero || b.IsNumZero)
+            return 0;
+        
+        if (a is Number numA && b is Number numB)
+            return new Number(numA.Num * numB.Num);
+
+        if (a.IsNumOne)
+            return b;
+        if (b.IsNumOne)
+            return a;
+
+        var result = Combine(a, b);
+        if (result is not null)
+            return result;
+
+        return new Multiplication(a, b);
+    }
 
     public override Expr Eval(Expr[] exprs, object[]? objects = null) => Construct(exprs);
     public override Expr NotEval(Expr[] exprs, object[]? objects = null) => new Multiplication(exprs);

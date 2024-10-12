@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using ConsoleApp1.Core.Expressions.Atoms;
+using ConsoleApp1.Core.Expressions.Base;
 
 namespace ConsoleApp1.Core.Polynomials;
 
@@ -132,6 +133,7 @@ public class Polynomial
         return new Polynomial(coefs);
     }
     
+    public static Polynomial operator *(Expr a, Polynomial b) => b * a;
     public static Polynomial operator *(Polynomial a, Expr b)
     {
         var coefs = new Expr[a.Deg + 1];
@@ -361,9 +363,9 @@ public class Polynomial
     {
         
         // P(x)x^n
-        var n = CTDeg();
-        if (n > 0)
-            P = P.ShiftRight(n);
+        // var n = CTDeg();
+        // if (n > 0)
+        //     P = P.ShiftRight(n);
         // todo: add to fac objects
         
         if (P.Deg == 0) // cste
@@ -526,4 +528,19 @@ public class Polynomial
     }
 
     #endregion
+
+    /// represents (x + a)^n
+    public static Polynomial NewtonBinomial(Expr a, int n)
+    {
+        if (n == 0)
+            return new Polynomial(1);
+        
+        var coefs = new Expr[n + 1];
+        for (int i = 0; i <= n; i++)
+        {
+            coefs[i] = NumberUtils.Binomial(n, i) * Pow(a, n-i);
+        }
+
+        return new Polynomial(coefs);
+    }
 }
