@@ -181,7 +181,7 @@ app.MapPost("/graph", ([FromBody] GraphRequest request) =>
     return Results.Ok(new GraphResponse(points));
 });
 
-app.Run();
+app.Run("/swagger");
 
 /*
 All things that you can do with the API are:

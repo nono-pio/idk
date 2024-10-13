@@ -365,7 +365,7 @@ public class Multiplication : Expr
         for (var i = 1; i < Factors.Length; i++)
         {
             // TODO : Check if the pow is negative : * -> /
-            result += Symbols.Mul + ParenthesisLatexIfNeeded(Factors[i]);
+            result += Symbols.Mul + ParenthesisLatexIfNeeded(Factors[i]);   
         }
         
         return isM1 ? '-' + result[(2 + Symbols.Mul.Length)..] : result;
