@@ -48,3 +48,6 @@ static (int, int) sqrt(int n)
 
     return (n / (sqrt * sqrt), sqrt);
 }
+
+print((Pow(x, 3) + Exp(x) / x + 2123).Derivee(x));
+print((Pow(x, 3) + Exp(x) / x + 2123).Derivee(x).ToLatex());

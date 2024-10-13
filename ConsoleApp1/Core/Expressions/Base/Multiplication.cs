@@ -368,6 +368,6 @@ public class Multiplication : Expr
             result += Symbols.Mul + ParenthesisLatexIfNeeded(Factors[i]);
         }
         
-        return isM1 ? '-' + result[3..] : result;
+        return isM1 ? '-' + result[(2 + Symbols.Mul.Length)..] : result;
     }
 }
