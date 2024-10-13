@@ -36,7 +36,7 @@ if (true)
 
 app.UseHttpsRedirection();
 
-app.MapGet("/", () => "Hello World!");
+app.MapGet("/", () => "<h1> Welcome to the CAS API </h1><a href='/swagger'>Swagger</a>");
 
 app.MapPost("/eval", ([FromBody] EvalRequest request) =>
 {
@@ -181,7 +181,7 @@ app.MapPost("/graph", ([FromBody] GraphRequest request) =>
     return Results.Ok(new GraphResponse(points));
 });
 
-app.Run("/swagger");
+app.Run();
 
 /*
 All things that you can do with the API are:
