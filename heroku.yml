@@ -1,6 +1,6 @@
 build:
   docker:
-    web: WebApplication1/Dockerfile
+    web: Dockerfile
 
 run:
   web: dotnet WebApplication1.dll
