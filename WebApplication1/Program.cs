@@ -36,8 +36,6 @@ if (true)
 
 app.UseHttpsRedirection();
 
-
-
 app.MapGet("/", () => "Hello World!");
 
 app.MapPost("/eval", ([FromBody] EvalRequest request) =>
@@ -46,18 +44,19 @@ app.MapPost("/eval", ([FromBody] EvalRequest request) =>
     if (input is null)
         return Results.BadRequest();
 
-    return Results.Ok(new EvalResponse(input.ToLatex(), input.SafeN()));
+    return Results.Ok(new EvalResponse(input.ToLatex()));
 });
 
 app.MapPost("/derivative", ([FromBody] DerivativeRequest request) =>
 {
     var func = Parser.Parse(request.Expr);
+    var x = new Variable(request.Var);
+
     if (func is null)
         return Results.BadRequest();
 
-    var x = new Variable(request.Var);
     var derivative = func.Derivee(x);
-    return Results.Ok(new DerivativeResponse(derivative.ToLatex(), derivative.SafeN()));
+    return Results.Ok(new DerivativeResponse(derivative.ToLatex()));
 });
 
 app.MapPost("/integral", ([FromBody] IntegralRequest request) =>
@@ -70,7 +69,7 @@ app.MapPost("/integral", ([FromBody] IntegralRequest request) =>
     
     var integral = Integral.Integrate(func, x);//func.Integrate(request.Var);
     return Results.Ok(
-        new IntegralResponse(integral?.ToLatex() ?? "Cannot do integral", integral?.SafeN() ?? double.NaN));
+        new IntegralResponse(integral?.ToLatex() ?? "Cannot do integral"));
 });
 
 app.MapPost("/limit", ([FromBody] LimitRequest request) =>
@@ -83,7 +82,7 @@ app.MapPost("/limit", ([FromBody] LimitRequest request) =>
         return Results.BadRequest();
     
     var limit = Limit.LimitOf(func, x, x0);
-    return Results.Ok(new LimitResponse(limit?.ToLatex() ?? "Cannot do limit", limit?.SafeN() ?? double.NaN));
+    return Results.Ok(new LimitResponse(limit?.ToLatex() ?? "Cannot do limit"));
 });
 
 app.MapPost("/simplify", ([FromBody] SimplifyRequest request) =>
@@ -93,7 +92,7 @@ app.MapPost("/simplify", ([FromBody] SimplifyRequest request) =>
         return Results.BadRequest();
 
     Expr simplified = double.NaN; //func.Simplify();
-    return Results.Ok(new SimplifyResponse(simplified.ToLatex(), simplified.SafeN()));
+    return Results.Ok(new SimplifyResponse(simplified.ToLatex()));
 });
 
 app.MapPost("/analyse", ([FromBody] AnalyzeFunctionRequest request) =>
@@ -124,9 +123,8 @@ app.MapPost("/equation", ([FromBody] EquationRequest request) =>
 
     Equation equation = new(func1, func2);
     var sol = equation.SolveFor(x);
-    var numValue = double.NaN;//equation.SolveNumericallyFor(request.Var);
     
-    return Results.Ok(new EquationResponse(sol.ToLatex(), double.IsNaN(numValue) ? null : numValue));
+    return Results.Ok(new EquationResponse(sol.ToLatex()));
 });
 
 app.MapPost("/inequality", ([FromBody] InequalityRequest request) =>
@@ -200,23 +198,23 @@ All things that you can do with the API are:
 
 // Eval
 record EvalRequest(string Expr);
-record EvalResponse(string Expr, double? NumValue);
+record EvalResponse(string Expr);
 
 // Derivative
 record DerivativeRequest(string Expr, string Var);
-record DerivativeResponse(string Expr, double? NumValue);
+record DerivativeResponse(string Expr);
 
 // Integral
 record IntegralRequest(string Expr, string Var);
-record IntegralResponse(string Expr, double? NumValue);
+record IntegralResponse(string Expr);
 
 // Limit
 record LimitRequest(string Expr, string Var, string To);
-record LimitResponse(string Expr, double? NumValue);
+record LimitResponse(string Expr);
 
 // Simplify
 record SimplifyRequest(string Expr);
-record SimplifyResponse(string Expr, double? NumValue);
+record SimplifyResponse(string Expr);
 
 // Analyze Function
 record AnalyzeFunctionRequest(string Expr, string Var);
@@ -224,7 +222,7 @@ record AnalyzeFunctionResponse(string EvalFunc, string? Domain, string? Range, s
 
 // Equation
 record EquationRequest(string LHS, string RHS, string Var);
-record EquationResponse(string Solutions, double? NumValue);
+record EquationResponse(string Solutions);
 
 // Inequality
 record InequalityRequest(string LHS, string RHS, string Sign, string Var);
