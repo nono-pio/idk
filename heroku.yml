@@ -3,4 +3,4 @@ build:
     web: Dockerfile
 
 run:
-  web: dotnet AppWeb.dll
+  web: dotnet WebApplication1.dll
