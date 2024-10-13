@@ -1,6 +1,8 @@
 using ConsoleApp1.Core.Equations;
 using ConsoleApp1.Core.Expressions;
 using ConsoleApp1.Core.Expressions.Atoms;
+using ConsoleApp1.Core.Integrals;
+using ConsoleApp1.Core.Limits;
 using ConsoleApp1.Core.Models;
 using ConsoleApp1.Parser;
 using Microsoft.AspNetCore.Mvc;
@@ -53,28 +55,35 @@ app.MapPost("/derivative", ([FromBody] DerivativeRequest request) =>
     if (func is null)
         return Results.BadRequest();
 
-    var derivative = func.Derivee((Variable) request.Var);
+    var x = new Variable(request.Var);
+    var derivative = func.Derivee(x);
     return Results.Ok(new DerivativeResponse(derivative.ToLatex(), derivative.SafeN()));
 });
 
 app.MapPost("/integral", ([FromBody] IntegralRequest request) =>
 {
     var func = Parser.Parse(request.Expr);
+    var x = new Variable(request.Var);
+
     if (func is null)
         return Results.BadRequest();
-
-    Expr integral = double.NaN;//func.Integrate(request.Var);
-    return Results.Ok(new IntegralResponse(integral.ToLatex(), integral.SafeN()));
+    
+    var integral = Integral.Integrate(func, x);//func.Integrate(request.Var);
+    return Results.Ok(
+        new IntegralResponse(integral?.ToLatex() ?? "Cannot do integral", integral?.SafeN() ?? double.NaN));
 });
 
 app.MapPost("/limit", ([FromBody] LimitRequest request) =>
 {
     var func = Parser.Parse(request.Expr);
-    if (func is null)
+    var x = new Variable(request.Var);
+    var x0 = Parser.Parse(request.To);
+    
+    if (func is null || x0 is null)
         return Results.BadRequest();
-
-    Expr limit = double.NaN; //func.Limit(request.Var, Parser.Parse(request.To));
-    return Results.Ok(new LimitResponse(limit.ToLatex(), limit.SafeN()));
+    
+    var limit = Limit.LimitOf(func, x, x0);
+    return Results.Ok(new LimitResponse(limit?.ToLatex() ?? "Cannot do limit", limit?.SafeN() ?? double.NaN));
 });
 
 app.MapPost("/simplify", ([FromBody] SimplifyRequest request) =>
@@ -108,11 +117,13 @@ app.MapPost("/equation", ([FromBody] EquationRequest request) =>
 {
     var func1 = Parser.Parse(request.LHS);
     var func2 = Parser.Parse(request.RHS);
+    var x = new Variable(request.Var);
+    
     if (func1 is null || func2 is null)
         return Results.BadRequest();
 
     Equation equation = new(func1, func2);
-    var sol = equation.SolveFor((Variable) request.Var);
+    var sol = equation.SolveFor(x);
     var numValue = double.NaN;//equation.SolveNumericallyFor(request.Var);
     
     return Results.Ok(new EquationResponse(sol.ToLatex(), double.IsNaN(numValue) ? null : numValue));
@@ -188,39 +199,37 @@ All things that you can do with the API are:
 */
 
 // Eval
-record EvalRequest(string Expr, VariableModel[]? Variables);
+record EvalRequest(string Expr);
 record EvalResponse(string Expr, double? NumValue);
 
 // Derivative
-record DerivativeRequest(string Expr, string Var, VariableModel[]? Variables);
+record DerivativeRequest(string Expr, string Var);
 record DerivativeResponse(string Expr, double? NumValue);
 
 // Integral
-record IntegralRequest(string Expr, string Var, VariableModel[]? Variables);
+record IntegralRequest(string Expr, string Var);
 record IntegralResponse(string Expr, double? NumValue);
 
 // Limit
-record LimitRequest(string Expr, string Var, string To, VariableModel[]? Variables);
+record LimitRequest(string Expr, string Var, string To);
 record LimitResponse(string Expr, double? NumValue);
 
 // Simplify
-record SimplifyRequest(string Expr, VariableModel[]? Variables);
+record SimplifyRequest(string Expr);
 record SimplifyResponse(string Expr, double? NumValue);
 
 // Analyze Function
-record AnalyzeFunctionRequest(string Expr, string Var, VariableModel[]? Variables);
+record AnalyzeFunctionRequest(string Expr, string Var);
 record AnalyzeFunctionResponse(string EvalFunc, string? Domain, string? Range, string? Derivative, string? Integral, string? Reciprocal, string? SeriesExpansion, string? Factorization);
 
 // Equation
-record EquationRequest(string LHS, string RHS, string Var, VariableModel[]? Variables);
+record EquationRequest(string LHS, string RHS, string Var);
 record EquationResponse(string Solutions, double? NumValue);
 
 // Inequality
-record InequalityRequest(string LHS, string RHS, string Sign, string Var, VariableModel[]? Variables);
+record InequalityRequest(string LHS, string RHS, string Sign, string Var);
 record InequalityResponse(string Solutions);
 
 // Graph
-record GraphRequest(string Expr, string Var, double? XStart, double? XEnd, double? YStart, double? YEnd, int? NumPoints, VariableModel[]? Variables);
+record GraphRequest(string Expr, string Var, double? XStart, double? XEnd, double? YStart, double? YEnd, int? NumPoints);
 record GraphResponse(double?[] Points);
-
-record VariableModel(string Name, string[]? Dependencies, string? Domain, string? Value);
