@@ -25,4 +25,25 @@
       </Content>
     </ItemGroup>
 
+    <ItemGroup>
+      <None Include="wwwroot\index.html" />
+      <None Include="wwwroot\mathquill\.exists--used_by_Makefile" />
+      <None Include="wwwroot\mathquill\font\Symbola-basic.eot" />
+      <None Include="wwwroot\mathquill\font\Symbola-basic.ttf" />
+      <None Include="wwwroot\mathquill\font\Symbola-basic.woff" />
+      <None Include="wwwroot\mathquill\font\Symbola-basic.woff2" />
+      <None Include="wwwroot\mathquill\font\Symbola.eot" />
+      <None Include="wwwroot\mathquill\font\Symbola.otf" />
+      <None Include="wwwroot\mathquill\font\Symbola.svg" />
+      <None Include="wwwroot\mathquill\font\Symbola.ttf" />
+      <None Include="wwwroot\mathquill\font\Symbola.woff" />
+      <None Include="wwwroot\mathquill\font\Symbola.woff2" />
+      <None Include="wwwroot\mathquill\mathquill-basic.css" />
+      <None Include="wwwroot\mathquill\mathquill-basic.js" />
+      <None Include="wwwroot\mathquill\mathquill.css" />
+      <None Include="wwwroot\mathquill\mathquill.js" />
+      <None Include="wwwroot\mathquill\mathquill.min.js" />
+      <None Include="wwwroot\mathquill\mathquill.test.js" />
+    </ItemGroup>
+
 </Project>

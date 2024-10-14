@@ -49,11 +49,5 @@ static (int, int) sqrt(int n)
     return (n / (sqrt * sqrt), sqrt);
 }
 
-foreach (var key in TrigonometrieExpr.MapValues.Keys)
-{
-    print("");
-    print(key*Constant.PI);
-    print(Sin(key*Constant.PI));
-    print(Cos(key*Constant.PI));
-    print(Tan(key*Constant.PI));
-}
+var p = Parser.Parse("log_b(x)");
+print(p);

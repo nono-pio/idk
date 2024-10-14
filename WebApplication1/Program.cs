@@ -6,6 +6,7 @@ using ConsoleApp1.Core.Limits;
 using ConsoleApp1.Core.Models;
 using ConsoleApp1.Parser;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Rewrite;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,7 +21,7 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-var port = Environment.GetEnvironmentVariable("PORT") ?? "5000";
+var port = Environment.GetEnvironmentVariable("PORT") ?? "5205";
 app.Urls.Add($"http://*:{port}");
 
 // Configure the HTTP request pipeline.
@@ -36,7 +37,7 @@ if (true)
 
 app.UseHttpsRedirection();
 
-app.MapGet("/", () => "<h1> Welcome to the CAS API </h1><a href='/swagger'>Swagger</a>");
+app.MapGet("/", () => Results.Redirect("/index.html"));
 
 app.MapPost("/eval", ([FromBody] EvalRequest request) =>
 {
@@ -181,6 +182,8 @@ app.MapPost("/graph", ([FromBody] GraphRequest request) =>
     return Results.Ok(new GraphResponse(points));
 });
 
+app.UseStaticFiles();
+app.UseDefaultFiles();
 app.Run();
 
 /*

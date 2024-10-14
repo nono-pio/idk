@@ -44,7 +44,7 @@ public class Parser
 {
     public static Expr? Parse(string input)
     {
-        var parse = GetExpr(input);
+        var parse = GetExpr(input.Replace(" ", null));
         if (parse is null)
             return null;
 
@@ -281,51 +281,123 @@ public class Parser
         var exprs = exprsTest.Value.Exprs;
         i += exprsTest.Value.Length;
 
-        var f = new UndefineFunction(name, exprs[0]);
-        return (power is null ? f : Pow(f, power), i);
+        var func = GetFunctionFromAttributes(name, exprs, subscript, power);
+        if (func is null)
+            return null;
+        
+        return (func, i);
     }
 
-    public static (string FuncName, int Length)? GetFuncName(string input)
+    private static (string FuncName, int Length)? GetFuncName(string input)
     {
-        // FuncName -> Letter | FuncNameList
-        var funcNameList = new string[]
-        {
-            "sin", "cos", "tan", "cot", "sec", "csc",
-            "arcsin", "arccos", "arctan", "arccot", "arcsec", "arccsc",
-            "sinh", "cosh", "tanh", "coth", "sech", "csch",
-            "arsinh", "arcosh", "artanh", "arcoth", "arsech", "arcsch",
-            "ln", "log", "exp",
-            "lim", "max", "min", "sup", "inf",
-            "det", "tr", "rank", "adj", "cof", "diag",
-            "dim", "ker", "im", "span", "null", "range",
-            "conv", "grad", "div", "curl", "lap", "hess",
-            "sgn", "abs", "floor", "ceil", "round",
-            "sqrt", "cbrt", "root",
-            "sum", "prod", "int", "oint", "iint", "iiint", "iiiint", "idotsint",
-            "vec", "mat", "det", "tr", "rank", "adj", "cof", "diag",
-            "dim", "ker", "im", "span", "null", "range",
-            "conv", "grad", "div", "curl", "lap", "hess",
-            "sgn", "abs", "floor", "ceil", "round",
-            "sqrt", "cbrt", "root",
-            "sum", "prod", "int", "oint", "iint", "iiint", "iiiint", "idotsint",
-            "vec", "mat"
-        };
         
-        foreach (var funcName in funcNameList)
+        // FuncName -> [a-zA-Z]+ | \[a-zA-Z]+
+        
+        var i = 0;
+        if (input.Length == 0)
+            return null;
+
+        while (i < input.Length && char.IsLetter(input[i]))
         {
-            if (input.StartsWith(funcName))
-            {
-                return (funcName, funcName.Length);
-            }
+            i++;
         }
         
-        var letterTest = GetLetter(input);
-        if (letterTest is not null)
-            return (letterTest.Value.Letter, letterTest.Value.Length);
-
-        return null;
+        return (input[..i], i);
     }
-    
+
+    private static Expr? GetFunctionFromAttributes(string name, Expr[] vars, Expr? subscript, Expr? power)
+    {
+        // FuncName -> Letter | FuncNameList
+        var univariateFuncsNoSubscripts = new Dictionary<string[], Func<Expr, Expr>>()
+        {
+            { ["sin"], Sin }, 
+            { ["cos"], Cos }, 
+            { ["tan"], Tan }, 
+            { ["arcsin"], ASin }, 
+            { ["arccos"], ACos }, 
+            { ["arctan"], ATan },
+            
+            // { "sinh", Sinh }, 
+            // { "cosh", Cosh }, 
+            // { "tanh", Tanh }, 
+            
+            { ["ln"], Ln },
+            { ["log"], Log },
+            { ["exp"], Exp },
+        
+            { ["im"], Im },
+            { ["re"], Re },
+        
+            { ["sign"], Sign },
+            { ["abs"], Abs },
+            { ["floor"], Floor },
+            { ["ceil"], Ceil },
+            { ["round"], Round },
+            
+            { ["sqrt"], Sqrt },
+            { ["cbrt"], Cbrt },
+        };
+
+        var multivariateFuncsNoSubscripts = new Dictionary<string[], Func<Expr[], Expr>>()
+        {
+            { ["max"], Max },
+            { ["min"], Min },
+        };
+        
+        var oldName = name;
+        if (name[0] == '\\')
+            name = name[1..];
+        name = name.ToLower();
+
+        if (power is not null && power == -1 && ((string[]) ["sin", "cos", "tan"]).Contains(name))
+        {
+            name = "arc" + name;
+            power *= -1;
+        }
+        
+        // TODO: index : log_b
+        // // Create function if name not known and name is not character -> null if character return f(x;...)
+        
+        Expr? result = null;
+
+        if (subscript is null)
+        {
+            // Univariate functions
+            foreach (var (names, func) in univariateFuncsNoSubscripts)
+            {
+                if (names.Contains(name))
+                    result = func(vars[0]);
+            }
+        
+            // Multivariate functions
+            foreach (var (names, func) in multivariateFuncsNoSubscripts)
+            {
+                if (names.Contains(name))
+                    result = func(vars);
+            }    
+        }
+        else // subscript cases
+        {
+            if (name == "log")
+                result = Log(vars[0], subscript);
+            if (name == "exp")
+                result = Pow(subscript, vars[0]);
+        }
+
+        if (result is null && IsLetter(oldName))
+        {
+            result = new UndefineFunction(oldName, vars);
+        }
+
+        if (result is null)
+            return null;
+        
+        if (power is not null && power != 1)
+            result = Pow(result, power);
+
+        return result;
+    }
+
     public static (Expr Sqrt, int Length)? GetSqrt(string input) 
     {
         // Sqrt -> \sqrt [Expr]? \left( Expr \right)
@@ -741,12 +813,16 @@ public class Parser
         return null;
     }
 
-    public static (Variable Var, int Length)? GetVariable(string input)
+    public static (Expr Var, int Length)? GetVariable(string input)
     {
         // Variable -> Letter (_ expr)?
 
         if (input.Length == 0)
             return null;
+        
+        var csteTest = GetConstant(input);
+        if (csteTest is not null)
+            return (csteTest.Value.Cste, csteTest.Value.Length);
 
         var i = 0;
         
@@ -770,6 +846,31 @@ public class Parser
         return (Var(name, subscript:subscript), i);
         */
     }
+
+    public static (Expr Cste, int Length)? GetConstant(string input)
+    {
+        var constants = new Dictionary<string[], Expr>()
+        {
+            { ["pi", "\\pi"], Constant.PI },
+            { ["e"], Constant.E },
+            { ["oo", "\\infty"], Constant.Infinity },
+            { ["-oo"], Constant.NegativeInfinity },
+            { ["\\text{NaN}"], Constant.NaN }
+        };
+        
+        foreach (var (names, cste) in constants)
+        {
+            for (int i = 0; i < names.Length; i++)
+            {
+                if (input.StartsWith(names[i]))
+                {
+                    return (cste, names[i].Length);
+                }
+            }
+        }
+        
+        return null;
+    }
     
     public static (string Letter, int Length)? GetLetter(string input)
     {
@@ -789,6 +890,15 @@ public class Parser
         
         return (name, i);
     }
+    
+    public static bool IsLetter(string input)
+    {
+        if (input.Length == 0)
+            return false;
+
+        return char.IsLetter(input[0]) || IsGreekLetter(input);
+    }
+    
     public static (Expr Expr, int Length)? GetSubscript(string input)
     {
         // Subscript -> _ ShortOrBracesExpr
