@@ -17,7 +17,27 @@ public class Logarithm : Expr
     public Logarithm(Expr value) : base(value, Math.E.Expr()) {}
 
     
-    public static Expr Construct(Expr value, Expr @base) => new Logarithm(value, @base);
+    public static Expr Construct(Expr value, Expr @base)
+    {
+        // log_x(0) = NaN
+        if (value.IsNumZero)
+            return Atoms.Constant.NaN;
+        // log_x(1) = 0
+        if (value.IsNumOne)
+            return 0;
+        // log_1(x) = log(x)/log(1) = log(x)/0 = NaN
+        if (@base.IsNumOne)
+            return Atoms.Constant.NaN;
+
+        // log_x(x) = lnx/lnx = 1
+        if (@base == value)
+            return 1;
+        // log_x(x^n) = n
+        if (value is Power vPow && vPow.Base == @base)
+            return vPow.Exp;
+        
+        return new Logarithm(value, @base);
+    }
     public static Expr Construct(Expr value) => new Logarithm(value);
     public override Expr Eval(Expr[] exprs, object[]? objects = null) => Construct(exprs[0], exprs[1]);
     public override Expr NotEval(Expr[] exprs, object[]? objects = null) => new Logarithm(exprs[0], exprs[1]);

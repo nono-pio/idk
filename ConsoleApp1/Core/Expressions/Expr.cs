@@ -339,6 +339,22 @@ public abstract class Expr
         return expr;
     }
     
+    // return a where a*x=this
+    public Expr? AsMulIndependent(Variable x)
+    {
+        if (this == x)
+            return 1;
+        if (this.IsNumZero)
+            return 0;
+        if (this is Number)
+            return null;
+
+        if (this is Multiplication mul)
+            return mul.AsIndependent(x, exact: true).Constant;
+
+        return null;
+    }
+    
     public IEnumerable<Expr> GetEnumerableTherms()
     {
         if (this is Addition add)

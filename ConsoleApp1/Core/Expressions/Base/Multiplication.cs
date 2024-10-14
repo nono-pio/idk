@@ -370,4 +370,21 @@ public class Multiplication : Expr
         
         return isM1 ? '-' + result[(2 + Symbols.Mul.Length)..] : result;
     }
+    
+    // a*f(x) = a, f(x)
+    public (Expr Constant, Expr Variable) AsIndependent(Variable var, bool exact=false)
+    {
+        Expr constant = 1;
+        Expr variable = 1;
+        foreach (var factor in Factors)
+        {
+            if (exact ? factor == var : !factor.Constant(var))
+                variable *= factor;
+            else
+                constant *= factor;
+            
+        }
+
+        return (constant, variable);
+    }
 }

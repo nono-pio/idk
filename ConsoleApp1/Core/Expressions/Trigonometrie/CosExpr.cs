@@ -1,9 +1,24 @@
-﻿namespace ConsoleApp1.Core.Expressions.Trigonometrie;
+﻿using ConsoleApp1.Core.Expressions.Atoms;
+
+namespace ConsoleApp1.Core.Expressions.Trigonometrie;
 
 public class CosExpr(Expr x) : TrigonometrieExpr(x)
 {
     
-    public static Expr Construct(Expr x) => new CosExpr(x);
+    public static Expr Construct(Expr x)
+    {
+        var n = x.AsMulIndependent(Atoms.Constant.PI);
+        if (n is Number num)
+        {
+            if (MapValues.TryGetValue(num, out var values))
+            {
+                return values.Cos;
+            }
+        }
+        
+        
+        return new CosExpr(x);
+    }
     public override Expr Eval(Expr[] exprs, object[]? objects = null) => Construct(exprs[0]);
     public override Expr NotEval(Expr[] exprs, object[]? objects = null) => new CosExpr(exprs[0]);
 

@@ -26,11 +26,11 @@ static void print(object? x)
     Console.WriteLine(x is null ? "null" : x.ToString());
 }
 
-var f = Sin(x);
-var a = 0;
-var n = 5;
-
-print(TaylorSeries.TaylorSeriesOf(f, x, a, n));
+// var f = Sin(x);
+// var a = 0;
+// var n = 5;
+//
+// print(TaylorSeries.TaylorSeriesOf(f, x, a, n));
 
 // /// n = c*sqrt^2
 // O(sqrt(n/2))
@@ -49,5 +49,11 @@ static (int, int) sqrt(int n)
     return (n / (sqrt * sqrt), sqrt);
 }
 
-print((Pow(x, 3) + Exp(x) / x + 2123).Derivee(x));
-print((Pow(x, 3) + Exp(x) / x + 2123).Derivee(x).ToLatex());
+foreach (var key in TrigonometrieExpr.MapValues.Keys)
+{
+    print("");
+    print(key*Constant.PI);
+    print(Sin(key*Constant.PI));
+    print(Cos(key*Constant.PI));
+    print(Tan(key*Constant.PI));
+}

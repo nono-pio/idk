@@ -11,12 +11,12 @@ public static class ConstructorAtoms
     public static Expr Un => Num(1);
     public static Expr Deux => Num(2);
 
-    public static Expr Num(double num) => new Number(num);
-    public static Expr Num(float num) => new Number(num);
-    public static Expr Num(long num) => new Number(num);
-    public static Expr Num(int num) => new Number(num);
-    public static Expr Num(NumberStruct num) => new Number(num);
-    public static Expr Num(long p, long q) => new Number(new NumberStruct(p, q));
+    public static Number Num(double num) => new Number(num);
+    public static Number Num(float num) => new Number(num);
+    public static Number Num(long num) => new Number(num);
+    public static Number Num(int num) => new Number(num);
+    public static Number Num(NumberStruct num) => new Number(num);
+    public static Number Num(long p, long q) => new Number(new NumberStruct(p, q));
 
     // Var: Name, real, natural, integer, rational, complex, positive, negative, domain, dependencies, default value
     
