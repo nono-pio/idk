@@ -1,4 +1,6 @@
-﻿namespace ConsoleApp1.Core.Booleans;
+﻿using ConsoleApp1.Core.Expressions.Atoms;
+
+namespace ConsoleApp1.Core.Booleans;
 
 public abstract class Boolean
 {
@@ -18,6 +20,8 @@ public abstract class Boolean
 
     public abstract bool? GetValue();
     
+    public virtual Boolean Substitue(Variable variable, Expr value) => this;
+    
     public static Boolean operator !(Boolean b) => new Not(b);
     public static Boolean operator &(Boolean b1, Boolean b2) => new And(b1, b2);
     public static Boolean operator |(Boolean b1, Boolean b2) => new Or(b1, b2);
@@ -26,12 +30,12 @@ public abstract class Boolean
     public static Boolean And(params Boolean[] values) => new And(values);
     public static Boolean Not(Boolean value) => new Not(value);
     
-    public static Boolean Equal(Expr e1, Expr e2) => new Equal(e1, e2);
-    public static Boolean NotEqual(Expr e1, Expr e2) => !Equal(e1, e2);
-    public static Boolean LessThan(Expr e1, Expr e2) => new Less(e1, e2);
-    public static Boolean LessThanOrEqual(Expr e1, Expr e2) => new LessOrEqual(e1, e2);
-    public static Boolean GreaterThan(Expr e1, Expr e2) => new Greater(e1, e2);
-    public static Boolean GreaterThanOrEqual(Expr e1, Expr e2) => new GreaterOrEqual(e1, e2);
+    public static Boolean Equal(Expr e1, Expr e2) => new Relationnals(e1, e2, Relations.Equal);
+    public static Boolean NotEqual(Expr e1, Expr e2) => new Relationnals(e1, e2, Relations.NotEqual);
+    public static Boolean LessThan(Expr e1, Expr e2) => new Relationnals(e1, e2, Relations.Less);
+    public static Boolean LessThanOrEqual(Expr e1, Expr e2) => new Relationnals(e1, e2, Relations.LessOrEqual);
+    public static Boolean GreaterThan(Expr e1, Expr e2) => new Relationnals(e1, e2, Relations.Greater);
+    public static Boolean GreaterThanOrEqual(Expr e1, Expr e2) => new Relationnals(e1, e2, Relations.GreaterOrEqual);
     public static Boolean EQ(Expr e1, Expr e2) => Equal(e1, e2);
     public static Boolean NE(Expr e1, Expr e2) => NotEqual(e1, e2);
     public static Boolean L(Expr e1, Expr e2) => LessThan(e1, e2);

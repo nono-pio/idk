@@ -1,4 +1,5 @@
-﻿using ConsoleApp1.Core.Expressions.ComplexExpressions;
+﻿using ConsoleApp1.Core.Expressions.Atoms;
+using ConsoleApp1.Core.Expressions.ComplexExpressions;
 
 namespace ConsoleApp1.Core.Sets;
 using Boolean = Booleans.Boolean;
@@ -51,6 +52,11 @@ public abstract class Set
     /* Set Creation */
     public static implicit operator Set(Expr expr) => CreateFiniteSet(expr);
 
+    public static Set CreateConditionSet(Boolean condition, Variable variable, Set domain)
+    {
+        return new ConditionSet(condition, variable, domain);
+    }
+    
     public static Set CreateFiniteSet(params Expr[] elements)
     {
         return FiniteSet.CreateFiniteSet(elements);
