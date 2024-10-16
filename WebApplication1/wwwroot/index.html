@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="./mathquill/mathquill.css"/>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
     <script src="./mathquill/mathquill.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
 </head>
 <body>
     <header class="w-100 d-flex flex-wrap align-content-between gap-5 py-3 mb-4 border-bottom">
@@ -27,12 +28,12 @@
 
     <ul class="nav nav-tabs">
         <li class="nav-item">
-            <a class="nav-link active" href="#" data-bs-toggle="tooltip" data-bs-title="Evaluate and Simplify an expression">Evaluate Expression</a>
+            <a class="nav-link active" href="#" data-bs-toggle="tooltip" data-bs-title="Evaluate and Simplify an expression" onclick="ActiveSection('eval')">Evaluate Expression</a>
         </li>
         <li class="nav-item" data-bs-toggle="tooltip" data-bs-title="Analyse a fonction, find domain, range, derive, ...">
             <a class="nav-link" href="#">Analyse Fonction</a>
         </li>
-        <li class="nav-item" data-bs-toggle="tooltip" data-bs-title="Derive a fonction">
+        <li class="nav-item" data-bs-toggle="tooltip" data-bs-title="Derive a fonction" onclick="ActiveSection('ddx')">
             <a class="nav-link" href="#">Dérivation</a>
         </li>
         <li class="nav-item dropdown" data-bs-toggle="tooltip" data-bs-title="Other functionalities">
@@ -47,14 +48,27 @@
         </li>
     </ul>
 
-    <div class="px-4 py-3 my-3 text-center">
-        <h1 class="display-5 fw-bold text-body-emphasis">Enter your expression</h1>
-        <div class="col-lg-6 mx-auto"> 
-            <span class="lead mb-2 w-75" id="math-field" style="min-height: 50px"></span>
-            <p class="mb-3 h5">LaTeX: <span id="latex"></span></p>
+    <!-- Section Evaluation -->
+    <div class="px-4 py-3 my-3 text-center" data-section="eval">
+        <h1 class="display-5 fw-bold text-body-emphasis mb-4">Enter your expression</h1>
+        <div class="col-lg-6 d-flex flex-column align-items-center">
+            <span class="form-control w-75 mb-2" id="eval-expr"></span>
+            <input type="text" class="form-control w-75 mb-2" placeholder="1+1" id="eval-expr-raw"/>
             <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
-                <button type="button" class="btn btn-primary btn-lg px-4 gap-3">Enter</button>
-                <button type="button" class="btn btn-outline-secondary btn-lg px-4">Reset</button>
+                <button type="button" class="btn btn-primary btn-lg px-4 gap-3" onclick="RenderEval()">Enter</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section Derivation -->
+    <div class="px-4 py-3 my-3 text-center" data-section="ddx">
+        <h1 class="display-5 fw-bold text-body-emphasis mb-4">Enter your function and variable</h1>
+        <div class="col-lg-6 d-flex flex-column align-items-center">
+            <span class="form-control w-75 mb-2" id="ddx-func"></span>
+            <input type="text" class="form-control w-75 mb-2" placeholder="x^2" id="ddx-func-raw"/>
+            <input type="text" class="form-control w-75 mb-2" placeholder="x" id="ddx-variable"/>
+            <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                <button type="button" class="btn btn-primary btn-lg px-4 gap-3" onclick="RenderDdx()">Enter</button>
             </div>
         </div>
     </div>
@@ -108,24 +122,163 @@
     </footer>
     
     <script>
+        eruda.init()
+        
         const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
         const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
         
         const dropdownElementList = document.querySelectorAll('.dropdown-toggle')
         const dropdownList = [...dropdownElementList].map(dropdownToggleEl => new bootstrap.Dropdown(dropdownToggleEl))
         
-        var mathFieldSpan = document.getElementById('math-field');
-        var latexSpan = document.getElementById('latex');
-
         var MQ = MathQuill.getInterface(2); // for backcompat
-        var mathField = MQ.MathField(mathFieldSpan, {
-            spaceBehavesLikeTab: true, // configurable
-            handlers: {
-                edit: function() { // useful event handlers
-                    latexSpan.textContent = mathField.latex(); // simple API
-                }
+        const config = {
+            spaceBehavesLikeTab: true,
+        }
+        
+        const resultsContainer = document.getElementById('results')
+        
+        const inputsFromSections = {
+            eval: {
+                expr: MQ.MathField(document.getElementById('eval-expr'), config),
+                expr_raw: document.getElementById('eval-expr-raw')
+            },
+            ddx: {
+                func: MQ.MathField(document.getElementById('ddx-func'), config),
+                func_raw: document.getElementById('ddx-func-raw'),
+                variable: document.getElementById('ddx-variable'),
             }
-        });
+        }
+        
+        ActiveSection("eval")
+        function ActiveSection(section){
+            for (const sectionEl of document.querySelectorAll('[data-section]')) {
+                const sectionName = sectionEl.getAttribute('data-section')
+                if (sectionName === section)
+                    sectionEl.classList.remove("d-none")
+                else
+                    sectionEl.classList.add("d-none")
+            }
+        }
+        
+        async function RenderEval() {
+            
+            const latex = inputsFromSections.eval.expr.latex()
+            const rawLatex = inputsFromSections.eval.expr_raw.value
+            let input = latex === '' ? rawLatex : latex;
+            
+            if (input === null || input === "")
+                return;
+            
+            let result = await FetchSimplify(input)
+            if (result === null)
+                RenderNoResult()
+            else
+                RenderCards([
+                    {
+                        domain: "Evaluation",
+                        title: `Evaluation of ${StaticMath(input)}`,
+                        content: StaticMath(result)
+                    }
+                ])
+        }
+
+        async function RenderDdx() {
+
+            const latex = inputsFromSections.ddx.func.latex()
+            const rawLatex = inputsFromSections.ddx.func_raw.value
+            const variable = inputsFromSections.ddx.variable.value
+            let inputFunc = latex === '' ? rawLatex : latex;
+
+            if (inputFunc === null || inputFunc === "" || variable === "")
+                return;
+
+            let result = await FetchDerivation(inputFunc, variable)
+            if (result === null)
+                RenderNoResult()
+            else
+                RenderCards([
+                    {
+                        domain: "Derivation",
+                        title: `Derivation of ${StaticMath(inputFunc)}`,
+                        content: StaticMath(result)
+                    }
+                ])
+        }
+        
+        function StaticMath(latex) {
+            return `<span class="static-math">${latex}</span>`
+        }
+        
+        function RenderNoResult() {
+            resultsContainer.innerHTML = "No Results"
+        }
+        
+        function RenderCards(cards) {
+            resultsContainer.innerHTML = ""
+            cards.forEach(card => {
+                resultsContainer.innerHTML += CreateHTMLCard(card)
+            })
+            RenderStaticMath()
+        }
+        
+        function RenderStaticMath() {
+            for (const staticMathEl of document.getElementsByClassName("static-math")) {
+                MQ.StaticMath(staticMathEl);
+            }
+        }
+        
+        function CreateHTMLCard(card) {
+            return `
+        <div class="card mb-3">
+            <div class="card-header">
+                ${card.domain}
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">${card.title}</h5>
+                <p class="card-text">${card.content}</p>
+            </div>
+        </div>`
+        }
+        
+        EvalURL = "/eval"
+        async function FetchSimplify(input) {
+            const response = await fetch(EvalURL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    "expr": input
+                })
+            })
+            
+            if (!response.ok)
+                return null
+            
+            const body = await response.json()
+            return body.expr
+        }
+
+        DerivationURL = "/derivative"
+        async function FetchDerivation(func, variable) {
+            const response = await fetch(DerivationURL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    "expr": func,
+                    "var": variable
+                })
+            })
+
+            if (!response.ok)
+                return null
+
+            const body = await response.json()
+            return body.expr
+        }
+        
     </script>
 
 </body>
