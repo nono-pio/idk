@@ -49,5 +49,9 @@ static (int, int) sqrt(int n)
     return (n / (sqrt * sqrt), sqrt);
 }
 
-var p = Parser.Parse("\\ln(exp(x))");
-print(p);
+
+string[] list = ["e^(12)sin(x)"];
+foreach (var p in list)
+{
+    print(Parser.Parse(p).ToLatex());
+}
