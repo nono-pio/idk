@@ -1,4 +1,5 @@
-﻿using ConsoleApp1.Core.Classes;
+﻿using System.Text.RegularExpressions;
+using ConsoleApp1.Core.Classes;
 using ConsoleApp1.Core.Expressions.Atoms;
 using ConsoleApp1.Core.Expressions.Others;
 using ConsoleApp1.Core.Sets;
@@ -6,6 +7,51 @@ using ConsoleApp1.Latex;
 
 namespace ConsoleApp1.Parser;
 
+public struct Parsed<T>
+{
+    public T Value;
+    public int Length;
+    
+    public bool IsNull => Length == 0;
+    
+    public static Parsed<T> Null => new Parsed<T>(default, 0);
+    public Parsed(T value, int length)
+    {
+        Value = value;
+        Length = length;
+    }
+    
+    public static Parsed<T> Or(string input, params Func<string, Parsed<T>>[] parsers)
+    {
+        foreach (var parse in parsers)
+        {
+            var result = parse(input);
+            if (!result.IsNull)
+                return result;
+        }
+
+        return Null;
+    }
+    
+    public static Parsed<string> ParseString(string input, string pattern)
+    {
+        if (input.StartsWith(pattern))
+            return new(pattern, pattern.Length);
+
+        return Parsed<string>.Null;
+    }
+    
+    public static Parsed<string> ParseStrings(string input, params string[] patterns)
+    {
+        foreach (var pattern in patterns)
+        {
+            if (input.StartsWith(pattern))
+                return new(pattern, pattern.Length);
+        }
+        
+        return Parsed<string>.Null;
+    }
+}
 
 
 /*
@@ -42,13 +88,12 @@ Parser Grammar:
 
 public class Parser
 {
+    public static Parsed<Expr> Null => Parsed<Expr>.Null;
+    
     public static Expr? Parse(string input)
     {
-        var parse = GetExpr(input.Replace(" ", null));
-        if (parse is null)
-            return null;
-
-        return parse.Value.Expr;
+        var parse = GetExpr(input);
+        return parse.IsNull ? null : parse.Value;
     } 
     
     
@@ -77,52 +122,52 @@ public class Parser
     Atom -> Number | Variable | (Expr) | Set | Vecteur | Matrice
     
     */
-    public static (Expr Expr, int Length)? GetExpr(string input)
+    public static Parsed<Expr> GetExpr(string input)
     {
         return GetAdd(input);
     }
 
-    public static (Expr Add, int Length)? GetAdd(string input)
+    public static Parsed<Expr> GetAdd(string input)
     {
         var i = 0;
         
         var mulTest = GetMul(input);
-        if (mulTest is null)
-            return null;
+        if (mulTest.IsNull)
+            return Null;
         
-        var currentExpr = mulTest.Value.Mul;
-        i += mulTest.Value.Length;
+        var sum = mulTest.Value;
+        i += mulTest.Length;
 
         while (i < input.Length)
         {
             var sign = input[i];
             if (sign != '+' && sign != '-')
-                return (currentExpr, i);
+                return new(sum, i);
             
             i++;
             
             mulTest = GetMul(input[i..]);
-            if (mulTest is null)
-                return null;
+            if (mulTest.IsNull)
+                return Null;
             
-            i += mulTest.Value.Length;
+            i += mulTest.Length;
             
             if (sign == '+')
-                currentExpr = Add(currentExpr, mulTest.Value.Mul);
+                sum = Add(sum, mulTest.Value);
             else // sign == '-'
-                currentExpr = Sub(currentExpr, mulTest.Value.Mul);
+                sum = Sub(sum, mulTest.Value);
         }
 
-        return (currentExpr, i);
+        return new(sum, i);
     }
     
-    public static (Expr Mul, int Length)? GetMul(string input)
+    public static Parsed<Expr> GetMul(string input)
     {
         var i = 0;
         
         var powTest = GetPow(input);
         if (powTest is null)
-            return null;
+            return Null;
         
         var currentExpr = powTest.Value.Pow;
         i += powTest.Value.Length;
@@ -130,15 +175,15 @@ public class Parser
         while (i < input.Length)
         {
             var sepTest = GetMulSeparator(input[i..]);
-            if (sepTest is null)
-                return null;
+            if (sepTest.IsNull)
+                return Null;
             
-            var mulType = sepTest.Value.MulType;
-            i += sepTest.Value.Length;
+            var mulType = sepTest.Value;
+            i += sepTest.Length;
             
             powTest = GetPow(input[i..]);
             if (powTest is null)
-                return mulType == 0 ? (currentExpr, i) : null;
+                return mulType == 0 ? new(currentExpr, i) : Null;
             
             i += powTest.Value.Length;
             if (mulType <= 1)
@@ -147,32 +192,32 @@ public class Parser
                 currentExpr = Div(currentExpr, powTest.Value.Pow);
         }
 
-        return (currentExpr, i);
+        return new(currentExpr, i);
     }
 
     // MulType: 0: None, 1: *, 2: /
-    public static (int MulType, int Length)? GetMulSeparator(string input)
+    public static Parsed<int> GetMulSeparator(string input)
     {
         // separators: * / None \cdot, \times
         const string cdot = @"\cdot";
         const string times = @"\times";
         
         if (input.Length == 0)
-            return null;
+            return Parsed<int>.Null;
 
         if (input[0] == '*')
-            return (1, 1);
+            return new(1, 1);
         
         if (input[0] == '/')
-            return (2, 1);
+            return new(2, 1);
         
         if (input.StartsWith(cdot))
-            return (1, cdot.Length);
+            return new(1, cdot.Length);
         
         if (input.StartsWith(times))
-            return (1, times.Length);
+            return new(1, times.Length);
 
-        return (0, 0); // None
+        return new(0, 0); // None
     }
     
     public static (Expr Pow, int Length)? GetPow(string input)
@@ -206,6 +251,10 @@ public class Parser
     {
         // Fn -> Fonction | Sqrt | Intégrale | Abs | Arrondi | Atom
         
+        var fracTest = GetFrac(input);
+        if (fracTest is not null)
+            return (fracTest.Value.Frac, fracTest.Value.Length);
+        
         // Fonction -> Letter _ Sub ^ Pow \left( Expr, Expr, ..., Expr \right)
         var functionTest = GetFunction(input);
         if (functionTest is not null)
@@ -237,6 +286,30 @@ public class Parser
             return (atomTest.Value.Atom, atomTest.Value.Length);
 
         return null;
+    }
+
+    public static (Expr Frac, int Length)? GetFrac(string input)
+    {
+        if (!input.StartsWith("\\frac"))
+            return null;
+        
+        // Frac -> \frac{Expr}{Expr}
+        var i = 5;
+        var numTest = GetShortOrBracesExpr(input[i..]);
+        if (numTest is null)
+            return null;
+
+        var num = numTest.Value.Expr;
+        i += numTest.Value.Length;
+
+        var denTest = GetShortOrBracesExpr(input[i..]);
+        if (denTest is null)
+            return null;
+
+        var den = denTest.Value.Expr;
+        i += denTest.Value.Length;
+
+        return (num / den, i);
     }
 
     public static (Expr Function, int Length)? GetFunction(string input)
@@ -296,6 +369,9 @@ public class Parser
         var i = 0;
         if (input.Length == 0)
             return null;
+        
+        if (input[i] == '\\')
+            i++;
 
         while (i < input.Length && char.IsLetter(input[i]))
         {
@@ -416,11 +492,11 @@ public class Parser
         {
             i++;
             var expTest = GetExpr(input[i..]);
-            if (expTest is null)
+            if (expTest.IsNull)
                 return null;
             
-            i += expTest.Value.Length;
-            n = expTest.Value.Expr;
+            i += expTest.Length;
+            n = expTest.Value;
             
             if (i >= input.Length || input[i] != ']')
                 return null;
@@ -478,11 +554,11 @@ public class Parser
         
         // Expr
         var exprTest = GetExpr(input[i..j]);
-        if (exprTest is null)
+        if (exprTest.IsNull)
             return null;
         
-        var expr = exprTest.Value.Expr;
-        i += exprTest.Value.Length;
+        var expr = exprTest.Value;
+        i += exprTest.Length;
         
         // dLetter
         var letterTest = GetLetter(input[j..]);
@@ -520,10 +596,10 @@ public class Parser
                 if (deep == 0)
                 {
                     var exprTest = GetExpr(input[i..j]);
-                    if (exprTest is null)
+                    if (exprTest.IsNull)
                         return null;
                     
-                    return (exprTest.Value.Expr, j + end.Length);
+                    return (exprTest.Value, j + end.Length);
                 }
             
             }
@@ -588,10 +664,10 @@ public class Parser
                 if (deep == 0)
                 {
                     var exprTest = GetExpr(input[i..j]);
-                    if (exprTest is null)
+                    if (exprTest.IsNull)
                         return null;
                     
-                    return (ToExpr(startType.Type, isEnd.Type, exprTest.Value.Expr), j + isEnd.Length);
+                    return (ToExpr(startType.Type, isEnd.Type, exprTest.Value), j + isEnd.Length);
                 }
             
             }
@@ -616,8 +692,8 @@ public class Parser
         
         // (Expr)
         var parenthesesTest = GetParentheses(input);
-        if (parenthesesTest is not null)
-            return (parenthesesTest.Value.Expr, parenthesesTest.Value.Length);
+        if (!parenthesesTest.IsNull)
+            return (parenthesesTest.Value, parenthesesTest.Length);
         
         // Set
         var setTest = GetSet(input);
@@ -648,15 +724,15 @@ public class Parser
         if (endInd == -1)
             return null;
 
-        var components = input[i..endInd].Split(separator);
+        var components = input[i..(endInd + 1)].Split(separator);
 
         var exprs = new Expr[components.Length];
         for (int j = 0; j < components.Length; j++)
         {
             var exprTest = GetExpr(components[j]);
-            if (exprTest is null)
+            if (exprTest.IsNull)
                 return null;
-            exprs[j] = exprTest.Value.Expr;
+            exprs[j] = exprTest.Value;
         }
         
         return (exprs, endInd + end.Length);
@@ -685,9 +761,9 @@ public class Parser
             for (int k = 0; k < cols.Length; k++)
             {
                 var exprTest = GetExpr(cols[k]);
-                if (exprTest is null)
+                if (exprTest.IsNull)
                     return null;
-                exprsRow[k] = exprTest.Value.Expr;    
+                exprsRow[k] = exprTest.Value;    
             }
             
             exprsGrid[j] = exprsRow;
@@ -766,13 +842,15 @@ public class Parser
         return (Matrix(exprs2D), i);
     }
     
-    public static (Expr Expr, int Length)? GetParentheses(string input)
+    
+    public static Parsed<Expr> GetParentheses(string input)
     {
         // Parentheses -> ( Expr )
 
         const string left = "\\left(";
         const string right = "\\right)";
 
+        // return Length of the token or -1 if the token is not found
         int Left(int i) => input[i] == '(' ? 1 : (input.ContainsAt(left, i) ? left.Length : -1);
         int Right(int i) => input[i] == ')' ? 1 : (input.ContainsAt(right, i) ? right.Length : -1);
         
@@ -780,7 +858,7 @@ public class Parser
         var i = 0;
         var leftLength = Left(i);
         if (input.Length <= 2 || leftLength == -1)
-            return null;
+            return Null;
 
         var deep = 0;
         for (int j = 0; j < input.Length; j++)
@@ -800,18 +878,22 @@ public class Parser
                 if (deep == 0)
                 {
                     var exprTest = GetExpr(input[leftLength..j]);
-                    if (exprTest is null)
-                        return null;
+                    if (exprTest.IsNull)
+                        return Null;
                     
-                    // TODO: Test length
-                    return (exprTest.Value.Expr, j+rightLength);
+                    return new(exprTest.Value, j+rightLength);
                 }
                 j += rightLength;
             }
         }
         
-        return null;
+        return Null;
     }
+
+    // public static Parsed<Expr> GetParenthesisOrLatexBracesOrShort(string input)
+    // {
+    //     return Parsed<Expr>.Or(input, [GetParentheses, GetLatexBracesExpr, GetShort]);
+    // }
 
     public static (Expr Var, int Length)? GetVariable(string input)
     {
@@ -916,7 +998,8 @@ public class Parser
         i += shortExprTest.Value.Length;
         return (expr, i);
     }
-
+    
+    
     public static (Expr Expr, int Length)? GetShortOrBracesExpr(string input)
     {
         // ShortOrBracesExpr -> ShortExpr | { Expr }
@@ -1013,10 +1096,10 @@ public class Parser
                 if (deep == 0)
                 {
                     var exprTest = GetExpr(input[1..i]);
-                    if (exprTest is null)
+                    if (exprTest.IsNull)
                         return null;
                     
-                    return (exprTest.Value.Expr, i+1);
+                    return (exprTest.Value, i+1);
                 }
             }
 

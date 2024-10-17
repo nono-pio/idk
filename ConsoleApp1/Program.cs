@@ -49,5 +49,5 @@ static (int, int) sqrt(int n)
     return (n / (sqrt * sqrt), sqrt);
 }
 
-var p = Parser.Parse("log_b(x)");
+var p = Parser.Parse("(x+y)^y");
 print(p);
