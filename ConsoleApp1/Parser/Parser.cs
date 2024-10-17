@@ -347,12 +347,12 @@ public class Parser
         }
         
         // \left( Expr, Expr, ..., Expr \right)
-        var exprsTest = GetExprs(input[i..], "(", ")", ",");
-        if (exprsTest is null)
+        var exprsTest = GetExprsParentheses(input[i..]);
+        if (exprsTest.IsNull)
             return null;
         
-        var exprs = exprsTest.Value.Exprs;
-        i += exprsTest.Value.Length;
+        var exprs = exprsTest.Value;
+        i += exprsTest.Length;
 
         var func = GetFunctionFromAttributes(name, exprs, subscript, power);
         if (func is null)
@@ -713,6 +713,26 @@ public class Parser
         return null;
     }
 
+    public static Parsed<Expr[]> GetExprsParentheses(string input)
+    {
+        var insideTest = GetParenthesesInside(input);
+        if (insideTest.IsNull)
+            return Parsed<Expr[]>.Null;
+        
+        var exprsInput = insideTest.Value.Split(",").ToArray();
+        var exprs = new Expr[exprsInput.Length];
+        for (int i = 0; i < exprsInput.Length; i++)
+        {
+            var exprTest = GetExpr(exprsInput[i]);
+            if (exprTest.IsNull)
+                return Parsed<Expr[]>.Null;
+            
+            exprs[i] = exprTest.Value;
+        }
+
+        return new(exprs, insideTest.Length);
+    }
+
     public static (Expr[] Exprs, int Length)? GetExprs(string input, string start, string end, string separator)
     {
         var i = 0;
@@ -724,7 +744,7 @@ public class Parser
         if (endInd == -1)
             return null;
 
-        var components = input[i..(endInd + 1)].Split(separator);
+        var components = input[i..endInd].Split(separator);
 
         var exprs = new Expr[components.Length];
         for (int j = 0; j < components.Length; j++)
@@ -888,6 +908,50 @@ public class Parser
         }
         
         return Null;
+    }
+    
+    public static Parsed<string> GetParenthesesInside(string input)
+    {
+        // Parentheses -> ( Expr )
+
+        const string left = "\\left(";
+        const string right = "\\right)";
+
+        // return Length of the token or -1 if the token is not found
+        int Left(int i) => input[i] == '(' ? 1 : (input.ContainsAt(left, i) ? left.Length : -1);
+        int Right(int i) => input[i] == ')' ? 1 : (input.ContainsAt(right, i) ? right.Length : -1);
+
+        if (input.Length <= 2)
+            return Parsed<string>.Null;
+        
+        var i = 0;
+        var leftLength = Left(i);
+        if (input.Length <= 2 || leftLength == -1)
+            return Parsed<string>.Null;
+
+        var deep = 0;
+        for (int j = 0; j < input.Length; j++)
+        {
+            var l = Left(j);
+            if (l != -1)
+            {
+                deep++;
+                j += l-1;
+                continue;
+            }
+
+            var rightLength = Right(j);
+            if (rightLength != -1)
+            {
+                deep--;
+                if (deep == 0)
+                    return new(input[leftLength..j], j+rightLength);
+                
+                j += rightLength-1;
+            }
+        }
+        
+        return Parsed<string>.Null;
     }
 
     // public static Parsed<Expr> GetParenthesisOrLatexBracesOrShort(string input)
