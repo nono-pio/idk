@@ -22,7 +22,20 @@ builder.Services.AddSwaggerGen(c =>
 var app = builder.Build();
 
 var port = Environment.GetEnvironmentVariable("PORT") ?? "5205";
-app.Urls.Add($"http://*:{port}");
+app.Urls.Add($"https://*:{port}");
+
+app.Use(async (context, next) =>
+{
+    var request = context.Request;
+    if (!request.Host.Value.StartsWith("www"))
+    {
+        var newUrl = $"https://www.{request.Host.Value}{request.Path}{request.QueryString}";
+        context.Response.Redirect(newUrl, permanent: true);
+        return;
+    }
+
+    await next();
+});
 
 // Configure the HTTP request pipeline.
 //if (app.Environment.IsDevelopment())
