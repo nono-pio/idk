@@ -22,7 +22,7 @@ builder.Services.AddSwaggerGen(c =>
 var app = builder.Build();
 
 var port = Environment.GetEnvironmentVariable("PORT") ?? "5205";
-app.Urls.Add($"https://*:{port}");
+app.Urls.Add($"http://*:{port}");
 
 app.Use(async (context, next) =>
 {
