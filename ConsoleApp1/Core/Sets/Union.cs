@@ -21,9 +21,30 @@ public class Union(params Set[] sets) : Set
         if (sets.Length == 0)
             return EmptySet;
         
-        // TODO
+        var newSets = new List<Set>();
+        foreach (var set in sets.SelectMany(set => set is Union union ? union.Sets : new Set[] {set}))
+        {
+            for (int i = 0; i < newSets.Count; i++)
+            {
+                var eval = EvalUnion(set, newSets[i]);
+                if (eval is not null)
+                {
+                    newSets[i] = eval;
+                    goto next;
+                }
+            }
+            
+            newSets.Add(set);
+            
+            next: ;
+        }
+
+        if (newSets.Count == 0)
+            return EmptySet;
+        if (newSets.Count == 1)
+            return newSets[0];
         
-        return new Union(sets);
+        return new Union(newSets.ToArray());
     }
 
     public static Set? EvalUnion(Set A, Set B)

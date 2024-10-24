@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Runtime;
 using ConsoleApp1.Algorithms;
 using ConsoleApp1.Core.Classes;
+using ConsoleApp1.Core.Equations;
 using ConsoleApp1.Core.Expressions.Atoms;
 using ConsoleApp1.Core.Expressions.Base;
 using ConsoleApp1.Core.Expressions.Others;
@@ -38,7 +39,7 @@ static (int, int) sqrt(int n)
 {
     var sqrt = (int) Math.Floor(Math.Sqrt(n));
 
-    if (n % sqrt * sqrt == 0) // c = 1 case
+    if (n % (sqrt * sqrt) == 0) // c = 1 case
         return (1, sqrt);
 
     sqrt = (int) Math.Ceiling(sqrt / 1.41421356237); // c is min 2
@@ -49,9 +50,7 @@ static (int, int) sqrt(int n)
     return (n / (sqrt * sqrt), sqrt);
 }
 
-
-string[] list = ["e^(12)sin(x)"];
-foreach (var p in list)
-{
-    print(Parser.Parse(p).ToLatex());
-}
+a.Value = 2.7;
+Regression.RegressionFor(Pow(a, x), x, [a], [(0, 1), (-1, 1/Math.E), (1, Math.E)]);
+print(a.Value);
+print(Math.E);

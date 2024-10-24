@@ -76,11 +76,19 @@ public class Intersection(params Set[] sets) : Set
 
     public override Expr? Infimum()
     {
+        var infTest = Sets[0].Infimum();
+        if (Sets.Skip(0).All(s => s.Infimum() == infTest))
+            return infTest;
+        
         throw new NotImplementedException();
     }
 
     public override Expr? Supremum()
     {
+        var supTest = Sets[0].Supremum();
+        if (Sets.Skip(0).All(s => s.Supremum() == supTest))
+            return supTest;
+        
         throw new NotImplementedException();
     }
 

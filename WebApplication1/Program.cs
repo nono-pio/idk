@@ -6,7 +6,6 @@ using ConsoleApp1.Core.Limits;
 using ConsoleApp1.Core.Models;
 using ConsoleApp1.Parser;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Rewrite;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,19 +22,6 @@ var app = builder.Build();
 
 var port = Environment.GetEnvironmentVariable("PORT") ?? "5205";
 app.Urls.Add($"http://*:{port}");
-
-app.Use(async (context, next) =>
-{
-    var request = context.Request;
-    if (!request.Host.Value.StartsWith("www"))
-    {
-        var newUrl = $"https://www.{request.Host.Value}{request.Path}{request.QueryString}";
-        context.Response.Redirect(newUrl, permanent: true);
-        return;
-    }
-
-    await next();
-});
 
 // Configure the HTTP request pipeline.
 //if (app.Environment.IsDevelopment())

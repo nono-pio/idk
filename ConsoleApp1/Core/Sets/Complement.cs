@@ -22,6 +22,21 @@ public class Complement(Set x, Set? univers = null) : Set
         return Boolean.And(Univers.Contains(x), !X.Contains(x));
     }
 
+    public override Expr? Infimum()
+    {
+        return Univers.Infimum(); //TODO
+    }
+
+    public override Expr? Supremum()
+    {
+        return Univers.Supremum(); // TODO
+    }
+
+    public override string ToString()
+    {
+        return $"{Univers}-{X}";
+    }
+
     public override string ToLatex()
     {
         return $"{X.ToLatex()}^C";

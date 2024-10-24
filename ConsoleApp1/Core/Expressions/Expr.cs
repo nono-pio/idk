@@ -410,6 +410,15 @@ public abstract class Expr
         return count;
     }
     
+    public void ForEach<T>(Action<T> action) where T : Expr
+    {
+        if (this is T t)
+            action(t);
+
+        foreach (var arg in Args)
+            arg.ForEach(action);
+    }
+    
     public Expr Map<T>(Func<T, Expr> func) where T : Expr
     {
         return MapBottomUp(expr => expr is T t ? func(t) : expr);

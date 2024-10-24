@@ -26,7 +26,17 @@ public abstract class BasicNumberSet : Set
     public static BasicNumberSet GetIntersectionOf(BasicNumberSet a, BasicNumberSet b)
     {
         return a._Level < b._Level ? a : b;
-    } 
+    }
+
+    public override Expr? Infimum()
+    {
+        return _Level == Natural.Level ? 0 : Expr.NegInf;
+    }
+
+    public override Expr? Supremum()
+    {   
+        return Expr.Inf;
+    }
 }
 
 public class Natural : BasicNumberSet

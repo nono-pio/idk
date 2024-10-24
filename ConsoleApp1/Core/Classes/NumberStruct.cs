@@ -247,17 +247,16 @@ public struct NumberStruct
 
     public int CompareTo(NumberStruct other)
     {
-        int typeCompare = Type.CompareTo(other.Type);
-        if (typeCompare != 0)
-            return typeCompare;
-
-        return Type switch
-        {
-            NumberType.Nan => 0,
-            NumberType.Float => FloatValue.CompareTo(other.FloatValue),
-            NumberType.Fraction => (Numerator * other.Denominator).CompareTo(other.Numerator * Denominator),
-            _ => 0
-        };
+        if (this.IsNan || other.IsNan)
+            return this.IsNan.CompareTo(other.IsNan);
+        
+        if (this.IsFraction && other.IsFraction)
+            return (Numerator * other.Denominator).CompareTo(other.Numerator * Denominator);
+        
+        if (this.IsFloat && other.IsFloat)
+            return FloatValue.CompareTo(other.FloatValue);
+        
+        return N().CompareTo(other.N());
     }
     
     public static bool operator ==(NumberStruct a, NumberStruct b) => a.CompareTo(b) == 0;

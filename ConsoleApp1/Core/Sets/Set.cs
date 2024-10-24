@@ -74,11 +74,13 @@ public abstract class Set
     
     public static Set CreateIntersection(params Set[] sets)
     {
+        return new Intersection(sets);
         throw new NotImplementedException(); // return Intersection.CreateIntersection(elements);
     }
     
     public static Set CreateComplement(Set set, Set universe)
     {
+        return new Complement(set, universe);
         throw new NotImplementedException(); // return Complement.CreateComplement(set, universe);
     }
 
@@ -86,17 +88,17 @@ public abstract class Set
 
     public Set Union(Set other)
     {
-        throw new NotImplementedException();
+        return CreateUnion(this, other);
     }
 
     public Set Intersection(Set other)
     {
-        throw new NotImplementedException();
+        return CreateIntersection(this, other);
     }
 
     public virtual Set Complement(Set universe)
     {
-        throw new NotImplementedException();
+        return CreateComplement(this, universe);
     }
 
     public Set SymmetricDifference(Set other)
