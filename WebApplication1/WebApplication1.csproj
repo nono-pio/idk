@@ -33,7 +33,7 @@
     </ItemGroup>
     
     <Target Name="PublishReact" AfterTargets="Publish">
-<!--        <Exec Command="npm install &#45;&#45;prefix client-app" />-->
+        <Exec Command="npm install --prefix client-app" />
         <Exec Command="npm run build --prefix client-app" />
         <ItemGroup>
             <FrontEndBuild Include="client-app\build\**\*.*" />
