@@ -10,22 +10,22 @@ public class Parser
     [TestMethod]
     public void GetIntTest()
     {
-        var test = ConsoleApp1.Parser.Parser.GetInt("123");
+        var test = ConsoleApp1.Parser.Parser.GetNumber("123");
         Assert.IsNotNull(test);
-        Assert.AreEqual(123L, test.Value.Int);
-        Assert.AreEqual(3, test.Value.Length);
+        Assert.AreEqual(123L, test.Value);
+        Assert.AreEqual(3, test.Length);
         
-        test = ConsoleApp1.Parser.Parser.GetInt("1234");
+        test = ConsoleApp1.Parser.Parser.GetNumber("1234");
         Assert.IsNotNull(test);
-        Assert.AreEqual(1234L, test.Value.Int);
-        Assert.AreEqual(4, test.Value.Length);
+        Assert.AreEqual(1234L, test.Value);
+        Assert.AreEqual(4, test.Length);
         
-        test = ConsoleApp1.Parser.Parser.GetInt("-123");
+        test = ConsoleApp1.Parser.Parser.GetNumber("-123");
         Assert.IsNotNull(test);
-        Assert.AreEqual(-123L, test.Value.Int);
-        Assert.AreEqual(4, test.Value.Length);
+        Assert.AreEqual(-123L, test.Value);
+        Assert.AreEqual(4, test.Length);
         
-        test = ConsoleApp1.Parser.Parser.GetInt("");
+        test = ConsoleApp1.Parser.Parser.GetNumber("");
         Assert.IsNull(test);
     }
 }
