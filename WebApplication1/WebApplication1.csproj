@@ -32,20 +32,20 @@
       <Folder Include="wwwroot\" />
     </ItemGroup>
     
-    <Target Name="PublishReact" AfterTargets="Publish">
-        <Exec Command="npm install --prefix client-app" />
-        <Exec Command="npm run build --prefix client-app" />
-        <ItemGroup>
-            <FrontEndBuild Include="client-app\build\**\*.*" />
-        </ItemGroup>
-        <Copy
-                SourceFiles="@(FrontEndBuild)"
-                DestinationFolder="wwwroot\%(RecursiveDir)"
-                SkipUnchangedFiles="true"
-                OverwriteReadOnlyFiles="true"
-                Retries="3"
-                RetryDelayMilliseconds="300"/>
-    </Target>
+<!--    <Target Name="PublishReact" AfterTargets="Publish">-->
+<!--        <Exec Command="npm install &#45;&#45;prefix client-app" />-->
+<!--        <Exec Command="npm run build &#45;&#45;prefix client-app" />-->
+<!--        <ItemGroup>-->
+<!--            <FrontEndBuild Include="client-app\build\**\*.*" />-->
+<!--        </ItemGroup>-->
+<!--        <Copy-->
+<!--                SourceFiles="@(FrontEndBuild)"-->
+<!--                DestinationFolder="wwwroot\%(RecursiveDir)"-->
+<!--                SkipUnchangedFiles="true"-->
+<!--                OverwriteReadOnlyFiles="true"-->
+<!--                Retries="3"-->
+<!--                RetryDelayMilliseconds="300"/>-->
+<!--    </Target>-->
     
     <Target Name="ReactBuild" AfterTargets="Build">
 <!--        <Exec Command="npm install &#45;&#45;prefix client-app" />-->
