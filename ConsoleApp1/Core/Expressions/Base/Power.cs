@@ -171,7 +171,7 @@ public class Power : Expr
         return argIndex switch
         {
             0 => Sqrt(y, Exp),
-            1 => throw new Exception("not implemented"),
+            1 => Log(y, Base),
             _ => throw new Exception("Power as only 2 args (value:0, exp:1), not " + argIndex)
         };
     }
@@ -221,12 +221,22 @@ public class Power : Expr
 
     public override string ToLatex()
     {
+        
+        if (Exp.Is(-1))
+            return LatexUtils.Fraction("1", Base.ToLatex());
+
+        if (Exp is Power pow && pow.Exp.Is(-1)) // base^{exp_b^-1}=base^{1/exp_b}=sqrt[exp_b]{base}
+            return LatexUtils.NthRoot(pow.Base.ToLatex(), Base.ToLatex());
+        
+        if (Exp is Number num && num.Num.IsFraction && num.Num.Numerator == 1) // idem for fraction
+            return LatexUtils.NthRoot(num.Num.Denominator.ToString(), Base.ToLatex());
+        
         var exp = Exp.ToLatex();
 
         if (exp.StartsWith("-"))
             return LatexUtils.Fraction("1", LatexUtils.Power(ParenthesisLatexIfNeeded(Base), exp[1..]));
         
-        return LatexUtils.Power(ParenthesisLatexIfNeeded(Base), exp);
+        return LatexUtils.Power(ParenthesisLatexIfNeeded(Base), LatexUtils.LatexBracesIfNotSingle(exp));
     }
 
     public override string ToString()

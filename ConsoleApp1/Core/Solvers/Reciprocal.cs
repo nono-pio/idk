@@ -8,6 +8,20 @@ namespace ConsoleApp1.Core.Solvers;
 
 public class Reciprocal
 {
+    
+    public static Expr? GetReciprocal(Expr expr, Variable variable, Variable? y = null)
+    {
+        y = y ?? new Variable("x", dummy:true);
+        // expr(x) = y
+        
+        var (rest, reciprocal) = Unfold(expr, y, variable); // rest(x) = reciprocal(y)
+        
+        if (rest == variable) // rest(x) = x 
+            return reciprocal;
+
+        return null;
+    }
+    
     public static (Expr expr, Expr y) Unfold(Expr expr, Expr y, Variable variable)
     {
         if (expr.Constant(variable))

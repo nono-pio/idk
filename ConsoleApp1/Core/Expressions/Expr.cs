@@ -122,7 +122,7 @@ public abstract class Expr
     
     # region Conversion
 
-    public virtual Set AsSet() => throw new NotImplementedException();
+    public virtual Set AsSet() => Set.CreateFiniteSet(this);
 
     public virtual (Expr Num, Expr Den) AsFraction() => (this, 1);
 

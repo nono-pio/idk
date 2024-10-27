@@ -5,7 +5,7 @@ import {OverlayTrigger, Tooltip} from "react-bootstrap";
 function NavBar({sections, otherSections, activeSection, setActiveSection}) {
 
     return (
-        <Nav variant="tabs" activeKey={activeSection} onSelect={section => setActiveSection(section)}>
+        <Nav variant="tabs" className="px-2" activeKey={activeSection} onSelect={section => setActiveSection(section)}>
 
             {sections.map(section => (
                 <OverlayTrigger key={section.name} overlay={<Tooltip id={section.name}>{section.description}</Tooltip>}>

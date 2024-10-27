@@ -16,7 +16,14 @@ public static class LatexUtils
         @"\frac{" + numerator + "}{" + denominator + "}";
     public static string Power(string content, string power) => content + "^" + LatexBracesIfNotSingle(power);
     public static string Sqrt(string content) => @"\sqrt{" + content + "}";
-    public static string NthRoot(string n, string content) => @"\sqrt[" + n + "]{" + content + "}";
+
+    public static string NthRoot(string n, string content)
+    { 
+        if (n == "2")
+            return @"\sqrt{" + content + "}";
+        
+        return  @"\sqrt[" + n + "]{" + content + "}";
+    } 
     
     public static string Summation(string start, string end, string expression) => 
         @"\sum_{" + start + "}^{" + end + "} " + expression;

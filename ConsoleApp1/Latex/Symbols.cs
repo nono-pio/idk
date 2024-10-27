@@ -126,8 +126,8 @@ public class Symbols
     public static string RParen = @"\right)";
     public static string LBrackets = @"\left[";
     public static string RBrackets = @"\right]";
-    public static string LBraces = @"\left{";
-    public static string RBraces = @"\right}";
+    public static string LBraces = @"\left\{";
+    public static string RBraces = @"\right\}";
     public static string LFloor = @"\lfloor";
     public static string RFloor = @"\rfloor";
     public static string LCeil = @"\lceil";

@@ -4,6 +4,9 @@ using ConsoleApp1.Core.Expressions.Atoms;
 using ConsoleApp1.Core.Integrals;
 using ConsoleApp1.Core.Limits;
 using ConsoleApp1.Core.Models;
+using ConsoleApp1.Core.Series;
+using ConsoleApp1.Core.Sets;
+using ConsoleApp1.Core.Solvers;
 using ConsoleApp1.Parser;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,6 +14,19 @@ namespace WebApplication1.apis;
 
 public class Api
 {
+    
+    private static T TryCatch<T>(Func<T> func, T defaultValue = default(T))
+    {
+        try
+        {
+            return func();
+        }
+        catch (Exception)
+        {
+            return defaultValue;
+        }
+    }
+    
     public static void APIRoutes(RouteGroupBuilder routes)
     {
         routes.MapPost("/eval", ([FromBody] EvalRequest request) =>
@@ -44,7 +60,7 @@ public class Api
 
             var integral = Integral.Integrate(func, x); //func.Integrate(request.Var);
             return Results.Ok(
-                new IntegralResponse(integral?.ToLatex() ?? "Cannot do integral"));
+                new IntegralResponse(integral?.ToLatex() ?? "\\text{Cannot do integral}"));
         });
 
         routes.MapPost("/limit", ([FromBody] LimitRequest request) =>
@@ -75,13 +91,15 @@ public class Api
             var func = Parser.Parse(request.Expr);
             if (func is null)
                 return Results.BadRequest();
+            
+            var variable = new Variable(request.Var);
 
-            Expr domain = double.NaN; //func.Domain();
+            Set domain = Inequalities.FindDomain(func, variable);
             Expr range = double.NaN; //func.Range();
-            Expr derivative = func.Derivee((Variable)request.Var); //func.Derivee(request.Var);
-            Expr integral = double.NaN; //func.Integrate(request.Var);
-            Expr reciprocal = double.NaN; //func.Reciprocal();
-            Expr seriesExpansion = double.NaN; //func.SeriesExpansion();
+            Expr derivative = func.Derivee(variable);
+            Expr integral = Integral.Integrate(func, variable) ?? double.NaN;
+            Expr reciprocal = TryCatch(() => Reciprocal.GetReciprocal(func, variable) ?? double.NaN, double.NaN);
+            Expr seriesExpansion = TryCatch(() => TaylorSeries.TaylorSeriesOf(func, variable, 6).Eval(variable), double.NaN); //func.SeriesExpansion();
             Expr factorization = double.NaN; //func.Factorization();
 
             return Results.Ok(new AnalyzeFunctionResponse(func.ToLatex(), domain.ToLatex(), range.ToLatex(),
@@ -95,7 +113,7 @@ public class Api
             var func2 = Parser.Parse(request.RHS);
             var x = new Variable(request.Var);
 
-            if (func1 is null || func2 is null)
+            if (func1 is null || func2 is null || !Parser.IsLetter(request.Var))
                 return Results.BadRequest();
 
             Equation equation = new(func1, func2);
