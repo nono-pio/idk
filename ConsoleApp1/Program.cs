@@ -50,7 +50,5 @@ static (int, int) sqrt(int n)
     return (n / (sqrt * sqrt), sqrt);
 }
 
-a.Value = 2.7;
-Regression.RegressionFor(Pow(a, x), x, [a], [(0, 1), (-1, 1/Math.E), (1, Math.E)]);
-print(a.Value);
-print(Math.E);
+print(Solve.SolveFor(Pow(x, 2) -2*x + 1, 0, x));
+print(Parser.Parse("x^2-2x+1"));

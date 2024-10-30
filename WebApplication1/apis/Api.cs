@@ -8,6 +8,7 @@ using ConsoleApp1.Core.Series;
 using ConsoleApp1.Core.Sets;
 using ConsoleApp1.Core.Solvers;
 using ConsoleApp1.Parser;
+using ConsoleApp1.Utils;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebApplication1.apis;
@@ -116,10 +117,9 @@ public class Api
             if (func1 is null || func2 is null || !Parser.IsLetter(request.Var))
                 return Results.BadRequest();
 
-            Equation equation = new(func1, func2);
-            var sol = equation.SolveFor(x);
+            var sol = Solve.SolveFor(func1, func1, x);
 
-            return Results.Ok(new EquationResponse(sol.ToLatex()));
+            return  Results.Ok(new EquationResponse(sol is null ? double.NaN.Expr().ToLatex() : sol.ToLatex()));
         });
 
         routes.MapPost("/inequality", ([FromBody] InequalityRequest request) =>

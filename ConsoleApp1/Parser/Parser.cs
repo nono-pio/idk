@@ -108,16 +108,32 @@ public class Parser
             
             var mulType = sepTest.Value.code;
             i += sepTest.Value.lenght;
-            
-            powTest = GetPow(input[i..]);
-            if (powTest.IsNull)
-                return mulType == 0 ? new(currentExpr, i) : Null;
-            
-            i += powTest.Length;
-            if (mulType <= 1)
-                currentExpr = Mul(currentExpr, powTest.Value);
+
+            if (mulType == 0) // implicite multiplication
+            {
+                // after implicit mul there is a variable or a function
+                var implTest = ParserHelper.Or(input[i..], 
+                    [GetFrac, GetFunction, GetSqrt, GetAbs, GetIntegerFunctions, GetVariable, GetParenthesesExpr, GetSquareBracketExpr]
+                );
+                
+                if (implTest.IsNull)
+                    return new(currentExpr, i); // mul impl fail
+                
+                currentExpr = Mul(currentExpr, implTest.Value);
+                i += implTest.Length;
+            }
             else
-                currentExpr = Div(currentExpr, powTest.Value);
+            {
+                powTest = GetPow(input[i..]);
+                if (powTest.IsNull)
+                    return Null;
+                
+                i += powTest.Length;
+                if (mulType <= 1)
+                    currentExpr = Mul(currentExpr, powTest.Value);
+                else
+                    currentExpr = Div(currentExpr, powTest.Value);
+            }
         }
 
         return new(currentExpr, i);
