@@ -1,4 +1,5 @@
-﻿grammar myGrammar;
+﻿grammar Latex;
+//  antlr4 Latex.g4  -Dlanguage=CSharp -no-listener -visitor
 
 program : expr EOF;
 
@@ -19,8 +20,8 @@ power_nofunc : atom_nofunc (CARET atom_nofunc)*;
 atom : parenthesis | number | function | variable | abs | intfunc | frac | sqrt;
 atom_nofunc : parenthesis | number | variable | abs | intfunc | frac | sqrt;
 
-function : FUNC_NAME subexpr? supexpr? DERIVATIVE* (func_args | power_nofunc) | letter subexpr? supexpr? DERIVATIVE* func_args;
-func_args : L_PAREN expr? (COMMA expr)* R_PAREN; // power or unary
+function : FUNC_NAME subexpr? supexpr? DERIVATIVE* (func_args | power_nofunc) | letter subexpr? supexpr? DERIVATIVE* func_args; // TODO : sup = r
+func_args : L_PAREN expr? (COMMA expr)* R_PAREN;
 
 abs : BAR expr BAR;
 intfunc : (L_FLOOR | L_CEIL) expr (R_FLOOR | R_CEIL); // floor, ceil or round

@@ -15,6 +15,8 @@ public class Power : Expr
     public override bool IsPositive => Base.IsPositive;
     public override bool IsNegative => throw new NotImplementedException(); // todo: (-1)^(2n+1)
 
+    public override bool IsInfinity => ((Base is Number num && num.Num > 1) || Base is Constant { AppValue: > 1 }) && Exp.IsInfinity;
+    public override bool IsNegativeInfinity => false;
 
     public Expr Base
      {

@@ -117,7 +117,7 @@ public class Api
             if (func1 is null || func2 is null || !Parser.IsLetter(request.Var))
                 return Results.BadRequest();
 
-            var sol = Solve.SolveFor(func1, func1, x);
+            var sol = Solve.SolveFor(func1, func2, x);
 
             return  Results.Ok(new EquationResponse(sol is null ? double.NaN.Expr().ToLatex() : sol.ToLatex()));
         });
@@ -125,9 +125,10 @@ public class Api
         routes.MapPost("/inequality", ([FromBody] InequalityRequest request) =>
         {
             Console.WriteLine("no problem here");
-            var func1 = Parser.Parse(request.LHS);
-            var func2 = Parser.Parse(request.RHS);
-            if (func1 is null || func2 is null)
+            var lhs = Parser.Parse(request.LHS);
+            var rhs = Parser.Parse(request.RHS);
+            var x = new Variable(request.Var);
+            if (lhs is null || rhs is null)
                 return Results.BadRequest();
 
             InequationType? sign = request.Sign switch
@@ -142,8 +143,7 @@ public class Api
             if (sign is null)
                 return Results.BadRequest();
 
-            Inequation inequality = new(func1, func2, sign.Value);
-            var sol = inequality.SolveFor(request.Var);
+            var sol = Inequalities.SolveFor(lhs, rhs, sign.Value, x);
 
             return Results.Ok(new InequalityResponse(sol.ToLatex()));
         });

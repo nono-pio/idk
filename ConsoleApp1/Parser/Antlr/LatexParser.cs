@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-// Generated from myGrammar.g4 by ANTLR 4.13.2
+// Generated from Latex.g4 by ANTLR 4.13.2
 
 // Unreachable code detected
 #pragma warning disable 0162
@@ -32,7 +32,7 @@ using DFA = Antlr4.Runtime.Dfa.DFA;
 
 [System.CodeDom.Compiler.GeneratedCode("ANTLR", "4.13.2")]
 [System.CLSCompliant(false)]
-public partial class myGrammarParser : Parser {
+public partial class LatexParser : Parser {
 	protected static DFA[] decisionToDFA;
 	protected static PredictionContextCache sharedContextCache = new PredictionContextCache();
 	public const int
@@ -79,22 +79,22 @@ public partial class myGrammarParser : Parser {
 		}
 	}
 
-	public override string GrammarFileName { get { return "myGrammar.g4"; } }
+	public override string GrammarFileName { get { return "Latex.g4"; } }
 
 	public override string[] RuleNames { get { return ruleNames; } }
 
 	public override int[] SerializedAtn { get { return _serializedATN; } }
 
-	static myGrammarParser() {
+	static LatexParser() {
 		decisionToDFA = new DFA[_ATN.NumberOfDecisions];
 		for (int i = 0; i < _ATN.NumberOfDecisions; i++) {
 			decisionToDFA[i] = new DFA(_ATN.GetDecisionState(i), i);
 		}
 	}
 
-		public myGrammarParser(ITokenStream input) : this(input, Console.Out, Console.Error) { }
+		public LatexParser(ITokenStream input) : this(input, Console.Out, Console.Error) { }
 
-		public myGrammarParser(ITokenStream input, TextWriter output, TextWriter errorOutput)
+		public LatexParser(ITokenStream input, TextWriter output, TextWriter errorOutput)
 		: base(input, output, errorOutput)
 	{
 		Interpreter = new ParserATNSimulator(this, _ATN, decisionToDFA, sharedContextCache);
@@ -104,21 +104,17 @@ public partial class myGrammarParser : Parser {
 		[System.Diagnostics.DebuggerNonUserCode] public ExprContext expr() {
 			return GetRuleContext<ExprContext>(0);
 		}
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode Eof() { return GetToken(myGrammarParser.Eof, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode Eof() { return GetToken(LatexParser.Eof, 0); }
 		public ProgramContext(ParserRuleContext parent, int invokingState)
 			: base(parent, invokingState)
 		{
 		}
 		public override int RuleIndex { get { return RULE_program; } }
 		[System.Diagnostics.DebuggerNonUserCode]
-		public override void EnterRule(IParseTreeListener listener) {
-			ImyGrammarListener typedListener = listener as ImyGrammarListener;
-			if (typedListener != null) typedListener.EnterProgram(this);
-		}
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override void ExitRule(IParseTreeListener listener) {
-			ImyGrammarListener typedListener = listener as ImyGrammarListener;
-			if (typedListener != null) typedListener.ExitProgram(this);
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			ILatexVisitor<TResult> typedVisitor = visitor as ILatexVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitProgram(this);
+			else return visitor.VisitChildren(this);
 		}
 	}
 
@@ -156,14 +152,10 @@ public partial class myGrammarParser : Parser {
 		}
 		public override int RuleIndex { get { return RULE_expr; } }
 		[System.Diagnostics.DebuggerNonUserCode]
-		public override void EnterRule(IParseTreeListener listener) {
-			ImyGrammarListener typedListener = listener as ImyGrammarListener;
-			if (typedListener != null) typedListener.EnterExpr(this);
-		}
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override void ExitRule(IParseTreeListener listener) {
-			ImyGrammarListener typedListener = listener as ImyGrammarListener;
-			if (typedListener != null) typedListener.ExitExpr(this);
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			ILatexVisitor<TResult> typedVisitor = visitor as ILatexVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitExpr(this);
+			else return visitor.VisitChildren(this);
 		}
 	}
 
@@ -196,13 +188,13 @@ public partial class myGrammarParser : Parser {
 		[System.Diagnostics.DebuggerNonUserCode] public MultiplicationContext multiplication(int i) {
 			return GetRuleContext<MultiplicationContext>(i);
 		}
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode[] ADD() { return GetTokens(myGrammarParser.ADD); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode[] ADD() { return GetTokens(LatexParser.ADD); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode ADD(int i) {
-			return GetToken(myGrammarParser.ADD, i);
+			return GetToken(LatexParser.ADD, i);
 		}
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode[] SUB() { return GetTokens(myGrammarParser.SUB); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode[] SUB() { return GetTokens(LatexParser.SUB); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode SUB(int i) {
-			return GetToken(myGrammarParser.SUB, i);
+			return GetToken(LatexParser.SUB, i);
 		}
 		public AdditionContext(ParserRuleContext parent, int invokingState)
 			: base(parent, invokingState)
@@ -210,14 +202,10 @@ public partial class myGrammarParser : Parser {
 		}
 		public override int RuleIndex { get { return RULE_addition; } }
 		[System.Diagnostics.DebuggerNonUserCode]
-		public override void EnterRule(IParseTreeListener listener) {
-			ImyGrammarListener typedListener = listener as ImyGrammarListener;
-			if (typedListener != null) typedListener.EnterAddition(this);
-		}
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override void ExitRule(IParseTreeListener listener) {
-			ImyGrammarListener typedListener = listener as ImyGrammarListener;
-			if (typedListener != null) typedListener.ExitAddition(this);
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			ILatexVisitor<TResult> typedVisitor = visitor as ILatexVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitAddition(this);
+			else return visitor.VisitChildren(this);
 		}
 	}
 
@@ -280,9 +268,9 @@ public partial class myGrammarParser : Parser {
 		[System.Diagnostics.DebuggerNonUserCode] public MulContext mul(int i) {
 			return GetRuleContext<MulContext>(i);
 		}
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode[] DIV() { return GetTokens(myGrammarParser.DIV); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode[] DIV() { return GetTokens(LatexParser.DIV); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode DIV(int i) {
-			return GetToken(myGrammarParser.DIV, i);
+			return GetToken(LatexParser.DIV, i);
 		}
 		public MultiplicationContext(ParserRuleContext parent, int invokingState)
 			: base(parent, invokingState)
@@ -290,14 +278,10 @@ public partial class myGrammarParser : Parser {
 		}
 		public override int RuleIndex { get { return RULE_multiplication; } }
 		[System.Diagnostics.DebuggerNonUserCode]
-		public override void EnterRule(IParseTreeListener listener) {
-			ImyGrammarListener typedListener = listener as ImyGrammarListener;
-			if (typedListener != null) typedListener.EnterMultiplication(this);
-		}
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override void ExitRule(IParseTreeListener listener) {
-			ImyGrammarListener typedListener = listener as ImyGrammarListener;
-			if (typedListener != null) typedListener.ExitMultiplication(this);
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			ILatexVisitor<TResult> typedVisitor = visitor as ILatexVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitMultiplication(this);
+			else return visitor.VisitChildren(this);
 		}
 	}
 
@@ -359,7 +343,7 @@ public partial class myGrammarParser : Parser {
 	}
 
 	public partial class UnaryContext : ParserRuleContext {
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode SUB() { return GetToken(myGrammarParser.SUB, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode SUB() { return GetToken(LatexParser.SUB, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public UnarysufixContext[] unarysufix() {
 			return GetRuleContexts<UnarysufixContext>();
 		}
@@ -372,14 +356,10 @@ public partial class myGrammarParser : Parser {
 		}
 		public override int RuleIndex { get { return RULE_unary; } }
 		[System.Diagnostics.DebuggerNonUserCode]
-		public override void EnterRule(IParseTreeListener listener) {
-			ImyGrammarListener typedListener = listener as ImyGrammarListener;
-			if (typedListener != null) typedListener.EnterUnary(this);
-		}
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override void ExitRule(IParseTreeListener listener) {
-			ImyGrammarListener typedListener = listener as ImyGrammarListener;
-			if (typedListener != null) typedListener.ExitUnary(this);
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			ILatexVisitor<TResult> typedVisitor = visitor as ILatexVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitUnary(this);
+			else return visitor.VisitChildren(this);
 		}
 	}
 
@@ -451,14 +431,10 @@ public partial class myGrammarParser : Parser {
 		}
 		public override int RuleIndex { get { return RULE_unarysufix; } }
 		[System.Diagnostics.DebuggerNonUserCode]
-		public override void EnterRule(IParseTreeListener listener) {
-			ImyGrammarListener typedListener = listener as ImyGrammarListener;
-			if (typedListener != null) typedListener.EnterUnarysufix(this);
-		}
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override void ExitRule(IParseTreeListener listener) {
-			ImyGrammarListener typedListener = listener as ImyGrammarListener;
-			if (typedListener != null) typedListener.ExitUnarysufix(this);
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			ILatexVisitor<TResult> typedVisitor = visitor as ILatexVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitUnarysufix(this);
+			else return visitor.VisitChildren(this);
 		}
 	}
 
@@ -500,21 +476,17 @@ public partial class myGrammarParser : Parser {
 	}
 
 	public partial class SuffixContext : ParserRuleContext {
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode FAC() { return GetToken(myGrammarParser.FAC, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode FAC() { return GetToken(LatexParser.FAC, 0); }
 		public SuffixContext(ParserRuleContext parent, int invokingState)
 			: base(parent, invokingState)
 		{
 		}
 		public override int RuleIndex { get { return RULE_suffix; } }
 		[System.Diagnostics.DebuggerNonUserCode]
-		public override void EnterRule(IParseTreeListener listener) {
-			ImyGrammarListener typedListener = listener as ImyGrammarListener;
-			if (typedListener != null) typedListener.EnterSuffix(this);
-		}
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override void ExitRule(IParseTreeListener listener) {
-			ImyGrammarListener typedListener = listener as ImyGrammarListener;
-			if (typedListener != null) typedListener.ExitSuffix(this);
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			ILatexVisitor<TResult> typedVisitor = visitor as ILatexVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitSuffix(this);
+			else return visitor.VisitChildren(this);
 		}
 	}
 
@@ -547,9 +519,9 @@ public partial class myGrammarParser : Parser {
 		[System.Diagnostics.DebuggerNonUserCode] public AtomContext atom(int i) {
 			return GetRuleContext<AtomContext>(i);
 		}
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode[] CARET() { return GetTokens(myGrammarParser.CARET); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode[] CARET() { return GetTokens(LatexParser.CARET); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode CARET(int i) {
-			return GetToken(myGrammarParser.CARET, i);
+			return GetToken(LatexParser.CARET, i);
 		}
 		public PowerContext(ParserRuleContext parent, int invokingState)
 			: base(parent, invokingState)
@@ -557,14 +529,10 @@ public partial class myGrammarParser : Parser {
 		}
 		public override int RuleIndex { get { return RULE_power; } }
 		[System.Diagnostics.DebuggerNonUserCode]
-		public override void EnterRule(IParseTreeListener listener) {
-			ImyGrammarListener typedListener = listener as ImyGrammarListener;
-			if (typedListener != null) typedListener.EnterPower(this);
-		}
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override void ExitRule(IParseTreeListener listener) {
-			ImyGrammarListener typedListener = listener as ImyGrammarListener;
-			if (typedListener != null) typedListener.ExitPower(this);
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			ILatexVisitor<TResult> typedVisitor = visitor as ILatexVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitPower(this);
+			else return visitor.VisitChildren(this);
 		}
 	}
 
@@ -614,9 +582,9 @@ public partial class myGrammarParser : Parser {
 		[System.Diagnostics.DebuggerNonUserCode] public Atom_nofuncContext atom_nofunc(int i) {
 			return GetRuleContext<Atom_nofuncContext>(i);
 		}
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode[] CARET() { return GetTokens(myGrammarParser.CARET); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode[] CARET() { return GetTokens(LatexParser.CARET); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode CARET(int i) {
-			return GetToken(myGrammarParser.CARET, i);
+			return GetToken(LatexParser.CARET, i);
 		}
 		public Power_nofuncContext(ParserRuleContext parent, int invokingState)
 			: base(parent, invokingState)
@@ -624,14 +592,10 @@ public partial class myGrammarParser : Parser {
 		}
 		public override int RuleIndex { get { return RULE_power_nofunc; } }
 		[System.Diagnostics.DebuggerNonUserCode]
-		public override void EnterRule(IParseTreeListener listener) {
-			ImyGrammarListener typedListener = listener as ImyGrammarListener;
-			if (typedListener != null) typedListener.EnterPower_nofunc(this);
-		}
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override void ExitRule(IParseTreeListener listener) {
-			ImyGrammarListener typedListener = listener as ImyGrammarListener;
-			if (typedListener != null) typedListener.ExitPower_nofunc(this);
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			ILatexVisitor<TResult> typedVisitor = visitor as ILatexVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitPower_nofunc(this);
+			else return visitor.VisitChildren(this);
 		}
 	}
 
@@ -707,14 +671,10 @@ public partial class myGrammarParser : Parser {
 		}
 		public override int RuleIndex { get { return RULE_atom; } }
 		[System.Diagnostics.DebuggerNonUserCode]
-		public override void EnterRule(IParseTreeListener listener) {
-			ImyGrammarListener typedListener = listener as ImyGrammarListener;
-			if (typedListener != null) typedListener.EnterAtom(this);
-		}
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override void ExitRule(IParseTreeListener listener) {
-			ImyGrammarListener typedListener = listener as ImyGrammarListener;
-			if (typedListener != null) typedListener.ExitAtom(this);
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			ILatexVisitor<TResult> typedVisitor = visitor as ILatexVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitAtom(this);
+			else return visitor.VisitChildren(this);
 		}
 	}
 
@@ -823,14 +783,10 @@ public partial class myGrammarParser : Parser {
 		}
 		public override int RuleIndex { get { return RULE_atom_nofunc; } }
 		[System.Diagnostics.DebuggerNonUserCode]
-		public override void EnterRule(IParseTreeListener listener) {
-			ImyGrammarListener typedListener = listener as ImyGrammarListener;
-			if (typedListener != null) typedListener.EnterAtom_nofunc(this);
-		}
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override void ExitRule(IParseTreeListener listener) {
-			ImyGrammarListener typedListener = listener as ImyGrammarListener;
-			if (typedListener != null) typedListener.ExitAtom_nofunc(this);
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			ILatexVisitor<TResult> typedVisitor = visitor as ILatexVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitAtom_nofunc(this);
+			else return visitor.VisitChildren(this);
 		}
 	}
 
@@ -911,7 +867,7 @@ public partial class myGrammarParser : Parser {
 	}
 
 	public partial class FunctionContext : ParserRuleContext {
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode FUNC_NAME() { return GetToken(myGrammarParser.FUNC_NAME, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode FUNC_NAME() { return GetToken(LatexParser.FUNC_NAME, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public Func_argsContext func_args() {
 			return GetRuleContext<Func_argsContext>(0);
 		}
@@ -924,9 +880,9 @@ public partial class myGrammarParser : Parser {
 		[System.Diagnostics.DebuggerNonUserCode] public SupexprContext supexpr() {
 			return GetRuleContext<SupexprContext>(0);
 		}
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode[] DERIVATIVE() { return GetTokens(myGrammarParser.DERIVATIVE); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode[] DERIVATIVE() { return GetTokens(LatexParser.DERIVATIVE); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode DERIVATIVE(int i) {
-			return GetToken(myGrammarParser.DERIVATIVE, i);
+			return GetToken(LatexParser.DERIVATIVE, i);
 		}
 		[System.Diagnostics.DebuggerNonUserCode] public LetterContext letter() {
 			return GetRuleContext<LetterContext>(0);
@@ -937,14 +893,10 @@ public partial class myGrammarParser : Parser {
 		}
 		public override int RuleIndex { get { return RULE_function; } }
 		[System.Diagnostics.DebuggerNonUserCode]
-		public override void EnterRule(IParseTreeListener listener) {
-			ImyGrammarListener typedListener = listener as ImyGrammarListener;
-			if (typedListener != null) typedListener.EnterFunction(this);
-		}
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override void ExitRule(IParseTreeListener listener) {
-			ImyGrammarListener typedListener = listener as ImyGrammarListener;
-			if (typedListener != null) typedListener.ExitFunction(this);
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			ILatexVisitor<TResult> typedVisitor = visitor as ILatexVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitFunction(this);
+			else return visitor.VisitChildren(this);
 		}
 	}
 
@@ -1074,17 +1026,17 @@ public partial class myGrammarParser : Parser {
 	}
 
 	public partial class Func_argsContext : ParserRuleContext {
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode L_PAREN() { return GetToken(myGrammarParser.L_PAREN, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode R_PAREN() { return GetToken(myGrammarParser.R_PAREN, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode L_PAREN() { return GetToken(LatexParser.L_PAREN, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode R_PAREN() { return GetToken(LatexParser.R_PAREN, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ExprContext[] expr() {
 			return GetRuleContexts<ExprContext>();
 		}
 		[System.Diagnostics.DebuggerNonUserCode] public ExprContext expr(int i) {
 			return GetRuleContext<ExprContext>(i);
 		}
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode[] COMMA() { return GetTokens(myGrammarParser.COMMA); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode[] COMMA() { return GetTokens(LatexParser.COMMA); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode COMMA(int i) {
-			return GetToken(myGrammarParser.COMMA, i);
+			return GetToken(LatexParser.COMMA, i);
 		}
 		public Func_argsContext(ParserRuleContext parent, int invokingState)
 			: base(parent, invokingState)
@@ -1092,14 +1044,10 @@ public partial class myGrammarParser : Parser {
 		}
 		public override int RuleIndex { get { return RULE_func_args; } }
 		[System.Diagnostics.DebuggerNonUserCode]
-		public override void EnterRule(IParseTreeListener listener) {
-			ImyGrammarListener typedListener = listener as ImyGrammarListener;
-			if (typedListener != null) typedListener.EnterFunc_args(this);
-		}
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override void ExitRule(IParseTreeListener listener) {
-			ImyGrammarListener typedListener = listener as ImyGrammarListener;
-			if (typedListener != null) typedListener.ExitFunc_args(this);
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			ILatexVisitor<TResult> typedVisitor = visitor as ILatexVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitFunc_args(this);
+			else return visitor.VisitChildren(this);
 		}
 	}
 
@@ -1155,9 +1103,9 @@ public partial class myGrammarParser : Parser {
 	}
 
 	public partial class AbsContext : ParserRuleContext {
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode[] BAR() { return GetTokens(myGrammarParser.BAR); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode[] BAR() { return GetTokens(LatexParser.BAR); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode BAR(int i) {
-			return GetToken(myGrammarParser.BAR, i);
+			return GetToken(LatexParser.BAR, i);
 		}
 		[System.Diagnostics.DebuggerNonUserCode] public ExprContext expr() {
 			return GetRuleContext<ExprContext>(0);
@@ -1168,14 +1116,10 @@ public partial class myGrammarParser : Parser {
 		}
 		public override int RuleIndex { get { return RULE_abs; } }
 		[System.Diagnostics.DebuggerNonUserCode]
-		public override void EnterRule(IParseTreeListener listener) {
-			ImyGrammarListener typedListener = listener as ImyGrammarListener;
-			if (typedListener != null) typedListener.EnterAbs(this);
-		}
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override void ExitRule(IParseTreeListener listener) {
-			ImyGrammarListener typedListener = listener as ImyGrammarListener;
-			if (typedListener != null) typedListener.ExitAbs(this);
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			ILatexVisitor<TResult> typedVisitor = visitor as ILatexVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitAbs(this);
+			else return visitor.VisitChildren(this);
 		}
 	}
 
@@ -1209,24 +1153,20 @@ public partial class myGrammarParser : Parser {
 		[System.Diagnostics.DebuggerNonUserCode] public ExprContext expr() {
 			return GetRuleContext<ExprContext>(0);
 		}
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode L_FLOOR() { return GetToken(myGrammarParser.L_FLOOR, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode L_CEIL() { return GetToken(myGrammarParser.L_CEIL, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode R_FLOOR() { return GetToken(myGrammarParser.R_FLOOR, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode R_CEIL() { return GetToken(myGrammarParser.R_CEIL, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode L_FLOOR() { return GetToken(LatexParser.L_FLOOR, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode L_CEIL() { return GetToken(LatexParser.L_CEIL, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode R_FLOOR() { return GetToken(LatexParser.R_FLOOR, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode R_CEIL() { return GetToken(LatexParser.R_CEIL, 0); }
 		public IntfuncContext(ParserRuleContext parent, int invokingState)
 			: base(parent, invokingState)
 		{
 		}
 		public override int RuleIndex { get { return RULE_intfunc; } }
 		[System.Diagnostics.DebuggerNonUserCode]
-		public override void EnterRule(IParseTreeListener listener) {
-			ImyGrammarListener typedListener = listener as ImyGrammarListener;
-			if (typedListener != null) typedListener.EnterIntfunc(this);
-		}
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override void ExitRule(IParseTreeListener listener) {
-			ImyGrammarListener typedListener = listener as ImyGrammarListener;
-			if (typedListener != null) typedListener.ExitIntfunc(this);
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			ILatexVisitor<TResult> typedVisitor = visitor as ILatexVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitIntfunc(this);
+			else return visitor.VisitChildren(this);
 		}
 	}
 
@@ -1272,10 +1212,10 @@ public partial class myGrammarParser : Parser {
 	}
 
 	public partial class FracContext : ParserRuleContext {
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode FRAC_CMD() { return GetToken(myGrammarParser.FRAC_CMD, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode[] L_BRACE() { return GetTokens(myGrammarParser.L_BRACE); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode FRAC_CMD() { return GetToken(LatexParser.FRAC_CMD, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode[] L_BRACE() { return GetTokens(LatexParser.L_BRACE); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode L_BRACE(int i) {
-			return GetToken(myGrammarParser.L_BRACE, i);
+			return GetToken(LatexParser.L_BRACE, i);
 		}
 		[System.Diagnostics.DebuggerNonUserCode] public ExprContext[] expr() {
 			return GetRuleContexts<ExprContext>();
@@ -1283,9 +1223,9 @@ public partial class myGrammarParser : Parser {
 		[System.Diagnostics.DebuggerNonUserCode] public ExprContext expr(int i) {
 			return GetRuleContext<ExprContext>(i);
 		}
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode[] R_BRACE() { return GetTokens(myGrammarParser.R_BRACE); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode[] R_BRACE() { return GetTokens(LatexParser.R_BRACE); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode R_BRACE(int i) {
-			return GetToken(myGrammarParser.R_BRACE, i);
+			return GetToken(LatexParser.R_BRACE, i);
 		}
 		public FracContext(ParserRuleContext parent, int invokingState)
 			: base(parent, invokingState)
@@ -1293,14 +1233,10 @@ public partial class myGrammarParser : Parser {
 		}
 		public override int RuleIndex { get { return RULE_frac; } }
 		[System.Diagnostics.DebuggerNonUserCode]
-		public override void EnterRule(IParseTreeListener listener) {
-			ImyGrammarListener typedListener = listener as ImyGrammarListener;
-			if (typedListener != null) typedListener.EnterFrac(this);
-		}
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override void ExitRule(IParseTreeListener listener) {
-			ImyGrammarListener typedListener = listener as ImyGrammarListener;
-			if (typedListener != null) typedListener.ExitFrac(this);
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			ILatexVisitor<TResult> typedVisitor = visitor as ILatexVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitFrac(this);
+			else return visitor.VisitChildren(this);
 		}
 	}
 
@@ -1339,31 +1275,27 @@ public partial class myGrammarParser : Parser {
 	}
 
 	public partial class SqrtContext : ParserRuleContext {
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode SQRT_CMD() { return GetToken(myGrammarParser.SQRT_CMD, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode L_BRACE() { return GetToken(myGrammarParser.L_BRACE, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode SQRT_CMD() { return GetToken(LatexParser.SQRT_CMD, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode L_BRACE() { return GetToken(LatexParser.L_BRACE, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ExprContext[] expr() {
 			return GetRuleContexts<ExprContext>();
 		}
 		[System.Diagnostics.DebuggerNonUserCode] public ExprContext expr(int i) {
 			return GetRuleContext<ExprContext>(i);
 		}
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode R_BRACE() { return GetToken(myGrammarParser.R_BRACE, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode L_BRACKET() { return GetToken(myGrammarParser.L_BRACKET, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode R_BRACKET() { return GetToken(myGrammarParser.R_BRACKET, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode R_BRACE() { return GetToken(LatexParser.R_BRACE, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode L_BRACKET() { return GetToken(LatexParser.L_BRACKET, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode R_BRACKET() { return GetToken(LatexParser.R_BRACKET, 0); }
 		public SqrtContext(ParserRuleContext parent, int invokingState)
 			: base(parent, invokingState)
 		{
 		}
 		public override int RuleIndex { get { return RULE_sqrt; } }
 		[System.Diagnostics.DebuggerNonUserCode]
-		public override void EnterRule(IParseTreeListener listener) {
-			ImyGrammarListener typedListener = listener as ImyGrammarListener;
-			if (typedListener != null) typedListener.EnterSqrt(this);
-		}
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override void ExitRule(IParseTreeListener listener) {
-			ImyGrammarListener typedListener = listener as ImyGrammarListener;
-			if (typedListener != null) typedListener.ExitSqrt(this);
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			ILatexVisitor<TResult> typedVisitor = visitor as ILatexVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitSqrt(this);
+			else return visitor.VisitChildren(this);
 		}
 	}
 
@@ -1411,12 +1343,12 @@ public partial class myGrammarParser : Parser {
 	}
 
 	public partial class SubexprContext : ParserRuleContext {
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode UNDERSCORE() { return GetToken(myGrammarParser.UNDERSCORE, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode L_BRACE() { return GetToken(myGrammarParser.L_BRACE, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode UNDERSCORE() { return GetToken(LatexParser.UNDERSCORE, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode L_BRACE() { return GetToken(LatexParser.L_BRACE, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ExprContext expr() {
 			return GetRuleContext<ExprContext>(0);
 		}
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode R_BRACE() { return GetToken(myGrammarParser.R_BRACE, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode R_BRACE() { return GetToken(LatexParser.R_BRACE, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public AtomContext atom() {
 			return GetRuleContext<AtomContext>(0);
 		}
@@ -1426,14 +1358,10 @@ public partial class myGrammarParser : Parser {
 		}
 		public override int RuleIndex { get { return RULE_subexpr; } }
 		[System.Diagnostics.DebuggerNonUserCode]
-		public override void EnterRule(IParseTreeListener listener) {
-			ImyGrammarListener typedListener = listener as ImyGrammarListener;
-			if (typedListener != null) typedListener.EnterSubexpr(this);
-		}
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override void ExitRule(IParseTreeListener listener) {
-			ImyGrammarListener typedListener = listener as ImyGrammarListener;
-			if (typedListener != null) typedListener.ExitSubexpr(this);
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			ILatexVisitor<TResult> typedVisitor = visitor as ILatexVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitSubexpr(this);
+			else return visitor.VisitChildren(this);
 		}
 	}
 
@@ -1480,12 +1408,12 @@ public partial class myGrammarParser : Parser {
 	}
 
 	public partial class SupexprContext : ParserRuleContext {
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode CARET() { return GetToken(myGrammarParser.CARET, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode L_BRACE() { return GetToken(myGrammarParser.L_BRACE, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode CARET() { return GetToken(LatexParser.CARET, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode L_BRACE() { return GetToken(LatexParser.L_BRACE, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ExprContext expr() {
 			return GetRuleContext<ExprContext>(0);
 		}
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode R_BRACE() { return GetToken(myGrammarParser.R_BRACE, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode R_BRACE() { return GetToken(LatexParser.R_BRACE, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public AtomContext atom() {
 			return GetRuleContext<AtomContext>(0);
 		}
@@ -1495,14 +1423,10 @@ public partial class myGrammarParser : Parser {
 		}
 		public override int RuleIndex { get { return RULE_supexpr; } }
 		[System.Diagnostics.DebuggerNonUserCode]
-		public override void EnterRule(IParseTreeListener listener) {
-			ImyGrammarListener typedListener = listener as ImyGrammarListener;
-			if (typedListener != null) typedListener.EnterSupexpr(this);
-		}
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override void ExitRule(IParseTreeListener listener) {
-			ImyGrammarListener typedListener = listener as ImyGrammarListener;
-			if (typedListener != null) typedListener.ExitSupexpr(this);
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			ILatexVisitor<TResult> typedVisitor = visitor as ILatexVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitSupexpr(this);
+			else return visitor.VisitChildren(this);
 		}
 	}
 
@@ -1549,29 +1473,25 @@ public partial class myGrammarParser : Parser {
 	}
 
 	public partial class ParenthesisContext : ParserRuleContext {
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode L_PAREN() { return GetToken(myGrammarParser.L_PAREN, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode L_PAREN() { return GetToken(LatexParser.L_PAREN, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ExprContext expr() {
 			return GetRuleContext<ExprContext>(0);
 		}
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode R_PAREN() { return GetToken(myGrammarParser.R_PAREN, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode L_BRACE() { return GetToken(myGrammarParser.L_BRACE, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode R_BRACE() { return GetToken(myGrammarParser.R_BRACE, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode L_BRACKET() { return GetToken(myGrammarParser.L_BRACKET, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode R_BRACKET() { return GetToken(myGrammarParser.R_BRACKET, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode R_PAREN() { return GetToken(LatexParser.R_PAREN, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode L_BRACE() { return GetToken(LatexParser.L_BRACE, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode R_BRACE() { return GetToken(LatexParser.R_BRACE, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode L_BRACKET() { return GetToken(LatexParser.L_BRACKET, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode R_BRACKET() { return GetToken(LatexParser.R_BRACKET, 0); }
 		public ParenthesisContext(ParserRuleContext parent, int invokingState)
 			: base(parent, invokingState)
 		{
 		}
 		public override int RuleIndex { get { return RULE_parenthesis; } }
 		[System.Diagnostics.DebuggerNonUserCode]
-		public override void EnterRule(IParseTreeListener listener) {
-			ImyGrammarListener typedListener = listener as ImyGrammarListener;
-			if (typedListener != null) typedListener.EnterParenthesis(this);
-		}
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override void ExitRule(IParseTreeListener listener) {
-			ImyGrammarListener typedListener = listener as ImyGrammarListener;
-			if (typedListener != null) typedListener.ExitParenthesis(this);
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			ILatexVisitor<TResult> typedVisitor = visitor as ILatexVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitParenthesis(this);
+			else return visitor.VisitChildren(this);
 		}
 	}
 
@@ -1632,9 +1552,9 @@ public partial class myGrammarParser : Parser {
 	}
 
 	public partial class NumberContext : ParserRuleContext {
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode[] DIGIT() { return GetTokens(myGrammarParser.DIGIT); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode[] DIGIT() { return GetTokens(LatexParser.DIGIT); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode DIGIT(int i) {
-			return GetToken(myGrammarParser.DIGIT, i);
+			return GetToken(LatexParser.DIGIT, i);
 		}
 		public NumberContext(ParserRuleContext parent, int invokingState)
 			: base(parent, invokingState)
@@ -1642,14 +1562,10 @@ public partial class myGrammarParser : Parser {
 		}
 		public override int RuleIndex { get { return RULE_number; } }
 		[System.Diagnostics.DebuggerNonUserCode]
-		public override void EnterRule(IParseTreeListener listener) {
-			ImyGrammarListener typedListener = listener as ImyGrammarListener;
-			if (typedListener != null) typedListener.EnterNumber(this);
-		}
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override void ExitRule(IParseTreeListener listener) {
-			ImyGrammarListener typedListener = listener as ImyGrammarListener;
-			if (typedListener != null) typedListener.ExitNumber(this);
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			ILatexVisitor<TResult> typedVisitor = visitor as ILatexVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitNumber(this);
+			else return visitor.VisitChildren(this);
 		}
 	}
 
@@ -1731,14 +1647,10 @@ public partial class myGrammarParser : Parser {
 		}
 		public override int RuleIndex { get { return RULE_variable; } }
 		[System.Diagnostics.DebuggerNonUserCode]
-		public override void EnterRule(IParseTreeListener listener) {
-			ImyGrammarListener typedListener = listener as ImyGrammarListener;
-			if (typedListener != null) typedListener.EnterVariable(this);
-		}
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override void ExitRule(IParseTreeListener listener) {
-			ImyGrammarListener typedListener = listener as ImyGrammarListener;
-			if (typedListener != null) typedListener.ExitVariable(this);
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			ILatexVisitor<TResult> typedVisitor = visitor as ILatexVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitVariable(this);
+			else return visitor.VisitChildren(this);
 		}
 	}
 
@@ -1765,22 +1677,18 @@ public partial class myGrammarParser : Parser {
 	}
 
 	public partial class LetterContext : ParserRuleContext {
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode CHAR() { return GetToken(myGrammarParser.CHAR, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode LATEX_CMD() { return GetToken(myGrammarParser.LATEX_CMD, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode CHAR() { return GetToken(LatexParser.CHAR, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode LATEX_CMD() { return GetToken(LatexParser.LATEX_CMD, 0); }
 		public LetterContext(ParserRuleContext parent, int invokingState)
 			: base(parent, invokingState)
 		{
 		}
 		public override int RuleIndex { get { return RULE_letter; } }
 		[System.Diagnostics.DebuggerNonUserCode]
-		public override void EnterRule(IParseTreeListener listener) {
-			ImyGrammarListener typedListener = listener as ImyGrammarListener;
-			if (typedListener != null) typedListener.EnterLetter(this);
-		}
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override void ExitRule(IParseTreeListener listener) {
-			ImyGrammarListener typedListener = listener as ImyGrammarListener;
-			if (typedListener != null) typedListener.ExitLetter(this);
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			ILatexVisitor<TResult> typedVisitor = visitor as ILatexVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitLetter(this);
+			else return visitor.VisitChildren(this);
 		}
 	}
 
@@ -1815,23 +1723,19 @@ public partial class myGrammarParser : Parser {
 	}
 
 	public partial class MulContext : ParserRuleContext {
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode MUL() { return GetToken(myGrammarParser.MUL, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode CDOT() { return GetToken(myGrammarParser.CDOT, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode TIMES() { return GetToken(myGrammarParser.TIMES, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode MUL() { return GetToken(LatexParser.MUL, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode CDOT() { return GetToken(LatexParser.CDOT, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode TIMES() { return GetToken(LatexParser.TIMES, 0); }
 		public MulContext(ParserRuleContext parent, int invokingState)
 			: base(parent, invokingState)
 		{
 		}
 		public override int RuleIndex { get { return RULE_mul; } }
 		[System.Diagnostics.DebuggerNonUserCode]
-		public override void EnterRule(IParseTreeListener listener) {
-			ImyGrammarListener typedListener = listener as ImyGrammarListener;
-			if (typedListener != null) typedListener.EnterMul(this);
-		}
-		[System.Diagnostics.DebuggerNonUserCode]
-		public override void ExitRule(IParseTreeListener listener) {
-			ImyGrammarListener typedListener = listener as ImyGrammarListener;
-			if (typedListener != null) typedListener.ExitMul(this);
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			ILatexVisitor<TResult> typedVisitor = visitor as ILatexVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitMul(this);
+			else return visitor.VisitChildren(this);
 		}
 	}
 

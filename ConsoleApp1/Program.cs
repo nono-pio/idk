@@ -50,5 +50,4 @@ static (int, int) sqrt(int n)
     return (n / (sqrt * sqrt), sqrt);
 }
 
-print(Solve.SolveFor(Pow(x, 2) -2*x + 1, 0, x));
-print(Parser.Parse("x^2-2x+1"));
+print(Parser.Parse("log_2 3"));
