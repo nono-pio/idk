@@ -16,8 +16,8 @@ public class FiniteSet(HashSet<Expr> elements) : Set
     public override bool IsElementsPositive =>  Elements.All(el => el.IsPositive);
     public override bool IsElementsNegative =>  Elements.All(el => el.IsNegative);
 
-    public new static Set CreateFiniteSet(params Expr[] elements) => CreateFiniteSet(elements.ToHashSet());
-    public new static Set CreateFiniteSet(HashSet<Expr> elements)
+    public static Set Construct(params Expr[] elements) => Construct(elements.ToHashSet());
+    public static Set Construct(HashSet<Expr> elements)
     {
         if (elements.Count == 0)
             return EmptySet;
@@ -28,73 +28,65 @@ public class FiniteSet(HashSet<Expr> elements) : Set
     public override bool IsEnumerable => true;
     public override IEnumerable<Expr> GetEnumerable() => Elements;
     
-    public override Set Complement(Set universe)
-    {
-        if (universe is Interval)
-        {
-            List<Number> nums = new();
-            List<Expr> others = new();
-            foreach (var e in Elements)
-            {
-                if (e is Number num)
-                    nums.Add(num);
-                else
-                    others.Add(e);
-            }
-
-            if (universe.IsR && nums.Count > 0)
-            {
-                nums.Sort();
-                var intervals = new List<Set>();
-                intervals.Add(CreateInterval(Expr.NegInf, nums[0], false, false));
-                for (int i = 1; i < nums.Count-1; i++)
-                {
-                    intervals.Add(CreateInterval(nums[i-1], nums[i], false, false));
-                }
-                intervals.Add(CreateInterval(nums[^1], Expr.Inf, false, false));
-                if (others.Count > 0)
-                    return CreateComplement(CreateUnion(intervals.ToArray()), CreateFiniteSet(others.ToArray()));
-                else
-                    return CreateUnion(intervals.ToArray());
-            }
-            else if (nums.Count == 0)
-            {
-                if (others.Count == 0)
-                    return universe;
-            
-                return CreateComplement(universe, CreateFiniteSet(others.ToArray()));
-            }    
-        }
-
-        if (universe is FiniteSet)
-        {
-            var hasnt = new List<Expr>();
-            var idk = new List<Expr>();
-            foreach (Expr value in Elements)
-            {
-                var has = universe.Contains(value)?.GetValue();
-                if (has is null)
-                    idk.Add(value);
-                else if (has == false)
-                    hasnt.Add(value);
-            }
-            
-            var hasntSet = CreateFiniteSet(hasnt.ToArray());
-            if (idk.Count > 0)
-                return CreateComplement(hasntSet, CreateFiniteSet(idk.ToArray()));
-            return hasntSet;
-        }
-        
-        return base.Complement(universe);
-    }
-    
-    public Set UnionSelf(FiniteSet other)
-    {
-        var newElements = new HashSet<Expr>(Elements);
-        newElements.UnionWith(other.Elements);
-        
-        return CreateFiniteSet(newElements);
-    }
+    // public override Set Complement(Set universe)
+    // {
+    //     if (universe is IntervalSet)
+    //     {
+    //         List<Number> nums = new();
+    //         List<Expr> others = new();
+    //         foreach (var e in Elements)
+    //         {
+    //             if (e is Number num)
+    //                 nums.Add(num);
+    //             else
+    //                 others.Add(e);
+    //         }
+    //
+    //         if (universe.IsR && nums.Count > 0)
+    //         {
+    //             nums.Sort();
+    //             var intervals = new List<Set>();
+    //             intervals.Add(Interval(Expr.NegInf, nums[0], false, false));
+    //             for (int i = 1; i < nums.Count-1; i++)
+    //             {
+    //                 intervals.Add(Interval(nums[i-1], nums[i], false, false));
+    //             }
+    //             intervals.Add(Interval(nums[^1], Expr.Inf, false, false));
+    //             if (others.Count > 0)
+    //                 return CreateComplement(CreateUnion(intervals.ToArray()), CreateFiniteSet(others.ToArray()));
+    //             else
+    //                 return CreateUnion(intervals.ToArray());
+    //         }
+    //         else if (nums.Count == 0)
+    //         {
+    //             if (others.Count == 0)
+    //                 return universe;
+    //         
+    //             return CreateComplement(universe, CreateFiniteSet(others.ToArray()));
+    //         }    
+    //     }
+    //
+    //     if (universe is FiniteSet)
+    //     {
+    //         var hasnt = new List<Expr>();
+    //         var idk = new List<Expr>();
+    //         foreach (Expr value in Elements)
+    //         {
+    //             var has = universe.Contains(value)?.GetValue();
+    //             if (has is null)
+    //                 idk.Add(value);
+    //             else if (has == false)
+    //                 hasnt.Add(value);
+    //         }
+    //         
+    //         var hasntSet = CreateFiniteSet(hasnt.ToArray());
+    //         if (idk.Count > 0)
+    //             return CreateComplement(hasntSet, CreateFiniteSet(idk.ToArray()));
+    //         return hasntSet;
+    //     }
+    //     
+    //     return base.Complement(universe);
+    // }
     
     // {1,2,3} U [3,6] = [3,6] U {1,2} (3 is in [3, 6])
     public Set UnionSet(Set b)
@@ -105,7 +97,7 @@ public class FiniteSet(HashSet<Expr> elements) : Set
         if (newElements.Count == 0)
             return b;
         
-        return CreateUnion(b, CreateFiniteSet(newElements));
+        return Union(b, ArraySet(newElements));
     }
     
     public Set IntersectionSelf(FiniteSet other)
@@ -116,7 +108,7 @@ public class FiniteSet(HashSet<Expr> elements) : Set
         if (newElements.Count == 0)
             return EmptySet;
         
-        return CreateFiniteSet(newElements);
+        return ArraySet(newElements);
     }
     
     public Set IntersectionSet(Set b)
@@ -135,9 +127,9 @@ public class FiniteSet(HashSet<Expr> elements) : Set
         return (newElements.Count == 0, newElementsIndeterminate.Count == 0) switch
         {
             (true, true) => EmptySet,
-            (true, false) => CreateIntersection(CreateFiniteSet(newElementsIndeterminate), b),
-            (false, true) => CreateFiniteSet(newElements),
-            (false, false) => CreateUnion(CreateFiniteSet(newElements), CreateIntersection(CreateFiniteSet(newElementsIndeterminate), b))
+            (true, false) => Intersection(ArraySet(newElementsIndeterminate), b),
+            (false, true) => ArraySet(newElements),
+            (false, false) => Union(ArraySet(newElements), Intersection(ArraySet(newElementsIndeterminate), b))
         };
     }
     

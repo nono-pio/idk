@@ -16,6 +16,11 @@ public class ConditionSet : Set
         Domain = domain;
     }
     
+    public static Set Construct(Variable x, Boolean condition, Set domain)
+    {
+        return new ConditionSet(condition, x, domain);
+    }
+    
     public override Boolean Contains(Expr x)
     {
         return Domain.Contains(x) & Condition.Substitue(Variable, x);

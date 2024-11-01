@@ -5,7 +5,7 @@ namespace ConsoleApp1.Core.Sets;
 
 // For sets like Natural, Integer, Rational, Real, ...
 // Where N ⊆ Z ⊆ Q ⊆ R ...
-public abstract class BasicNumberSet : Set
+public abstract class NumberSet : Set
 {
     // The level of the set in the hierarchy (Natural = 1, Integer = 2, Rational = 3, Real = 4)
     public abstract int _Level { get; }
@@ -18,12 +18,12 @@ public abstract class BasicNumberSet : Set
     public override bool IsElementsPositive => _Level == Natural.Level;
     public override bool IsElementsNegative => false;
     
-    public static BasicNumberSet GetUnionOf(BasicNumberSet a, BasicNumberSet b)
+    public static NumberSet GetUnionOf(NumberSet a, NumberSet b)
     {
         return a._Level > b._Level ? a : b;
     } 
     
-    public static BasicNumberSet GetIntersectionOf(BasicNumberSet a, BasicNumberSet b)
+    public static NumberSet GetIntersectionOf(NumberSet a, NumberSet b)
     {
         return a._Level < b._Level ? a : b;
     }
@@ -39,7 +39,7 @@ public abstract class BasicNumberSet : Set
     }
 }
 
-public class Natural : BasicNumberSet
+public class Natural : NumberSet
 {
     public static readonly int Level = 1;
     public override int _Level => Level;
@@ -60,7 +60,7 @@ public class Natural : BasicNumberSet
     }
 }
 
-public class Integer : BasicNumberSet
+public class Integer : NumberSet
 {    
     public static readonly int Level = 2;
     public override int _Level => Level;
@@ -80,7 +80,7 @@ public class Integer : BasicNumberSet
     }
 }
 
-public class Rational : BasicNumberSet
+public class Rational : NumberSet
 {
     public static readonly int Level = 3;
     public override int _Level => Level;
@@ -101,7 +101,7 @@ public class Rational : BasicNumberSet
     }
 }
 
-public class Real : BasicNumberSet
+public class Real : NumberSet
 {
     public static readonly int Level = 4;
     public override int _Level => Level;

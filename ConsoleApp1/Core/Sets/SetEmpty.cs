@@ -1,7 +1,7 @@
 ﻿namespace ConsoleApp1.Core.Sets;
 using Boolean = ConsoleApp1.Core.Booleans.Boolean;
 
-public class EmptySet : Set
+public class SetEmpty : Set
 {
     public override bool IsElementsNatural => true;
     public override bool IsElementsInteger => true;

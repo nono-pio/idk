@@ -34,10 +34,10 @@ public class Inequation(Expr lhs, Expr rhs, InequationType type)
     {
         var set = Type switch
         {
-            InequationType.LessThan => Set.CreateInterval(double.NegativeInfinity, 0, false, false),
-            InequationType.LessThanOrEqual => Set.CreateInterval(double.NegativeInfinity, 0, false, true),
-            InequationType.GreaterThan => Set.CreateInterval(0, double.PositiveInfinity, false, false),
-            InequationType.GreaterThanOrEqual => Set.CreateInterval(0, double.PositiveInfinity, true, false),
+            InequationType.LessThan => Interval(double.NegativeInfinity, 0, false, false),
+            InequationType.LessThanOrEqual => Interval(double.NegativeInfinity, 0, false, true),
+            InequationType.GreaterThan => Interval(0, double.PositiveInfinity, false, false),
+            InequationType.GreaterThanOrEqual => Interval(0, double.PositiveInfinity, true, false),
             _ => throw new ArgumentOutOfRangeException()
         };
 

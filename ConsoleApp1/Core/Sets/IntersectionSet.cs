@@ -4,7 +4,7 @@ using Boolean = ConsoleApp1.Core.Booleans.Boolean;
 
 namespace ConsoleApp1.Core.Sets;
 
-public class Intersection(params Set[] sets) : Set
+public class IntersectionSet(params Set[] sets) : Set
 {
     public Set[] Sets = sets;
     
@@ -16,20 +16,20 @@ public class Intersection(params Set[] sets) : Set
     public override bool IsElementsPositive => Sets.All(set => set.IsElementsPositive);
     public override bool IsElementsNegative => Sets.All(set => set.IsElementsNegative);
     
-    public new static Set CreateIntersection(params Set[] sets)
+    public static Set Construct(params Set[] sets)
     {
         if (sets.Length == 0)
             return EmptySet;
         
         // TODO
         
-        return new Intersection(sets);
+        return new IntersectionSet(sets);
     }
 
     public static Set? EvalIntersection(Set A, Set B)
     {
         // Empty Set
-        if (A is EmptySet || B is EmptySet)
+        if (A is SetEmpty || B is SetEmpty)
             return EmptySet;
         
         // Universal Set
@@ -39,17 +39,17 @@ public class Intersection(params Set[] sets) : Set
             return A;
         
         // Basic Number Sets
-        if (A is BasicNumberSet bA && B is BasicNumberSet bB)
-            return BasicNumberSet.GetIntersectionOf(bA, bB);
+        if (A is NumberSet bA && B is NumberSet bB)
+            return NumberSet.GetIntersectionOf(bA, bB);
         
         // Interval Sets
-        if (A is Interval intA && B is Interval intB)
+        if (A is IntervalSet intA && B is IntervalSet intB)
             return OverlapIntervals(intA, intB);
 
-        if (A is BasicNumberSet bA2 && B is Interval intB2)
-            return IntersectionIntervalBasicNumberSet(intB2, bA2);
-        if (A is Interval intA2 && B is BasicNumberSet bB2)
-            return IntersectionIntervalBasicNumberSet(intA2, bB2);
+        if (A is NumberSet bA2 && B is IntervalSet intB2)
+            return IntersectionIntervalNumberSet(intB2, bA2);
+        if (A is IntervalSet intA2 && B is NumberSet bB2)
+            return IntersectionIntervalNumberSet(intA2, bB2);
 
         // Finite Sets
         if (A is FiniteSet fA && B is FiniteSet fB)
@@ -63,13 +63,13 @@ public class Intersection(params Set[] sets) : Set
         return null;
     }
     
-    public static Interval? OverlapIntervals(Interval a, Interval b)
+    public static IntervalSet? OverlapIntervals(IntervalSet a, IntervalSet b)
     {
         // TODO
         return null;
     }
     
-    public static Set? IntersectionIntervalBasicNumberSet(Interval a, BasicNumberSet b)
+    public static Set? IntersectionIntervalNumberSet(IntervalSet a, NumberSet b)
     {
         return b._Level < Real.Level ? null/*TODO:Range*/ : a;
     }
@@ -92,10 +92,10 @@ public class Intersection(params Set[] sets) : Set
         throw new NotImplementedException();
     }
 
-    public override Set Complement(Set universe)
-    {
-        return CreateUnion(Sets.Select(set => set.Complement(universe)).ToArray());
-    }
+    // public Set Complement(Set universe)
+    // {
+    //     return Union(Sets.Select(set => set.Complement(universe)).ToArray());
+    // }
 
     public override Set Boundary()
     {

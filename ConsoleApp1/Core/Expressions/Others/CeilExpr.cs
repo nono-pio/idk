@@ -17,7 +17,7 @@ public class CeilExpr(Expr x) : FonctionExpr(x)
 
     public override Set AsSet()
     {
-        return ArithmeticOnSet.FunctionOnSet(Eval, X.AsSet(), ArithmeticOnSet.FunctionBasicNumber(natural: Set.N, integer: Set.Z, rational: Set.Z, real: Set.Z));
+        return ArithmeticOnSets.FunctionOnSet(Eval, X.AsSet(), ArithmeticOnSets.FunctionBasicNumber(natural: ConstructorSets.N, integer: Z, rational: Z, real: Z));
     }
 
     public override Expr Eval(Expr[] exprs, object[]? objects = null)

@@ -15,7 +15,7 @@ public class Variable : Atom
     public override bool IsPositive  => Domain?.IsElementsPositive ?? false;
     public override bool IsNegative  => Domain?.IsElementsNegative ?? false;
 
-    public override Set AsSet() => Set.CreateFiniteSet(this);
+    public override Set AsSet() => ArraySet(this);
 
     public readonly string Name;
     public readonly string LatexName;

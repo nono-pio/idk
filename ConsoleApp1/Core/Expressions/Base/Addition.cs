@@ -207,10 +207,10 @@ public class Addition : Expr
 
     public override Set AsSet()
     {
-        Set SetAAddSetB(Set setA, Set setB) => ArithmeticOnSet.BiCommutativeFunctionOnSet(
+        Set SetAAddSetB(Set setA, Set setB) => ArithmeticOnSets.BiCommutativeFunctionOnSet(
             (el1, el2) => el1 + el2, setA, setB, 
             interval: (interval, interval1) => interval.ArithmeticAdd(interval1),
-            expr_interval: (expr, interval) => Set.CreateInterval(interval.Start + expr, interval.End+expr, interval.StartInclusive, interval.EndInclusive),
+            expr_interval: (expr, interval) => Interval(interval.Start + expr, interval.End+expr, interval.StartInclusive, interval.EndInclusive),
             bns: (bnsA, bnsB) => bnsA._Level >= bnsB._Level ? bnsA : bnsB,
             bns_integral: (bns, interval) => bns is Real ? bns : null, // question: Q + [x1,x2] = R x1 != x2; TODO: N/Z + [x1, x2] = R si x2-x1 > 1
             expr_bns: (expr, bns) => bns switch

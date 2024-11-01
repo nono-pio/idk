@@ -25,15 +25,8 @@ Operations on sets: (class derived from Set)
  */
 public abstract class Set
 {
-    public static Set EmptySet => new EmptySet();
-    public static UniversalSet U => new UniversalSet();
-    public static Natural N => new Natural();
-    public static Integer Z => new Integer();
-    public static Rational Q => new Rational();
-    public static Real R => new Real();
-
-    public Set Positive => CreateIntersection(this, CreateInterval(0, Expr.Inf));
-    public Set Negative => CreateIntersection(this, CreateInterval(Expr.NegInf, 0));
+    public Set Positive => Intersection(this, Interval(0, Expr.Inf));
+    public Set Negative => Intersection(this, Interval(Expr.NegInf, 0));
     
     public virtual bool IsElementsNatural => throw new NotImplementedException();
     public virtual bool IsElementsInteger => IsElementsNatural;
@@ -45,73 +38,30 @@ public abstract class Set
     public virtual bool IsElementsNegative => throw new NotImplementedException();
 
     public bool IsEmpty => IsEmptySet();
-    public bool IsEmptySet() => this is EmptySet;
+    public bool IsEmptySet() => this is SetEmpty;
 
     public bool IsR => this is Real;
 
     /* Set Creation */
-    public static implicit operator Set(Expr expr) => CreateFiniteSet(expr);
-
-    public static Set CreateConditionSet(Boolean condition, Variable variable, Set domain)
-    {
-        return new ConditionSet(condition, variable, domain);
-    }
-    
-    public static Set CreateFiniteSet(params Expr[] elements)
-    {
-        return FiniteSet.CreateFiniteSet(elements);
-    }
-
-    public static Set CreateInterval(Expr start, Expr end, bool startInclusive = true, bool endInclusive = true)
-    {
-        return Interval.CreateInterval(start, end, startInclusive, endInclusive);
-    }
-    
-    public static Set CreateUnion(params Set[] sets)
-    {
-        return Sets.Union.CreateUnion(sets);
-    }
-    
-    public static Set CreateIntersection(params Set[] sets)
-    {
-        return new Intersection(sets);
-        throw new NotImplementedException(); // return Intersection.CreateIntersection(elements);
-    }
-    
-    public static Set CreateComplement(Set set, Set universe)
-    {
-        return new Complement(set, universe);
-        throw new NotImplementedException(); // return Complement.CreateComplement(set, universe);
-    }
+    public static implicit operator Set(Expr expr) => ArraySet(expr);
 
     /* Operation on Sets */
 
-    public Set Union(Set other)
+    public Set UnionWith(Set other)
     {
-        return CreateUnion(this, other);
+        return Union(this, other);
     }
 
-    public Set Intersection(Set other)
+    public Set Intersect(Set other)
     {
-        return CreateIntersection(this, other);
+        return Intersection(this, other);
     }
-
-    public virtual Set Complement(Set universe)
+    
+    public Set Complement(Set? univers = null)
     {
-        return CreateComplement(this, universe);
+        return SetDifference(univers ?? R, this);
     }
-
-    public Set SymmetricDifference(Set other)
-    {
-        throw new NotImplementedException();
-    }
-
-    // Power Set of this set
-
-    public Set PowerSet()
-    {
-        throw new NotImplementedException();
-    }
+    
 
     /**/
     public virtual bool IsEnumerable => false;

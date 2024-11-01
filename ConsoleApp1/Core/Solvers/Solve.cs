@@ -14,7 +14,7 @@ public class Solve
     {
         if (f.Constant(variable))
         {
-            return f.IsZero ? Set.R/*return x domain or R*/ : Set.EmptySet;
+            return f.IsZero ? R/*return x domain or R*/ : EmptySet;
         }
 
         (f, var y) = Reciprocal.Unfold(f, 0, variable);
@@ -47,7 +47,7 @@ public class Solve
 
             if (isAllSolvable)
             {
-                return Set.CreateUnion(solutions.ToArray());    
+                return Union(solutions.ToArray());    
             }
         }
         
@@ -57,7 +57,7 @@ public class Solve
         if (Poly.IsPolynomial(polyExpr, variable))
         {
             var poly = Poly.ToPoly(polyExpr, variable);
-            return Set.CreateFiniteSet(poly.Solve());
+            return ArraySet(poly.Solve());
         }
         
         // change variable, exemple :

@@ -4,7 +4,7 @@ using Boolean = ConsoleApp1.Core.Booleans.Boolean;
 
 namespace ConsoleApp1.Core.Sets;
 
-public class Union(params Set[] sets) : Set
+public class UnionSet(params Set[] sets) : Set
 {
     public Set[] Sets = sets;
     
@@ -16,13 +16,13 @@ public class Union(params Set[] sets) : Set
     public override bool IsElementsPositive => Sets.All(set => set.IsElementsPositive);
     public override bool IsElementsNegative => Sets.All(set => set.IsElementsNegative);
     
-    public new static Set CreateUnion(params Set[] sets)
+    public static Set Construct(params Set[] sets)
     {
         if (sets.Length == 0)
             return EmptySet;
         
         var newSets = new List<Set>();
-        foreach (var set in sets.SelectMany(set => set is Union union ? union.Sets : new Set[] {set}))
+        foreach (var set in sets.SelectMany(set => set is UnionSet union ? union.Sets : new Set[] {set}))
         {
             for (int i = 0; i < newSets.Count; i++)
             {
@@ -44,15 +44,15 @@ public class Union(params Set[] sets) : Set
         if (newSets.Count == 1)
             return newSets[0];
         
-        return new Union(newSets.ToArray());
+        return new UnionSet(newSets.ToArray());
     }
 
     public static Set? EvalUnion(Set A, Set B)
     {
         // Empty Set
-        if (A is EmptySet)
+        if (A is SetEmpty)
             return B;
-        if (B is EmptySet)
+        if (B is SetEmpty)
             return A;
         
         // Universal Set
@@ -60,21 +60,21 @@ public class Union(params Set[] sets) : Set
             return U;
         
         // Basic Number Sets
-        if (A is BasicNumberSet bA && B is BasicNumberSet bB)
-            return BasicNumberSet.GetUnionOf(bA, bB);
+        if (A is NumberSet bA && B is NumberSet bB)
+            return NumberSet.GetUnionOf(bA, bB);
         
         // Interval Sets
-        if (A is Interval intA && B is Interval intB)
+        if (A is IntervalSet intA && B is IntervalSet intB)
             return CombineIntervals(intA, intB);
 
-        if (A is BasicNumberSet bA2 && B is Interval intB2)
-            return CombineIntervalBasicNumberSet(intB2, bA2);
-        if (A is Interval intA2 && B is BasicNumberSet bB2)
-            return CombineIntervalBasicNumberSet(intA2, bB2);
+        if (A is NumberSet bA2 && B is IntervalSet intB2)
+            return CombineIntervalNumberSet(intB2, bA2);
+        if (A is IntervalSet intA2 && B is NumberSet bB2)
+            return CombineIntervalNumberSet(intA2, bB2);
 
         // Finite Sets
-        if (A is FiniteSet fA && B is FiniteSet fB)
-            return fA.UnionSelf(fB);
+        // if (A is FiniteSet fA && B is FiniteSet fB)
+        //     return fA.UnionSelf(fB);
         
         if (A is FiniteSet fA2)
             return fA2.UnionSet(B);
@@ -84,13 +84,13 @@ public class Union(params Set[] sets) : Set
         return null;
     }
     
-    public static Interval? CombineIntervals(Interval a, Interval b)
+    public static IntervalSet? CombineIntervals(IntervalSet a, IntervalSet b)
     {
         // TODO
         return null;
     }
     
-    public static BasicNumberSet? CombineIntervalBasicNumberSet(Interval a, BasicNumberSet b)
+    public static NumberSet? CombineIntervalNumberSet(IntervalSet a, NumberSet b)
     {
         return b._Level < Real.Level ? null : b;
     }
@@ -123,10 +123,10 @@ public class Union(params Set[] sets) : Set
         return Max(supSets);
     }
 
-    public override Set Complement(Set universe)
-    {
-        return CreateIntersection(Sets.Select(set => set.Complement(universe)).ToArray());
-    }
+    // public override Set Complement(Set universe)
+    // {
+    //     return Intersection(Sets.Select(set => set.Complement(universe)).ToArray());
+    // }
 
     public override Set Boundary()
     {

@@ -187,15 +187,15 @@ public class Multiplication : Expr
     
     public override Set AsSet()
     {
-        Set SetAAddSetB(Set setA, Set setB) => ArithmeticOnSet.BiCommutativeFunctionOnSet(
+        Set SetAAddSetB(Set setA, Set setB) => ArithmeticOnSets.BiCommutativeFunctionOnSet(
             (el1, el2) => el1 * el2, setA, setB, 
-            interval: (interval, interval1) => Set.CreateInterval(Min(interval.Start * interval1.End, interval.Start * interval1.Start, interval.End * interval1.End, interval.End * interval1.Start), Max(interval.Start * interval1.End, interval.Start * interval1.Start, interval.End * interval1.End, interval.End * interval1.Start)), // TODO : bornes
-            expr_interval: (expr, interval) => Set.CreateInterval(Min(interval.Start * expr, interval.End * expr), Max(interval.Start * expr, interval.End * expr)), // TODO : bornes
+            interval: (interval, interval1) => Interval(Min(interval.Start * interval1.End, interval.Start * interval1.Start, interval.End * interval1.End, interval.End * interval1.Start), Max(interval.Start * interval1.End, interval.Start * interval1.Start, interval.End * interval1.End, interval.End * interval1.Start)), // TODO : bornes
+            expr_interval: (expr, interval) => Interval(Min(interval.Start * expr, interval.End * expr), Max(interval.Start * expr, interval.End * expr)), // TODO : bornes
             bns: (bnsA, bnsB) => bnsA._Level >= bnsB._Level ? bnsA : bnsB,
             bns_integral: (bns, interval) => bns is Real ? bns : null,
             expr_bns: (expr, bns) => bns switch
             {
-                Natural => expr == -1 ? Set.Z.Negative : throw new NotImplementedException(),
+                Natural => expr == -1 ? Z.Negative : throw new NotImplementedException(),
                 Integer => expr == -1 ? bns : throw new NotImplementedException(),
                 Rational => expr.IsRational ? bns : throw new NotImplementedException(),
                 Real => expr.IsReal ? bns : throw new NotImplementedException(),

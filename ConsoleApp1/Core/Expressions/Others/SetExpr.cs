@@ -29,7 +29,7 @@ public class SetExpr(Set set) : Expr
         var bCount = b.Elements.Count;
         if (aCount == 0 || bCount == 0)
         {
-            return new SetExpr(Set.EmptySet);
+            return new SetExpr(EmptySet);
         }
         
         var exprs = new Expr[aCount * bCount];
@@ -43,21 +43,21 @@ public class SetExpr(Set set) : Expr
             }
         }
         
-        return new SetExpr(Set.CreateFiniteSet(exprs));
+        return new SetExpr(ArraySet(exprs));
     }
     
     public static Expr Add(Set a, Set b)
     {
         // Empty + Set
         if (a.IsEmpty || b.IsEmpty)
-            return Construct(Set.EmptySet);
+            return Construct(EmptySet);
         
         // Universal + Set
         if (a is UniversalSet || b is UniversalSet)
-            return Construct(Set.U);
+            return Construct(U);
 
         // BNS + BNS
-        if (a is BasicNumberSet bnsA && b is BasicNumberSet bnsB)
+        if (a is NumberSet bnsA && b is NumberSet bnsB)
             return bnsA._Level > bnsB._Level ? Construct(bnsA) : Construct(bnsB);
         
         // BNS + Interval

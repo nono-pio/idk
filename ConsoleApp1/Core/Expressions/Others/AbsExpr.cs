@@ -15,9 +15,9 @@ public class AbsExpr(Expr x) : FonctionExpr(x)
 
     public override Set AsSet()
     {
-        return ArithmeticOnSet.FunctionOnSet(Eval, X.AsSet(),
-            (abs_start, abs_end) => Set.CreateInterval(Min(0, abs_start, abs_end), Max(abs_start, abs_end)),
-            ArithmeticOnSet.FunctionBasicNumber(natural: Set.N, integer: Set.N, rational: Set.Q.Positive, real: Set.R.Positive)
+        return ArithmeticOnSets.FunctionOnSet(Eval, X.AsSet(),
+            (abs_start, abs_end) => Interval(Min(0, abs_start, abs_end), Max(abs_start, abs_end)),
+            ArithmeticOnSets.FunctionBasicNumber(natural: ConstructorSets.N, integer: ConstructorSets.N, rational: Q.Positive, real: R.Positive)
             );
     }
 

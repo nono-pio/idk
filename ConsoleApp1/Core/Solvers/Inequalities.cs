@@ -13,15 +13,15 @@ public class Inequalities
     {
         if (condition is BooleanValue value)
         {
-            return value.Value ? Set.R : Set.EmptySet;
+            return value.Value ? R : EmptySet;
         }
         
         if (condition is Or or)
-            return Set.CreateUnion(or.Values.Select(b => RelationnalsToSet(b, var)).ToArray());
+            return Union(or.Values.Select(b => RelationnalsToSet(b, var)).ToArray());
         if (condition is And and)
-            return Set.CreateIntersection(and.Values.Select(b => RelationnalsToSet(b, var)).ToArray());
+            return Intersection(and.Values.Select(b => RelationnalsToSet(b, var)).ToArray());
         if (condition is Not not)
-            return Set.CreateComplement(RelationnalsToSet(not.Value, var), Set.R);
+            return Complement(RelationnalsToSet(not.Value, var), R);
 
         if (condition is Relationnals relationnals)
         {
@@ -33,33 +33,33 @@ public class Inequalities
             var b = relationnals.B;
             return relationnals.Relation switch
             {
-                Relations.Equal => Set.CreateFiniteSet(b),
-                Relations.NotEqual => Set.CreateComplement(Set.CreateFiniteSet(b), Set.R),
-                Relations.Greater => Set.CreateInterval(b, Expr.Inf, false, false),
-                Relations.GreaterOrEqual => Set.CreateInterval(b, Expr.Inf, true, false),
-                Relations.Less => Set.CreateInterval(Expr.NegInf, b, false, false),
-                Relations.LessOrEqual => Set.CreateInterval(Expr.NegInf, b, false, true),
+                Relations.Equal => ArraySet(b),
+                Relations.NotEqual => Complement(ArraySet(b), R),
+                Relations.Greater => Interval(b, Expr.Inf, false, false),
+                Relations.GreaterOrEqual => Interval(b, Expr.Inf, true, false),
+                Relations.Less => Interval(Expr.NegInf, b, false, false),
+                Relations.LessOrEqual => Interval(Expr.NegInf, b, false, true),
                 _ => throw new ArgumentOutOfRangeException()
             };
         }
         
-        return Set.CreateConditionSet(condition, var, Set.R);
+        return LambdaSet(var, condition, R);
     }
     
     public static Set FindDomain(Expr f, Variable variable)
     {
         // Add, Mul, Pow, Ln, Exp
-        Set dom = Set.R;
+        Set dom = R;
         f.ForEach<Logarithm>(log =>
         {
-            dom = dom.Intersection(SolveFor(log.Value, 0, InequationType.GreaterThan, variable));
+            dom = dom.Intersect(SolveFor(log.Value, 0, InequationType.GreaterThan, variable));
         });
         
         f.ForEach<Power>(pow =>
         {
             if (pow.Exp.IsNegative)
             {
-                dom = dom.Intersection(Solve.SolveFor(pow.Base, 0, variable)!.Complement(Set.R));
+                dom = dom.Intersect(Solve.SolveFor(pow.Base, 0, variable)!.Complement(R));
             }
         });
 
@@ -74,14 +74,14 @@ public class Inequalities
         var solutions = Solve.SolveFor(f, 0, variable);
         // var singularities = FindSingularities(f, variable);
 
-        var criticalPoints = solutions.Union(Set.CreateFiniteSet(domain.Infimum(), domain.Supremum())); // U singularities
+        var criticalPoints = solutions.UnionWith(ArraySet(domain.Infimum(), domain.Supremum())); // U singularities
         if (criticalPoints is not FiniteSet criticalSet)
             throw new NotImplementedException();
 
         var xs = criticalSet.Elements.ToArray();
         Array.Sort(xs, (a, b) => a < b ? -1 : 1);
         
-        var intervals = Set.EmptySet;
+        var intervals = EmptySet;
         for (int i = 1; i < xs.Length; i++)
         {
             var x_j = xs[i - 1];
@@ -92,7 +92,7 @@ public class Inequalities
 
             if (Valid(y, type))
             {
-                intervals = intervals.Union(Set.CreateInterval(x_j, x_j2));
+                intervals = intervals.UnionWith(Interval(x_j, x_j2));
             }
 
         }

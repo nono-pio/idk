@@ -76,7 +76,7 @@ public class Reciprocal
         if (Poly.IsPolynomial(polyExpr, variable))
         {
             var poly = Poly.ToPoly(polyExpr, variable);
-            return new SetExpr(Set.CreateFiniteSet(poly.Solve())); // todo poly.Solve -> Expr
+            return new SetExpr(ArraySet(poly.Solve())); // todo poly.Solve -> Expr
         }
 
         return null;

@@ -22,12 +22,12 @@ public class SignExpr(Expr x) : FonctionExpr(x)
 
     public override Set AsSet()
     {
-        return ArithmeticOnSet.FunctionOnSet(Eval, X.AsSet(), 
-            ArithmeticOnSet.FunctionBasicNumber(
-                natural: Set.CreateFiniteSet([0, 1]), 
-                integer: Set.CreateFiniteSet([-1, 0, 1]), 
-                rational: Set.CreateFiniteSet([-1, 0, 1]), 
-                real: Set.CreateFiniteSet([-1, 0, 1])
+        return ArithmeticOnSets.FunctionOnSet(Eval, X.AsSet(), 
+            ArithmeticOnSets.FunctionBasicNumber(
+                natural: ArraySet(0, 1), 
+                integer: ArraySet(-1, 0, 1), 
+                rational: ArraySet(-1, 0, 1), 
+                real: ArraySet(-1, 0, 1)
                 )
             );
     }

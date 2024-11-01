@@ -30,13 +30,13 @@ public static class ConstructorAtoms
     {
         Set? domain_ = domain;
         if (real)
-            domain_ = Set.R;
+            domain_ = R;
         if (natural)
-            domain_ = Set.N;
+            domain_ = N;
         if (integer)
-            domain_ = Set.Z;
+            domain_ = Z;
         if (rational)
-            domain_ = Set.Q;
+            domain_ = Q;
         if (complex)
             throw new NotImplementedException();
 

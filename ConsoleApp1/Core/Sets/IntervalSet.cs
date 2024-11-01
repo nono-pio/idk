@@ -2,7 +2,7 @@
 
 namespace ConsoleApp1.Core.Sets;
 
-public class Interval : Set
+public class IntervalSet : Set
 {
     public Expr Start;
     public Expr End;
@@ -18,7 +18,7 @@ public class Interval : Set
     public override bool IsElementsPositive => Start.IsPositive && End.IsPositive;
     public override bool IsElementsNegative => Start.IsNegative && End.IsNegative;
 
-    private Interval(Expr start, Expr end, bool startInclusive, bool endInclusive)
+    private IntervalSet(Expr start, Expr end, bool startInclusive, bool endInclusive)
     {
         Start = start;
         End = end;
@@ -26,12 +26,12 @@ public class Interval : Set
         EndInclusive = endInclusive;
     }
 
-    public Set ArithmeticAdd(Interval other)
+    public Set ArithmeticAdd(IntervalSet other)
     {
-        return CreateInterval(Start + other.Start, End + other.End, StartInclusive || other.StartInclusive, EndInclusive || other.EndInclusive);
+        return Interval(Start + other.Start, End + other.End, StartInclusive || other.StartInclusive, EndInclusive || other.EndInclusive);
     }
     
-    public new static Set CreateInterval(Expr start, Expr end, bool startInclusive = true, bool endInclusive = true)
+    public static Set Construct(Expr start, Expr end, bool startInclusive = true, bool endInclusive = true)
     {
         if (!start.IsExtendedReal || !end.IsExtendedReal || !(end-start).IsExtendedReal)
             throw new Exception("Invalid interval");
@@ -50,7 +50,7 @@ public class Interval : Set
                 return EmptySet;
 
             // [1,1] = {1}
-            return CreateFiniteSet(start);
+            return ArraySet(start);
         }
 
         if (start.IsNegativeInfinity)
@@ -58,15 +58,15 @@ public class Interval : Set
         if (end.IsInfinity)
             endInclusive = false;
         
-        return new Interval(start, end, startInclusive, endInclusive);
+        return new IntervalSet(start, end, startInclusive, endInclusive);
     }
 
-    public Set UnionSelf(Interval other)
+    public Set UnionSelf(IntervalSet other)
     {
         throw new NotImplementedException();
     }
     
-    public Boolean IsOverlapping(Interval other)
+    public Boolean IsOverlapping(IntervalSet other)
     {
         throw new NotImplementedException();
     }
@@ -75,26 +75,26 @@ public class Interval : Set
     public override Expr? Infimum() => Start;
     public override Expr? Supremum() => End;
     
-    public override Set Complement(Set universe)
-    {
-        if (universe.IsR)
-        {
-            var a = CreateInterval(Expr.NegInf, Start, false, !StartInclusive);
-            var b = CreateInterval(End, Expr.Inf, !EndInclusive, false);
-            return CreateUnion(a, b);    
-        }
-        
-        return base.Complement(universe);
-    }
+    // public override Set Complement(Set universe)
+    // {
+    //     if (universe.IsR)
+    //     {
+    //         var a = Interval(Expr.NegInf, Start, false, !StartInclusive);
+    //         var b = Interval(End, Expr.Inf, !EndInclusive, false);
+    //         return Union(a, b);    
+    //     }
+    //     
+    //     return base.Complement(universe);
+    // }
 
     public override Set Boundary()
     {
         return (Start.IsNegativeInfinity, End.IsInfinity) switch
         {
             (true, true) => EmptySet,
-            (true, false) => CreateFiniteSet(End),
-            (false, true) => CreateFiniteSet(Start),
-            (false, false) => CreateFiniteSet(Start, End)
+            (true, false) => ArraySet(End),
+            (false, true) => ArraySet(Start),
+            (false, false) => ArraySet(Start, End)
         };
     }
     

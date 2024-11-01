@@ -74,7 +74,7 @@ public class Number : Atom
         return base.AsFraction();
     }
 
-    public override Set AsSet() => Set.CreateFiniteSet(this);
+    public override Set AsSet() => ArraySet(this);
 
     public static int Gcd(int a, int b) => NumberUtils.Gcd(a, b);
 
