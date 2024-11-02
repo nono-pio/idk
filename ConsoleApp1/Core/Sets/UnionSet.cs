@@ -29,7 +29,7 @@ public class UnionSet(params Set[] sets) : Set
                 var eval = EvalUnion(set, newSets[i]);
                 if (eval is not null)
                 {
-                    newSets[i] = eval;
+                    newSets[i] = eval; // TODO check U or Empty
                     goto next;
                 }
             }
@@ -49,50 +49,105 @@ public class UnionSet(params Set[] sets) : Set
 
     public static Set? EvalUnion(Set A, Set B)
     {
-        // Empty Set
-        if (A is SetEmpty)
-            return B;
-        if (B is SetEmpty)
-            return A;
-        
-        // Universal Set
-        if (A is UniversalSet || B is UniversalSet)
-            return U;
-        
-        // Basic Number Sets
-        if (A is NumberSet bA && B is NumberSet bB)
-            return NumberSet.GetUnionOf(bA, bB);
-        
-        // Interval Sets
-        if (A is IntervalSet intA && B is IntervalSet intB)
-            return CombineIntervals(intA, intB);
+        if (A is UnionSet unionA)
+        {
+            return Union(unionA.Sets.Select(set => Intersection(set, B)).ToArray());
+        }
+        if (B is UnionSet unionB)
+        {
+            return Union(unionB.Sets.Select(set => Intersection(set, A)).ToArray());
+        }
 
-        if (A is NumberSet bA2 && B is IntervalSet intB2)
-            return CombineIntervalNumberSet(intB2, bA2);
-        if (A is IntervalSet intA2 && B is NumberSet bB2)
-            return CombineIntervalNumberSet(intA2, bB2);
+        switch (A, B)
+        {
+            case (IntersectionSet intersectionA, _):
+                return Intersection(intersectionA.Sets.Select(set => Union(set, B)).ToArray());
+            case (_, IntersectionSet intersectionB):
+                return Intersection(intersectionB.Sets.Select(set => Union(set, A)).ToArray());
+            
+            case (SetEmpty, _):
+                return B;
+            case (_, SetEmpty):
+                return A;
+            
+            case (UniversalSet, _):
+                return U;
+            case (_, UniversalSet):
+                return U;
+            
+            case (NumberSet bA, NumberSet bB):
+                return bA._Level > bB._Level ? bA : bB;
 
-        // Finite Sets
-        // if (A is FiniteSet fA && B is FiniteSet fB)
-        //     return fA.UnionSelf(fB);
-        
-        if (A is FiniteSet fA2)
-            return fA2.UnionSet(B);
-        if (B is FiniteSet fB2)
-            return fB2.UnionSet(A);
+            case (IntervalSet intA, IntervalSet intB):
+                return CombineIntervals(intA, intB);
+
+            case (NumberSet bA2, IntervalSet):
+                return bA2._Level < Real.Level ? null : bA2;
+            case (IntervalSet, NumberSet bB2):
+                return bB2._Level < Real.Level ? null : bB2;
+
+            case (FiniteSet fA, FiniteSet fB):
+                var newEls = new HashSet<Expr>(fA.Elements);
+                newEls.UnionWith(fB.Elements);
+
+                return ArraySet(newEls);
+    
+            case (FiniteSet fA2, _):
+                return CombineFiniteAndSet(fA2, B);
+            case (_, FiniteSet fB2):
+                return CombineFiniteAndSet(fB2, A);
+            
+        }
         
         return null;
     }
     
-    public static IntervalSet? CombineIntervals(IntervalSet a, IntervalSet b)
+    public static Set? CombineIntervals(IntervalSet a, IntervalSet b)
+    {
+        if (a.Overlap(b))
+        {
+            Expr start;
+            bool startInc;
+            if (a.Start < b.Start)
+            {
+                start = a.Start;
+                startInc = a.StartInclusive;
+            }
+            else
+            {
+                start = b.Start;
+                startInc = b.StartInclusive;
+            }
+            
+            Expr end;
+            bool endInc;
+            if (a.End > b.End)
+            {
+                end = a.End;
+                endInc = a.EndInclusive;
+            }
+            else
+            {
+                end = b.End;
+                endInc = b.EndInclusive;
+            }
+            
+            return Interval(start, end, startInc, endInc);
+        }
+        
+        return null;
+    }
+    
+    public static Set CombineFiniteAndSet(FiniteSet f, Set set)
     {
         // TODO
-        return null;
-    }
-    
-    public static NumberSet? CombineIntervalNumberSet(IntervalSet a, NumberSet b)
-    {
-        return b._Level < Real.Level ? null : b;
+        var newElements = new HashSet<Expr>(f.Elements);
+        newElements.RemoveWhere(x => set.Contains(x).IsTrue);
+
+        if (newElements.Count == 0)
+            return set;
+        
+        return new UnionSet(set, ArraySet(newElements));
     }
 
     public override Expr? Infimum()

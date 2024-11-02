@@ -88,51 +88,6 @@ public class FiniteSet(HashSet<Expr> elements) : Set
     //     return base.Complement(universe);
     // }
     
-    // {1,2,3} U [3,6] = [3,6] U {1,2} (3 is in [3, 6])
-    public Set UnionSet(Set b)
-    {
-        var newElements = new HashSet<Expr>(Elements);
-        newElements.RemoveWhere(x => b.Contains(x).IsFalse);
-
-        if (newElements.Count == 0)
-            return b;
-        
-        return Union(b, ArraySet(newElements));
-    }
-    
-    public Set IntersectionSelf(FiniteSet other)
-    {
-        var newElements = new HashSet<Expr>(Elements);
-        newElements.IntersectWith(other.Elements);
-
-        if (newElements.Count == 0)
-            return EmptySet;
-        
-        return ArraySet(newElements);
-    }
-    
-    public Set IntersectionSet(Set b)
-    {
-        var newElements = new HashSet<Expr>(Elements);
-        var newElementsIndeterminate = new HashSet<Expr>();
-        foreach (var elm in Elements)
-        {
-            var contains = b.Contains(elm);
-            if (contains.IsTrue)
-                newElements.Add(elm);
-            else if (contains.IsIndeterminate)
-                newElementsIndeterminate.Add(elm);
-        }
-
-        return (newElements.Count == 0, newElementsIndeterminate.Count == 0) switch
-        {
-            (true, true) => EmptySet,
-            (true, false) => Intersection(ArraySet(newElementsIndeterminate), b),
-            (false, true) => ArraySet(newElements),
-            (false, false) => Union(ArraySet(newElements), Intersection(ArraySet(newElementsIndeterminate), b))
-        };
-    }
-    
     public override Boolean Contains(Expr x)
     {
         return AsCondition(x);
@@ -167,5 +122,21 @@ public class FiniteSet(HashSet<Expr> elements) : Set
     public override string ToLatex()
     {
         return Symbols.LBraces + string.Join("; ", Elements) + Symbols.RBraces;
+    }
+
+    public override bool IsSubset(Set other)
+    {
+        if (other is FiniteSet f)
+            return Elements.IsSubsetOf(f.Elements);
+        
+        return base.IsSubset(other);
+    }
+
+    public override bool IsSuperset(Set other)
+    {
+        if (other is FiniteSet f)
+            return Elements.IsSupersetOf(f.Elements);
+        
+        return base.IsSuperset(other);
     }
 }

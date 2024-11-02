@@ -25,6 +25,30 @@ public class Relationnals : Boolean
         Relation = relation;
     }
     
+    public static Boolean Construct(Expr a, Expr b, Relations relation)
+    {
+        var dif = a - b;
+        switch (relation)
+        {
+            case Relations.Equal:
+                return dif.IsZero;
+            case Relations.NotEqual:
+                return !dif.IsZero;
+            case Relations.Greater:
+                return dif.IsPositive;
+            case Relations.GreaterOrEqual:
+                return dif.IsPositive || dif.IsZero;
+            case Relations.Less:
+                return dif.IsNegative;
+            case Relations.LessOrEqual:
+                return dif.IsNegative || dif.IsZero;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(relation), relation, null);
+        }
+        
+        return new Relationnals(a, b, relation);
+    }
+    
     public Relationnals Swap()
     {
         var a = B;
@@ -63,7 +87,7 @@ public class Relationnals : Boolean
 
     public override Boolean Substitue(Variable variable, Expr value)
     {
-        return new Relationnals(A.Substitue(variable, value), B.Substitue(variable, value), Relation);
+        return Construct(A.Substitue(variable, value), B.Substitue(variable, value), Relation);
     }
 
     public override bool? GetValue()

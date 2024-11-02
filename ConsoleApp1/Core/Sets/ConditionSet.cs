@@ -18,6 +18,9 @@ public class ConditionSet : Set
     
     public static Set Construct(Variable x, Boolean condition, Set domain)
     {
+        if (condition.IsTrue)
+            return domain;
+        
         return new ConditionSet(condition, x, domain);
     }
     

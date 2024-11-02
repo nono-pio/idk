@@ -18,7 +18,7 @@ public class IntervalSet : Set
     public override bool IsElementsPositive => Start.IsPositive && End.IsPositive;
     public override bool IsElementsNegative => Start.IsNegative && End.IsNegative;
 
-    private IntervalSet(Expr start, Expr end, bool startInclusive, bool endInclusive)
+    public IntervalSet(Expr start, Expr end, bool startInclusive, bool endInclusive)
     {
         Start = start;
         End = end;
@@ -30,6 +30,15 @@ public class IntervalSet : Set
     {
         return Interval(Start + other.Start, End + other.End, StartInclusive || other.StartInclusive, EndInclusive || other.EndInclusive);
     }
+
+    public bool Overlap(IntervalSet interval)
+    {
+        bool startOver = StartInclusive || interval.EndInclusive ? interval.End >= Start : interval.End > Start;
+        bool endOver = EndInclusive || interval.StartInclusive ? interval.Start <= End : interval.Start < End;
+        
+        return startOver && endOver;
+    }
+
     
     public static Set Construct(Expr start, Expr end, bool startInclusive = true, bool endInclusive = true)
     {
@@ -53,22 +62,15 @@ public class IntervalSet : Set
             return ArraySet(start);
         }
 
+        if (start.IsNegativeInfinity && end.IsInfinity)
+            return R;
+
         if (start.IsNegativeInfinity)
             startInclusive = false;
         if (end.IsInfinity)
             endInclusive = false;
         
         return new IntervalSet(start, end, startInclusive, endInclusive);
-    }
-
-    public Set UnionSelf(IntervalSet other)
-    {
-        throw new NotImplementedException();
-    }
-    
-    public Boolean IsOverlapping(IntervalSet other)
-    {
-        throw new NotImplementedException();
     }
     
     
@@ -118,5 +120,31 @@ public class IntervalSet : Set
     public override string ToLatex()
     {
         return $"{(StartInclusive ? "[" : "]")}{Start.ToLatex()}, {End.ToLatex()}{(EndInclusive ? "]" : "[")}";
+    }
+
+    public override bool IsSubset(Set other)
+    {
+        if (other is Real)
+            return true;
+
+        if (other is IntervalSet inter)
+        {
+            return Start >= inter.Start && End <= inter.End;
+        }
+        
+        return base.IsSubset(other);
+    }
+
+    public override bool IsSuperset(Set other)
+    {
+        if (other is Real)
+            return false;
+
+        if (other is IntervalSet inter)
+        {
+            return Start <= inter.Start && End >= inter.End;
+        }
+        
+        return base.IsSuperset(other);
     }
 }

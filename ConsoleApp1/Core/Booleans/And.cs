@@ -7,16 +7,22 @@ public class And(params Boolean[] values) : Boolean
     public static Boolean Eval(IEnumerable<Boolean> values)
     {
         List<Boolean> newValues = new();
+        bool hasTrue = false;
         foreach (var value in values)
         {
             if (value.IsFalse)
-                return false;            
+                return false;
+            if (value.IsTrue)
+            {
+                hasTrue = true;
+                continue;
+            }
             newValues.Add(value);
         }
 
         return newValues.Count switch
         {
-            0 => false,
+            0 => hasTrue,
             1 => newValues[0],
             _ => new And(newValues.ToArray())
         };

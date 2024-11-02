@@ -7,16 +7,22 @@ public class Or(params Boolean[] values) : Boolean
     public static Boolean Eval(IEnumerable<Boolean> values)
     {
         List<Boolean> newValues = new();
+        bool hasFalse = false;
         foreach (var value in values)
         {
             if (value.IsTrue)
                 return true;
+            if (value.IsFalse)
+            {
+                hasFalse = true;
+                continue;
+            }
             newValues.Add(value);
         }
         
         return newValues.Count switch
         {
-            0 => true,
+            0 => !hasFalse,
             1 => newValues[0],
             _ => new Or(newValues.ToArray())
         };

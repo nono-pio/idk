@@ -17,16 +17,6 @@ public abstract class NumberSet : Set
     
     public override bool IsElementsPositive => _Level == Natural.Level;
     public override bool IsElementsNegative => false;
-    
-    public static NumberSet GetUnionOf(NumberSet a, NumberSet b)
-    {
-        return a._Level > b._Level ? a : b;
-    } 
-    
-    public static NumberSet GetIntersectionOf(NumberSet a, NumberSet b)
-    {
-        return a._Level < b._Level ? a : b;
-    }
 
     public override Expr? Infimum()
     {
@@ -36,6 +26,28 @@ public abstract class NumberSet : Set
     public override Expr? Supremum()
     {   
         return Expr.Inf;
+    }
+
+    public override bool IsSubset(Set other)
+    {
+        if (other is NumberSet n)
+            return n._Level >= _Level;
+        
+        if (other is IntervalSet)
+            return Real.Level >= _Level;
+        
+        return base.IsSubset(other);
+    }
+
+    public override bool IsSuperset(Set other)
+    {
+        if (other is NumberSet n)
+            return n._Level <= _Level;
+        
+        if (other is IntervalSet)
+            return Real.Level <= _Level;
+        
+        return base.IsSuperset(other);
     }
 }
 
@@ -105,6 +117,8 @@ public class Real : NumberSet
 {
     public static readonly int Level = 4;
     public override int _Level => Level;
+
+    public static IntervalSet AsInterval => new IntervalSet(Expr.NegInf, Expr.Inf, false, false);
 
     public override Boolean? Contains(Expr x)
     {

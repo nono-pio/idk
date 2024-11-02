@@ -104,36 +104,43 @@ public abstract class Set
     /*  */
     public abstract Boolean Contains(Expr x);
     
-    // TODO
-    public Boolean IsSubset(Set other)
+    public virtual bool IsSubset(Set other)
     {
         throw new NotImplementedException();
     }
     
-    public Boolean IsProperSubset(Set other)
-    {
-        throw new NotImplementedException();
-    }
-    
-    public Boolean IsSuperset(Set other)
-    {
-        throw new NotImplementedException();
-    }
-    
-    public Boolean IsProperSuperset(Set other)
+    public virtual bool IsSuperset(Set other)
     {
         throw new NotImplementedException();
     }
 
-    public bool? IsOpen()
+    public override bool Equals(object? obj)
     {
-        return Intersection(Boundary()).IsEmpty;
+        if (obj == null || GetType() != obj.GetType())
+            return false;
+
+        var properties = GetType().GetProperties().Where(p => p.DeclaringType != typeof(Set));
+        foreach (var property in properties)
+        {
+            var value1 = property.GetValue(this);
+            var value2 = property.GetValue(obj);
+            
+             if (!Equals(value1, value2))
+                return false;
+        }
+        return true;
     }
-    
-    public Boolean? IsClosed()
+
+    public static bool operator ==(Set A, Set B)
     {
-        return Boundary().IsSubset(this);
+        return A.Equals(B);
     }
+
+    public static bool operator !=(Set A, Set B)
+    {
+        return !(A == B);
+    }
+
 
     public abstract string ToLatex();
 }

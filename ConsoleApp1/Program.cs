@@ -50,4 +50,5 @@ static (int, int) sqrt(int n)
     return (n / (sqrt * sqrt), sqrt);
 }
 
-print(Parser.Parse("log_2 3"));
+var f = Ln(x)*x;
+print(Inequalities.FindDomain(f, x));

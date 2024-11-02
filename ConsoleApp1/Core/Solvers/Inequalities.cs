@@ -53,6 +53,8 @@ public class Inequalities
         f.ForEach<Logarithm>(log =>
         {
             dom = dom.Intersect(SolveFor(log.Value, 0, InequationType.GreaterThan, variable));
+            dom = dom.Intersect(SolveFor(log.Base, 0, InequationType.GreaterThan, variable));
+            dom.Intersect(Solve.SolveFor(log.Base, 1, variable)!.Complement(R));
         });
         
         f.ForEach<Power>(pow =>
@@ -61,7 +63,14 @@ public class Inequalities
             {
                 dom = dom.Intersect(Solve.SolveFor(pow.Base, 0, variable)!.Complement(R));
             }
+
+            if (!pow.Exp.IsInteger)
+            {
+                dom = dom.Intersect(SolveFor(pow.Base, 0, InequationType.GreaterThanOrEqual, variable));
+            }
         });
+        
+        // TODO: tan, asin, acos
 
         return dom;
     }
