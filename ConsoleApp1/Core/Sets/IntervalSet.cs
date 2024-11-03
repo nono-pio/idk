@@ -33,10 +33,10 @@ public class IntervalSet : Set
 
     public bool Overlap(IntervalSet interval)
     {
-        bool startOver = StartInclusive || interval.EndInclusive ? interval.End >= Start : interval.End > Start;
-        bool endOver = EndInclusive || interval.StartInclusive ? interval.Start <= End : interval.Start < End;
+        Boolean startOver = StartInclusive || interval.EndInclusive ? interval.End >= Start : interval.End > Start;
+        Boolean endOver = EndInclusive || interval.StartInclusive ? interval.Start <= End : interval.Start < End;
         
-        return startOver && endOver;
+        return startOver.IsTrue && endOver.IsTrue;
     }
 
     
@@ -129,7 +129,7 @@ public class IntervalSet : Set
 
         if (other is IntervalSet inter)
         {
-            return Start >= inter.Start && End <= inter.End;
+            return (Start >= inter.Start && End <= inter.End).IsTrue;
         }
         
         return base.IsSubset(other);
@@ -142,7 +142,7 @@ public class IntervalSet : Set
 
         if (other is IntervalSet inter)
         {
-            return Start <= inter.Start && End >= inter.End;
+            return (Start <= inter.Start && End >= inter.End).IsTrue;
         }
         
         return base.IsSuperset(other);

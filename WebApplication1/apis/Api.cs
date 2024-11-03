@@ -5,7 +5,6 @@ using ConsoleApp1.Core.Integrals;
 using ConsoleApp1.Core.Limits;
 using ConsoleApp1.Core.Models;
 using ConsoleApp1.Core.Series;
-using ConsoleApp1.Core.Sets;
 using ConsoleApp1.Core.Solvers;
 using ConsoleApp1.Parser;
 using ConsoleApp1.Utils;
@@ -95,17 +94,26 @@ public class Api
             
             var variable = new Variable(request.Var);
 
-            Set domain = Inequalities.FindDomain(func, variable);
-            Expr range = double.NaN; //func.Range();
-            Expr derivative = func.Derivee(variable);
-            Expr integral = Integral.Integrate(func, variable) ?? double.NaN;
-            Expr reciprocal = TryCatch(() => Reciprocal.GetReciprocal(func, variable) ?? double.NaN, double.NaN);
-            Expr seriesExpansion = TryCatch(() => TaylorSeries.TaylorSeriesOf(func, variable, 6).Eval(variable), double.NaN); //func.SeriesExpansion();
-            Expr factorization = double.NaN; //func.Factorization();
+            var domain = TryCatch(() => Inequalities.FindDomain(func, variable));
+            var range = TryCatch(() => Inequalities.FindRange(func, variable));
+            var derivative = func.Derivee(variable);
+            var integral = Integral.Integrate(func, variable) ?? null;
+            var reciprocal = TryCatch(() => Reciprocal.GetReciprocal(func, variable));
+            var seriesExpansion = TryCatch(() => TaylorSeries.TaylorSeriesOf(func, variable, 6).Eval(variable));
+            Expr? factorization = null; //func.Factorization();
 
-            return Results.Ok(new AnalyzeFunctionResponse(func.ToLatex(), domain.ToLatex(), range.ToLatex(),
-                derivative.ToLatex(), integral.ToLatex(), reciprocal.ToLatex(), seriesExpansion.ToLatex(),
-                factorization.ToLatex()));
+            return Results.Ok(
+                new AnalyzeFunctionResponse(
+                    func.ToLatex(), 
+                    domain?.ToLatex(), 
+                    range?.ToLatex(),
+                    derivative.ToLatex(), 
+                    integral?.ToLatex(), 
+                    reciprocal?.ToLatex(), 
+                    seriesExpansion?.ToLatex(),
+                    factorization?.ToLatex()
+                    )
+                );
         });
 
         routes.MapPost("/equation", ([FromBody] EquationRequest request) =>
@@ -124,7 +132,6 @@ public class Api
 
         routes.MapPost("/inequality", ([FromBody] InequalityRequest request) =>
         {
-            Console.WriteLine("no problem here");
             var lhs = Parser.Parse(request.LHS);
             var rhs = Parser.Parse(request.RHS);
             var x = new Variable(request.Var);
@@ -215,7 +222,7 @@ record SimplifyResponse(string Expr);
 
 // Analyze Function
 record AnalyzeFunctionRequest(string Expr, string Var);
-record AnalyzeFunctionResponse(string EvalFunc, string? Domain, string? Range, string? Derivative, string? Integral, string? Reciprocal, string? SeriesExpansion, string? Factorization);
+record AnalyzeFunctionResponse(string? EvalFunc, string? Domain, string? Range, string? Derivative, string? Integral, string? Reciprocal, string? SeriesExpansion, string? Factorization);
 
 // Equation
 record EquationRequest(string LHS, string RHS, string Var);

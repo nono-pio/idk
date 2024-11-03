@@ -85,7 +85,7 @@ public class PolyRational
                 return basePoly.Pow(exp);
             
             case Variable var: 
-                return var.Name == variable ? new PolyRational(new Poly(1, 0)) : new PolyRational(new Poly(var)); // var.Name == variable ? deg=1 : deg=0
+                return var.Equal(variable) ? new PolyRational(new Poly(1, 0)) : new PolyRational(new Poly(var)); // var.Name == variable ? deg=1 : deg=0
             
             default:
                 throw new Exception("This is not a polynomial"); 

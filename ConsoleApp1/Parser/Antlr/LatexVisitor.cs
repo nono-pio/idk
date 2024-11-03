@@ -8,6 +8,11 @@ public class LatexVisitor : LatexBaseVisitor<Expr>
     {
         return Visit(context.expr());
     }
+    
+    public override Expr VisitExpr(LatexParser.ExprContext context)
+    {
+        return Visit(context.addition());
+    }
 
     public override Expr VisitAddition(LatexParser.AdditionContext context)
     {
@@ -82,6 +87,16 @@ public class LatexVisitor : LatexBaseVisitor<Expr>
         }
         return result;
     }
+    
+    public override Expr VisitPower_nofunc(LatexParser.Power_nofuncContext context)
+    {
+        var result = Visit(context.atom_nofunc(0));
+        for (int i = 1; i < context.atom_nofunc().Length; i++)
+        {
+            result = Pow(result, Visit(context.atom_nofunc(i)));
+        }
+        return result;
+    }
 
     public override Expr VisitAtom(LatexParser.AtomContext context)
     {
@@ -119,6 +134,69 @@ public class LatexVisitor : LatexBaseVisitor<Expr>
         }
         throw new NotImplementedException("Unknown atom type");
     }
+    
+    public override Expr VisitAtom_nofunc(LatexParser.Atom_nofuncContext context)
+    {
+        if (context.parenthesis() != null)
+        {
+            return Visit(context.parenthesis());
+        }
+        if (context.number() != null)
+        {
+            return Visit(context.number());
+        }
+        if (context.variable() != null)
+        {
+            return Visit(context.variable());
+        }
+        if (context.abs() != null)
+        {
+            return Visit(context.abs());
+        }
+        if (context.intfunc() != null)
+        {
+            return Visit(context.intfunc());
+        }
+        if (context.frac() != null)
+        {
+            return Visit(context.frac());
+        }
+        if (context.sqrt() != null)
+        {
+            return Visit(context.sqrt());
+        }
+        throw new NotImplementedException("Unknown atom type");
+    }
+
+    public override Expr VisitSubexpr(LatexParser.SubexprContext context)
+    {
+        return context.expr() is not null ? Visit(context.expr()) : Visit(context.atom());
+    }
+
+    public override Expr VisitSupexpr(LatexParser.SupexprContext context)
+    {
+        return context.expr() is not null ? Visit(context.expr()) : Visit(context.atom());
+    }
+
+    public override Expr VisitAbs(LatexParser.AbsContext context)
+    {
+        return Visit(context.expr());
+    }
+
+    public override Expr VisitIntfunc(LatexParser.IntfuncContext context)
+    {
+        var lceil = context.L_CEIL() is not null;
+        var rceil = context.R_CEIL() is not null;
+        var x = Visit(context.expr());
+        
+        return (lceil, rceil) switch
+        {
+            (true, true) => Ceil(x),
+            (false, false) => Floor(x),
+            (false, true) => Round(x),
+            (true, false) => Round(x)
+        };
+    }
 
     public override Expr VisitParenthesis(LatexParser.ParenthesisContext context)
     {
@@ -128,12 +206,31 @@ public class LatexVisitor : LatexBaseVisitor<Expr>
     public override Expr VisitNumber(LatexParser.NumberContext context)
     {
         double value = double.Parse(context.GetText());
+        if (double.IsInteger(value))
+            return Num((int)value);
         return Num(value);
     }
 
     public override Expr VisitVariable(LatexParser.VariableContext context)
     {
+        if (context.GetText() == "e")
+            return Constant.E;
         return Var(context.GetText());
+    }
+
+    public override Expr VisitFunc_args(LatexParser.Func_argsContext context)
+    {
+        throw new Exception();
+    }
+
+    public override Expr VisitLetter(LatexParser.LetterContext context)
+    {
+        throw new Exception();
+    }
+
+    public override Expr VisitMul(LatexParser.MulContext context)
+    {
+        throw new Exception();
     }
 
     public override Expr VisitFunction(LatexParser.FunctionContext context)
@@ -159,6 +256,9 @@ public class LatexVisitor : LatexBaseVisitor<Expr>
             { "arcsin", ASin }, 
             { "arccos", ACos }, 
             { "arctan", ATan },
+            { "asin", ASin }, 
+            { "acos", ACos }, 
+            { "atan", ATan },
             
             // { "sinh", Sinh }, 
             // { "cosh", Cosh }, 
@@ -192,10 +292,10 @@ public class LatexVisitor : LatexBaseVisitor<Expr>
             funcName = funcName[1..];
         funcName = funcName.ToLower();
 
-        if (supExpr is not null && supExpr == -1 && ((string[]) ["sin", "cos", "tan"]).Contains(funcName))
+        if (supExpr is not null && supExpr.Is(-1) && ((string[]) ["sin", "cos", "tan"]).Contains(funcName))
         {
             funcName = "arc" + funcName;
-            supExpr *= -1;
+            supExpr = null;
         }
         
         Expr? result = null;
@@ -223,7 +323,7 @@ public class LatexVisitor : LatexBaseVisitor<Expr>
         if (result is null)
             throw new Exception("This is not a function");
         
-        if (supExpr is not null && supExpr != 1)
+        if (supExpr is not null)
             result = Pow(result, supExpr);
 
         return result;

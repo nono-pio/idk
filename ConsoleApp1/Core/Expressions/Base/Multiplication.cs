@@ -70,6 +70,9 @@ public class Multiplication : Expr
             {
                 if (num.IsZero)
                     return 0;
+
+                if (num.IsInfinite)
+                    return num;
                 
                 numbersProduct *= num.Num;
                 continue;
@@ -138,7 +141,7 @@ public class Multiplication : Expr
     {
         if (a is Multiplication || b is Multiplication)
             return Construct(a, b);
-
+        
         // if (a.IsInfinite || b.IsInfinite)
         // {
         //     // +-oo * 0 = Nan
@@ -156,6 +159,12 @@ public class Multiplication : Expr
         
         if (a is Number numA && b is Number numB)
             return new Number(numA.Num * numB.Num);
+        
+        // TODO remove
+        if (a.IsInfinite)
+            return a;
+        if (b.IsInfinite)
+            return b;
 
         if (a.IsNumOne)
             return b;
@@ -195,8 +204,8 @@ public class Multiplication : Expr
             bns_integral: (bns, interval) => bns is Real ? bns : null,
             expr_bns: (expr, bns) => bns switch
             {
-                Natural => expr == -1 ? Z.Negative : throw new NotImplementedException(),
-                Integer => expr == -1 ? bns : throw new NotImplementedException(),
+                Natural => expr.Is(-1) ? Z.Negative : throw new NotImplementedException(),
+                Integer => expr.Is(-1) ? bns : throw new NotImplementedException(),
                 Rational => expr.IsRational ? bns : throw new NotImplementedException(),
                 Real => expr.IsReal ? bns : throw new NotImplementedException(),
                 _ => throw new NotImplementedException()

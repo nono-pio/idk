@@ -1,4 +1,7 @@
-﻿namespace ConsoleApp1.Core.Booleans;
+﻿using ConsoleApp1.Core.Expressions.Atoms;
+using ConsoleApp1.Core.Sets;
+
+namespace ConsoleApp1.Core.Booleans;
 
 public class And(params Boolean[] values) : Boolean
 {
@@ -27,7 +30,9 @@ public class And(params Boolean[] values) : Boolean
             _ => new And(newValues.ToArray())
         };
     }
-    
+
+    public override Set SolveFor(Variable x) => Intersection(Values.Select(v => v.SolveFor(x)).ToArray());
+
     public override bool? GetValue()
     {
         foreach (var value in Values)

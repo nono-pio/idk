@@ -1,4 +1,7 @@
-﻿using ConsoleApp1.Core.Expressions.Atoms;
+﻿using System.Data.SqlTypes;
+using System.Diagnostics;
+using ConsoleApp1.Core.Expressions.Atoms;
+using ConsoleApp1.Core.Sets;
 
 namespace ConsoleApp1.Core.Booleans;
 
@@ -16,7 +19,8 @@ public abstract class Boolean
     public bool IsTrueOrFalse => this is BooleanValue;
     public bool IsTrueOrIndeterminate => IsTrue || IsIndeterminate;
     public bool IsFalseOrIndeterminate => IsFalse || IsIndeterminate;
-    
+
+    public virtual Set SolveFor(Variable x) => throw new NotImplementedException();
 
     public abstract bool? GetValue();
     
@@ -42,7 +46,8 @@ public abstract class Boolean
     public static Boolean LE(Expr e1, Expr e2) => LessThanOrEqual(e1, e2);
     public static Boolean G(Expr e1, Expr e2) => GreaterThan(e1, e2);
     public static Boolean GE(Expr e1, Expr e2) => GreaterThanOrEqual(e1, e2);
-    
-    
+
+    public static bool operator true(Boolean cond) => cond.IsTrue;
+    public static bool operator false(Boolean cond) => throw new UnreachableException();
     
 }

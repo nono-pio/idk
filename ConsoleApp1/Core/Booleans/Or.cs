@@ -1,4 +1,7 @@
-﻿namespace ConsoleApp1.Core.Booleans;
+﻿using ConsoleApp1.Core.Expressions.Atoms;
+using ConsoleApp1.Core.Sets;
+
+namespace ConsoleApp1.Core.Booleans;
 
 public class Or(params Boolean[] values) : Boolean
 {
@@ -27,6 +30,9 @@ public class Or(params Boolean[] values) : Boolean
             _ => new Or(newValues.ToArray())
         };
     }
+    
+    public override Set SolveFor(Variable x) => Union(Values.Select(v => v.SolveFor(x)).ToArray());
+
     
     public override bool? GetValue()
     {

@@ -1,8 +1,10 @@
-﻿namespace ConsoleApp1.Core.Expressions.Trigonometrie;
+﻿using Boolean = ConsoleApp1.Core.Booleans.Boolean;
+
+namespace ConsoleApp1.Core.Expressions.Trigonometrie;
 
 public class ASinExpr(Expr x) : TrigonometrieExpr(x)
 {
-
+    public override Boolean DomainCondition => X >= -1 & X <= 1;
     public static Expr Construct(Expr x) => new ASinExpr(x);
     public override Expr Eval(Expr[] exprs, object[]? objects = null) => Construct(exprs[0]);
     public override Expr NotEval(Expr[] exprs, object[]? objects = null) => new ASinExpr(exprs[0]);

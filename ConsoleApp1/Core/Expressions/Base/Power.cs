@@ -1,6 +1,7 @@
 ﻿using ConsoleApp1.Core.Complexes;
 using ConsoleApp1.Core.Expressions.Atoms;
 using ConsoleApp1.Latex;
+using Boolean = ConsoleApp1.Core.Booleans.Boolean;
 
 namespace ConsoleApp1.Core.Expressions.Base;
 
@@ -29,8 +30,11 @@ public class Power : Expr
          get => Args[1];
          private set => Args[1] = value;
      }
-     
-    public Power(Expr value, Expr exp) : base(value, exp) { }
+
+     public override Boolean DomainCondition =>
+         Base > 0 | (Boolean.Equal(Base, 0) & Exp > 0) | (Base < 0 & Z.Contains(Exp));
+
+     public Power(Expr value, Expr exp) : base(value, exp) { }
 
     public override (Expr Num, Expr Den) AsFraction()
     {
@@ -66,8 +70,13 @@ public class Power : Expr
 
         if (@base.IsOne || exp.IsZero) 
             return Num(1);
-        if (@base.IsZero) 
-            return Num(0);
+        if (@base.IsZero)
+        {
+            if (exp.IsPositive)
+                return Num(0);
+            if (exp.IsNegative)
+                return Inf;
+        }
         if (exp.IsOne) 
             return @base;
         

@@ -10,6 +10,10 @@ public static class ConstructorAtoms
     public static Expr Zero => Num(0);
     public static Expr Un => Num(1);
     public static Expr Deux => Num(2);
+    
+    public static Expr PI => Constant.PI;
+    public static Expr e => Constant.E;
+    
 
     public static Number Num(double num) => new Number(num);
     public static Number Num(float num) => new Number(num);

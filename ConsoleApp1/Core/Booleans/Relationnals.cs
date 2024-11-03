@@ -1,4 +1,8 @@
-﻿using ConsoleApp1.Core.Expressions.Atoms;
+﻿using System.Diagnostics;
+using ConsoleApp1.Core.Equations;
+using ConsoleApp1.Core.Expressions.Atoms;
+using ConsoleApp1.Core.Sets;
+using ConsoleApp1.Core.Solvers;
 
 namespace ConsoleApp1.Core.Booleans;
 
@@ -28,27 +32,64 @@ public class Relationnals : Boolean
     public static Boolean Construct(Expr a, Expr b, Relations relation)
     {
         var dif = a - b;
+
+        var equal = dif.IsZero || a.Equals(b);
+        
         switch (relation)
         {
             case Relations.Equal:
-                return dif.IsZero;
+                if (equal)
+                    return true;
+                break;
             case Relations.NotEqual:
-                return !dif.IsZero;
+                if (equal)
+                    return false;
+                if (dif is Number && !dif.IsNumZero)
+                    return true;
+                break; // TODO
             case Relations.Greater:
-                return dif.IsPositive;
+                if (dif.IsPositive && !equal)
+                    return true;
+                if (dif.IsNegative || equal)
+                    return false;
+                break;
             case Relations.GreaterOrEqual:
-                return dif.IsPositive || dif.IsZero;
+                if (dif.IsPositive || equal)
+                    return true;
+                if (dif.IsNegative && !equal)
+                    return false;
+                break;
             case Relations.Less:
-                return dif.IsNegative;
+                if (dif.IsNegative && !equal)
+                    return true;
+                if (dif.IsPositive || equal)
+                    return false;
+                break;
             case Relations.LessOrEqual:
-                return dif.IsNegative || dif.IsZero;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(relation), relation, null);
+                if (dif.IsNegative || equal)
+                    return true;
+                if (dif.IsPositive && !equal)
+                    return false;
+                break;
         }
         
         return new Relationnals(a, b, relation);
     }
-    
+
+    public override Set SolveFor(Variable x)
+    {
+        return Relation switch
+        {
+            Relations.Equal => Solve.SolveFor(A, B, x) ?? throw new NotImplementedException(),
+            Relations.NotEqual => Complement(Solve.SolveFor(A, B, x) ?? throw new NotImplementedException()),
+            Relations.Greater => Inequalities.SolveFor(A, B, InequationType.GreaterThan, x),
+            Relations.GreaterOrEqual => Inequalities.SolveFor(A, B, InequationType.GreaterThanOrEqual, x),
+            Relations.Less => Inequalities.SolveFor(A, B, InequationType.LessThan, x),
+            Relations.LessOrEqual => Inequalities.SolveFor(A, B, InequationType.LessThanOrEqual, x),
+            _ => throw new UnreachableException()
+        };
+    }
+
     public Relationnals Swap()
     {
         var a = B;

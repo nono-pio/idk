@@ -1,6 +1,7 @@
 ﻿using ConsoleApp1.Core.Complexes;
 using ConsoleApp1.Core.Expressions.Atoms;
 using ConsoleApp1.Latex;
+using Boolean = ConsoleApp1.Core.Booleans.Boolean;
 
 namespace ConsoleApp1.Core.Expressions.Base;
 
@@ -12,16 +13,18 @@ public class Logarithm : Expr
 
     public Expr Value => Args[0];
     public Expr Base => Args[1];
-    
+
+    public override Boolean DomainCondition => Value > 0 & Base > 0 & Base != 1;
+
     public Logarithm(Expr value, Expr @base) : base(value, @base) {}
     public Logarithm(Expr value) : base(value, Math.E.Expr()) {}
 
     
     public static Expr Construct(Expr value, Expr @base)
     {
-        // log_x(0) = NaN
+        // log_x(0) = -oo TODO Nan or -oo
         if (value.IsNumZero)
-            return Atoms.Constant.NaN;
+            return NegInf;
         // log_x(1) = 0
         if (value.IsNumOne)
             return 0;
@@ -29,11 +32,14 @@ public class Logarithm : Expr
         if (@base.IsNumOne)
             return Atoms.Constant.NaN;
 
+        if (value.IsInfinity)
+            return Inf;
+
         // log_x(x) = lnx/lnx = 1
         if (@base == value)
             return 1;
         // log_x(x^n) = n
-        if (value is Power vPow && vPow.Base == @base)
+        if (value is Power vPow && vPow.Base.Equals(@base))
             return vPow.Exp;
         
         return new Logarithm(value, @base);

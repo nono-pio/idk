@@ -17,7 +17,11 @@ public class Constant : Variable
     
     public static Constant True = new("True", 1);
     public static Constant False = new("False", 0);
+
+    public override bool IsPositive => AppValue > 0;
+    public override bool IsNegative => AppValue < 0;
     
+
     public Constant(string name, double appValue, string? latexName = null) : base(name, latexName: latexName)
     {
         AppValue = appValue;

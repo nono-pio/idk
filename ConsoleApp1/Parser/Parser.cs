@@ -8,16 +8,13 @@ public class Parser
 {
     public static Expr? Parse(string input)
     {
-        // Création d'un lexer et d'un parser pour analyser le texte LaTeX
         var inputStream = new AntlrInputStream(input);
         var lexer = new LatexLexer(inputStream);
         var tokenStream = new CommonTokenStream(lexer);
         var parser = new LatexParser(tokenStream);
 
-        // Analyse de l'entrée LaTeX avec la règle de départ
         var context = parser.expr();
 
-        // Création et utilisation du visiteur pour générer l'Expr
         var visitor = new LatexVisitor();
         return visitor.Visit(context);
     }

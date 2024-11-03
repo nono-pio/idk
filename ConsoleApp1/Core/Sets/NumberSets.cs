@@ -77,7 +77,7 @@ public class Integer : NumberSet
     public static readonly int Level = 2;
     public override int _Level => Level;
 
-    public override Boolean? Contains(Expr x)
+    public override Boolean Contains(Expr x)
     {
         return x.IsInteger;
     }

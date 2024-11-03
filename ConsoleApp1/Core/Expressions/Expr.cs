@@ -36,7 +36,7 @@ public abstract class Expr
     
     # region Condition
 
-    public virtual bool IsNatural => throw new NotImplementedException();
+    public virtual bool IsNatural => false;
     public virtual bool IsInteger => IsNatural;
     public virtual bool IsRational => IsInteger;
     public virtual bool IsReal => IsRational;
@@ -44,12 +44,31 @@ public abstract class Expr
     public bool IsExtendedReal => IsReal || IsInfinity || IsNegativeInfinity;
 
     public bool IsInfinite => IsInfinity || IsNegativeInfinity;
-    public virtual bool IsInfinity => throw new NotImplementedException();
-    public virtual bool IsNegativeInfinity => throw new NotImplementedException();
+    public virtual bool IsInfinity => false;
+    public virtual bool IsNegativeInfinity => false;
     
-    public virtual bool IsPositive => throw new NotImplementedException();
-    public virtual bool IsNegative => throw new NotImplementedException();
-    
+    public virtual bool IsPositive
+    {
+        get
+        {
+            if (!Has<Variable>())
+                return N() > 0;
+            
+            return false;
+        }
+    }
+
+    public virtual bool IsNegative
+    {
+        get
+        {
+            if (!Has<Variable>())
+                return N() < 0;
+            
+            return false;
+        }
+    }
+
     public virtual Boolean IsContinue(Variable variable, Set set)
     {
         return this switch
@@ -88,7 +107,7 @@ public abstract class Expr
     
     public virtual bool IsNaN => this is Number { Num.IsNan: true };
     
-    public bool IsVar(Variable variable) => this is Variable var && var.Name == variable;
+    public bool IsVar(Variable variable) => this is Variable var && var.Equal(variable);
 
     public bool IsNumberInt() => this is Number num && num.IsInteger;
     public bool IsNumberIntPositif() => this is Number num && num.IsNatural;
@@ -239,6 +258,9 @@ public abstract class Expr
 
     # region Outils Mathématiques
 
+    /// Represente the domain as a condition (ex: ln(x) -> x > 0)
+    public virtual Boolean DomainCondition => true;
+    
     public enum OrderOfOperation
     {
         Always = 0,             // Tous le temps des parenthèses
@@ -530,43 +552,64 @@ public abstract class Expr
     
     public override bool Equals(object? obj)
     {
-        if (obj is not Expr expr) return false;
+        if (obj is not Expr expr) 
+            return false;
 
         return CompareTo(expr) == 0;
     }
 
-    public static bool operator ==(Expr expr1, Expr expr2)
+    public static bool operator ==(Expr lhs, Expr rhs)
     {
-        return expr1.CompareTo(expr2) == 0;
+        return Equals(lhs, rhs);
     }
 
-    public static bool operator !=(Expr expr1, Expr expr2)
+    public static bool operator !=(Expr lhs, Expr rhs)
     {
-        return expr1.CompareTo(expr2) != 0;
+        return !Equals(lhs, rhs);
     }
 
-    public static bool operator >(Expr expr1, Expr expr2)
+    public static Boolean operator >(Expr lhs, Expr rhs)
     {
-        return expr1.CompareTo(expr2) == 1;
+        return Boolean.GreaterThan(lhs, rhs);
     }
-
-    public static bool operator <(Expr expr1, Expr expr2)
+    
+    public static Boolean operator >=(Expr lhs, Expr rhs)
     {
-        return expr1.CompareTo(expr2) == -1;
+        return Boolean.GreaterThanOrEqual(lhs, rhs);
     }
-
-    public static bool operator >=(Expr expr1, Expr expr2)
+    
+    public static Boolean operator <(Expr lhs, Expr rhs)
     {
-        var cmp = expr1.CompareTo(expr2);
-        return cmp == 0 || cmp == 1;
+        return Boolean.LessThan(lhs, rhs);
     }
-
-    public static bool operator <=(Expr expr1, Expr expr2)
+    
+    public static Boolean operator <=(Expr lhs, Expr rhs)
     {
-        var cmp = expr1.CompareTo(expr2);
-        return cmp == 0 || cmp == -1;
+        return Boolean.LessThanOrEqual(lhs, rhs);
     }
     
     # endregion
+
+    public class ExprComparer : IComparer<Expr>
+    {
+        public int Compare(Expr? x, Expr? y)
+        {
+            switch (x, y)
+            {
+                case (null, null):
+                    return 0;
+                case (null, _):
+                    return -1;
+                case (_, null):
+                    return 1;
+                case (_, _):
+                    if (x > y)
+                        return 1;
+                    if (x < y)
+                        return -1;
+                    return 0;
+            }
+        }
+    }
     
 }

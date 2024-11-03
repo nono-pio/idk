@@ -9,7 +9,7 @@ public class Alphabet
     public static Variable a = Var("a");
     public static Variable b = Var("b");
     public static Variable c = Var("c");
-    public static Variable e = Var("e", value: Constant.E);
+    // public static Variable e = Var("e", value: Constant.E);
     public static Variable f = Var("f"); // TODO: default is func
     public static Variable g = Var("g"); // idem
     public static Variable h = Var("h"); // idem

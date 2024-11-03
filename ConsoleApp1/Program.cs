@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Diagnostics;
 using System.Runtime;
+using System.Text.Json.Serialization;
 using ConsoleApp1.Algorithms;
 using ConsoleApp1.Core.Classes;
 using ConsoleApp1.Core.Equations;
@@ -50,5 +51,5 @@ static (int, int) sqrt(int n)
     return (n / (sqrt * sqrt), sqrt);
 }
 
-var f = Ln(x)*x;
-print(Inequalities.FindDomain(f, x));
+// Domain : ASin(Log(x) - 1)
+print(Parser.Parse("sin^{-1}(x)"));

@@ -176,8 +176,8 @@ public class MultiPoly
     }
 
     
-    public bool IsZero() => Terms.Length == 1 && Terms[0].Coef == 0;
-    public bool IsOne() => Terms.Length == 1 && Terms[0].Coef == 1;
+    public bool IsZero() => Terms.Length == 1 && Terms[0].Coef.IsNumZero;
+    public bool IsOne() => Terms.Length == 1 && Terms[0].Coef.IsNumOne;
 
     public int GetVarIndex(Expr x)
     {

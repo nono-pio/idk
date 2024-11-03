@@ -1,4 +1,5 @@
-﻿using ConsoleApp1.Core.Booleans;
+﻿using System.Collections;
+using ConsoleApp1.Core.Booleans;
 using ConsoleApp1.Core.Equations;
 using ConsoleApp1.Core.Expressions.Atoms;
 using ConsoleApp1.Core.Expressions.Base;
@@ -50,63 +51,123 @@ public class Inequalities
     {
         // Add, Mul, Pow, Ln, Exp
         Set dom = R;
-        f.ForEach<Logarithm>(log =>
+        f.ForEach<Expr>(expr =>
         {
-            dom = dom.Intersect(SolveFor(log.Value, 0, InequationType.GreaterThan, variable));
-            dom = dom.Intersect(SolveFor(log.Base, 0, InequationType.GreaterThan, variable));
-            dom.Intersect(Solve.SolveFor(log.Base, 1, variable)!.Complement(R));
-        });
-        
-        f.ForEach<Power>(pow =>
-        {
-            if (pow.Exp.IsNegative)
+            if (!expr.DomainCondition.IsTrue)
             {
-                dom = dom.Intersect(Solve.SolveFor(pow.Base, 0, variable)!.Complement(R));
-            }
-
-            if (!pow.Exp.IsInteger)
-            {
-                dom = dom.Intersect(SolveFor(pow.Base, 0, InequationType.GreaterThanOrEqual, variable));
+                dom = dom.Intersect(expr.DomainCondition.SolveFor(variable));
             }
         });
-        
-        // TODO: tan, asin, acos
 
         return dom;
+    }
+
+    public static Set FindRange(Expr f, Variable variable, Set? domain = null)
+    {
+        Set dom = FindDomain(f, variable).Intersect(domain ?? R);
+        Set range = EmptySet;
+
+        Set[] dom_union = dom switch
+        {
+            FiniteSet => [dom],
+            IntervalSet => [dom],
+            UnionSet union => union.Sets,
+            _ => throw new NotImplementedException()
+        };
+
+        foreach (var set in dom_union)
+        {
+            switch (set)
+            {
+                case FiniteSet fs:
+                    range.UnionWith(ArraySet(fs.Elements.Select(el => f.Substitue(variable, el)).ToArray()));
+                    break;
+                case IntervalSet interval:
+                    
+                    List<(Expr Value, bool Include)> criticalPoints = [
+                        (f.Substitue(variable, interval.Start), interval.StartInclusive),
+                        (f.Substitue(variable, interval.End), interval.EndInclusive),
+                    ];
+        
+                    var solutions = Solve.SolveFor(f.Derivee(variable), 0, variable);
+                    if (solutions is not FiniteSet)
+                        throw new NotImplementedException();
+        
+                    criticalPoints.InsertRange(1, 
+                        ((FiniteSet) solutions).Elements.Select(x => (f.Substitue(variable, x), true))
+                        );
+                    
+                    var max = criticalPoints.MaxBy(cp => cp.Value, new Expr.ExprComparer());
+                    var min = criticalPoints.MinBy(cp => cp.Value, new Expr.ExprComparer());
+                    
+                    
+                    // TODO : si il y a une singularité ou une discontinuité alors Range = U [criticalP_i-1, criticalP_i] ou criticalP est ordonné
+                    // sinon continus et Range = [Min(criticalP), Max(criticalP)]
+                    
+                    range = range.UnionWith(Interval(min.Value, max.Value, min.Include, max.Include));
+                    break;
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        return range;
     }
     
     public static Set SolveFor(Expr lhs, Expr rhs, InequationType type, Variable variable)
     {
         var f = lhs - rhs;
-        Set domain = FindDomain(f, variable);
+        
+        var domain = FindDomain(f, variable);
+        
+        var inf = domain.Infimum();
+        var sup = domain.Supremum();
 
+        if (inf is null || sup is null)
+            throw new NotImplementedException();
+        
+        
+        List<(Expr Value, bool Include)> criticalPoints = [
+            (inf, true),
+            (sup, true),
+        ];
+        
         var solutions = Solve.SolveFor(f, 0, variable);
         // var singularities = FindSingularities(f, variable);
-
-        var criticalPoints = solutions.UnionWith(ArraySet(domain.Infimum(), domain.Supremum())); // U singularities
-        if (criticalPoints is not FiniteSet criticalSet)
+        if (solutions is not FiniteSet)
             throw new NotImplementedException();
 
-        var xs = criticalSet.Elements.ToArray();
-        Array.Sort(xs, (a, b) => a < b ? -1 : 1);
+        var equal = type == InequationType.GreaterThanOrEqual || type == InequationType.LessThanOrEqual;
+        var sols = ((FiniteSet)solutions).Elements.Select(x => (x, equal)).ToArray();
+        Array.Sort(sols, (a, b) =>
+        {
+            var cmp = a.x > b.x;
+            if (cmp.IsTrue)
+                return 1;
+            if (cmp.IsFalse)
+                return -1;
+            return 0;
+        });
+        
+        criticalPoints.InsertRange(1, sols);
         
         var intervals = EmptySet;
-        for (int i = 1; i < xs.Length; i++)
+        for (int i = 1; i < criticalPoints.Count; i++)
         {
-            var x_j = xs[i - 1];
-            var x_j2 = xs[i];
+            var x_j = criticalPoints[i - 1];
+            var x_j2 = criticalPoints[i];
 
-            var p = MidPoint(x_j, x_j2);
+            var p = MidPoint(x_j.Value, x_j2.Value);
             var y = f.Substitue(variable, p);
 
             if (Valid(y, type))
             {
-                intervals = intervals.UnionWith(Interval(x_j, x_j2));
+                intervals = intervals.UnionWith(Interval(x_j.Value, x_j2.Value, x_j.Include, x_j2.Include));
             }
 
         }
 
-        return intervals;
+        return intervals.Intersect(domain);
     }
     
     // x < y

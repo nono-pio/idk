@@ -11,7 +11,7 @@ public class Sorting
             swapped = false;
             for (int j = 0; j < n - i - 1; j++)
             {
-                if (exprs[j] > exprs[j + 1]) 
+                if (exprs[j].CompareTo(exprs[j + 1]) == 1) 
                 {
                     (exprs[j], exprs[j + 1]) = (exprs[j + 1], exprs[j]);
                     swapped = true;

@@ -78,6 +78,8 @@ public class Variable : Atom
         throw new Exception("Can not take the reciprocal of a variable");
     }
 
+    public bool Equal(Variable variable) => CompareSelf(variable) == 0;
+    
     public override int CompareSelf(Atom expr)
     {
         var other = (Variable) expr;

@@ -1,9 +1,11 @@
 ﻿using ConsoleApp1.Core.Expressions.Atoms;
+using Boolean = ConsoleApp1.Core.Booleans.Boolean;
 
 namespace ConsoleApp1.Core.Expressions.Trigonometrie;
 
 public class TanExpr(Expr x) : TrigonometrieExpr(x)
 {
+    public override Boolean DomainCondition => Boolean.NotEqual(X, PI/2 + new Variable("n", dummy: true, domain: Z) * PI);
 
     public static Expr Construct(Expr x)
     {
