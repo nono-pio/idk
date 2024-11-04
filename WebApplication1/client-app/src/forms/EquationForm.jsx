@@ -20,11 +20,12 @@ export default function EquationForm({ setResults }) {
             return
         
         const signAscii = displayToASCII[sign];
-        let results;
+        let fetch_result;
         if (signAscii === '=')
-            results = await Fetch("equation", {lhs, rhs, var: variable})
+            fetch_result = await Fetch("equation", {lhs, rhs, var: variable})
         else
-            results = await Fetch("inequality", {lhs, rhs, var: variable, sign:signAscii})         
+            fetch_result = await Fetch("inequality", {lhs, rhs, var: variable, sign:signAscii})         
+        const results = fetch_result.result
         
         if (results === null)
             setResults([ ])
@@ -33,7 +34,8 @@ export default function EquationForm({ setResults }) {
                 {
                     domain: "Equation",
                     title: <>Solutions of <MathExpr latex={lhs + ` ${sign} ` + rhs} /></>,
-                    content: <MathExpr latex={results.solutions} />
+                    content: <MathExpr latex={results.solutions} />,
+                    fetch: fetch_result
                 },
             ])
     }

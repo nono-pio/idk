@@ -10,7 +10,8 @@ export default function IntegralForm({ setResults }) {
         if (expression === "")
             return
 
-        let results = await Fetch("integral", {expr: expression, var: variable})
+        let fetch_result = await Fetch("integral", {expr: expression, var: variable})
+        const results = fetch_result.result
         if (results === null)
             setResults([ ])
         else
@@ -18,7 +19,8 @@ export default function IntegralForm({ setResults }) {
                 {
                     domain: "Integration",
                     title: <>Integral of <MathExpr latex={expression} /></>,
-                    content: <MathExpr latex={results.expr} />
+                    content: <MathExpr latex={results.expr} />,
+                    fetch: fetch_result
                 }
             ])
     }

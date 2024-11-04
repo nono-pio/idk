@@ -21,7 +21,8 @@ export default function AnalyseForm({ setResults }) {
         if (expression === "" || variable === "")
             return
 
-        let results = await Fetch("analyse", {expr: expression, var: variable})
+        let fetch_result = await Fetch("analyse", {expr: expression, var: variable})
+        const results = fetch_result.result
         if (results === null)
             setResults([ ])
         else
@@ -32,7 +33,8 @@ export default function AnalyseForm({ setResults }) {
                         return {
                             domain: "Analyse",
                             title: titleMapping[op],
-                            content: <MathExpr latex={result} />
+                            content: <MathExpr latex={result} />,
+                            fetch: fetch_result
                         }
                     })
             )

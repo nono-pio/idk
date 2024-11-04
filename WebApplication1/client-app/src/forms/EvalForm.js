@@ -11,7 +11,8 @@ export default function EvalForm({ setResults }) {
         if (expression === "")
             return 
         
-        let results = await Fetch("eval", {"expr": expression})
+        let fetch_result = await Fetch("eval", {"expr": expression})
+        const results = fetch_result.result
         if (results === null)
             setResults([ ])
         else
@@ -19,7 +20,8 @@ export default function EvalForm({ setResults }) {
                 {
                     domain: "Evaluation",
                     title: <>Evaluation of <MathExpr latex={expression} /></>,
-                    content: <MathExpr latex={results.expr} />
+                    content: <MathExpr latex={results.expr} />,
+                    fetch: fetch_result
                 }
             ])
     }

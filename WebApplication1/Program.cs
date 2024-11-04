@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.OpenApi.Models;
 using WebApplication1.apis;
 
@@ -30,8 +31,17 @@ if (true)
 
 app.UseHttpsRedirection();
 
+// cas api
 var apiRouteBuilder = app.MapGroup("/api");
 Api.APIRoutes(apiRouteBuilder);
+
+// math error manager
+apiRouteBuilder.MapPost("/error", ([FromBody] MathError request) => { 
+    MathErrorController.AddError(request);
+    return Results.Ok();
+});
+apiRouteBuilder.MapGet("/error", () => Results.Ok(MathErrorController.GetErrors()));
+
 
 app.UseDefaultFiles();
 app.UseStaticFiles();

@@ -10,7 +10,8 @@ export default function DerivativeForm({ setResults }) {
         if (expression === "")
             return
 
-        let results = await Fetch("derivative", {expr: expression, var: variable})
+        let fetch_results = await Fetch("derivative", {expr: expression, var: variable})
+        const results = fetch_results.result
         if (results === null)
             setResults([ ])
         else
@@ -18,7 +19,8 @@ export default function DerivativeForm({ setResults }) {
                 {
                     domain: "Derivation",
                     title: <>Derivation of <MathExpr latex={expression} /></>,
-                    content: <MathExpr latex={results.expr} />
+                    content: <MathExpr latex={results.expr} />,
+                    fetch: fetch_results 
                 }
             ])
     }
