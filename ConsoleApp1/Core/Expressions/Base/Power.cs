@@ -12,13 +12,15 @@ public class Power : Expr
     public override bool IsRational => Base.IsRational && Exp.IsInteger;
     public override bool IsReal => Base.IsReal && Exp.IsInteger; // todo: (-1)^0.5
     public override bool IsComplex => true;
-
+    
     public override bool IsPositive => Base.IsPositive;
     public override bool IsNegative => throw new NotImplementedException(); // todo: (-1)^(2n+1)
 
     public override bool IsInfinity => ((Base is Number num && num.Num > 1) || Base is Constant { AppValue: > 1 }) && Exp.IsInfinity;
     public override bool IsNegativeInfinity => false;
 
+    public bool IsExp => Exp == Atoms.Constant.E;
+    
     public Expr Base
      {
          get => Args[0];

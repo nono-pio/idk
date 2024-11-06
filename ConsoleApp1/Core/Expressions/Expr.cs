@@ -349,7 +349,12 @@ public abstract class Expr
     {
         return Map<Variable>(var => var == variable ? value : var);
     }
-    
+
+    public Expr Substitue(Expr expr, Expr value)
+    {
+        return Map<Expr>(e => e == expr ? value : e);
+    }
+
     public Expr Substitue(Dictionary<Variable,Expr> maps)
     {
         Expr expr = this;
