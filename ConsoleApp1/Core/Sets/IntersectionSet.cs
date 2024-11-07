@@ -120,6 +120,11 @@ public class IntersectionSet(params Set[] sets) : Set
         {
             Expr start;
             bool startInc;
+            if (a.Start == b.Start)
+            {
+                start = a.Start;
+                startInc = a.StartInclusive && b.StartInclusive;
+            }
             if (a.Start > b.Start)
             {
                 start = a.Start;
@@ -133,6 +138,11 @@ public class IntersectionSet(params Set[] sets) : Set
             
             Expr end;
             bool endInc;
+            if (a.End == b.End)
+            {
+                end = a.End;
+                endInc = a.EndInclusive && b.EndInclusive;
+            }
             if (a.End < b.End)
             {
                 end = a.End;

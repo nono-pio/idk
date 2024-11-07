@@ -45,9 +45,6 @@ public class IntervalSet : Set
         if (!start.IsExtendedReal || !end.IsExtendedReal || !(end-start).IsExtendedReal)
             throw new Exception("Invalid interval");
 
-        if ((end - start).IsNegative)
-            return EmptySet;
-
         if (end == start)
         {
             // ]1,1[ = {}

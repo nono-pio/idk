@@ -51,7 +51,7 @@ public abstract class Expr
     {
         get
         {
-            if (!Has<Variable>())
+            if (Constant())
                 return N() > 0;
             
             return false;
@@ -62,7 +62,7 @@ public abstract class Expr
     {
         get
         {
-            if (!Has<Variable>())
+            if (Constant())
                 return N() < 0;
             
             return false;
@@ -407,6 +407,18 @@ public abstract class Expr
 
         foreach (var arg in Args)
             if (!arg.Constant(variable))
+                return false;
+
+        return true;
+    }
+    
+    public bool Constant()
+    {
+        if (this is Variable && this is not Atoms.Constant) 
+            return false;
+
+        foreach (var arg in Args)
+            if (!arg.Constant())
                 return false;
 
         return true;

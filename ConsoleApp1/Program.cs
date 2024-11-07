@@ -53,3 +53,10 @@ static (int, int) sqrt(int n)
 
 // Domain : ASin(Log(x) - 1)
 print(Parser.Parse("sin^{-1}(x)"));
+print(Inequalities.FindDomain(Exp(x)/Ln(x), x));
+
+// Good functions for domains
+// ASin(Ln(x)) -> [1/e, e]
+// Ln(x) -> ]0, +inf[
+// Asin(Ln(x) - 1) -> [1, e^2]
+// Exp(x)/Ln(x) -> ]1, +inf[ U [0, 1[

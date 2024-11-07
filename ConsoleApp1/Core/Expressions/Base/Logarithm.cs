@@ -30,7 +30,7 @@ public class Logarithm : Expr
             return 0;
         // log_1(x) = log(x)/log(1) = log(x)/0 = NaN
         if (@base.IsNumOne)
-            return Atoms.Constant.NaN;
+            return double.NaN;
 
         if (value.IsInfinity)
             return Inf;
