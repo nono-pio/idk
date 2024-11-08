@@ -1,6 +1,8 @@
 ﻿using ConsoleApp1.Core.Classes;
 using ConsoleApp1.Core.Complexes;
 using ConsoleApp1.Core.Expressions.Atoms;
+using ConsoleApp1.Core.Models;
+using ConsoleApp1.Core.Polynomials;
 using ConsoleApp1.Core.Sets;
 using ConsoleApp1.Latex;
 
@@ -307,6 +309,14 @@ public class Addition : Expr
 
     public override string ToLatex()
     {
+
+        var vars = GetVariables();
+        if (vars.Length == 1 && Poly.IsPolynomial(this, vars[0]))
+        {
+            var poly = Poly.ToPoly(this, vars[0]);
+            return poly.ToString();
+        }
+        
         var result = ParenthesisLatexIfNeeded(Therms[0]);
 
         for (var i = 1; i < Therms.Length; i++)

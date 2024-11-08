@@ -33,6 +33,22 @@ public class Multiplication : Expr
 
         return (Mul(cstes), Mul(vars));
     }
+    
+    public override (Expr Constant, Expr Variate) SeparateConstant()
+    {
+
+        var cstes = new Expr[Factors.Length];
+        var vars = new Expr[Factors.Length];
+
+        for (int i = 0; i < Factors.Length; i++)
+        {
+            var cv = Factors[i].SeparateConstant();
+            cstes[i] = cv.Constant;
+            vars[i] = cv.Variate;
+        }
+
+        return (Mul(cstes), Mul(vars));
+    }
 
     public override (Expr Num, Expr Den) AsFraction()
     {
@@ -109,7 +125,7 @@ public class Multiplication : Expr
         if (a is not Power && b is not Power)
             return null;
 
-        if (a is Power aPow && b is Power bPow)
+        if (a is Power aPow && b is Power bPow && !aPow.Base.Constant())
             return aPow.Base == bPow.Base ? Pow(aPow.Base, aPow.Exp + bPow.Exp) : null;
 
         Power pow;
@@ -125,7 +141,7 @@ public class Multiplication : Expr
             expr = a;
         }
 
-        if (pow.Base == expr)
+        if (pow.Base == expr && !expr.Constant())
         {
             var newExp = pow.Exp + 1;
             if (newExp.IsZero)
@@ -367,17 +383,38 @@ public class Multiplication : Expr
     {
         if (Factors.Length < 2) 
             throw new Exception("You must mul two or more factors");
-        
-        var result = ParenthesisLatexIfNeeded(Factors[0]);
-        var isM1 = result == "-1";
 
-        for (var i = 1; i < Factors.Length; i++)
+        string MulLatex(Expr[] items) => string.Join("", items.Select(e => e.ToLatex()));
+
+        string FractionLatex((Expr num, Expr den) frac)
         {
-            // TODO : Check if the pow is negative : * -> /
-            result += Symbols.Mul + ParenthesisLatexIfNeeded(Factors[i]);   
+            var denLatex = frac.den is Multiplication denMul ? MulLatex(denMul.Args) : frac.den.ToLatex();
+            var numLatex = frac.num is Multiplication numMul ? 
+                MulLatex(numMul.Args) : 
+                denLatex == "1" ? 
+                    ParenthesisLatexIfNeeded(frac.num) : 
+                    frac.num.ToLatex();
+
+            return denLatex == "1" ? numLatex : LatexUtils.Fraction(numLatex, denLatex);
         }
         
-        return isM1 ? '-' + result[(2 + Symbols.Mul.Length)..] : result;
+        var (cste, var) = SeparateConstant();
+
+        var cste_latex = FractionLatex(AsMulFraction(cste));
+        var var_latex = FractionLatex(AsMulFraction(var));
+        
+        return cste_latex + var_latex;
+    }
+
+    private (Expr Num, Expr Den) AsMulFraction(Expr expr)
+    {
+        if (expr is Multiplication mul)
+            return mul.Args.Select(AsMulFraction).Aggregate((frac1, frac2) => (frac1.Num * frac2.Num, frac1.Den * frac2.Den));
+        
+        if (expr is Power pow && pow.Exp.IsNegative)
+            return (1, Pow(pow.Base, -pow.Exp));
+        
+        return (expr, 1);
     }
     
     // a*f(x) = a, f(x)

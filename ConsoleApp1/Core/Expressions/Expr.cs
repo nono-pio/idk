@@ -147,6 +147,7 @@ public abstract class Expr
 
     // af(x) -> a, f(x)
     public virtual (Expr Constant, Expr Variate) SeparateConstant(Variable var) => Constant(var) ? (this, 1) : (1, this);
+    public virtual (Expr Constant, Expr Variate) SeparateConstant() => Constant() ? (this, 1) : (1, this);
     
     public Fonction AsFonction(Variable variable)
     {
@@ -424,6 +425,18 @@ public abstract class Expr
         return true;
     }
     
+    public Variable[] GetVariables()
+    {
+        var variables = new HashSet<Variable>(new ExprQuickComparer());
+        ForEach<Variable>(var =>
+        {
+            if (var is not Atoms.Constant)
+                variables.Add(var);
+        });
+        
+        return variables.ToArray();
+    }
+    
     public bool Has<T>() where T : Expr
     {
         if (this is T)
@@ -626,6 +639,36 @@ public abstract class Expr
                         return -1;
                     return 0;
             }
+        }
+    }
+    
+    public class ExprQuickComparer : IComparer<Expr>, IEqualityComparer<Expr>
+    {
+        public int Compare(Expr? x, Expr? y)
+        {
+            return (x, y) switch
+            {
+                (null, null) => 0,
+                (null, _) => -1,
+                (_, null) => 1,
+                (_, _) => x.CompareTo(y)
+            };
+        }
+
+        public bool Equals(Expr x, Expr y)
+        {
+            return (x, y) switch
+            {
+                (null, null) => true,
+                (null, _) => false,
+                (_, null) => false,
+                (_, _) => x.CompareTo(y) == 0
+            };
+        }
+
+        public int GetHashCode(Expr obj)
+        {
+            return obj.Args.GetHashCode();
         }
     }
     

@@ -1,5 +1,6 @@
 ﻿using ConsoleApp1.Core.Expressions.Atoms;
 using ConsoleApp1.Core.Expressions.Base;
+using ConsoleApp1.Latex;
 
 namespace ConsoleApp1.Core.Models;
 
@@ -271,6 +272,40 @@ public class Poly
                     continue;
                 default:
                     str += "+" + coef_str + "x^" + deg;
+                    break;
+            }
+        }
+        
+        if (str == "") 
+            return "0";
+        
+        if (str[0] == '+')
+            str = str[1..];
+
+        return str;
+    }
+    
+    public string ToLatex(string var)
+    {
+        
+        var str = "";
+        for (var i = 0; i < _coefs.Length; i++)
+        {
+            var coef = _coefs[i];
+            var deg = Deg() - i; 
+            if (coef.IsZero)
+                continue;
+            var coef_str = coef.IsOne && deg != 0 ? "" : coef.ToLatex();
+            switch (deg)
+            {
+                case 0:
+                    str += Symbols.Add + var;
+                    continue;
+                case 1:
+                    str += Symbols.Add + coef_str + var;
+                    continue;
+                default:
+                    str += Symbols.Add + coef_str + LatexUtils.Power(var, deg.ToString());
                     break;
             }
         }
