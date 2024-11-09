@@ -122,6 +122,9 @@ public class Multiplication : Expr
     }
     private static Expr? Combine(Expr a, Expr b)
     {
+        if (a == b)
+            return Pow(a, 2);
+        
         if (a is not Power && b is not Power)
             return null;
 
@@ -257,7 +260,8 @@ public class Multiplication : Expr
     public override Expr Develop()
     {
         var therms = new List<Expr>();
-        foreach (var factor in Factors)
+        var factors = new List<Expr>();
+        foreach (var factor in Factors.Select(e => e.Develop()))
         {
             if (factor is Addition add)
             {
@@ -280,15 +284,15 @@ public class Multiplication : Expr
                 }
             }
             else
-            {
-                for (int i = 0; i < therms.Count; i++)
-                {
-                    therms[i] = Mul(therms[i], factor);
-                }
+            { 
+                factors.Add(factor);
             }
         }
 
-        return Add(therms.ToArray());
+        if (therms.Count == 0)
+            return Mul(factors.ToArray());
+        
+        return Add(therms.Select(t => Mul(factors.Append(t).ToArray())).ToArray());
     }
 
     public override Expr Derivee(Variable variable, int n)

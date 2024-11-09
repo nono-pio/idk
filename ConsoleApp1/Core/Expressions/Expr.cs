@@ -46,6 +46,8 @@ public abstract class Expr
     public bool IsInfinite => IsInfinity || IsNegativeInfinity;
     public virtual bool IsInfinity => false;
     public virtual bool IsNegativeInfinity => false;
+
+    public bool? Positivity => IsPositive ? true : IsNegative ? false : null;
     
     public virtual bool IsPositive
     {
@@ -279,6 +281,9 @@ public abstract class Expr
     {
         try
         {
+            var n = N();
+            if (double.IsNaN(n) || double.IsInfinity(n))
+                return null;
             return N();
         }
         catch (Exception e)
@@ -348,12 +353,24 @@ public abstract class Expr
     
     public Expr Substitue(Variable variable, Expr value)
     {
-        return Map<Variable>(var => var == variable ? value : var);
+        return MapAtoms<Variable>(var => var == variable ? value : var);
     }
 
-    public Expr Substitue(Expr expr, Expr value)
+    public virtual Expr Substitue(Expr expr, Expr value)
     {
-        return Map<Expr>(e => e == expr ? value : e);
+        
+        var objects = GetArgs();
+        var newArgs = new Expr[Args.Length];
+        
+        for (var i = 0; i < Args.Length; i++) 
+            newArgs[i] = Args[i].Substitue(expr, value);
+
+        var result = Eval(newArgs, objects);
+        
+        if (result == expr)
+            return value;
+        
+        return result;
     }
 
     public Expr Substitue(Dictionary<Variable,Expr> maps)
@@ -476,9 +493,18 @@ public abstract class Expr
         return MapBottomUp(expr => expr is T t ? func(t) : expr);
     }
 
-    public Expr MapAtoms(Func<Atom, Expr> func)
+    public Expr MapAtoms<T>(Func<T, Expr> func) where T : Atom
     {
-        return Map(func);
+        var objects = GetArgs();
+        var newArgs = new Expr[Args.Length];
+
+        if (this is T t)
+            return func(t);
+        
+        for (var i = 0; i < Args.Length; i++) 
+            newArgs[i] = Args[i].MapAtoms(func);
+
+        return Eval(newArgs, objects);
     }
 
     public Expr MapBottomUp(Func<Expr, Expr> func)

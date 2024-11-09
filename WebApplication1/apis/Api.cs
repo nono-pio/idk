@@ -4,11 +4,13 @@ using ConsoleApp1.Core.Expressions.Atoms;
 using ConsoleApp1.Core.Integrals;
 using ConsoleApp1.Core.Limits;
 using ConsoleApp1.Core.Models;
+using ConsoleApp1.Core.NumericalAnalysis;
 using ConsoleApp1.Core.Series;
 using ConsoleApp1.Core.Solvers;
 using ConsoleApp1.Parser;
 using ConsoleApp1.Utils;
 using Microsoft.AspNetCore.Mvc;
+// ReSharper disable All
 
 namespace WebApplication1.apis;
 
@@ -35,7 +37,9 @@ public class Api
             if (input is null)
                 return Results.BadRequest();
 
-            return Results.Ok(new EvalResponse(input.ToLatex()));
+            var app = input.SafeN();
+
+            return Results.Ok(new EvalResponse(input.ToLatex(), app));
         });
 
         routes.MapPost("/derivative", ([FromBody] DerivativeRequest request) =>
@@ -55,12 +59,30 @@ public class Api
             var func = Parser.Parse(request.Expr);
             var x = new Variable(request.Var);
 
+            var a = request.Inf is null ? null : Parser.Parse(request.Inf);
+            var b = request.Sup is null ? null : Parser.Parse(request.Sup);
+            (Expr, Expr)? bornes = a is null || b is null ? null : (a, b);
+
             if (func is null)
                 return Results.BadRequest();
 
-            var integral = Integral.Integrate(func, x); //func.Integrate(request.Var);
-            return Results.Ok(
-                new IntegralResponse(integral?.ToLatex() ?? "\\text{Cannot do integral}"));
+            var integral = Integral.Integrate(func, x, bornes: bornes);
+
+            double? app = null;
+            if (bornes is not null)
+            {
+                var vars = func.GetVariables();
+                var aApp = bornes.Value.Item1.SafeN();
+                var bApp = bornes.Value.Item2.SafeN();
+                if (aApp is not null && bApp is not null)
+                {
+                    app = IntegralApproximation.Integral(aApp.Value, bApp.Value, func.AsFonction(x).N);
+                    if (double.IsNaN(app.Value) || double.IsInfinity(app.Value))
+                        app = null;
+                }
+            }
+            
+            return Results.Ok(new IntegralResponse(integral?.ToLatex(), app));
         });
 
         routes.MapPost("/limit", ([FromBody] LimitRequest request) =>
@@ -73,7 +95,11 @@ public class Api
                 return Results.BadRequest();
 
             var limit = Limit.LimitOf(func, x, x0);
-            return Results.Ok(new LimitResponse(limit?.ToLatex() ?? "Cannot do limit"));
+            
+            const double epsilon = 1e-6d;
+            var app = func.Substitue(x, x0 + epsilon).SafeN();
+            
+            return Results.Ok(new LimitResponse(limit.ToLatex(), app));
         });
 
         routes.MapPost("/simplify", ([FromBody] SimplifyRequest request) =>
@@ -83,7 +109,7 @@ public class Api
                 return Results.BadRequest();
 
             Expr simplified = double.NaN; //func.Simplify();
-            return Results.Ok(new SimplifyResponse(simplified.ToLatex()));
+            return Results.Ok(new SimplifyResponse(simplified.ToLatex(), simplified.SafeN()));
         });
 
         routes.MapPost("/analyse", ([FromBody] AnalyzeFunctionRequest request) =>
@@ -202,23 +228,23 @@ All things that you can do with the API are:
 
 // Eval
 record EvalRequest(string Expr);
-record EvalResponse(string Expr);
+record EvalResponse(string Expr, double? app);
 
 // Derivative
 record DerivativeRequest(string Expr, string Var);
 record DerivativeResponse(string Expr);
 
 // Integral
-record IntegralRequest(string Expr, string Var);
-record IntegralResponse(string Expr);
+record IntegralRequest(string Expr, string Var, string? Inf, string? Sup);
+record IntegralResponse(string? Expr, double? app);
 
 // Limit
 record LimitRequest(string Expr, string Var, string To);
-record LimitResponse(string Expr);
+record LimitResponse(string Expr, double? app);
 
 // Simplify
 record SimplifyRequest(string Expr);
-record SimplifyResponse(string Expr);
+record SimplifyResponse(string Expr, double? app);
 
 // Analyze Function
 record AnalyzeFunctionRequest(string Expr, string Var);

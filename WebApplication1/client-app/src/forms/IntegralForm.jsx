@@ -10,7 +10,7 @@ export default function IntegralForm({ setResults }) {
         if (expression === "")
             return
 
-        let fetch_result = await Fetch("integral", {expr: expression, var: variable})
+        let fetch_result = await Fetch("integral", {expr: expression, var: variable, inf:inf === ""?null:inf, sup:sup === ""?null:sup})
         const results = fetch_result.result
         if (results === null)
             setResults([ ])
@@ -19,7 +19,7 @@ export default function IntegralForm({ setResults }) {
                 {
                     domain: "Integration",
                     title: <>Integral of <MathExpr latex={expression} /></>,
-                    content: <MathExpr latex={results.expr} />,
+                    content: <MathExpr latex={`${results.expr} = ${results.app}`} />,
                     fetch: fetch_result
                 }
             ])
@@ -27,6 +27,8 @@ export default function IntegralForm({ setResults }) {
 
     const [expression, setExpression] = useState("")
     const [variable, setVariable] = useState("x")
+    const [inf, setInf] = useState(undefined);
+    const [sup, setSup] = useState(undefined);
 
     return (
         <CustomForm title="Integration" onSubmit={onSubmit}>
@@ -37,12 +39,10 @@ export default function IntegralForm({ setResults }) {
                         <big style={{fontSize:"300%", transform:"scaleX(1)"}}>∫</big>
                         <span className="mq-supsub mq-non-leaf">
                             <span className="mq-sup"><span className="mq-sup-inner" style={{verticalAlign: "2.3em"}}>
-                                <MathInput style={{padding:".1rem .15rem"}} setLatex={() => {
-                                }}/>
+                                <MathInput style={{padding:".1rem .15rem"}} setLatex={setInf}/>
                             </span></span>
                             <span className="mq-sub">
-                               <MathInput style={{padding:".1rem .15rem"}} setLatex={() => {
-                               }}/>
+                               <MathInput style={{padding:".1rem .15rem"}} setLatex={setSup}/>
                             </span>
                             <span style={{display: "inline-block", width: 0}}>​</span>
                         </span>

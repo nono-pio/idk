@@ -20,7 +20,7 @@ export default function EvalForm({ setResults }) {
                 {
                     domain: "Evaluation",
                     title: <>Evaluation of <MathExpr latex={expression} /></>,
-                    content: <MathExpr latex={results.expr} />,
+                    content: <MathExpr latex={`${results.expr} = ${results.app}`} />,
                     fetch: fetch_result
                 }
             ])

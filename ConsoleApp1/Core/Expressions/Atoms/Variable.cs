@@ -56,6 +56,9 @@ public class Variable : Atom
         var domain = (Set) objects[3];
         var dependencies = (List<Variable>) objects[4];
         var value = (Expr) objects[5];
+
+        if (dummy)
+            return this;
         
         return new Variable(name, latexName, dummy, domain, dependencies, value);
     }

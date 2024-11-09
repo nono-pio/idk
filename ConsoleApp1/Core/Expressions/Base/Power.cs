@@ -19,7 +19,7 @@ public class Power : Expr
     public override bool IsInfinity => ((Base is Number num && num.Num > 1) || Base is Constant { AppValue: > 1 }) && Exp.IsInfinity;
     public override bool IsNegativeInfinity => false;
 
-    public bool IsExp => Exp == Atoms.Constant.E;
+    public bool IsExp => Base == Atoms.Constant.E;
     
     public Expr Base
      {
@@ -52,6 +52,25 @@ public class Power : Expr
             return (this, 1);
         
         return (Pow(base_frac.Num, Exp), Pow(base_frac.Den, Exp));
+    }
+
+    public override Expr Substitue(Expr expr, Expr value)
+    {
+        if (this == expr)
+            return value;
+        
+        var @base = Base.Substitue(expr, value);
+        var exp = Exp.Substitue(expr, value);
+        
+        if (expr is Power pow && pow.Base == @base)
+        {
+            var new_exp = exp / pow.Exp;
+
+            if (new_exp.Constant())
+                return Pow(value, new_exp);
+        }
+
+        return Pow(@base, exp);
     }
 
     public override Complex AsComplex()
@@ -202,6 +221,10 @@ public class Power : Expr
 
     public override Expr Develop()
     {
+        if (Exp is Addition eAdd)
+            return Mul(eAdd.Therms.Select(n => Pow(Base, n).Develop()).ToArray());
+        
+        
         return Base switch
         {
             Addition add => Exp.IsInteger ? NewtonMultinomial(add.Therms, (int)Exp.N()) : this,

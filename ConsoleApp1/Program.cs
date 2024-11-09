@@ -60,3 +60,6 @@ static (int, int) sqrt(int n)
 // Ln(x) -> ]0, +inf[
 // Asin(Ln(x) - 1) -> [1, e^2]
 // Exp(x)/Ln(x) -> ]1, +inf[ U [0, 1[
+
+var ex2 = Exp(-Pow(x, 2)).AsFonction(x);
+print(IntegralApproximation.Integral(0, 999, ex2.N));
