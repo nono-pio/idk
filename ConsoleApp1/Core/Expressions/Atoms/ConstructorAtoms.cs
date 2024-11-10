@@ -1,5 +1,4 @@
 ﻿using ConsoleApp1.Core.Classes;
-using ConsoleApp1.Core.Models;
 using ConsoleApp1.Core.Sets;
 
 namespace ConsoleApp1.Core.Expressions.Atoms;

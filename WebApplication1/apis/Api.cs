@@ -6,6 +6,7 @@ using ConsoleApp1.Core.Limits;
 using ConsoleApp1.Core.Models;
 using ConsoleApp1.Core.NumericalAnalysis;
 using ConsoleApp1.Core.Series;
+using ConsoleApp1.Core.Simplifiers;
 using ConsoleApp1.Core.Solvers;
 using ConsoleApp1.Parser;
 using ConsoleApp1.Utils;
@@ -33,10 +34,11 @@ public class Api
     {
         routes.MapPost("/eval", ([FromBody] EvalRequest request) =>
         {
-            var input = Parser.Parse(request.Expr);
+            var input = Parser.ParseExpr(request.Expr);
             if (input is null)
                 return Results.BadRequest();
 
+            input = Simplifier.Simplify(input);
             var app = input.SafeN();
 
             return Results.Ok(new EvalResponse(input.ToLatex(), app));
@@ -44,7 +46,7 @@ public class Api
 
         routes.MapPost("/derivative", ([FromBody] DerivativeRequest request) =>
         {
-            var func = Parser.Parse(request.Expr);
+            var func = Parser.ParseExpr(request.Expr);
             var x = new Variable(request.Var);
 
             if (func is null)
@@ -56,11 +58,11 @@ public class Api
 
         routes.MapPost("/integral", ([FromBody] IntegralRequest request) =>
         {
-            var func = Parser.Parse(request.Expr);
+            var func = Parser.ParseExpr(request.Expr);
             var x = new Variable(request.Var);
 
-            var a = request.Inf is null ? null : Parser.Parse(request.Inf);
-            var b = request.Sup is null ? null : Parser.Parse(request.Sup);
+            var a = request.Inf is null ? null : Parser.ParseExpr(request.Inf);
+            var b = request.Sup is null ? null : Parser.ParseExpr(request.Sup);
             (Expr, Expr)? bornes = a is null || b is null ? null : (a, b);
 
             if (func is null)
@@ -87,9 +89,9 @@ public class Api
 
         routes.MapPost("/limit", ([FromBody] LimitRequest request) =>
         {
-            var func = Parser.Parse(request.Expr);
+            var func = Parser.ParseExpr(request.Expr);
             var x = new Variable(request.Var);
-            var x0 = Parser.Parse(request.To);
+            var x0 = Parser.ParseExpr(request.To);
 
             if (func is null || x0 is null)
                 return Results.BadRequest();
@@ -104,7 +106,7 @@ public class Api
 
         routes.MapPost("/simplify", ([FromBody] SimplifyRequest request) =>
         {
-            var func = Parser.Parse(request.Expr);
+            var func = Parser.ParseExpr(request.Expr);
             if (func is null)
                 return Results.BadRequest();
 
@@ -114,7 +116,7 @@ public class Api
 
         routes.MapPost("/analyse", ([FromBody] AnalyzeFunctionRequest request) =>
         {
-            var func = Parser.Parse(request.Expr);
+            var func = Parser.ParseExpr(request.Expr);
             if (func is null)
                 return Results.BadRequest();
             
@@ -144,8 +146,8 @@ public class Api
 
         routes.MapPost("/equation", ([FromBody] EquationRequest request) =>
         {
-            var func1 = Parser.Parse(request.LHS);
-            var func2 = Parser.Parse(request.RHS);
+            var func1 = Parser.ParseExpr(request.LHS);
+            var func2 = Parser.ParseExpr(request.RHS);
             var x = new Variable(request.Var);
 
             if (func1 is null || func2 is null || !Parser.IsLetter(request.Var))
@@ -158,8 +160,8 @@ public class Api
 
         routes.MapPost("/inequality", ([FromBody] InequalityRequest request) =>
         {
-            var lhs = Parser.Parse(request.LHS);
-            var rhs = Parser.Parse(request.RHS);
+            var lhs = Parser.ParseExpr(request.LHS);
+            var rhs = Parser.ParseExpr(request.RHS);
             var x = new Variable(request.Var);
             if (lhs is null || rhs is null)
                 return Results.BadRequest();
@@ -183,7 +185,7 @@ public class Api
 
         routes.MapPost("/graph", ([FromBody] GraphRequest request) =>
         {
-            var func = Parser.Parse(request.Expr);
+            var func = Parser.ParseExpr(request.Expr);
             if (func is null)
                 return Results.BadRequest();
 

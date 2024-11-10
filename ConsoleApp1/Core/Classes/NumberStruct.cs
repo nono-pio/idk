@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Globalization;
+using System.Runtime.InteropServices;
 using ConsoleApp1.Core.Expressions.Atoms;
 using ConsoleApp1.Latex;
 
@@ -7,7 +8,7 @@ namespace ConsoleApp1.Core.Classes;
 [StructLayout(LayoutKind.Explicit)]
 public struct NumberStruct
 {
-    
+
     enum NumberType
     {
         Fraction,
@@ -41,7 +42,7 @@ public struct NumberStruct
     public bool IsFloat => Type == NumberType.Float;
     
     public bool IsZero => (IsFraction && Numerator == 0) || (IsFloat && FloatValue == 0);
-    public bool IsOne => (IsFraction && Numerator == 1 && Denominator == 1) || (IsFloat && FloatValue == 1);
+    public bool IsOne => (IsFraction && Numerator == 1 && Denominator == 1) || (IsFloat && FloatValue.Equals(1));
     
     public bool IsPositive => (IsFraction && Numerator >= 0) || (IsFloat && FloatValue >= 0);
     public bool IsNegative => (IsFraction && Numerator <= 0) || (IsFloat && FloatValue <= 0);
@@ -92,7 +93,7 @@ public struct NumberStruct
 
     public Expr Expr() => new Number(this);
 
-    public double N()
+    public readonly double N()
     {
         return Type switch
         {
@@ -259,6 +260,21 @@ public struct NumberStruct
         return N().CompareTo(other.N());
     }
     
+    public bool Equals(NumberStruct other)
+    {
+        return CompareTo(other) == 0;
+    }
+
+    public override bool Equals(object? obj)
+    {
+        return obj is NumberStruct other && Equals(other);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine((int)Type, Numerator, Denominator, FloatValue);
+    }
+    
     public static bool operator ==(NumberStruct a, NumberStruct b) => a.CompareTo(b) == 0;
     public static bool operator !=(NumberStruct a, NumberStruct b) => a.CompareTo(b) != 0;
     public static bool operator <(NumberStruct a, NumberStruct b) => a.CompareTo(b) < 0;
@@ -276,7 +292,7 @@ public struct NumberStruct
             {
                 double.PositiveInfinity => "oo",
                 double.NegativeInfinity => "-oo",
-                _ => FloatValue.ToString()
+                _ => FloatValue.ToString(CultureInfo.CurrentCulture)
             },
             _ => "NaN"
         };
@@ -293,7 +309,7 @@ public struct NumberStruct
             {
                 double.PositiveInfinity => @"\infty",
                 double.NegativeInfinity => @"-\infty",
-                _ => FloatValue.ToString()
+                _ => FloatValue.ToString(CultureInfo.InvariantCulture)
             },
             _ => "NaN"
         };

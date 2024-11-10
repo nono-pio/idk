@@ -1,5 +1,4 @@
-﻿using System.Data.SqlTypes;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using ConsoleApp1.Core.Expressions.Atoms;
 using ConsoleApp1.Core.Sets;
 

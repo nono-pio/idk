@@ -2,7 +2,6 @@
 using ConsoleApp1.Core.Complexes;
 using ConsoleApp1.Core.Expressions.Atoms;
 using ConsoleApp1.Core.Models;
-using ConsoleApp1.Core.Polynomials;
 using ConsoleApp1.Core.Sets;
 using ConsoleApp1.Latex;
 
@@ -18,9 +17,9 @@ public class Addition : Expr
             throw new Exception("You must add two or more therms");
     }
 
-    public override (Expr Num, Expr Den) AsFraction()
+    public override (Expr Num, Expr Den) AsFraction(bool expNumber = true)
     {
-        var fracs = Therms.Select(t => t.AsFraction()).ToArray();
+        var fracs = Therms.Select(t => t.AsFraction(expNumber)).ToArray();
 
         Expr num = 0;
         for (int i = 0; i < fracs.Length; i++)
@@ -73,7 +72,11 @@ public class Addition : Expr
                 Expr? combine = Combine(expr, exprsSum[i]);
                 if (combine is not null)
                 {
-                    exprsSum[i] = combine;
+                    if (combine.IsNumZero)
+                        exprsSum.RemoveAt(i);
+                    else 
+                        exprsSum[i] = combine;
+                    
                     hasCombined = true;
                     break;
                 }
@@ -157,27 +160,6 @@ public class Addition : Expr
     {
         if (a is Addition || b is Addition)
             return Construct(a, b);
-
-        // if (a.IsInfinite || b.IsInfinite)
-        // {
-        //     var aPosInf = a.IsInfinity;
-        //     var bPosInf = b.IsInfinity;
-        //     var aNegInf = a.IsNegativeInfinity;
-        //     var bNegInf = b.IsNegativeInfinity;
-        //     
-        //     // oo + x = oo if x != -oo
-        //     // -oo + x = -oo if x != oo
-        //     // oo + -oo = 0
-        //     
-        //     if ((aPosInf && bNegInf) || (aNegInf && bPosInf))
-        //         return Num(NumberStruct.Nan);
-        //
-        //     if (aPosInf || bPosInf)
-        //         return Inf;
-        //
-        //     if (aNegInf || bNegInf)
-        //         return NegInf;
-        // }
         
         if (a is Number numA && b is Number numB)
             return new Number(numA.Num + numB.Num);

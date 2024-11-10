@@ -14,6 +14,7 @@ import IntegralForm from "./forms/IntegralForm";
 import EquationForm from "./forms/EquationForm";
 import MathExpr from "./components/MathExpr";
 import MathInput from "./components/MathInput";
+import LimitForm from "./forms/LimitForm";
 
 addStyles()
 
@@ -45,6 +46,11 @@ const otherSections = [
         name: "Integrate",
         shortName: "integral",
         description: "Integrate a fonction"
+    },
+    {
+        name: "Limit",
+        shortName: "limit",
+        description: "Limit a fonction to a point"
     }
 ]
 
@@ -65,7 +71,8 @@ function App() {
         "analyse": <AnalyseForm setResults={setResults}/>,
         "ddx": <DerivativeForm setResults={setResults}/>,
         "integral": <IntegralForm setResults={setResults}/>,
-        "equation": <EquationForm setResults={setResults}/>
+        "equation": <EquationForm setResults={setResults}/>,
+        "limit": <LimitForm setResults={setResults} />
     }
 
     return (

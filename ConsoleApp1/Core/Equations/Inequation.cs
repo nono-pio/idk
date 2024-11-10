@@ -1,8 +1,5 @@
-﻿using ConsoleApp1.Core.Expressions.Atoms;
-using ConsoleApp1.Core.Expressions.Others;
+﻿using ConsoleApp1.Core.Expressions.Others;
 using ConsoleApp1.Core.Sets;
-using ConsoleApp1.Core.Solvers;
-using Boolean = ConsoleApp1.Core.Booleans.Boolean;
 
 namespace ConsoleApp1.Core.Equations;
 

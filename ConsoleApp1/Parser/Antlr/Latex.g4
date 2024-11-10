@@ -1,8 +1,51 @@
 ﻿grammar Latex;
 //  antlr4 Latex.g4  -Dlanguage=CSharp -no-listener -visitor
 
-program : expr EOF;
+// sets
+// {1, 2, 3}, { expr | cond }, \R, \N, \Q, \Z, Union, Inter, A - B ou A/B
+set : unions;
 
+unions : intersections (UNION intersections)*;
+intersections : differences (INTERSECTION differences)*;
+differences : set_atom ((SUB | DIV) differences)?;
+set_atom : finite_set | number_set | conditionnal_set | parenthesis_set |;
+finite_set : L_BRACE_SET expr? (COMMA expr)* R_BRACE_SET;
+number_set : R_SET | N_SET | Z_SET | Q_SET | EMPTY_SET;
+conditionnal_set : L_BRACE_SET expr BAR condition R_BRACE_SET;
+parenthesis_set : L_PAREN set R_PAREN;
+
+UNION : '\\cup';
+INTERSECTION : '\\cap';
+N_SET : '\\N';
+Z_SET : '\\Z';
+Q_SET : '\\Q';
+R_SET : '\\R';
+EMPTY_SET : '\\empty';
+
+// conditions
+// True, False, And, Or, expr =/</<=/>/>=/!= expr, variable \in Set, \not
+
+condition : or;
+boolean : or;
+
+or : and (OR and)*;
+and : not (AND not)*;
+not : NOT* cond_atom;
+cond_atom : bool_value | relationnal | in_set | parenthesis_cond |;
+bool_value : TRUE | FALSE;
+relationnal : expr REL_SIGN expr;
+in_set : variable IN set;
+parenthesis_cond : L_PAREN condition R_PAREN;
+
+OR : 'or' | 'ou' | '\\lor' | '\\vee';
+AND : 'and' | 'et' | '\\land' | '\\wedge';
+NOT : '\\neg';
+TRUE : 'true' | 'vrai';
+FALSE : 'false' | 'faux';
+REL_SIGN : '=' | '<' | '>' | '<=' | '>=' | '!=' | '\\leq' | '\\geq' | '\\neq' | '\\ne';
+IN : '\\in';
+
+// expressions
 expr : addition;
 
 addition : multiplication ((ADD | SUB) multiplication)*;
@@ -35,7 +78,7 @@ parenthesis : L_PAREN expr R_PAREN
             | L_BRACE expr R_BRACE
             | L_BRACKET expr R_BRACKET;
 
-number : DIGIT+ ('.' DIGIT*)? ;//(escient NEG? DIGIT+)?;  
+number : DIGIT+ ('.' DIGIT*)? | INFTY;
 
 variable : letter;
 letter : CHAR | LATEX_CMD;
@@ -73,6 +116,8 @@ L_PAREN : '(' | '\\left(';
 R_PAREN : ')' | '\\right)';
 L_BRACE : '{';
 R_BRACE : '}';
+L_BRACE_SET : '\\left{';
+R_BRACE_SET : '\\right}';
 L_BRACKET : '[';
 R_BRACKET : ']';
 BAR : '|';
@@ -87,5 +132,7 @@ FAC : '!';
 // functions
 FUNC_NAME : FUNC_NAME_LATEX | '\\' FUNC_NAME_LATEX | 'abs' | 'floor' | 'ceil' | 'round';
 FUNC_NAME_LATEX : 'sin' | 'cos' | 'tan' | 'cot' | 'sec' | 'csc' | 'log' | 'ln' | 'exp';
+
+INFTY : '\\infty';
 
 LATEX_CMD : '\\' [a-zA-Z]+;

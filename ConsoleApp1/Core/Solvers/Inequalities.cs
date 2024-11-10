@@ -1,8 +1,7 @@
-﻿using System.Collections;
-using ConsoleApp1.Core.Booleans;
+﻿using ConsoleApp1.Core.Booleans;
 using ConsoleApp1.Core.Equations;
 using ConsoleApp1.Core.Expressions.Atoms;
-using ConsoleApp1.Core.Expressions.Base;
+using ConsoleApp1.Core.Limits;
 using ConsoleApp1.Core.Sets;
 using Boolean = ConsoleApp1.Core.Booleans.Boolean;
 
@@ -85,8 +84,8 @@ public class Inequalities
                 case IntervalSet interval:
                     
                     List<(Expr Value, bool Include)> criticalPoints = [
-                        (f.Substitue(variable, interval.Start), interval.StartInclusive),
-                        (f.Substitue(variable, interval.End), interval.EndInclusive),
+                        (interval.StartInclusive ? f.Substitue(variable, interval.Start) : Limit.LimitOf(f, variable, interval.Start, Direction.Greater), interval.StartInclusive),
+                        (interval.EndInclusive ? f.Substitue(variable, interval.End) : Limit.LimitOf(f, variable, interval.End, Direction.Smaller), interval.EndInclusive),
                     ];
         
                     var solutions = Solve.SolveFor(f.Derivee(variable), 0, variable);

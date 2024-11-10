@@ -22,18 +22,16 @@ public class Logarithm : Expr
     
     public static Expr Construct(Expr value, Expr @base)
     {
-        // log_x(0) = -oo TODO Nan or -oo
+        // log_x(0) = nan
         if (value.IsNumZero)
-            return NegInf;
+            return double.NaN;
         // log_x(1) = 0
         if (value.IsNumOne)
             return 0;
         // log_1(x) = log(x)/log(1) = log(x)/0 = NaN
         if (@base.IsNumOne)
             return double.NaN;
-
-        if (value.IsInfinity)
-            return Inf;
+        
 
         // log_x(x) = lnx/lnx = 1
         if (@base == value)

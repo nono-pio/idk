@@ -1,6 +1,4 @@
-﻿using ConsoleApp1.Core.Sets;
-
-namespace ConsoleApp1.Core.Expressions.Atoms;
+﻿namespace ConsoleApp1.Core.Expressions.Atoms;
 
 public class UndefineFunction : Variable
 {

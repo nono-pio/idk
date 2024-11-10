@@ -1,5 +1,4 @@
 ﻿using ConsoleApp1.Core.Expressions.Atoms;
-using ConsoleApp1.Core.NumericalAnalysis;
 using ConsoleApp1.Core.Sets;
 using ConsoleApp1.Core.Solvers;
 

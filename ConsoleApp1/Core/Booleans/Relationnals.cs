@@ -135,8 +135,8 @@ public class Relationnals : Boolean
     {
         return Relation switch
         {
-            Relations.Equal => A.N() == B.N(),
-            Relations.NotEqual => A.N() != B.N(),
+            Relations.Equal => A.N().Equals(B.N()),
+            Relations.NotEqual => !A.N().Equals(B.N()),
             Relations.Greater => A.N() > B.N(),
             Relations.GreaterOrEqual => A.N() >= B.N(),
             Relations.Less => A.N() < B.N(),

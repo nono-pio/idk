@@ -145,7 +145,7 @@ public abstract class Expr
 
     public virtual Set AsSet() => ArraySet(this);
 
-    public virtual (Expr Num, Expr Den) AsFraction() => (this, 1);
+    public virtual (Expr Num, Expr Den) AsFraction(bool expNumber = true) => (this, 1);
 
     // af(x) -> a, f(x)
     public virtual (Expr Constant, Expr Variate) SeparateConstant(Variable var) => Constant(var) ? (this, 1) : (1, this);
@@ -503,6 +503,17 @@ public abstract class Expr
         
         for (var i = 0; i < Args.Length; i++) 
             newArgs[i] = Args[i].MapAtoms(func);
+
+        return Eval(newArgs, objects);
+    }
+    
+    public Expr MapArgs(Func<Expr, Expr> func)
+    {
+        var objects = GetArgs();
+        var newArgs = new Expr[Args.Length];
+
+        for (var i = 0; i < Args.Length; i++)
+            newArgs[i] = func(Args[i]);
 
         return Eval(newArgs, objects);
     }

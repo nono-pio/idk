@@ -1,40 +1,18 @@
-﻿using System.Globalization;
-using ConsoleApp1.Core.Classes;
+﻿using ConsoleApp1.Core.Classes;
 using ConsoleApp1.Core.Complexes;
 using ConsoleApp1.Core.Expressions.Base;
 using ConsoleApp1.Core.Sets;
 
 namespace ConsoleApp1.Core.Expressions.Atoms;
 
-/*
-
-From:
-- Both (default)
-- Minus
-- Plus
-Data: NumberStruct
-
-*/
-
-/* Use for limit */
-public enum From
-{
-    Both,
-    Minus,
-    Plus
-}
-
-
 public class Number : Atom
 {
     public static readonly double FloatPointTolerance = 1e-5;
 
-    //public readonly From From;
     public readonly NumberStruct Num;
 
-    public Number(NumberStruct num, From from = From.Both)
+    public Number(NumberStruct num)
     {
-        //From = from;
         Num = num;
     }
 
@@ -66,12 +44,12 @@ public class Number : Atom
     public override bool IsInteger => Num.IsInt;
     public override bool IsRational => true;
 
-    public override (Expr Num, Expr Den) AsFraction()
+    public override (Expr Num, Expr Den) AsFraction(bool expNumber = true)
     {
         if (Num.IsFraction && Num.Denominator != 1)
             return (Num.Numerator, Num.Denominator);
         
-        return base.AsFraction();
+        return base.AsFraction(expNumber);
     }
 
     public override Set AsSet() => ArraySet(this);

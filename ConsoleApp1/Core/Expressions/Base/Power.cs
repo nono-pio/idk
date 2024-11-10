@@ -38,14 +38,19 @@ public class Power : Expr
 
      public Power(Expr value, Expr exp) : base(value, exp) { }
 
-    public override (Expr Num, Expr Den) AsFraction()
+    public override (Expr Num, Expr Den) AsFraction(bool expNumber = true)
     {
         // (n/d)^b
         // b>0 -> n^b, d^b
         // b<0 -> d^-b, n^-b
-        var base_frac = Base.AsFraction();
-        
-        if (Exp.IsNegative)
+        var base_frac = Base.AsFraction(expNumber);
+
+        if (expNumber)
+        {
+            if (Exp is Number num && num.IsNegative)
+                return (Pow(base_frac.Den, -num), Pow(base_frac.Num, -num));
+        }
+        else if (Exp.IsNegative)
             return (Pow(base_frac.Den, -Exp), Pow(base_frac.Num, -Exp));
 
         if (base_frac.Den.IsOne)
@@ -96,7 +101,7 @@ public class Power : Expr
             if (exp.IsPositive)
                 return Num(0);
             if (exp.IsNegative)
-                return Inf;
+                return double.NaN;
         }
         if (exp.IsOne) 
             return @base;

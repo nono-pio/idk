@@ -50,13 +50,13 @@ public class Multiplication : Expr
         return (Mul(cstes), Mul(vars));
     }
 
-    public override (Expr Num, Expr Den) AsFraction()
+    public override (Expr Num, Expr Den) AsFraction(bool expNumber = true)
     {
         var nums = new Expr[Factors.Length];
         var dens = new Expr[Factors.Length];
         for (int i = 0; i < Factors.Length; i++)
         {
-            var frac = Factors[i].AsFraction();
+            var frac = Factors[i].AsFraction(expNumber);
             nums[i] = frac.Num;
             dens[i] = frac.Den;
         }
@@ -86,9 +86,6 @@ public class Multiplication : Expr
             {
                 if (num.IsZero)
                     return 0;
-
-                if (num.IsInfinite)
-                    return num;
                 
                 numbersProduct *= num.Num;
                 continue;
@@ -161,29 +158,11 @@ public class Multiplication : Expr
         if (a is Multiplication || b is Multiplication)
             return Construct(a, b);
         
-        // if (a.IsInfinite || b.IsInfinite)
-        // {
-        //     // +-oo * 0 = Nan
-        //     // oo * x = sign(x) * oo
-        //     // -oo * x = -sign(x) * oo
-        //     
-        //     if (a.IsInfinite && b.IsZero || b.IsInfinite && a.IsZero)
-        //         return Num(NumberStruct.Nan);
-        //
-        //     return Sign(a) * Sign(b) * Inf;
-        // }
-        
         if (a.IsNumZero || b.IsNumZero)
             return 0;
         
         if (a is Number numA && b is Number numB)
             return new Number(numA.Num * numB.Num);
-        
-        // TODO remove
-        if (a.IsInfinite)
-            return a;
-        if (b.IsInfinite)
-            return b;
 
         if (a.IsNumOne)
             return b;
@@ -259,9 +238,14 @@ public class Multiplication : Expr
 
     public override Expr Develop()
     {
+        return DistributeOverAddition();
+    }
+
+    public Expr DistributeOverAddition()
+    {
         var therms = new List<Expr>();
         var factors = new List<Expr>();
-        foreach (var factor in Factors.Select(e => e.Develop()))
+        foreach (var factor in Factors)
         {
             if (factor is Addition add)
             {
@@ -404,7 +388,7 @@ public class Multiplication : Expr
         
         var (cste, var) = SeparateConstant();
 
-        var cste_latex = FractionLatex(AsMulFraction(cste));
+        var cste_latex = cste.IsNumOne ? "" : FractionLatex(AsMulFraction(cste));
         var var_latex = FractionLatex(AsMulFraction(var));
         
         return cste_latex + var_latex;

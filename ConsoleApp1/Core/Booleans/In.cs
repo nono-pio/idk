@@ -1,20 +1,21 @@
-﻿using ConsoleApp1.Core.Sets;
+﻿using ConsoleApp1.Core.Expressions.Atoms;
+using ConsoleApp1.Core.Sets;
 
 namespace ConsoleApp1.Core.Booleans;
 
 public class In : Boolean
 {
 
-    public Expr Value;
+    public Variable Value;
     public Set Domain;
 
-    public In(Expr value, Set domain)
+    public In(Variable value, Set domain)
     {
         Value = value;
         Domain = domain;
     }
 
-    public static Boolean Eval(Expr value, Set domain)
+    public static Boolean Eval(Variable value, Set domain)
     {
         return new In(value, domain);
     }

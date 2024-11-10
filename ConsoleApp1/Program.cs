@@ -18,6 +18,7 @@ using ConsoleApp1.Core.NumericalAnalysis;
 using ConsoleApp1.Core.Polynomials;
 using ConsoleApp1.Core.Series;
 using ConsoleApp1.Core.Sets;
+using ConsoleApp1.Core.Simplifiers;
 using ConsoleApp1.Core.Solvers;
 using ConsoleApp1.Core.TestDir;
 using ConsoleApp1.Parser;
@@ -61,5 +62,4 @@ static (int, int) sqrt(int n)
 // Asin(Ln(x) - 1) -> [1, e^2]
 // Exp(x)/Ln(x) -> ]1, +inf[ U [0, 1[
 
-var ex2 = Exp(-Pow(x, 2)).AsFonction(x);
-print(IntegralApproximation.Integral(0, 999, ex2.N));
+print(Inequalities.FindRange(Ln(x), x));

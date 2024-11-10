@@ -1,5 +1,4 @@
-﻿using ConsoleApp1.Core.Sets;
-using ConsoleApp1.Latex;
+﻿using ConsoleApp1.Latex;
 
 namespace ConsoleApp1.Core.Expressions.Atoms;
 
