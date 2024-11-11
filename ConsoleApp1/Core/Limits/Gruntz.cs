@@ -3,7 +3,8 @@ using ConsoleApp1.Core.Expressions.Base;
 
 public class Gruntz
 {
-
+    public static int depth = 0;
+    public static int depth_max = 100;
     public static Expr Limit(Expr f, Variable x, Expr x0)
     {
         if (x0.IsInfinity)
@@ -87,6 +88,10 @@ public class Gruntz
     {
         if (f.Constant(variable))
             return f;
+     
+        depth++;
+        if (depth > depth_max)
+            throw new Exception("Depth max in Gruntz algorithm");
         
         var (c0, e0) = LeadTerm(f, variable);
         var sign = SignInf(e0, variable);
@@ -98,7 +103,8 @@ public class Gruntz
             _ => throw new ArgumentException("Sign must be -1, 0 or 1")
         };
         
-        // Console.WriteLine($"Input: {f}, Output: {result}");
+        Console.WriteLine($"Input: {f}, Output: {result}, Depth:{depth}");
+        depth--;
         return result;
     }
 

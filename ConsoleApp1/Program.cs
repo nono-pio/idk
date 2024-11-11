@@ -62,4 +62,6 @@ static (int, int) sqrt(int n)
 // Asin(Ln(x) - 1) -> [1, e^2]
 // Exp(x)/Ln(x) -> ]1, +inf[ U [0, 1[
 
-print(Inequalities.FindRange(Ln(x), x));
+
+print(Gruntz.LimitInf(Pow(x, 2), x));
+

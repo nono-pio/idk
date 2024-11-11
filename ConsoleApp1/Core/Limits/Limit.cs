@@ -14,6 +14,9 @@ public enum Direction
 public static class Limit
 {
     // lim x->a f(x) = L
+
+
+    
     public static Expr LimitOf(Expr expr, Variable variable, Expr value, Direction dir = Direction.Smaller)
     {
         if (expr.Constant(variable))

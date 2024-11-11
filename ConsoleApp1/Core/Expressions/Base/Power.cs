@@ -94,16 +94,16 @@ public class Power : Expr
         // a, b is number -> a^b simplified
 
 
-        if (@base.IsOne || exp.IsZero) 
+        if (@base.IsNumOne || exp.IsNumZero) 
             return Num(1);
-        if (@base.IsZero)
+        if (@base.IsNumZero)
         {
             if (exp.IsPositive)
                 return Num(0);
             if (exp.IsNegative)
                 return double.NaN;
         }
-        if (exp.IsOne) 
+        if (exp.IsNumOne) 
             return @base;
         
         if (@base is Number a && exp is Number b) 

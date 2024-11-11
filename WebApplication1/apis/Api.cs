@@ -96,12 +96,9 @@ public class Api
             if (func is null || x0 is null)
                 return Results.BadRequest();
 
-            var limit = Limit.LimitOf(func, x, x0);
+            Expr limit = TryCatch(() => Limit.LimitOf(func, x, x0), double.NaN);
             
-            const double epsilon = 1e-6d;
-            var app = func.Substitue(x, x0 + epsilon).SafeN();
-            
-            return Results.Ok(new LimitResponse(limit.ToLatex(), app));
+            return Results.Ok(new LimitResponse(limit.ToLatex(), null));
         });
 
         routes.MapPost("/simplify", ([FromBody] SimplifyRequest request) =>
@@ -178,9 +175,9 @@ public class Api
             if (sign is null)
                 return Results.BadRequest();
 
-            var sol = Inequalities.SolveFor(lhs, rhs, sign.Value, x);
+            var sol = TryCatch(() => Inequalities.SolveFor(lhs, rhs, sign.Value, x));
 
-            return Results.Ok(new InequalityResponse(sol.ToLatex()));
+            return Results.Ok(new InequalityResponse(sol?.ToLatex() ?? "NaN"));
         });
 
         routes.MapPost("/graph", ([FromBody] GraphRequest request) =>
