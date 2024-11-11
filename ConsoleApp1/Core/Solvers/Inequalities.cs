@@ -63,24 +63,21 @@ public class Inequalities
 
     public static Set FindRange(Expr f, Variable variable, Set? domain = null)
     {
+        
         Set dom = FindDomain(f, variable).Intersect(domain ?? R);
-        Set range = EmptySet;
 
-        Set[] dom_union = dom switch
-        {
-            FiniteSet => [dom],
-            IntervalSet => [dom],
-            UnionSet union => union.Sets,
-            _ => throw new NotImplementedException()
-        };
-
-        foreach (var set in dom_union)
+        Set RangeFromSet(Set set)
         {
             switch (set)
             {
+                case UnionSet union:
+                    return Union(union.Sets.Select(RangeFromSet).ToArray());
+                case IntersectionSet intersection:
+                    return Intersection(intersection.Sets.Select(RangeFromSet).ToArray());
                 case FiniteSet fs:
-                    range.UnionWith(ArraySet(fs.Elements.Select(el => f.Substitue(variable, el)).ToArray()));
-                    break;
+                    return ArraySet(fs.Elements.Select(el => f.Substitue(variable, el)).ToArray());
+                case Real:
+                    return RangeFromSet(new IntervalSet(Expr.NegInf, Expr.Inf, false, false));
                 case IntervalSet interval:
                     
                     List<(Expr Value, bool Include)> criticalPoints = [
@@ -89,11 +86,12 @@ public class Inequalities
                     ];
         
                     var solutions = Solve.SolveFor(f.Derivee(variable), 0, variable);
-                    if (solutions is not FiniteSet)
+                    if (solutions is null || (solutions is not FiniteSet && !solutions.IsEmpty))
                         throw new NotImplementedException();
         
-                    criticalPoints.InsertRange(1, 
-                        ((FiniteSet) solutions).Elements.Select(x => (f.Substitue(variable, x), true))
+                    if (!solutions.IsEmpty)
+                        criticalPoints.InsertRange(1, 
+                            ((FiniteSet) solutions).Elements.Select(x => (f.Substitue(variable, x), true))
                         );
                     
                     var max = criticalPoints.MaxBy(cp => cp.Value, new Expr.ExprComparer());
@@ -102,15 +100,16 @@ public class Inequalities
                     
                     // TODO : si il y a une singularité ou une discontinuité alors Range = U [criticalP_i-1, criticalP_i] ou criticalP est ordonné
                     // sinon continus et Range = [Min(criticalP), Max(criticalP)]
-                    
-                    range = range.UnionWith(Interval(min.Value, max.Value, min.Include, max.Include));
-                    break;
+
+                    return Interval(min.Value, max.Value, min.Include, max.Include);
+                case SetEmpty:
+                    return EmptySet;
                 default:
                     throw new NotImplementedException();
             }
         }
 
-        return range;
+        return RangeFromSet(dom);
     }
     
     public static Set SolveFor(Expr lhs, Expr rhs, InequationType type, Variable variable)

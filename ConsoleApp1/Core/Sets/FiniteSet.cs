@@ -19,6 +19,8 @@ public class FiniteSet(HashSet<Expr> elements) : Set
     public static Set Construct(params Expr[] elements) => Construct(elements.ToHashSet());
     public static Set Construct(HashSet<Expr> elements)
     {
+        elements = elements.Where(e => !e.HasNan()).ToHashSet();
+        
         if (elements.Count == 0)
             return EmptySet;
         

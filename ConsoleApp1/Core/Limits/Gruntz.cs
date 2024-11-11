@@ -1,5 +1,6 @@
 ﻿using ConsoleApp1.Core.Expressions.Atoms;
 using ConsoleApp1.Core.Expressions.Base;
+using ConsoleApp1.Core.Simplifiers;
 
 public class Gruntz
 {
@@ -92,6 +93,8 @@ public class Gruntz
         depth++;
         if (depth > depth_max)
             throw new Exception("Depth max in Gruntz algorithm");
+
+        f = Simplifier.Simplify(f);
         
         var (c0, e0) = LeadTerm(f, variable);
         var sign = SignInf(e0, variable);

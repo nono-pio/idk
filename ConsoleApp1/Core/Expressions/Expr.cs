@@ -708,5 +708,16 @@ public abstract class Expr
             return obj.Args.GetHashCode();
         }
     }
-    
+
+    public bool HasNan()
+    {
+        var has = false;
+        ForEach<Number>(num =>
+        {
+            if (num.IsNaN)
+                has = true;
+        });
+
+        return has;
+    }
 }

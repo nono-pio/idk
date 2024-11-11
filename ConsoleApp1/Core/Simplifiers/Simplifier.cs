@@ -5,6 +5,31 @@ namespace ConsoleApp1.Core.Simplifiers;
 public class Simplifier
 {
 
+    public static int CountVar(Expr expr)
+    {
+        return expr.GetVariables().Length;
+    }
+
+    public static int CountParenthesis(Expr expr)
+    {
+        var pcount = expr.Args.Sum(CountParenthesis);
+
+        switch (expr)
+        {
+            case Addition:
+                break;
+            case Multiplication:
+                pcount += expr.Args.Count(arg => arg.GetOrderOfOperation() < expr.GetOrderOfOperation());
+                break;
+            case Power pow:
+                if (pow.Base.GetOrderOfOperation() < expr.GetOrderOfOperation())
+                    pcount++;
+                break;
+        }
+
+        return pcount;
+    }
+
     public static int CountOperations(Expr expr)
     {
         var op = 0;
@@ -17,33 +42,16 @@ public class Simplifier
         return op;
     }
 
-    public static int Depth(Expr expr)
+    public static int GetScore(Expr expr, int var_coef = 20, int parenth_coef = 5, int op_coef = 1)
     {
-        var max_depth = 0;
-        foreach (var e in expr.Args)
-        {
-            var d = Depth(e);
-            if (d > max_depth)
-                max_depth = d;
-        }
-
-        return ++max_depth;
+        return CountVar(expr) * var_coef + CountParenthesis(expr) * parenth_coef + CountOperations(expr) * op_coef;
     }
 
     public class BestExprComparer : IComparer<Expr>
     {
         public int Compare(Expr x, Expr y)
         {
-            var xOp = CountOperations(x);
-            var yOp = CountOperations(y);
-
-            if (xOp != yOp)
-                return xOp.CompareTo(yOp);
-
-            var xDepth = Depth(x);
-            var yDepth = Depth(y);
-
-            return xDepth.CompareTo(yDepth);
+            return GetScore(x).CompareTo(GetScore(y));
         }
     }
 

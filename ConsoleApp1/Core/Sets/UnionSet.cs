@@ -29,7 +29,22 @@ public class UnionSet(params Set[] sets) : Set
                 var eval = EvalUnion(set, newSets[i]);
                 if (eval is not null)
                 {
-                    newSets[i] = eval; // TODO check U or Empty
+                    switch (eval)
+                    {
+                        case UniversalSet:
+                            return U;
+                        case SetEmpty:
+                            newSets.RemoveAt(i);
+                            break;
+                        case UnionSet union:
+                            newSets[i] = union.Sets[0];
+                            newSets.AddRange(union.Sets.Skip(0));
+                            break;
+                        default:
+                            newSets[i] = eval;
+                            break;
+                    }
+
                     goto next;
                 }
             }
@@ -49,14 +64,6 @@ public class UnionSet(params Set[] sets) : Set
 
     public static Set? EvalUnion(Set A, Set B)
     {
-        if (A is UnionSet unionA)
-        {
-            return Union(unionA.Sets.Select(set => Intersection(set, B)).ToArray());
-        }
-        if (B is UnionSet unionB)
-        {
-            return Union(unionB.Sets.Select(set => Intersection(set, A)).ToArray());
-        }
 
         switch (A, B)
         {
@@ -91,7 +98,54 @@ public class UnionSet(params Set[] sets) : Set
                 newEls.UnionWith(fB.Elements);
 
                 return ArraySet(newEls);
-    
+            
+            case (FiniteSet f, IntervalSet i):
+                var new_els = new HashSet<Expr>(f.Elements);
+                var start_inc = i.StartInclusive;
+                var end_inc = i.EndInclusive;
+                
+                foreach (var el in f.Elements)
+                {
+                    if (el == i.Start)
+                        start_inc = true;
+                    if (el == i.End)
+                        end_inc = true;
+                    
+                    if (el > i.Start & el < i.End)
+                        continue;
+
+                    new_els.Add(el);
+                }
+
+                return new_els.Count switch
+                {
+                    0 => Interval(i.Start, i.End, start_inc, end_inc),
+                    _ => new UnionSet(Interval(i.Start, i.End, start_inc, end_inc), ArraySet(new_els))
+                };
+            case (IntervalSet i, FiniteSet f):
+                var new_els2 = new HashSet<Expr>(f.Elements);
+                var start_inc2 = i.StartInclusive;
+                var end_inc2 = i.EndInclusive;
+                
+                foreach (var el in f.Elements)
+                {
+                    if (el == i.Start)
+                        start_inc2 = true;
+                    if (el == i.End)
+                        end_inc2 = true;
+                    
+                    if (el > i.Start & el < i.End)
+                        continue;
+
+                    new_els2.Add(el);
+                }
+
+                return new_els2.Count switch
+                {
+                    0 => Interval(i.Start, i.End, start_inc2, end_inc2),
+                    _ => new UnionSet(Interval(i.Start, i.End, start_inc2, end_inc2), ArraySet(new_els2))
+                };
+            
             case (FiniteSet fA2, _):
                 return CombineFiniteAndSet(fA2, B);
             case (_, FiniteSet fB2):
