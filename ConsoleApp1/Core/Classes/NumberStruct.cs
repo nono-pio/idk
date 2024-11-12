@@ -49,7 +49,9 @@ public struct NumberStruct
     
     public bool IsInfinity => IsFloat && double.IsPositiveInfinity(FloatValue);
     public bool IsNegativeInfinity => IsFloat && double.IsNegativeInfinity(FloatValue);
-    
+    public bool IsEven => IsInt && Numerator % 2 == 0;
+    public bool IsOdd => IsInt && Numerator % 2 == 1;
+
     public bool Is(int n) => IsFraction && Numerator == n && Denominator == 1;
     
     public NumberStruct(long numerator, long denominator = 1)

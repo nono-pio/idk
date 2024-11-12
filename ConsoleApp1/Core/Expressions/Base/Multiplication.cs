@@ -97,7 +97,11 @@ public class Multiplication : Expr
                 Expr? combine = Combine(expr, exprsFactors[i]);
                 if (combine is not null)
                 {
-                    exprsFactors[i] = combine;
+                    if (combine.IsNumOne)
+                        exprsFactors.RemoveAt(i);
+                    else
+                        exprsFactors[i] = combine;
+    
                     hasCombined = true;
                     break;
                 }
@@ -372,7 +376,7 @@ public class Multiplication : Expr
         if (Factors.Length < 2) 
             throw new Exception("You must mul two or more factors");
 
-        string MulLatex(Expr[] items) => string.Join("", items.Select(e => e.ToLatex()));
+        string MulLatex(Expr[] items) => string.Join("", items.Select(ParenthesisLatexIfNeeded));
 
         string FractionLatex((Expr num, Expr den) frac)
         {

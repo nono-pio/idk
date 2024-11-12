@@ -720,4 +720,18 @@ public abstract class Expr
 
         return has;
     }
+
+    public virtual bool CanRemoveNegativeSign()
+    {
+        if (this is not Multiplication mul)
+            return false;
+
+        foreach (var fac in mul.Args)
+        {
+            if (fac.Is(-1))
+                return true;
+        }
+
+        return false;
+    }
 }

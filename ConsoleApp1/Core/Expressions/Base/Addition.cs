@@ -293,10 +293,10 @@ public class Addition : Expr
     {
 
         var vars = GetVariables();
-        if (vars.Length == 1 && Poly.IsPolynomial(this, vars[0]))
+        if (vars.Length == 1 && Poly.IsDirectPolynomial(this, vars[0]))
         {
             var poly = Poly.ToPoly(this, vars[0]);
-            return poly.ToString();
+            return poly.ToLatex(vars[0].Name);
         }
         
         var result = ParenthesisLatexIfNeeded(Therms[0]);

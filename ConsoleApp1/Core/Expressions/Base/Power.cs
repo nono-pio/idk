@@ -109,12 +109,15 @@ public class Power : Expr
         if (@base is Number a && exp is Number b) 
             return Number.SimplifyPow(a, b);
 
+        if (exp is Number num && num.Num.IsEven && @base.CanRemoveNegativeSign())
+            @base = -@base;
+
         // 2. Power Tower       pow(pow(a,b),c) -> pow(a,bc)
         if (@base is Power pow)
         {
             @base = pow.Base;
             exp = exp * pow.Exp;
-            return new Power(@base, exp);
+            return Pow(@base, exp);
         }
 
         return new Power(@base, exp);

@@ -60,13 +60,16 @@ public class Simplifier
         return exprs.Min(new BestExprComparer())!;
     }
     
-    public static Expr Simplify(Expr expr, bool deep = true, bool others_deep = false)
+    public static Expr Simplify(Expr expr, bool deep = true, bool others_deep = true)
     {
         if (deep)
             expr = expr.MapArgs(e => Simplify(e, true, others_deep));
 
-        expr = BestExpr(expr, Expand(expr, deep: others_deep));
-        expr = BestExpr(expr, CombineFractions(expr, deep: others_deep));
+        expr = BestExpr(
+            expr, 
+            Expand(expr, deep: others_deep), 
+            CombineFractions(expr, deep: others_deep)
+            );
 
         if (expr.Has<Logarithm>())
         {
@@ -132,6 +135,7 @@ public class Simplifier
     {
         if (deep)
             expr = expr.MapArgs(e => CombineLog(e, true));
+        
 
         // TODO lnx/ln2 -> log_2x
         switch (expr)
@@ -164,7 +168,7 @@ public class Simplifier
                 Logarithm log2 = null;
                 for (int j = 0; j < mul.Args.Length; j++)
                 {
-                    if (mul.Factors[i] is Logarithm l)
+                    if (mul.Factors[j] is Logarithm l)
                     {
                         i = j;
                         log2 = l;

@@ -78,6 +78,23 @@ public class Poly
         };
     }
     
+    /// Return true if the expr is a polynomial without expand (ex: (x+1)(x-3) is not a direct polynomial)
+    public static bool IsDirectPolynomial(Expr expr, Variable variable)
+    {
+        if (expr.Constant(variable))
+            return true; // deg=0
+
+        return expr switch
+        {
+            Addition add => add.Therms.All(therm => IsDirectPolynomial(therm, variable)), // deg=max(deg(therm))
+            Multiplication mul => mul.SeparateConstant(variable).Variate is Power pow && IsDirectPolynomial(pow, variable), // deg=sum(deg(factor))
+            Number => true, // deg=0 
+            Power pow => pow.Base.IsVar(variable) && pow.Exp.IsNumberIntPositif(), //deg=deg(base)*exp
+            Variable var => true, // var.Name == variable ? deg=1 : deg=0
+            _ => false
+        };
+    }
+    
     public static Poly ToPoly(Expr expr, Variable variable)
     {
         if (expr.Constant(variable))
@@ -296,16 +313,17 @@ public class Poly
             if (coef.IsZero)
                 continue;
             var coef_str = coef.IsOne && deg != 0 ? "" : coef.ToLatex();
+            var symbol = coef_str.StartsWith('-') ? Symbols.Sub : Symbols.Add;
             switch (deg)
             {
                 case 0:
-                    str += Symbols.Add + var;
+                    str += symbol + var;
                     continue;
                 case 1:
-                    str += Symbols.Add + coef_str + var;
+                    str += symbol + coef_str + var;
                     continue;
                 default:
-                    str += Symbols.Add + coef_str + LatexUtils.Power(var, deg.ToString());
+                    str += symbol + coef_str + LatexUtils.Power(var, deg.ToString());
                     break;
             }
         }
