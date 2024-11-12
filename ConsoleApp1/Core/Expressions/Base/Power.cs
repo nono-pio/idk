@@ -269,18 +269,16 @@ public class Power : Expr
         if (Exp.Is(-1))
             return LatexUtils.Fraction("1", Base.ToLatex());
 
-        if (Exp is Power pow && pow.Exp.Is(-1)) // base^{exp_b^-1}=base^{1/exp_b}=sqrt[exp_b]{base}
+        if (Exp is Power pow && pow.Exp.Is(-1) && pow.Base.IsInteger) // base^{exp_b^-1}=base^{1/exp_b}=sqrt[exp_b]{base}
             return LatexUtils.NthRoot(pow.Base.ToLatex(), Base.ToLatex());
         
         if (Exp is Number num && num.Num.IsFraction && num.Num.Numerator == 1) // idem for fraction
             return LatexUtils.NthRoot(num.Num.Denominator.ToString(), Base.ToLatex());
-        
-        var exp = Exp.ToLatex();
 
-        if (exp.StartsWith("-"))
-            return LatexUtils.Fraction("1", LatexUtils.Power(ParenthesisLatexIfNeeded(Base), exp[1..]));
+        if (Exp is Number && Exp.IsNegative)
+            return LatexUtils.Fraction("1", LatexUtils.Power(ParenthesisLatexIfNeeded(Base), (-Exp).ToLatex()));
         
-        return LatexUtils.Power(ParenthesisLatexIfNeeded(Base), LatexUtils.LatexBracesIfNotSingle(exp));
+        return LatexUtils.Power(ParenthesisLatexIfNeeded(Base), LatexUtils.LatexBracesIfNotSingle(Exp.ToLatex()));
     }
 
     public override string ToString()

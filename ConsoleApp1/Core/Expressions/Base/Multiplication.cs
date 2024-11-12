@@ -392,9 +392,17 @@ public class Multiplication : Expr
         
         var (cste, var) = SeparateConstant();
 
-        var cste_latex = cste.IsNumOne ? "" : FractionLatex(AsMulFraction(cste));
-        var var_latex = FractionLatex(AsMulFraction(var));
+        var var_frac = AsMulFraction(var);
+        if (var_frac.Num.IsNumOne && cste is Number num && num.Num.IsInt && !cste.IsNumOne && !cste.Is(-1))
+        {
+            if (cste.IsNegative)
+                return "-" + FractionLatex((-cste, var_frac.Den));
+            return FractionLatex((cste, var_frac.Den));
+        }
         
+        var var_latex = FractionLatex(var_frac);
+        var cste_latex = cste.IsNumOne ? "" : (cste.Is(-1) && var_latex != "") ? "-" : FractionLatex(AsMulFraction(cste));
+
         return cste_latex + var_latex;
     }
 
@@ -403,7 +411,7 @@ public class Multiplication : Expr
         if (expr is Multiplication mul)
             return mul.Args.Select(AsMulFraction).Aggregate((frac1, frac2) => (frac1.Num * frac2.Num, frac1.Den * frac2.Den));
         
-        if (expr is Power pow && pow.Exp.IsNegative)
+        if (expr is Power pow && pow.Exp is Number && pow.Exp.IsNegative)
             return (1, Pow(pow.Base, -pow.Exp));
         
         return (expr, 1);
