@@ -181,6 +181,8 @@ public class Gruntz
 
         if (f.IsVar(w))
             return w;
+
+        f = f.Develop();
         
         switch (f)
         {

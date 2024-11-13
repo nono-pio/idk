@@ -42,8 +42,6 @@ public class IntervalSet : Set
     
     public static Set Construct(Expr start, Expr end, bool startInclusive = true, bool endInclusive = true)
     {
-        if (!start.IsExtendedReal || !end.IsExtendedReal || !(end-start).IsExtendedReal)
-            throw new Exception("Invalid interval");
 
         if (end == start)
         {

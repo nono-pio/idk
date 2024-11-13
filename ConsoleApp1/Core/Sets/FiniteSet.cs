@@ -123,7 +123,7 @@ public class FiniteSet(HashSet<Expr> elements) : Set
     
     public override string ToLatex()
     {
-        return Symbols.LBraces + string.Join("; ", Elements) + Symbols.RBraces;
+        return Symbols.LBraces + string.Join("; ", Elements.Select(e => e.ToLatex())) + Symbols.RBraces;
     }
 
     public override bool IsSubset(Set other)
