@@ -263,6 +263,9 @@ public abstract class Expr
 
     /// Represente the domain as a condition (ex: ln(x) -> x > 0)
     public virtual Boolean DomainCondition => true;
+
+    /// If the Function has a period over Args[0] / null = no period else period
+    public virtual Expr? BasePeriod => null;
     
     public enum OrderOfOperation
     {
@@ -302,15 +305,31 @@ public abstract class Expr
     
     public static Expr Gcd(Expr a, Expr b)
     {
-        if (a is Number a_num && a_num.IsInteger && b is Number b_num && b_num.IsInteger)
+        if (a is Number a_num && a_num.Num.IsFraction && b is Number b_num && b_num.Num.IsFraction)
         {
-            return Number.Gcd(a_num.ToInt(), b_num.ToInt()).Expr();
+            var gcd = NumberUtils.Gcd(
+                b_num.Num.Numerator * a_num.Num.Denominator,
+                a_num.Num.Numerator * b_num.Num.Denominator);
+            
+            return Num(gcd, a_num.Num.Denominator * b_num.Num.Denominator);
         }
 
         throw new NotImplementedException();
     }
     
+    public static Expr Lcm(IEnumerable<Expr> exprs)
+    {
+        return exprs.Aggregate(Lcm);
+    }
+
+
+    public static Expr Lcm(Expr a, Expr b)
+    {
+        return a * b / Gcd(a, b);
+    }
+    
     public abstract Expr Reciprocal(Expr y, int argIndex);
+    public virtual Expr[] AllReciprocal(Expr y, int argIndex) => [Reciprocal(y, argIndex)];
 
     # endregion
     
@@ -733,5 +752,33 @@ public abstract class Expr
         }
 
         return false;
+    }
+
+    public (Expr AddCoef, Expr MulCoef)? AsLinear(Variable variable)
+    {
+        if (Constant(variable))
+            return (0, 0);
+        if (IsVar(variable))
+            return (0, 1);
+        
+        Expr addCoef = 0;
+        Expr mulCoef = 1;
+
+        var e = this;
+
+        if (e is Addition add)
+        {
+            (addCoef, e) = add.AsIndependent(variable);
+        }
+
+        if (e is Multiplication mul)
+        {
+            (mulCoef, e) = mul.AsIndependent(variable);
+        }
+
+        if (e.IsVar(variable))
+            return (addCoef, mulCoef);
+
+        return null;
     }
 }

@@ -4,7 +4,8 @@ namespace ConsoleApp1.Core.Expressions.Trigonometrie;
 
 public class CosExpr(Expr x) : TrigonometrieExpr(x)
 {
-    
+    public override Expr? BasePeriod => 2 * PI;
+
     public static Expr Construct(Expr x)
     {
         var n = x.AsMulIndependent(Atoms.Constant.PI);

@@ -259,6 +259,7 @@ public static class NumberUtils
     public static IEnumerable<(int, int)> AsFactorExp(long n)
     {
         
+        
         var bound = (int) Math.Sqrt(n) + 1;
         for (int i = 2; i <= bound; i++)
         {
@@ -268,14 +269,16 @@ public static class NumberUtils
                 n /= i;
                 exp++;
             }
-            yield return (i, exp);
+            if (exp != 0)
+                yield return (i, exp);
 
             if (n == 1)
             {
                 yield break;
             }
         }
-        
+
+        yield return ((int)n, 1);
     }
     
 

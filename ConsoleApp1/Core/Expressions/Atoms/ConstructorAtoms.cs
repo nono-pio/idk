@@ -10,7 +10,7 @@ public static class ConstructorAtoms
     public static Expr Un => Num(1);
     public static Expr Deux => Num(2);
     
-    public static Expr PI => Constant.PI;
+    public static Variable PI => Constant.PI;
     public static Expr e => Constant.E;
     
 

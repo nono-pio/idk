@@ -5,6 +5,7 @@ namespace ConsoleApp1.Core.Expressions.Trigonometrie;
 
 public class SinExpr(Expr x) : TrigonometrieExpr(x)
 {
+    public override Expr? BasePeriod => 2 * PI;
 
     public static Expr Construct(Expr x)
     {

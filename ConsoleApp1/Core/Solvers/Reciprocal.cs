@@ -65,6 +65,66 @@ public class Reciprocal
 
         throw new UnreachableException();
     }
+    
+    public static (Expr exprs, List<Expr> ys) Unfolds(Expr expr, Expr y, Variable variable)
+    {
+        if (expr.Constant(variable))
+            throw new ArgumentException("expr must contain the variable.");
+
+        List<Expr> ys = [y];
+        
+        while (true)
+        {
+            // x == y
+            if (expr.IsVar(variable))
+                return (expr, ys);
+            
+            var varIndex = -1;
+            for (var i = 0; i < expr.Args.Length; i++)
+            {
+                if (!expr.Args[i].Constant(variable))
+                {
+                    if (varIndex != -1) // multiple variables
+                    {
+                        varIndex = -2;
+                        break;
+                    }
+                    varIndex = i;
+                }
+            }
+
+            switch (varIndex)
+            {
+                case -1: // no variable (expr is constant)
+                    throw new UnreachableException();
+                case -2: // multiple variables
+                    return (expr, ys);
+                default:
+                {
+                    var new_expr = expr.Args[varIndex];
+                    var nys = ys.Count;
+                    for (int i = 0; i < nys; i++)
+                    {
+                        var new_ys = expr.AllReciprocal(ys[i], varIndex);
+                        if (new_ys.Length == 0)
+                            throw new NotImplementedException();
+                        else if (new_ys.Length == 1)
+                            ys[i] = new_ys[0];
+                        else
+                        {
+                            ys[i] = new_ys[0];
+                            ys.AddRange(new_ys.Skip(1));
+                        }
+                    }
+                    
+                    expr = new_expr;
+                    break;
+                }
+            }
+        }
+
+        throw new UnreachableException();
+    }
 
     public static Expr? ReciprocalPattern(Expr expr, Variable variable)
     {

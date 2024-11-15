@@ -17,12 +17,22 @@ public class Solve
             return f.IsZero ? R/*return x domain or R*/ : EmptySet;
         }
 
-        (f, var y) = Reciprocal.Unfold(f, 0, variable);
+        (f, var ys) = Reciprocal.Unfolds(f, 0, variable);
 
-        if (f.IsVar(variable))
-            return y.AsSet();
+        // todo get period
         
-        return MatchPattern(f, y, variable);
+        if (f.IsVar(variable))
+            return ArraySet(ys.ToArray());
+
+        var set = EmptySet;
+        foreach (var y in ys)
+        {
+            var xs = MatchPattern(f, y, variable);
+            if (xs is not null)
+                set = set.UnionWith(xs);
+        }
+
+        return set;
     }
     
     public static Set? MatchPattern(Expr expr, Expr y, Variable variable)

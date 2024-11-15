@@ -313,5 +313,19 @@ public class Addition : Expr
         
         return result;
     }
+    public (Expr Constant, Expr Variable) AsIndependent(Variable var, bool exact=false)
+    {
+        Expr constant = 1;
+        Expr variable = 1;
+        foreach (var therm in Therms)
+        {
+            if (exact ? therm == var : !therm.Constant(var))
+                variable += therm;
+            else
+                constant += therm;
+            
+        }
 
+        return (constant, variable);
+    }
 }

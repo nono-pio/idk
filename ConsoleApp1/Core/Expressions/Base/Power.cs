@@ -216,6 +216,16 @@ public class Power : Expr
         };
     }
     
+    public override Expr[] AllReciprocal(Expr y, int argIndex)
+    {
+        if (argIndex == 0 && Exp is Number num && num.Num.IsEven)
+        {
+            return [Sqrt(y, Exp), -Sqrt(y, Exp)];
+        }
+
+        return base.AllReciprocal(y, argIndex);
+    }
+    
     public static Expr NewtonBinomial(Expr a, Expr b, int n)
     {
         var therms = new Expr[n + 1];
