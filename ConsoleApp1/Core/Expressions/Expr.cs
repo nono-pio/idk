@@ -266,7 +266,9 @@ public abstract class Expr
 
     /// If the Function has a period over Args[0] / null = no period else period
     public virtual Expr? BasePeriod => null;
-    
+
+    public bool IsNumInf => this is Number num && (num.Num.IsInfinity || num.Num.IsNegativeInfinity);
+
     public enum OrderOfOperation
     {
         Always = 0,             // Tous le temps des parenthèses

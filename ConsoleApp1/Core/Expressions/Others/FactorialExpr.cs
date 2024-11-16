@@ -1,4 +1,5 @@
-﻿using ConsoleApp1.Core.Expressions.Atoms;
+﻿using ConsoleApp1.Core.Evaluators;
+using ConsoleApp1.Core.Expressions.Atoms;
 
 namespace ConsoleApp1.Core.Expressions.Others;
 
@@ -6,38 +7,21 @@ public class FactorialExpr(Expr x) : FonctionExpr(x)
 {
     
     public const int MAX_FACTORIAL_EVAL = 6;
-    
-    public static Expr Eval(Expr x)
-    {
-        if (x is Number num && num.IsNatural && num.Num <= MAX_FACTORIAL_EVAL)
-        {
-            return new Number(Factorial(num.ToInt()));
-        }
-        return new FactorialExpr(x);
-    }
-    
-    public override Expr Eval(Expr[] exprs, object[]? objects = null)
-    {
-        return Eval(exprs[0]);
-    }
+    public override string Name => "Factorial";
 
-    public override Expr NotEval(Expr[] exprs, object[]? objects = null)
-    {
-        return new FactorialExpr(exprs[0]);
-    }
 
-    public override double N()
-    {
-        var x = X.N();
-        
-        if (x < 0)
-            throw new ArgumentException("x must be positive");
-        if (x % 1 != 0)
-            throw new ArgumentException("x must be an integer");
-        
-        return Factorial((long) x);
-    }
-    
+    public static readonly FunctionEval Evaluator = new FunctionEval(
+        e => new FactorialExpr(e),
+        specialValueRule: e => e is Number num && num.Num.IsInt  && num.Num <= MAX_FACTORIAL_EVAL ? Factorial(num.Num.Numerator) : null,
+        ifNotIntegerReturnNaN:true,
+        numFunc: n => Factorial((long) Math.Floor(n))
+        );
+
+    public override Expr Eval(Expr[] exprs, object[]? objects = null) => Evaluator.Eval(exprs, objects);
+    public override Expr NotEval(Expr[] exprs, object[]? objects = null) => Evaluator.NotEval(exprs, objects);
+    public override double N() => Evaluator.N(X);
+
+
     public static int Factorial(long n)
     {
         if (n < 0)
@@ -52,13 +36,6 @@ public class FactorialExpr(Expr x) : FonctionExpr(x)
     }
 
     public override OrderOfOperation GetOrderOfOperation() => OrderOfOperation.Multiplication;
-    public override string Name => "Factorial";
-    public override string ToString()
-    {
-        return $"{ParenthesisIfNeeded(x)}!";
-    }
-    public override string ToLatex()
-    {
-        return $"{ParenthesisLatexIfNeeded(x)}!";
-    }
+    public override string ToString() => $"{ParenthesisIfNeeded(x)}!";
+    public override string ToLatex() => $"{ParenthesisLatexIfNeeded(x)}!";
 }

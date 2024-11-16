@@ -1,5 +1,7 @@
 ﻿using ConsoleApp1.Core.Complexes;
+using ConsoleApp1.Core.Evaluators;
 using ConsoleApp1.Core.Sets;
+using ConsoleApp1.Latex;
 
 namespace ConsoleApp1.Core.Expressions.Others;
 
@@ -13,36 +15,28 @@ public class AbsExpr(Expr x) : FonctionExpr(x)
     public override bool IsPositive => true;
     public override bool IsNegative => false;
 
-    public override Set AsSet()
-    {
-        return ArithmeticOnSets.FunctionOnSet(Eval, X.AsSet(),
-            (abs_start, abs_end) => Interval(Min(0, abs_start, abs_end), Max(abs_start, abs_end)),
-            ArithmeticOnSets.FunctionBasicNumber(natural: ConstructorSets.N, integer: ConstructorSets.N, rational: Q.Positive, real: R.Positive)
-            );
-    }
-
     public override string Name => "abs";
 
-    public static Expr Eval(Expr x)
-    {
-        if (x.IsZero)
-            return x;
-        if (x.IsPositive)
-            return x;
-        if (x.IsNegative)
-            return -x;
-        
-        return new AbsExpr(x);
-    }
-    public override Expr Eval(Expr[] exprs, object[]? objects = null)
-    {
-        return Eval(exprs[0]);
-    }
+    public static readonly FunctionEval Evaluator = new FunctionEval(
+        e => new AbsExpr(e),
+        specialValueRule: x =>
+        {
+            if (x.IsZero)
+                return x;
+            if (x.IsPositive)
+                return x;
+            if (x.IsNegative)
+                return -x;
 
-    public override Expr NotEval(Expr[] exprs, object[]? objects = null)
-    {
-        return new AbsExpr(exprs[0]);
-    }
+            return null;
+        },
+        numFunc: Math.Abs,
+        isEven: true
+        );
+
+    public override Expr Eval(Expr[] exprs, object[]? objects = null) => Evaluator.Eval(exprs, objects);
+    public override Expr NotEval(Expr[] exprs, object[]? objects = null) => Evaluator.NotEval(exprs, objects);
+    public override double N() => Evaluator.N(X);
 
     public override Complex AsComplex()
     {
@@ -54,13 +48,11 @@ public class AbsExpr(Expr x) : FonctionExpr(x)
         return new(complex.Norm, 0);
     }
 
-    public override double N()
-    {
-        return Math.Abs(x.N());
-    }
-
     public override Expr fDerivee()
     {
         return Sign(X);
     }
+
+    public override string ToLatex() => $@"\left|{X.ToLatex()}\right|";
+    public override string ToString() => $"|{X}|";
 }

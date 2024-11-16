@@ -318,7 +318,7 @@ public struct NumberStruct
     
     }
 
-    public int ToInt()
+    public readonly int ToInt()
     {
         if (Type != NumberType.Fraction || Denominator != 1)
             throw new InvalidCastException("Cannot convert to int");
