@@ -50,6 +50,12 @@ public class Integral
             return poly.Integral().Of(var) * cste;
         }
         
+        if (PolyRational.IsPolyRational(f, var))
+        {
+            var poly = PolyRational.ToPolyRational(f, var);
+            return IntPolyRational(poly.Num, poly.Den);
+        }
+        
         // Trig cases
         if (f.Has<SinExpr>() || f.Has<CosExpr>())
         {
@@ -130,5 +136,10 @@ public class Integral
             return TrigoIntegrals.IntegralCosPow(m, var);
         
         return TrigoIntegrals.IntegralCosSin(m, n, var);
+    }
+
+    public static Expr? IntPolyRational(Poly Num, Poly Den)
+    {
+        return null;
     }
 }

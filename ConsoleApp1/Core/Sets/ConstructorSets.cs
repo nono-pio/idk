@@ -48,11 +48,9 @@ public class ConstructorSets
         return DifferenceSet.Construct(univers, set);
     }
 
-    public static Set LambdaSet(Variable x, Boolean condition, Set? domain = null)
+    public static Set LambdaSet(Expr value, Boolean condition, Variable[] vars)
     {
-        domain = domain ?? R;
-
-        return ConditionSet.Construct(x, condition, domain);
+        return ConditionSet.Construct(value, condition, vars);
     }
     
 }

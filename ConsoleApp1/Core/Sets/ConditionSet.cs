@@ -3,34 +3,33 @@ using Boolean = ConsoleApp1.Core.Booleans.Boolean;
 
 namespace ConsoleApp1.Core.Sets;
 
+// {value | cond}
 public class ConditionSet : Set
 {
     public Boolean Condition;
-    public Variable Variable;
-    public Set Domain;
+    public Expr Value;
+    public Variable[] Variables;
     
-    public ConditionSet(Boolean condition, Variable variable, Set domain)
+    public ConditionSet(Boolean condition, Expr value, Variable[] vars)
     {
         Condition = condition;
-        Variable = variable;
-        Domain = domain;
+        Value = value;
+        Variables = vars;
     }
     
-    public static Set Construct(Variable x, Boolean condition, Set domain)
+    public static Set Construct(Expr value, Boolean condition, Variable[] vars)
     {
-        if (condition.IsTrue)
-            return domain;
-        
-        return new ConditionSet(condition, x, domain);
+        return new ConditionSet(condition, value, vars);
     }
     
     public override Boolean Contains(Expr x)
     {
-        return Domain.Contains(x) & Condition.Substitue(Variable, x);
+        // TODO
+        return Boolean.False;
     }
 
     public override string ToLatex()
     {
-        throw new NotImplementedException();
+        return $@"\left{{{Value.ToLatex()} | {Condition.ToString()}\right}}";
     }
 }

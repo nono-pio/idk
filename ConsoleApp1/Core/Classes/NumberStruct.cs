@@ -29,7 +29,7 @@ public struct NumberStruct
     [FieldOffset(4)]
     public double FloatValue;
     
-    public static implicit operator NumberStruct(int value) => new NumberStruct(value);
+    public static implicit operator NumberStruct(int value) => new NumberStruct((long) value);
     public static implicit operator NumberStruct(long value) => new NumberStruct(value);
     public static implicit operator NumberStruct(float value) => new NumberStruct(value);
     public static implicit operator NumberStruct(double value) => new NumberStruct(value);

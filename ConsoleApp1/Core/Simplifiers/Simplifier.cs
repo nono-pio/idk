@@ -1,4 +1,5 @@
-﻿using ConsoleApp1.Core.Expressions.Base;
+﻿using ConsoleApp1.Core.Expressions.Atoms;
+using ConsoleApp1.Core.Expressions.Base;
 
 namespace ConsoleApp1.Core.Simplifiers;
 
@@ -42,7 +43,7 @@ public class Simplifier
         return op;
     }
 
-    public static int GetScore(Expr expr, int var_coef = 20, int parenth_coef = 5, int op_coef = 1)
+    public static int GetScore(Expr expr, int var_coef = 20, int parenth_coef = 1, int op_coef = 1)
     {
         return CountVar(expr) * var_coef + CountParenthesis(expr) * parenth_coef + CountOperations(expr) * op_coef;
     }
@@ -62,6 +63,9 @@ public class Simplifier
     
     public static Expr Simplify(Expr expr, bool deep = true, bool others_deep = true)
     {
+        if (expr is Number)
+            return expr;
+        
         if (deep)
             expr = expr.MapArgs(e => Simplify(e, true, others_deep));
 

@@ -377,6 +377,9 @@ public class Multiplication : Expr
         if (Factors.Length < 2) 
             throw new Exception("You must mul two or more factors");
 
+        if (CanRemoveNegativeSign())
+            return "-" + (-this).ToLatex();
+
         string MulLatex(Expr[] items) => string.Join("", items.Select(ParenthesisLatexIfNeeded));
 
         string FractionLatex((Expr num, Expr den) frac)
@@ -395,15 +398,15 @@ public class Multiplication : Expr
 
         var var_frac = AsMulFraction(var);
         if (var_frac.Num.IsNumOne && cste is Number num && num.Num.IsInt && !cste.IsNumOne && !cste.Is(-1))
-        {
-            if (cste.IsNegative)
-                return "-" + FractionLatex((-cste, var_frac.Den));
-            return FractionLatex((cste, var_frac.Den));
-        }
+            FractionLatex((cste, var_frac.Den));
         
-        var var_latex = FractionLatex(var_frac);
-        var cste_latex = cste.IsNumOne ? "" : (cste.Is(-1) && var_latex != "") ? "-" : FractionLatex(AsMulFraction(cste));
+        
+        var var_latex = var.IsNumOne ? "" : FractionLatex(var_frac);
+        var cste_latex = cste.IsNumOne ? "" : FractionLatex(AsMulFraction(cste));
 
+        if (var_latex == "" && cste_latex == "")
+            return "1";
+        
         return cste_latex + var_latex;
     }
 

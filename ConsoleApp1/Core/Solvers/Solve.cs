@@ -1,7 +1,9 @@
-﻿using ConsoleApp1.Core.Expressions.Atoms;
+﻿using ConsoleApp1.Core.Booleans;
+using ConsoleApp1.Core.Expressions.Atoms;
 using ConsoleApp1.Core.Expressions.Base;
 using ConsoleApp1.Core.Models;
 using ConsoleApp1.Core.Sets;
+using Boolean = ConsoleApp1.Core.Booleans.Boolean;
 
 namespace ConsoleApp1.Core.Solvers;
 
@@ -12,6 +14,8 @@ public class Solve
     
     public static Set? FindRoots(Expr f, Variable variable)
     {
+        var period = Period.FindPeriod(f, variable);
+        
         if (f.Constant(variable))
         {
             return f.IsZero ? R/*return x domain or R*/ : EmptySet;
@@ -19,20 +23,33 @@ public class Solve
 
         (f, var ys) = Reciprocal.Unfolds(f, 0, variable);
 
-        // todo get period
-        
+        Set result;
         if (f.IsVar(variable))
-            return ArraySet(ys.ToArray());
-
-        var set = EmptySet;
-        foreach (var y in ys)
+            result =  ArraySet(ys.ToArray());
+        else
         {
-            var xs = MatchPattern(f, y, variable);
-            if (xs is not null)
-                set = set.UnionWith(xs);
+            result = EmptySet;
+            foreach (var y in ys)
+            {
+                var xs = MatchPattern(f, y, variable);
+                if (xs is not null)
+                    result = result.UnionWith(xs);
+            }    
         }
 
-        return set;
+        if (period is not null && !period.IsZero)
+        {
+            var dummy_n = new Variable("n", dummy: true);
+            if (result is FiniteSet fs)
+            {
+                return Union(fs.Elements.Select(e => LambdaSet(e + dummy_n * period, In.Eval(dummy_n, Z), [dummy_n])).ToArray());
+            }
+            
+            var dummy_x = new Variable("x", dummy: true);
+            return LambdaSet(dummy_x + dummy_n * period, Boolean.And(In.Eval(dummy_x, result), In.Eval(dummy_n, Z)), [dummy_x, dummy_n]);
+        }
+
+        return result;
     }
     
     public static Set? MatchPattern(Expr expr, Expr y, Variable variable)
@@ -68,6 +85,12 @@ public class Solve
         {
             var poly = Poly.ToPoly(polyExpr, variable);
             return ArraySet(poly.Solve());
+        }
+
+        if (PolyRational.IsPolyRational(polyExpr, variable))
+        {
+            var poly = PolyRational.ToPolyRational(polyExpr, variable);
+            return ArraySet(poly.Num.Solve());
         }
         
         // change variable, exemple :

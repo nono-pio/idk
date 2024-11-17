@@ -25,13 +25,14 @@ public class Constant : Variable
     
     public override object[] GetArgs()
     {
-        return new object[] { Name, AppValue, LatexName };
+        return new object[] { Name, AppValue, LatexName, App };
     }
     public override Expr Eval(Expr[] exprs, object[]? objects = null)
     {
         var name = (string) objects[0];
         var appValue = (double) objects[1];
         var latexName = (string?) objects[2];
+        var app = (Func<int, MpfrRounding, MpfrFloat>?)objects[3];
         
         return new Constant(name, appValue, latexName);
     }

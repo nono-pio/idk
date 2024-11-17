@@ -213,6 +213,8 @@ public class LatexExprVisitor : LatexBaseVisitor<Expr>
     {
         if (context.GetText() == "e")
             return Constant.E;
+        if (context.GetText() == "\\pi")
+            return Constant.PI;
         return Var(context.GetText());
     }
 

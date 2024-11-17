@@ -63,7 +63,4 @@ static (int, int) sqrt(int n)
 // Asin(Ln(x) - 1) -> [1, e^2]
 // Exp(x)/Ln(x) -> ]1, +inf[ U [0, 1[
 
-print(Solve.SolveFor(Pow(x, 2)+3*x, 0, x));
-print(Inequalities.SolveFor(Exp(-Pow(x, 2)), Num(1, 2), InequationType.LessThan, x));
-
-
+print(Solve.SolveFor(Pow(Sin(x), 2), 1, x).ToLatex());

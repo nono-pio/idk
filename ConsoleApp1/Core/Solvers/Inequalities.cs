@@ -43,7 +43,7 @@ public class Inequalities
             };
         }
         
-        return LambdaSet(var, condition, R);
+        return LambdaSet(var, condition, [var]);
     }
     
     public static Set FindDomain(Expr f, Variable variable)

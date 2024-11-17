@@ -28,6 +28,7 @@ public abstract class Expr
 
     public static implicit operator Expr(double value) => new Number(value);
     public static implicit operator Expr(int value) => new Number(value);
+    public static implicit operator Expr(long value) => new Number(value);
     public static implicit operator Expr(string variable) => new Variable(variable);
 
     # endregion
