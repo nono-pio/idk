@@ -1,5 +1,6 @@
 ﻿using ConsoleApp1.Core.Evaluators;
 using ConsoleApp1.Core.Sets;
+using Sdcb.Arithmetic.Mpfr;
 
 namespace ConsoleApp1.Core.Expressions.Others;
 
@@ -22,4 +23,9 @@ public class CeilExpr(Expr x) : FonctionExpr(x)
 
 
     public override string Name => "ceil";
+    
+    public override MpfrFloat NPrec(int precision = 333, MpfrRounding rnd = MpfrRounding.ToEven)
+    {
+        return MpfrFloat.Ceiling(X.NPrec(precision, rnd), precision);
+    }
 }

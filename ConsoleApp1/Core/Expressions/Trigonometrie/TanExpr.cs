@@ -1,4 +1,5 @@
 ﻿using ConsoleApp1.Core.Expressions.Atoms;
+using Sdcb.Arithmetic.Mpfr;
 using Boolean = ConsoleApp1.Core.Booleans.Boolean;
 
 namespace ConsoleApp1.Core.Expressions.Trigonometrie;
@@ -35,5 +36,10 @@ public class TanExpr(Expr x) : TrigonometrieExpr(x)
     public override double N()
     {
         return Math.Tan(X.N());
+    }
+    
+    public override MpfrFloat NPrec(int precision = 333, MpfrRounding rnd = MpfrRounding.ToEven)
+    {
+        return MpfrFloat.Tan(X.NPrec(precision, rnd), precision, rnd);
     }
 }

@@ -1,5 +1,6 @@
 ﻿using ConsoleApp1.Core.Expressions.Atoms;
 using ConsoleApp1.Core.Expressions.Others;
+using Sdcb.Arithmetic.Mpfr;
 
 namespace ConsoleApp1.Core.Expressions.Trigonometrie;
 
@@ -33,5 +34,10 @@ public class SinExpr(Expr x) : TrigonometrieExpr(x)
     public override double N()
     {
         return Math.Sin(X.N());
+    }
+
+    public override MpfrFloat NPrec(int precision = 333, MpfrRounding rnd = MpfrRounding.ToEven)
+    {
+        return MpfrFloat.Sin(X.NPrec(precision, rnd), precision, rnd);
     }
 }

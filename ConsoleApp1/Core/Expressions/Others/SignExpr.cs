@@ -1,6 +1,7 @@
 ﻿using System.Data;
 using ConsoleApp1.Core.Evaluators;
 using ConsoleApp1.Core.Sets;
+using Sdcb.Arithmetic.Mpfr;
 
 namespace ConsoleApp1.Core.Expressions.Others;
 
@@ -31,4 +32,13 @@ public class SignExpr(Expr x) : FonctionExpr(x)
     public override double N() => Evaluator.N(X);
 
     public override string Name => "sign";
+    
+    public override MpfrFloat NPrec(int precision = 333, MpfrRounding rnd = MpfrRounding.ToEven)
+    {
+        var r = new MpfrFloat(precision);
+        var x = X.NPrec(precision, rnd);
+        r.Assign(x.IsZero ? 0 : x.Sign);
+
+        return r;
+    }
 }

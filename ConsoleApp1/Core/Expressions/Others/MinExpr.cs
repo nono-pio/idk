@@ -1,4 +1,5 @@
 ﻿using ConsoleApp1.Core.Expressions.Atoms;
+using Sdcb.Arithmetic.Mpfr;
 
 namespace ConsoleApp1.Core.Expressions.Others;
 
@@ -55,5 +56,16 @@ public class MinExpr : Expr
     public override Expr Derivee(Variable variable)
     {
         throw new Exception("Min is not derivable");
+    }
+    
+    public override MpfrFloat NPrec(int precision = 333, MpfrRounding rnd = MpfrRounding.ToEven)
+    {
+        var min = Args[0].NPrec(precision, rnd);
+        foreach (var arg in Args.Skip(1))
+        {
+            MpfrFloat.MinInplace(min, min, arg.NPrec(precision, rnd), rnd);
+        }
+
+        return min;
     }
 }

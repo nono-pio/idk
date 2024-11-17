@@ -1,5 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 using ConsoleApp1.Core.Sets;
+using Sdcb.Arithmetic.Mpfr;
 
 namespace ConsoleApp1.Core.Expressions.Atoms;
 
@@ -118,6 +119,11 @@ public class Variable : Atom
     public override string ToString()
     {
         return Name;
+    }
+
+    public override MpfrFloat NPrec(int precision = 333, MpfrRounding rnd = MpfrRounding.ToEven)
+    {
+        return Value is not null ? Value.NPrec(precision, rnd) : double.NaN;
     }
 }
 

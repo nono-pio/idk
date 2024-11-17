@@ -1,6 +1,7 @@
 ﻿using ConsoleApp1.Core.Complexes;
 using ConsoleApp1.Core.Expressions.Atoms;
 using ConsoleApp1.Latex;
+using Sdcb.Arithmetic.Mpfr;
 using Boolean = ConsoleApp1.Core.Booleans.Boolean;
 
 namespace ConsoleApp1.Core.Expressions.Base;
@@ -305,5 +306,10 @@ public class Power : Expr
         }
 
         return $"{ParenthesisIfNeeded(Base)}^{ParenthesisIfNeeded(Exp)}";
+    }
+
+    public override MpfrFloat NPrec(int precision = 333, MpfrRounding rnd = MpfrRounding.ToEven)
+    {
+        return MpfrFloat.Power(Base.NPrec(precision, rnd), Exp.NPrec(precision, rnd), precision, rnd);
     }
 }

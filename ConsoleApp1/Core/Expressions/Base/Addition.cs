@@ -4,6 +4,7 @@ using ConsoleApp1.Core.Expressions.Atoms;
 using ConsoleApp1.Core.Models;
 using ConsoleApp1.Core.Sets;
 using ConsoleApp1.Latex;
+using Sdcb.Arithmetic.Mpfr;
 
 namespace ConsoleApp1.Core.Expressions.Base;
 
@@ -327,5 +328,16 @@ public class Addition : Expr
         }
 
         return (constant, variable);
+    }
+
+    public override MpfrFloat NPrec(int precision = 333, MpfrRounding rnd = MpfrRounding.ToEven)
+    {
+        var result = new MpfrFloat(precision);
+        foreach (var therm in Therms)
+        {
+            MpfrFloat.AddInplace(result, result, therm.NPrec(precision, rnd), rnd);
+        }
+
+        return result;
     }
 }

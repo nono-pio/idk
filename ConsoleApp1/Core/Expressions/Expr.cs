@@ -8,6 +8,7 @@ using ConsoleApp1.Core.Expressions.Others;
 using ConsoleApp1.Core.Models;
 using ConsoleApp1.Core.Sets;
 using ConsoleApp1.Latex;
+using Sdcb.Arithmetic.Mpfr;
 using Boolean = ConsoleApp1.Core.Booleans.Boolean;
 
 namespace ConsoleApp1.Core.Expressions;
@@ -298,6 +299,8 @@ public abstract class Expr
         }
     }
     public abstract double N();
+
+    public virtual MpfrFloat NPrec(int precision = 333, MpfrRounding rnd = MpfrRounding.ToEven) => MpfrFloat.From(double.NaN);
 
     public static Expr Gcd(IEnumerable<Expr> exprs)
     {

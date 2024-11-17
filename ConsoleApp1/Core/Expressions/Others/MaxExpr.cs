@@ -1,4 +1,5 @@
 ﻿using ConsoleApp1.Core.Expressions.Atoms;
+using Sdcb.Arithmetic.Mpfr;
 
 namespace ConsoleApp1.Core.Expressions.Others;
 
@@ -54,5 +55,16 @@ public class MaxExpr : Expr
     public override Expr Derivee(Variable variable)
     {
         throw new Exception("Max is not derivable");
+    }
+
+    public override MpfrFloat NPrec(int precision = 333, MpfrRounding rnd = MpfrRounding.ToEven)
+    {
+        var max = Args[0].NPrec(precision, rnd);
+        foreach (var arg in Args.Skip(1))
+        {
+            MpfrFloat.MaxInplace(max, max, arg.NPrec(precision, rnd), rnd);
+        }
+
+        return max;
     }
 }

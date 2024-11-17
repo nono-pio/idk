@@ -3,7 +3,7 @@ using Boolean = ConsoleApp1.Core.Booleans.Boolean;
 
 namespace ConsoleApp1.Core.Evaluators;
 
-public class FunctionEval
+public class FunctionEval : ExprEvaluator
 {
     /// x -> f(x)
     public Func<Expr, Expr> Constructor;
@@ -78,10 +78,10 @@ public class FunctionEval
         return x;
     }
 
-    public Expr NotEval(Expr[] exprs, object[]? objects = null) => NotEval(exprs[0]);
+    public override Expr NotEval(Expr[] exprs, object[]? objects = null) => NotEval(exprs[0]);
     public Expr NotEval(Expr expr) => Constructor(expr);
     
-    public Expr Eval(Expr[] exprs, object[]? objects = null) => Eval(exprs[0]);
+    public override Expr Eval(Expr[] exprs, object[]? objects = null) => Eval(exprs[0]);
     public Expr Eval(Expr expr)
     {
         // Nan checks

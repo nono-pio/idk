@@ -1,5 +1,6 @@
 ﻿using ConsoleApp1.Core.Evaluators;
 using ConsoleApp1.Core.Sets;
+using Sdcb.Arithmetic.Mpfr;
 
 namespace ConsoleApp1.Core.Expressions.Others;
 
@@ -21,4 +22,9 @@ public class RoundExpr(Expr x) : FonctionExpr(x)
 
 
     public override string Name => "round";
+    
+    public override MpfrFloat NPrec(int precision = 333, MpfrRounding rnd = MpfrRounding.ToEven)
+    {
+        return MpfrFloat.Round(X.NPrec(precision, rnd), precision);
+    }
 }

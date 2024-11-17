@@ -22,6 +22,7 @@ using ConsoleApp1.Core.Simplifiers;
 using ConsoleApp1.Core.Solvers;
 using ConsoleApp1.Core.TestDir;
 using ConsoleApp1.Parser;
+using Sdcb.Arithmetic.Mpfr;
 using Boolean = ConsoleApp1.Core.Booleans.Boolean;
 using static ConsoleApp1.Core.Alphabet;
 
@@ -64,3 +65,5 @@ static (int, int) sqrt(int n)
 
 print(Solve.SolveFor(Pow(x, 2)+3*x, 0, x));
 print(Inequalities.SolveFor(Exp(-Pow(x, 2)), Num(1, 2), InequationType.LessThan, x));
+
+

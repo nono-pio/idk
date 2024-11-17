@@ -1,6 +1,7 @@
 ﻿using System.Data;
 using ConsoleApp1.Core.Evaluators;
 using ConsoleApp1.Core.Sets;
+using Sdcb.Arithmetic.Mpfr;
 
 namespace ConsoleApp1.Core.Expressions.Others;
 
@@ -22,4 +23,9 @@ public class FloorExpr(Expr x) : FonctionExpr(x)
     public override double N() => Evaluator.N(X);
 
     public override string Name => "floor";
+    
+    public override MpfrFloat NPrec(int precision = 333, MpfrRounding rnd = MpfrRounding.ToEven)
+    {
+        return MpfrFloat.Floor(X.NPrec(precision, rnd), precision);
+    }
 }

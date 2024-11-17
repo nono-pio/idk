@@ -1,4 +1,5 @@
-﻿using Boolean = ConsoleApp1.Core.Booleans.Boolean;
+﻿using Sdcb.Arithmetic.Mpfr;
+using Boolean = ConsoleApp1.Core.Booleans.Boolean;
 
 namespace ConsoleApp1.Core.Expressions.Trigonometrie;
 
@@ -17,4 +18,9 @@ public class ASinExpr(Expr x) : TrigonometrieExpr(x)
     public override Expr Reciproque(Expr y) => Sin(y);
 
     public override double N() => Math.Asin(X.N());
+    
+    public override MpfrFloat NPrec(int precision = 333, MpfrRounding rnd = MpfrRounding.ToEven)
+    {
+        return MpfrFloat.Asin(X.NPrec(precision, rnd), precision, rnd);
+    }
 }

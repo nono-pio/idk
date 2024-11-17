@@ -1,6 +1,7 @@
 ﻿using ConsoleApp1.Core.Complexes;
 using ConsoleApp1.Core.Expressions.Atoms;
 using ConsoleApp1.Latex;
+using Sdcb.Arithmetic.Mpfr;
 using Boolean = ConsoleApp1.Core.Booleans.Boolean;
 
 namespace ConsoleApp1.Core.Expressions.Base;
@@ -115,5 +116,12 @@ public class Logarithm : Expr
         }
         
         throw new ArgumentException("ArgIndex must be 0 (value) or 1 (base)");
+    }
+
+    public override MpfrFloat NPrec(int precision = 333, MpfrRounding rnd = MpfrRounding.ToEven)
+    {
+        var logV = MpfrFloat.Log(Value.NPrec(precision, rnd), precision, rnd);
+        var logB = MpfrFloat.Log(Base.NPrec(precision, rnd), precision, rnd);
+        return MpfrFloat.Divide(logV, logB, precision, rnd);
     }
 }

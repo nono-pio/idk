@@ -1,7 +1,9 @@
-﻿using ConsoleApp1.Core.Classes;
+﻿using System.Diagnostics;
+using ConsoleApp1.Core.Classes;
 using ConsoleApp1.Core.Complexes;
 using ConsoleApp1.Core.Expressions.Base;
 using ConsoleApp1.Core.Sets;
+using Sdcb.Arithmetic.Mpfr;
 
 namespace ConsoleApp1.Core.Expressions.Atoms;
 
@@ -133,5 +135,29 @@ public class Number : Atom
     public override string ToLatex()
     {
         return Num.ToLatex();
+    }
+
+    public override MpfrFloat NPrec(int precision = 333, MpfrRounding rnd = MpfrRounding.ToEven)
+    {
+        if (Num.IsFloat)
+        {
+            var r = new MpfrFloat(precision);
+            r.Assign(Num.FloatValue);
+            return r;
+        }
+
+        if (Num.IsNan)
+        {
+            var r = new MpfrFloat(precision);
+            r.Assign(double.NaN);
+            return r;
+        }
+
+        if (Num.IsFraction)
+        {
+            return MpfrFloat.Divide((MpfrFloat) Num.Numerator, (MpfrFloat) Num.Denominator, precision, rnd);
+        }
+
+        throw new UnreachableException();
     }
 }

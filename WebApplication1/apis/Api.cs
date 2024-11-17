@@ -39,9 +39,9 @@ public class Api
                 return Results.BadRequest();
 
             input = Simplifier.Simplify(input);
-            var app = input.SafeN();
+            var app = input.NPrec();
 
-            return Results.Ok(new EvalResponse(input.ToLatex(), app));
+            return Results.Ok(new EvalResponse(input.ToLatex(), app.ToString()));
         });
 
         routes.MapPost("/derivative", ([FromBody] DerivativeRequest request) =>
@@ -84,7 +84,7 @@ public class Api
                 }
             }
             
-            return Results.Ok(new IntegralResponse(integral?.ToLatex(), app));
+            return Results.Ok(new IntegralResponse(integral?.ToLatex(), app.ToString() ?? double.NaN.ToString()));
         });
 
         routes.MapPost("/limit", ([FromBody] LimitRequest request) =>
@@ -98,7 +98,7 @@ public class Api
 
             Expr limit = TryCatch(() => Limit.LimitOf(func, x, x0), double.NaN);
             
-            return Results.Ok(new LimitResponse(limit.ToLatex(), null));
+            return Results.Ok(new LimitResponse(limit.ToLatex(), double.NaN.ToString()));
         });
 
         routes.MapPost("/simplify", ([FromBody] SimplifyRequest request) =>
@@ -107,8 +107,8 @@ public class Api
             if (func is null)
                 return Results.BadRequest();
 
-            Expr simplified = double.NaN; //func.Simplify();
-            return Results.Ok(new SimplifyResponse(simplified.ToLatex(), simplified.SafeN()));
+            Expr simplified = Simplifier.Simplify(func);
+            return Results.Ok(new SimplifyResponse(simplified.ToLatex(), func.NPrec().ToString()));
         });
 
         routes.MapPost("/analyse", ([FromBody] AnalyzeFunctionRequest request) =>
@@ -227,7 +227,7 @@ All things that you can do with the API are:
 
 // Eval
 record EvalRequest(string Expr);
-record EvalResponse(string Expr, double? app);
+record EvalResponse(string Expr, string app);
 
 // Derivative
 record DerivativeRequest(string Expr, string Var);
@@ -235,15 +235,15 @@ record DerivativeResponse(string Expr);
 
 // Integral
 record IntegralRequest(string Expr, string Var, string? Inf, string? Sup);
-record IntegralResponse(string? Expr, double? app);
+record IntegralResponse(string? Expr, string app);
 
 // Limit
 record LimitRequest(string Expr, string Var, string To);
-record LimitResponse(string Expr, double? app);
+record LimitResponse(string Expr, string app);
 
 // Simplify
 record SimplifyRequest(string Expr);
-record SimplifyResponse(string Expr, double? app);
+record SimplifyResponse(string Expr, string app);
 
 // Analyze Function
 record AnalyzeFunctionRequest(string Expr, string Var);

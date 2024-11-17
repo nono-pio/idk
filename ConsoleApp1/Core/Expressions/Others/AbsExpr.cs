@@ -2,6 +2,7 @@
 using ConsoleApp1.Core.Evaluators;
 using ConsoleApp1.Core.Sets;
 using ConsoleApp1.Latex;
+using Sdcb.Arithmetic.Mpfr;
 
 namespace ConsoleApp1.Core.Expressions.Others;
 
@@ -53,6 +54,11 @@ public class AbsExpr(Expr x) : FonctionExpr(x)
         return Sign(X);
     }
 
-    public override string ToLatex() => $@"\left|{X.ToLatex()}\right|";
+    public override string ToLatex() => $@"\left| {X.ToLatex()} \right|";
     public override string ToString() => $"|{X}|";
+    
+    public override MpfrFloat NPrec(int precision = 333, MpfrRounding rnd = MpfrRounding.ToEven)
+    {
+        return MpfrFloat.Abs(X.NPrec(precision, rnd), precision, rnd);
+    }
 }

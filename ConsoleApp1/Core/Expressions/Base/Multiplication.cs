@@ -3,6 +3,7 @@ using ConsoleApp1.Core.Complexes;
 using ConsoleApp1.Core.Expressions.Atoms;
 using ConsoleApp1.Core.Sets;
 using ConsoleApp1.Latex;
+using Sdcb.Arithmetic.Mpfr;
 
 namespace ConsoleApp1.Core.Expressions.Base;
 
@@ -432,5 +433,17 @@ public class Multiplication : Expr
         }
 
         return (constant, variable);
+    }
+    
+    public override MpfrFloat NPrec(int precision = 333, MpfrRounding rnd = MpfrRounding.ToEven)
+    {
+        var result = new MpfrFloat(precision);
+        result.Assign(1, rnd);
+        foreach (var factor in Factors)
+        {
+            MpfrFloat.MultiplyInplace(result, result, factor.NPrec(precision, rnd), rnd);
+        }
+
+        return result;
     }
 }

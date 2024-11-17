@@ -1,4 +1,5 @@
-﻿using Boolean = ConsoleApp1.Core.Booleans.Boolean;
+﻿using Sdcb.Arithmetic.Mpfr;
+using Boolean = ConsoleApp1.Core.Booleans.Boolean;
 
 namespace ConsoleApp1.Core.Expressions.Trigonometrie;
 
@@ -18,4 +19,9 @@ public class ACosExpr(Expr x) : TrigonometrieExpr(x)
     public override Expr Reciproque(Expr y) => Cos(y);
 
     public override double N() => Math.Acos(X.N());
+    
+    public override MpfrFloat NPrec(int precision = 333, MpfrRounding rnd = MpfrRounding.ToEven)
+    {
+        return MpfrFloat.Acos(X.NPrec(precision, rnd), precision, rnd);
+    }
 }

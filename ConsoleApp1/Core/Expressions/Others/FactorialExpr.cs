@@ -1,5 +1,6 @@
 ﻿using ConsoleApp1.Core.Evaluators;
 using ConsoleApp1.Core.Expressions.Atoms;
+using Sdcb.Arithmetic.Mpfr;
 
 namespace ConsoleApp1.Core.Expressions.Others;
 
@@ -38,4 +39,13 @@ public class FactorialExpr(Expr x) : FonctionExpr(x)
     public override OrderOfOperation GetOrderOfOperation() => OrderOfOperation.Multiplication;
     public override string ToString() => $"{ParenthesisIfNeeded(x)}!";
     public override string ToLatex() => $"{ParenthesisLatexIfNeeded(x)}!";
+    
+    public override MpfrFloat NPrec(int precision = 333, MpfrRounding rnd = MpfrRounding.ToEven)
+    {
+        var x = X.NPrec(precision, rnd);
+        if (!x.FitsUInt32(rnd))
+            return double.NaN;
+        
+        return MpfrFloat.Factorial(x.ToUInt32(), precision, rnd);
+    }
 }

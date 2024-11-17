@@ -1,4 +1,6 @@
-﻿namespace ConsoleApp1.Core.Expressions.Trigonometrie;
+﻿using Sdcb.Arithmetic.Mpfr;
+
+namespace ConsoleApp1.Core.Expressions.Trigonometrie;
 
 public class ATanExpr(Expr x) : TrigonometrieExpr(x)
 {
@@ -15,4 +17,9 @@ public class ATanExpr(Expr x) : TrigonometrieExpr(x)
     public override Expr Reciproque(Expr y) => Tan(y);
 
     public override double N() => Math.Atan(X.N());
+    
+    public override MpfrFloat NPrec(int precision = 333, MpfrRounding rnd = MpfrRounding.ToEven)
+    {
+        return MpfrFloat.Atan(X.NPrec(precision, rnd), precision, rnd);
+    }
 }

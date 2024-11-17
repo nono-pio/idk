@@ -1,4 +1,5 @@
 ﻿using ConsoleApp1.Core.Expressions.Atoms;
+using Sdcb.Arithmetic.Mpfr;
 
 namespace ConsoleApp1.Core.Expressions.Trigonometrie;
 
@@ -30,4 +31,9 @@ public class CosExpr(Expr x) : TrigonometrieExpr(x)
     public override Expr Reciproque(Expr y) => ACos(y);
 
     public override double N() => Math.Cos(X.N());
+    
+    public override MpfrFloat NPrec(int precision = 333, MpfrRounding rnd = MpfrRounding.ToEven)
+    {
+        return MpfrFloat.Cos(X.NPrec(precision, rnd), precision, rnd);
+    }
 }
