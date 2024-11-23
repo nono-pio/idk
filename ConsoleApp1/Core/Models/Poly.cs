@@ -1,5 +1,6 @@
 ﻿using ConsoleApp1.Core.Expressions.Atoms;
 using ConsoleApp1.Core.Expressions.Base;
+using ConsoleApp1.Core.Simplifiers;
 using ConsoleApp1.Latex;
 
 namespace ConsoleApp1.Core.Models;
@@ -14,7 +15,7 @@ public class Poly
         if (coefs.Length == 0)
             coefs = [ Zero ];
         
-        _coefs = coefs;
+        _coefs = coefs.Select(c => Simplifier.Simplify(c)).ToArray();
     }
     
     public Poly(params int[] coefs)
@@ -431,6 +432,16 @@ public class Poly
     /// a = qb + r
     public static (Poly, Poly) Div(Poly a, Poly b)
     {
+        
+        if (a.Deg() < b.Deg())
+            return (PolyZero, a);
+        
+        if (a.Deg() == b.Deg())
+        {
+            var _q = a.LC() / b.LC();
+            return (new Poly(_q), a - b * _q);
+        }
+        
         var q = new Expr[a.Deg() - b.Deg() + 1];
         for (int i = 0; i <= a.Deg() - b.Deg(); i++)
         {

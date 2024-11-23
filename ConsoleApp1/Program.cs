@@ -28,6 +28,12 @@ using static ConsoleApp1.Core.Alphabet;
 
 static void print(object? x)
 {
+    if (x is Array arr)
+    {
+        print(string.Join(" ; ", Enumerable.Range(0, arr.Length).Select(i => arr.GetValue(i).ToString())));
+        return;
+    }
+    
     Console.WriteLine(x is null ? "null" : x.ToString());
 }
 
@@ -63,4 +69,18 @@ static (int, int) sqrt(int n)
 // Asin(Ln(x) - 1) -> [1, e^2]
 // Exp(x)/Ln(x) -> ]1, +inf[ U [0, 1[
 
-print(Solve.SolveFor(Pow(Sin(x), 2), 1, x).ToLatex());
+// var D = new Risch.DiffField(Exp(x) + Exp(Exp(x)) * Exp(x) ,x);
+// print(D.t);
+// print(D.T);
+// print(D.D);
+// print(D.Cases);
+// print(Risch.Derivative(D.f, D));
+
+var D = new Risch.DiffField(1, x)
+{
+    t = [x, t],
+    T = [x, double.NaN],
+    D = [1, -Pow(t, 2) - Num(3, 2) * t / x + 1/(2*x)]
+};
+var p = 4*Pow(x, 4)*Pow(t, 5) - 4*Pow(x, 3)*(x+1)*Pow(t, 4) + Pow(x, 2)*(2*x-3)*Pow(t, 3) + x*(2*Pow(x, 2)+7*x+2)*Pow(t, 2) -(4*Pow(x,2) +4*x-1)*t + 2*x - 1;
+print(Risch.SplitFactor(p, D, 1));
