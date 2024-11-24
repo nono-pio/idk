@@ -22,9 +22,11 @@ using ConsoleApp1.Core.Simplifiers;
 using ConsoleApp1.Core.Solvers;
 using ConsoleApp1.Core.TestDir;
 using ConsoleApp1.Parser;
+using PolynomialTheory;
 using Sdcb.Arithmetic.Mpfr;
 using Boolean = ConsoleApp1.Core.Booleans.Boolean;
 using static ConsoleApp1.Core.Alphabet;
+using Rational = PolynomialTheory.Rational;
 
 static void print(object? x)
 {
@@ -76,11 +78,20 @@ static (int, int) sqrt(int n)
 // print(D.Cases);
 // print(Risch.Derivative(D.f, D));
 
-var D = new Risch.DiffField(1, x)
-{
-    t = [x, t],
-    T = [x, double.NaN],
-    D = [1, -Pow(t, 2) - Num(3, 2) * t / x + 1/(2*x)]
-};
-var p = 4*Pow(x, 4)*Pow(t, 5) - 4*Pow(x, 3)*(x+1)*Pow(t, 4) + Pow(x, 2)*(2*x-3)*Pow(t, 3) + x*(2*Pow(x, 2)+7*x+2)*Pow(t, 2) -(4*Pow(x,2) +4*x-1)*t + 2*x - 1;
-print(Risch.SplitFactor(p, D, 1));
+// var D = new Risch.DiffField(1, x)
+// {
+//     t = [x, t],
+//     T = [x, double.NaN],
+//     D = [1, -Pow(t, 2) - Num(3, 2) * t / x + 1/(2*x)]
+// };
+// var p = 4*Pow(x, 4)*Pow(t, 5) - 4*Pow(x, 3)*(x+1)*Pow(t, 4) + Pow(x, 2)*(2*x-3)*Pow(t, 3) + x*(2*Pow(x, 2)+7*x+2)*Pow(t, 2) -(4*Pow(x,2) +4*x-1)*t + 2*x - 1;
+// print(Risch.SplitFactor(p, D, 1));
+
+var ZZ = new IntegerRing();
+var QQ = new RationalRing();
+var polyA = new UniPolynomial<Rational>(QQ, [0, 1, 1]); // x^2 + x
+var polyB = new UniPolynomial<Rational>(QQ, [1, 2, 1]); // x^2 + 2x + 1
+
+var gcd = UniPolynomial<Rational>.ExtendedEuclidean(QQ, polyA, polyB);
+print(gcd);
+
