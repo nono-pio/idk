@@ -1,8 +1,8 @@
 ﻿namespace PolynomialTheory;
 
-public class UniPolynomial<T> where T : IEquatable<T>
+public class UniPolynomial<T> : IEquatable<UniPolynomial<T>> where T : IEquatable<T>
 {
-    public IRing<T> Ring;
+    public readonly IRing<T> Ring;
     public T[] Coefficients { get; } // index = degree
     public int Degree => Coefficients.Length - 1;
     public T LC => Coefficients[^1];
@@ -205,6 +205,14 @@ public class UniPolynomial<T> where T : IEquatable<T>
 
         return (a1, a2, a);
     }
+    
+    public UniPolynomial<T> Derivative()
+    {
+        var coefficients = new T[Degree];
+        for (int i = 0; i < Degree; i++)
+            coefficients[i] = Ring.Multiply(Coefficients[i + 1], i + 1);
+        return new UniPolynomial<T>(Ring, coefficients);
+    }
 
     private UniPolynomial<T> Monic()
     {
@@ -215,10 +223,15 @@ public class UniPolynomial<T> where T : IEquatable<T>
     {
         return string.Join(" + ", Coefficients.Select((c, i) => c + "x^" + i));
     }
+    public string ToString(string variableName)
+    {
+        return string.Join(" + ", Coefficients.Select((c, i) => c + variableName + "^" + i));
+    }
 
     public static UniPolynomial<T> operator +(UniPolynomial<T> a, T b) => a + new UniPolynomial<T>(a.Ring, [b]);
     public static UniPolynomial<T> operator -(UniPolynomial<T> a, T b) => a - new UniPolynomial<T>(a.Ring, [b]);
     public static UniPolynomial<T> operator *(UniPolynomial<T> a, T b) => new UniPolynomial<T>(a.Ring, a.Coefficients.Select(c => a.Ring.Multiply(c, b)).ToArray());
+    public static UniPolynomial<T> operator *(UniPolynomial<T> a, int b) => new UniPolynomial<T>(a.Ring, a.Coefficients.Select(c => a.Ring.Multiply(c, b)).ToArray());
     public static UniPolynomial<T> operator +(T b, UniPolynomial<T> a) => a + new UniPolynomial<T>(a.Ring, [b]);
     public static UniPolynomial<T> operator -(T b, UniPolynomial<T> a) => a - new UniPolynomial<T>(a.Ring, [b]);
     public static UniPolynomial<T> operator *(T b, UniPolynomial<T> a) => new UniPolynomial<T>(a.Ring, a.Coefficients.Select(c => a.Ring.Multiply(c, b)).ToArray());
@@ -256,6 +269,18 @@ public class UniPolynomial<T> where T : IEquatable<T>
         return new UniPolynomial<T>(ring, coefficients);
     }
     
+    public static UniPolynomial<T> operator -(UniPolynomial<T> a)
+    {
+        var ring = a.Ring;
+        var maxDegree = a.Degree;
+        var coefficients = new T[maxDegree + 1];
+        
+        for (int i = 0; i <= maxDegree; i++)
+            coefficients[i] = ring.Negate(a.Coefficients[i]);
+
+        return new UniPolynomial<T>(ring, coefficients);
+    }
+    
     public static UniPolynomial<T> operator *(UniPolynomial<T> a, UniPolynomial<T> b)
     {
         var ring = a.Ring;
@@ -284,6 +309,25 @@ public class UniPolynomial<T> where T : IEquatable<T>
         var ring = a.Ring;
         return Divide(ring, a, b).Remainder;
     }
-    
-    
+
+
+    public bool Equals(UniPolynomial<T>? other)
+    {
+        if (ReferenceEquals(null, other)) return false;
+        if (ReferenceEquals(this, other)) return true;
+        return Ring.Equals(other.Ring) && Coefficients.SequenceEqual(other.Coefficients);
+    }
+
+    public override bool Equals(object? obj)
+    {
+        if (ReferenceEquals(null, obj)) return false;
+        if (ReferenceEquals(this, obj)) return true;
+        if (obj.GetType() != this.GetType()) return false;
+        return Equals((UniPolynomial<T>)obj);
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(Ring, Coefficients);
+    }
 }

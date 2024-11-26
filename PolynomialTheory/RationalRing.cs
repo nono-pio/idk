@@ -105,10 +105,12 @@ public class RationalRing : IRing<Rational>
     public Rational Negate(Rational a) => -a;
 
     public Rational Multiply(Rational a, Rational b) => a * b;
+    public Rational Multiply(Rational a, int b) => a * b;
 
     public Rational Inverse(Rational a) => 1 / a;
 
     public Rational Divide(Rational a, Rational b) => a / b;
+    public bool IsZero(Rational a) => a.Numerator == 0;
 
     public bool IsInversible(Rational a) => a.Numerator != 0;
 

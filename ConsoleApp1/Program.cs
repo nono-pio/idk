@@ -89,9 +89,16 @@ static (int, int) sqrt(int n)
 
 var ZZ = new IntegerRing();
 var QQ = new RationalRing();
-var polyA = new UniPolynomial<Rational>(QQ, [0, 1, 1]); // x^2 + x
-var polyB = new UniPolynomial<Rational>(QQ, [1, 2, 1]); // x^2 + 2x + 1
+var RatPoly = new RationalUniPolynomialRing<int>(ZZ);
+var polyA = new UniPolynomial<int>(ZZ, [0, 1, 1]); // x^2 + x
+var polyB = new UniPolynomial<int>(ZZ, [1, 2, 1]); // x^2 + 2x + 1
+var polyC = new UniPolynomial<int>(ZZ, [-1, 0, 1]); // x^2 - 1
 
-var gcd = UniPolynomial<Rational>.ExtendedEuclidean(QQ, polyA, polyB);
-print(gcd);
+var ratPolyA = new RationalUniPolynomial<int>(polyA, polyB);
+var ratPolyB = new RationalUniPolynomial<int>(polyC);
+
+var poly = new UniPolynomial<RationalUniPolynomial<int>>(RatPoly, [ratPolyB, ratPolyA]);
+
+print(poly.ToString("t"));
+print(((poly * 2) / poly).ToString("t"));
 
