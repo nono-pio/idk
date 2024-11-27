@@ -90,6 +90,11 @@ public class RationalMultiPolynomial<T> : IEquatable<RationalMultiPolynomial<T>>
     {
         return HashCode.Combine(Numerator, Denominator);
     }
+    
+    public string ToString(string[] vars)
+    {
+        return $"({Numerator.ToString(vars)}) / ({Denominator.ToString(vars)})";
+    }
 
     public override string ToString()
     {

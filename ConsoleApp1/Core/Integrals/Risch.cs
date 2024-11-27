@@ -4,6 +4,9 @@ using ConsoleApp1.Core.Expressions.Atoms;
 using ConsoleApp1.Core.Expressions.Base;
 using ConsoleApp1.Core.Expressions.Trigonometrie;
 using ConsoleApp1.Core.Models;
+using PolynomialTheory;
+using MPoly = PolynomialTheory.MultiPolynomial<PolynomialTheory.Rational>;
+using RMPoly = PolynomialTheory.RationalMultiPolynomial<PolynomialTheory.Rational>;
 
 namespace ConsoleApp1.Core.Integrals;
 
@@ -21,9 +24,11 @@ public class Risch
     
     public class DiffField
     {
+        public static RationalRing QQ = new RationalRing();
         public Variable[] t;
         public Expr[] T;
         public Expr[] D;
+        public RMPoly[] Dtemp;
         public RischCases[] Cases;
         public Variable x => t[0];
         public Expr f;
@@ -38,6 +43,7 @@ public class Risch
             this.t = t.ToArray();
             this.T = T.ToArray();
             this.D = D.ToArray();
+            this.Dtemp = D.Select(ExprToRMPoly).ToArray();
             
             SetCases();
         }
@@ -76,6 +82,7 @@ public class Risch
         {
             if (f.Constant(t[0]))
                 return f;
+            
             if (f.IsVar(t[0]))
                 return f;
             
@@ -114,6 +121,47 @@ public class Risch
             
             return newt;
         }
+
+        public RMPoly ExprToRMPoly(Expr expr)
+        {
+            var (n, d) = expr.AsFraction();
+            return new RMPoly(ExprToMPoly(n), ExprToMPoly(d));
+        }
+        
+        public MPoly ExprToMPoly(Expr expr)
+        {
+            var n = t.Length;
+
+            switch (expr)
+            {
+                case Number num:
+                    if (!num.Num.IsFraction)
+                        goto default;
+
+                    return PolynomialHelper.MultiPolynomial(QQ,
+                        new Rational((int)num.Num.Numerator, (int)num.Num.Denominator), n);
+                case Variable var:
+                    
+                    var ti = Array.IndexOf(t, var);
+                    if (ti == -1)
+                        goto default;
+
+                    var degs = new int[n];
+                    degs[ti] = 1;
+                    
+                    return PolynomialHelper.MultiPolynomial(QQ, (1, degs));
+                case Addition add:
+                    return add.Args.Select(ExprToMPoly).Aggregate((a, b) => a + b);
+                case Multiplication mul:
+                    return mul.Args.Select(ExprToMPoly).Aggregate((a, b) => a * b);
+                case Power pow:
+                    var exp = pow.Exp is Number number && number.Num.IsInt ? (int)number.Num.Numerator : throw new NotImplementedException();
+                    
+                    return ExprToMPoly(pow.Base).Pow(exp);
+                default:
+                    throw new NotImplementedException();
+            }
+        }
     }
     
     public static Expr Derivative(Expr f, DiffField D)
@@ -138,6 +186,38 @@ public class Risch
 
         return result;
     }
+
+    public static RMPoly Derivative(RMPoly f, DiffField D)
+    {
+        return (Derivative(f.Numerator, D) * f.Denominator.ToRationalPoly() - Derivative(f.Denominator, D) * f.Numerator.ToRationalPoly()) / (f.Denominator * f.Denominator).ToRationalPoly();
+    }
+
+    public static RMPoly Derivative(MPoly f, DiffField D)
+    {
+        RMPoly Derivative(Multinomial<Rational> multinomial)
+        {
+            var result = RMPoly.Zero(DiffField.QQ, D.t.Length);
+            for (int i = 0; i < multinomial.Degs.Length; i++)
+            {
+                if (multinomial.Degs[i] == 0)
+                    continue;
+                
+                var degs = new int[multinomial.Degs.Length];
+                Array.Copy(multinomial.Degs, degs, degs.Length);
+                degs[i]--;
+                
+                var newMul = (multinomial.Degs[i] * multinomial.Coef, degs);
+                var newPoly = PolynomialHelper.MultiPolynomial(DiffField.QQ, newMul).ToRationalPoly() * D.Dtemp[i];
+                
+                result += newPoly;
+            }
+
+            return result;
+        }
+        
+        return f.Multinomials.Select(Derivative).Aggregate((a, b) => a + b);
+    }
+
     
     public static Expr RischIntegrate(Expr f, Variable x)
     {

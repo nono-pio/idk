@@ -6,6 +6,18 @@ public static class PolynomialHelper
         where T : IEquatable<T> 
         => new UniPolynomial<T>(ring, coefficients);
     
+    public static MultiPolynomial<T> MultiPolynomial<T>(IRing<T> ring, (T, int[])[] multinomials)
+        where T : IEquatable<T> 
+        => new MultiPolynomial<T>(ring, multinomials.Select(m => new Multinomial<T>(m.Item1, m.Item2)).ToArray());
+    
+    public static MultiPolynomial<T> MultiPolynomial<T>(IRing<T> ring, (T, int[]) multinomial)
+        where T : IEquatable<T> 
+        => new MultiPolynomial<T>(ring, [new Multinomial<T>(multinomial.Item1, multinomial.Item2)]);
+    
+    public static MultiPolynomial<T> MultiPolynomial<T>(IRing<T> ring, T cste, int nVars)
+        where T : IEquatable<T> 
+        => new MultiPolynomial<T>(ring, [ new Multinomial<T>(cste, new int[nVars]) ]);
+    
     public static RationalUniPolynomial<T> RationalPolynomial<T>(UniPolynomial<T> numerator, UniPolynomial<T>? denominator = null)
         where T : IEquatable<T> 
         => new RationalUniPolynomial<T>(numerator, denominator);

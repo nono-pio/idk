@@ -113,7 +113,7 @@ public class MultiPolynomial<T> : IEquatable<MultiPolynomial<T>> where T : IEqua
 
     public string ToString(string[] vars)
     {
-        return string.Join(" + ", Multinomials.Select(mul => mul.Coef + mul.Degs.Select((deg, i) => vars[i] + "^" + deg).Aggregate("", (acc, t) => acc + t)));
+        return string.Join(" + ", Multinomials.Select(mul => mul.Coef + mul.Degs.Select((deg, i) => deg == 0 ? "" : deg == 1 ? vars[i] : vars[i] + "^" + deg).Aggregate("", (acc, t) => acc + t)));
     }
 
     public override string ToString()
@@ -139,5 +139,22 @@ public class MultiPolynomial<T> : IEquatable<MultiPolynomial<T>> where T : IEqua
     public override int GetHashCode()
     {
         return HashCode.Combine(Ring, Multinomials);
+    }
+
+    public MultiPolynomial<T> Pow(int exp)
+    {
+        if (exp == 0)
+            return One(Ring, NVars);
+        
+        var result = this;
+        for (int i = 1; i < exp; i++)
+            result *= this;
+
+        return result;
+    }
+
+    public RationalMultiPolynomial<T> ToRationalPoly()
+    {
+        return new RationalMultiPolynomial<T>(this);
     }
 }

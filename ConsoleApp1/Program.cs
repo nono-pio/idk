@@ -71,49 +71,12 @@ static (int, int) sqrt(int n)
 // Asin(Ln(x) - 1) -> [1, e^2]
 // Exp(x)/Ln(x) -> ]1, +inf[ U [0, 1[
 
-// var D = new Risch.DiffField(Exp(x) + Exp(Exp(x)) * Exp(x) ,x);
-// print(D.t);
-// print(D.T);
-// print(D.D);
-// print(D.Cases);
-// print(Risch.Derivative(D.f, D));
-
-// var D = new Risch.DiffField(1, x)
-// {
-//     t = [x, t],
-//     T = [x, double.NaN],
-//     D = [1, -Pow(t, 2) - Num(3, 2) * t / x + 1/(2*x)]
-// };
-// var p = 4*Pow(x, 4)*Pow(t, 5) - 4*Pow(x, 3)*(x+1)*Pow(t, 4) + Pow(x, 2)*(2*x-3)*Pow(t, 3) + x*(2*Pow(x, 2)+7*x+2)*Pow(t, 2) -(4*Pow(x,2) +4*x-1)*t + 2*x - 1;
-// print(Risch.SplitFactor(p, D, 1));
-
-var ZZ = new IntegerRing();
-var QQ = new RationalRing();
-var RatPoly = new RationalUniPolynomialRing<int>(ZZ);
-
-var polyA = PolynomialHelper.UniPolynomial(ZZ, [0, 1, 1]); // x^2 + x
-var polyB = PolynomialHelper.UniPolynomial(ZZ, [1, 2, 1]); // x^2 + 2x + 1
-var polyC = PolynomialHelper.UniPolynomial(ZZ, [-1, 0, 1]); // x^2 - 1
-
-var ratPolyA = PolynomialHelper.RationalPolynomial(polyA, polyB);
-var ratPolyB = PolynomialHelper.RationalPolynomial(polyC);
-
-var poly = PolynomialHelper.UniPolynomial(RatPoly, [ratPolyB, ratPolyA]); // (t+1)/(2t) * x^2 + t * x + t^2
-
-print(poly.ToString("t"));
-print(((poly * 2) / poly).ToString("t"));
-
-var multPoly = new MultiPolynomial<int>(ZZ, [
-    new Multinomial<int>(1, [2, 0]),
-    new Multinomial<int>(2, [1, 1]),
-    new Multinomial<int>(1, [0, 2]),
-]);
-
-print(multPoly);
-
-// QQ(x, t, t2)
-// 2*x*t / (t2^3+x)
-// QQ(t, t2)(x)
-// 2t * x / (x + t2^3)
-// 1. 2t * x
-// 2. x + t2^3
+var D = new Risch.DiffField(Exp(x) + Exp(Exp(x)) * Exp(x) ,x);
+print(D.t);
+print(D.T);
+print(D.D);
+print(D.Cases);
+print(Risch.Derivative(D.f, D));
+var asRMPOLY = D.ExprToRMPoly(D.f);
+print(asRMPOLY.ToString(["x", "t1", "t2"]));
+print(Risch.Derivative(asRMPOLY, D).ToString(["x", "t1", "t2"]));
