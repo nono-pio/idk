@@ -90,15 +90,30 @@ static (int, int) sqrt(int n)
 var ZZ = new IntegerRing();
 var QQ = new RationalRing();
 var RatPoly = new RationalUniPolynomialRing<int>(ZZ);
-var polyA = new UniPolynomial<int>(ZZ, [0, 1, 1]); // x^2 + x
-var polyB = new UniPolynomial<int>(ZZ, [1, 2, 1]); // x^2 + 2x + 1
-var polyC = new UniPolynomial<int>(ZZ, [-1, 0, 1]); // x^2 - 1
 
-var ratPolyA = new RationalUniPolynomial<int>(polyA, polyB);
-var ratPolyB = new RationalUniPolynomial<int>(polyC);
+var polyA = PolynomialHelper.UniPolynomial(ZZ, [0, 1, 1]); // x^2 + x
+var polyB = PolynomialHelper.UniPolynomial(ZZ, [1, 2, 1]); // x^2 + 2x + 1
+var polyC = PolynomialHelper.UniPolynomial(ZZ, [-1, 0, 1]); // x^2 - 1
 
-var poly = new UniPolynomial<RationalUniPolynomial<int>>(RatPoly, [ratPolyB, ratPolyA]);
+var ratPolyA = PolynomialHelper.RationalPolynomial(polyA, polyB);
+var ratPolyB = PolynomialHelper.RationalPolynomial(polyC);
+
+var poly = PolynomialHelper.UniPolynomial(RatPoly, [ratPolyB, ratPolyA]); // (t+1)/(2t) * x^2 + t * x + t^2
 
 print(poly.ToString("t"));
 print(((poly * 2) / poly).ToString("t"));
 
+var multPoly = new MultiPolynomial<int>(ZZ, [
+    new Multinomial<int>(1, [2, 0]),
+    new Multinomial<int>(2, [1, 1]),
+    new Multinomial<int>(1, [0, 2]),
+]);
+
+print(multPoly);
+
+// QQ(x, t, t2)
+// 2*x*t / (t2^3+x)
+// QQ(t, t2)(x)
+// 2t * x / (x + t2^3)
+// 1. 2t * x
+// 2. x + t2^3
