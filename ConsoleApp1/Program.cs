@@ -71,12 +71,16 @@ static (int, int) sqrt(int n)
 // Asin(Ln(x) - 1) -> [1, e^2]
 // Exp(x)/Ln(x) -> ]1, +inf[ U [0, 1[
 
-var D = new Risch.DiffField(Exp(x) + Exp(Exp(x)) * Exp(x) ,x);
-print(D.t);
-print(D.T);
-print(D.D);
-print(D.Cases);
-print(Risch.Derivative(D.f, D));
-var asRMPOLY = D.ExprToRMPoly(D.f);
-print(asRMPOLY.ToString(["x", "t1", "t2"]));
-print(Risch.Derivative(asRMPOLY, D).ToString(["x", "t1", "t2"]));
+// Hermite
+// var D = new Risch.DiffField((x-Tan(x))/Pow(Tan(x), 2) ,x);
+// print(D.Dtemp);
+//
+// var f = D.ExprToRMPoly(D.f).ToUniPolynomialOfRational(1);
+// print(Risch.HermiteReduce(f, D, 1));
+
+// Poly reduce
+var D = new Risch.DiffField(1 + x * Tan(x) + Pow(Tan(x), 2), x);
+print(D.Dtemp);
+
+var f = D.ExprToRMPoly(D.f).ToUniPolynomialOfRational(1);
+print(Risch.PolynomialReduce(f.Numerator, D, 1));

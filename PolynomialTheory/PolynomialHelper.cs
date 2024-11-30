@@ -26,4 +26,8 @@ public static class PolynomialHelper
         where T : IEquatable<T> 
         => new RationalMultiPolynomial<T>(numerator, denominator);
 
+    public static UniPolynomial<T> Gcd<T>(UniPolynomial<T> a, UniPolynomial<T> b) 
+        where T : IEquatable<T> =>
+        PolynomialTheory.UniPolynomial<T>.GCD(a.Ring, a, b);
+
 }

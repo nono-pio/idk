@@ -63,6 +63,9 @@ public class RationalUniPolynomialRing<T> : IRing<RationalUniPolynomial<T>> wher
     {
         return true;
     }
-    
-    
+
+    public RationalUniPolynomial<T> Divide(RationalUniPolynomial<T> a, int b)
+    {
+        return a / b;
+    }
 }

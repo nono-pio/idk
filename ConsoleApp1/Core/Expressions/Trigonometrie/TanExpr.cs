@@ -29,7 +29,7 @@ public class TanExpr(Expr x) : TrigonometrieExpr(x)
     
     public override string Name => "tan";
 
-    public override Expr fDerivee() => 1 - Pow(Tan(X), 2);
+    public override Expr fDerivee() => 1 + Pow(Tan(X), 2);
 
     public override Expr Reciproque(Expr y) => ATan(y);
     

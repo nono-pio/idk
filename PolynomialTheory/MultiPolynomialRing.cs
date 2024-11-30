@@ -68,4 +68,9 @@ public class MultiPolynomialRing<T> : IRing<MultiPolynomial<T>> where T : IEquat
     {
         return false;
     }
+
+    public MultiPolynomial<T> Divide(MultiPolynomial<T> a, int b)
+    {
+        return a / b;
+    }
 }

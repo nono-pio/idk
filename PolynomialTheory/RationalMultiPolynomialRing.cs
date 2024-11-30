@@ -66,6 +66,9 @@ public class RationalMultiPolynomialRing<T> : IRing<RationalMultiPolynomial<T>> 
     {
         return true;
     }
-    
-    
+
+    public RationalMultiPolynomial<T> Divide(RationalMultiPolynomial<T> a, int b)
+    {
+        return new(a.Numerator, a.Denominator * b);
+    }
 }

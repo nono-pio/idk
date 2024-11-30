@@ -1,4 +1,7 @@
-﻿namespace PolynomialTheory;
+﻿using System.Net.Sockets;
+using Microsoft.VisualBasic.CompilerServices;
+
+namespace PolynomialTheory;
 
 public class MultiPolynomial<T> : IEquatable<MultiPolynomial<T>> where T : IEquatable<T>
 {
@@ -21,6 +24,8 @@ public class MultiPolynomial<T> : IEquatable<MultiPolynomial<T>> where T : IEqua
         Ring = ring;
         Multinomials = multinomials;
     }
+
+    public bool IsConstant => Multinomials.Length == 1 && Multinomials[0].Degs.All(d => d == 0);
 
     public static MultiPolynomial<T> Zero(IRing<T> ring, int nVars) => new MultiPolynomial<T>(ring, [new Multinomial<T>(ring.Zero, new int[nVars])]);
     public static MultiPolynomial<T> One(IRing<T> ring, int nVars) => new MultiPolynomial<T>(ring, [new Multinomial<T>(ring.One, new int[nVars])]);
@@ -65,7 +70,7 @@ public class MultiPolynomial<T> : IEquatable<MultiPolynomial<T>> where T : IEqua
             {
                 if (bMul.Degs.SequenceEqual(newMul[i].Degs))
                 {
-                    newMul[i] = new Multinomial<T>(ring.Subtract(bMul.Coef, newMul[i].Coef), bMul.Degs);
+                    newMul[i] = new Multinomial<T>(ring.Subtract(newMul[i].Coef, bMul.Coef), bMul.Degs);
                     added = true;
                     break;
                 }
@@ -106,14 +111,37 @@ public class MultiPolynomial<T> : IEquatable<MultiPolynomial<T>> where T : IEqua
             a.Multinomials.Select(m => new Multinomial<T>(ring.Multiply(m.Coef, b), m.Degs)).ToArray());
     }
     
+    public static MultiPolynomial<T> operator *(MultiPolynomial<T> a, T b)
+    {
+        var ring = a.Ring;
+        return new MultiPolynomial<T>(ring,
+            a.Multinomials.Select(m => new Multinomial<T>(ring.Multiply(m.Coef, b), m.Degs)).ToArray());
+    }
+    
+    public static MultiPolynomial<T> operator /(MultiPolynomial<T> a, int b)
+    {
+        var ring = a.Ring;
+        return new MultiPolynomial<T>(ring,
+            a.Multinomials.Select(m => new Multinomial<T>(ring.Divide(m.Coef, b), m.Degs)).ToArray());
+    }
+    
+    public static MultiPolynomial<T> operator /(MultiPolynomial<T> a, T b)
+    {
+        var ring = a.Ring;
+        return new MultiPolynomial<T>(ring,
+            a.Multinomials.Select(m => new Multinomial<T>(ring.Divide(m.Coef, b), m.Degs)).ToArray());
+    }
+
     public static MultiPolynomial<T> operator -(MultiPolynomial<T> a)
     {
         return new MultiPolynomial<T>(a.Ring, a.Multinomials.Select(m => new Multinomial<T>(a.Ring.Negate(m.Coef), m.Degs)).ToArray());
     }
 
-    public string ToString(string[] vars)
+    public string ToString(string[] vars, Func<T, string>? ringToString = null)
     {
-        return string.Join(" + ", Multinomials.Select(mul => mul.Coef + mul.Degs.Select((deg, i) => deg == 0 ? "" : deg == 1 ? vars[i] : vars[i] + "^" + deg).Aggregate("", (acc, t) => acc + t)));
+        ringToString ??= t => t.ToString();
+        var result = string.Join(" + ", Multinomials.Where(m => !Ring.IsZero(m.Coef)).Select(mul => ringToString(mul.Coef) + mul.Degs.Select((deg, i) => deg == 0 ? "" : deg == 1 ? vars[i] : vars[i] + "^" + deg).Aggregate("", (acc, t) => acc + t)));
+        return result == "" ? "0" : result;
     }
 
     public override string ToString()
@@ -156,5 +184,120 @@ public class MultiPolynomial<T> : IEquatable<MultiPolynomial<T>> where T : IEqua
     public RationalMultiPolynomial<T> ToRationalPoly()
     {
         return new RationalMultiPolynomial<T>(this);
+    }
+
+    public int Deg(int i) => Multinomials.Max(m => m.Degs[i]);
+
+    public UniPolynomial<MultiPolynomial<T>> ToUniPolynomial(int i)
+    {
+        var deg = Deg(i);
+        var coeff = new MultiPolynomial<T>[deg + 1];
+        Array.Fill(coeff, Zero(Ring, NVars - 1));
+
+        foreach (var multinomial in Multinomials)
+        {
+            var d = multinomial.Degs[i];
+            var newDegs = new int[multinomial.Degs.Length - 1];
+            for (int j = 0; j < multinomial.Degs.Length; j++)
+            {
+                if (j < i)
+                    newDegs[j] = multinomial.Degs[j];
+                else if (j == i)
+                    continue;
+                else
+                    newDegs[j - 1] = multinomial.Degs[j];
+            }
+
+            var newMul = new Multinomial<T>(multinomial.Coef, newDegs);
+            coeff[d] += new MultiPolynomial<T>(Ring, [newMul]);
+        }
+
+        var ring = new MultiPolynomialRing<T>(Ring, NVars - 1);
+
+        return new UniPolynomial<MultiPolynomial<T>>(ring, coeff);
+    }
+    
+    public UniPolynomial<RationalMultiPolynomial<T>> ToUniPolynomialOfRational(int i)
+    {
+        var deg = Deg(i);
+        var coeff = new RationalMultiPolynomial<T>[deg + 1];
+        Array.Fill(coeff, RationalMultiPolynomial<T>.Zero(Ring, NVars - 1));
+
+
+        foreach (var multinomial in Multinomials)
+        {
+            var d = multinomial.Degs[i];
+            var newDegs = new int[multinomial.Degs.Length - 1];
+            for (int j = 0; j < multinomial.Degs.Length; j++)
+            {
+                if (j < i)
+                    newDegs[j] = multinomial.Degs[j];
+                else if (j == i)
+                    continue;
+                else
+                    newDegs[j - 1] = multinomial.Degs[j];
+            }
+
+            var newMul = new Multinomial<T>(multinomial.Coef, newDegs);
+            coeff[d] += new RationalMultiPolynomial<T>(new MultiPolynomial<T>(Ring, [newMul]));
+        }
+
+        var ring = new RationalMultiPolynomialRing<T>(Ring, NVars - 1);
+
+        return new UniPolynomial<RationalMultiPolynomial<T>>(ring, coeff);
+    }
+    
+    /// T[t0, t1, t2, ...][ti] -> T[t0, t1, ...]
+    public static MultiPolynomial<T> CombineWithMultiPolynomial(UniPolynomial<MultiPolynomial<T>> poly, int i)
+    {
+        var mPolyRing = (MultiPolynomialRing<T>) poly.Ring;
+        var result = MultiPolynomial<T>.Zero(mPolyRing.Ring, mPolyRing.NVars + 1);
+
+        for (int j = 0; j < poly.Coefficients.Length; j++)
+        {
+            var mpoly = poly.Coefficients[j];
+            foreach (var mul in mpoly.Multinomials)
+            {
+                var newDegs = new int[mul.Degs.Length + 1];
+                for (int k = 0; k < newDegs.Length; k++)
+                {
+                    if (k < i)
+                        newDegs[k] = mul.Degs[k];
+                    if (k == i)
+                        newDegs[k] = j;
+                    if (k > i)
+                        newDegs[k] = mul.Degs[k - 1];
+                }
+
+                var newMul = new Multinomial<T>(mul.Coef, newDegs);
+                result += new MultiPolynomial<T>(mPolyRing.Ring, [newMul]);
+            }
+        }
+
+        return result;
+    }
+
+    public T LC(int i)
+    {
+        var result = Ring.Zero;
+        var maxDeg = -1;
+        foreach (var mul in Multinomials)
+        {
+            if (mul.Degs[i] > maxDeg)
+            {
+                result = mul.Coef;
+                maxDeg = mul.Degs[i];
+                continue;
+            }
+
+            if (mul.Degs[i] == maxDeg)
+                result = Ring.Add(result, mul.Coef);
+            
+        }
+
+        if (maxDeg == -1)
+            throw new Exception();
+
+        return result;
     }
 }

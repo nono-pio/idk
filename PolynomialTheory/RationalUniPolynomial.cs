@@ -8,9 +8,13 @@ public class RationalUniPolynomial<T> : IEquatable<RationalUniPolynomial<T>> whe
     
     public RationalUniPolynomial(UniPolynomial<T> numerator, UniPolynomial<T>? denominator = null)
     {
-        if (denominator is not null && numerator.Ring != denominator.Ring)
-            throw new ArgumentException("Les anneaux des deux polynômes ne sont pas les mêmes.");
-
+        if (numerator.IsZero())
+        {
+            Numerator = numerator;
+            Denominator = UniPolynomial<T>.One(numerator.Ring);
+            return;
+        }
+       
         if (numerator.Equals(denominator))
         {
             Numerator = UniPolynomial<T>.One(numerator.Ring);
@@ -58,6 +62,10 @@ public class RationalUniPolynomial<T> : IEquatable<RationalUniPolynomial<T>> whe
         return new RationalUniPolynomial<T>(a.Numerator * b.Denominator, a.Denominator * b.Numerator);
     }
     
+    public static RationalUniPolynomial<T> operator /(RationalUniPolynomial<T> a, int b)
+    {
+        return new RationalUniPolynomial<T>(a.Numerator, a.Denominator * b);
+    }
     public static RationalUniPolynomial<T> operator /(int a, RationalUniPolynomial<T> b)
     {
         return new RationalUniPolynomial<T>(b.Denominator * a, b.Numerator);
@@ -91,6 +99,28 @@ public class RationalUniPolynomial<T> : IEquatable<RationalUniPolynomial<T>> whe
 
     public override string ToString()
     {
-        return $"({Numerator}) / ({Denominator})";
+        return ToString("x");
+    }
+
+    public string ToString(string varName, Func<T, string>? ringToString = null)
+    {
+        ringToString ??= t => t.ToString();
+        var num = Numerator.Degree == 0 ? ringToString(Numerator.Coefficients[0]) : Numerator.ToString(varName, ringToString);
+        var den = Denominator.ToString(varName, ringToString);
+
+        if (num.Contains('+') || num.Contains('-'))
+            num = $"({num})";
+        
+        if (den.Contains('+') || den.Contains('-'))
+            den = $"({num})";
+        
+        return den == "1" ? num : num + " / " + den;
+
+    }
+
+    public bool IsDenMonic() => Denominator.LC.Equals(Ring.One);
+    public RationalUniPolynomial<T> MonicDen()
+    {
+        return new RationalUniPolynomial<T>(Numerator / Denominator.LC, Denominator / Denominator.LC);
     }
 }

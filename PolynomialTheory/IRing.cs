@@ -14,6 +14,7 @@ public interface IRing<T> where T : IEquatable<T>
     
     T Inverse(T a); // return a^-1, or throw exception if a^-1 is not in ring
     T Divide(T a, T b); // return a / b, or throw exception if a / b is not in ring
+    T Divide(T a, int b); // return a / b, or throw exception if a / b is not in ring
     
     public bool IsZero(T a);
     public bool IsInversible(T a); // return true if a^-1 is in ring (ex: 1 is inversible in Z, but not 2)

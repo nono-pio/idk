@@ -73,4 +73,9 @@ public class UniPolynomialRing<T> : IRing<UniPolynomial<T>> where T : IEquatable
     {
         return false;
     }
+
+    public UniPolynomial<T> Divide(UniPolynomial<T> a, int b)
+    {
+        return a / b;
+    }
 }

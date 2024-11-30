@@ -110,6 +110,11 @@ public class RationalRing : IRing<Rational>
     public Rational Inverse(Rational a) => 1 / a;
 
     public Rational Divide(Rational a, Rational b) => a / b;
+    public Rational Divide(Rational a, int b)
+    {
+        return a / b;
+    }
+
     public bool IsZero(Rational a) => a.Numerator == 0;
 
     public bool IsInversible(Rational a) => a.Numerator != 0;
