@@ -14,10 +14,10 @@ public abstract class AUnivariatePolynomial64<lPoly> : IUnivariatePolynomial<lPo
     private static long serialVersionUID = 1L;
 
     /** array of coefficients { x^0, x^1, ... , x^Degree } */
-    protected long[] data;
+    public long[] data;
 
     /** points to the last non zero element in the data array */
-    protected int Degree;
+    public int Degree;
 
     /** casted self **/
     private lPoly self = (lPoly)this;

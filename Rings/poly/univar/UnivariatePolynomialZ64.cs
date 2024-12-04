@@ -1,52 +1,32 @@
-package cc.redberry.rings.poly.univar;
+using System.Diagnostics;
+using System.Numerics;
+using Rings.io;
 
-import cc.redberry.libdivide4j.FastDivision.Magic;
-import cc.redberry.rings.IntegersZp64;
-import cc.redberry.rings.Rings;
-import cc.redberry.rings.bigint.BigInteger;
-import cc.redberry.rings.io.IStringifier;
-import cc.redberry.rings.poly.MachineArithmetic;
-import cc.redberry.rings.poly.multivar.AMultivariatePolynomial;
-import cc.redberry.rings.poly.multivar.DegreeVector;
+namespace Rings.poly.univar;
 
-import java.util.Arrays;
-import java.util.Comparator;
-
-import static cc.redberry.libdivide4j.FastDivision.divideSignedFast;
-import static cc.redberry.libdivide4j.FastDivision.magicSigned;
-
-/**
- * Univariate polynomial over machine integers in range [-2^63, 2^63]. <b>NOTE:</b> this class is used in internal
- * routines for performance reasons, for usual polynomials over Z use {@link UnivariatePolynomial} over BigIntegers.
- *
- * <p> Arithmetic operations on instances of this type may cause long overflow in which case a proper {@link
- * ArithmeticException} will be thrown.
- *
- * @since 1.0
- */
-public final class UnivariatePolynomialZ64 extends AUnivariatePolynomial64<UnivariatePolynomialZ64> {
-    private static final long serialVersionUID = 1L;
+public sealed class UnivariatePolynomialZ64 : AUnivariatePolynomial64<UnivariatePolynomialZ64> {
+    private static readonly long serialVersionUID = 1L;
 
     /** main constructor */
-    private UnivariatePolynomialZ64(long[] data) {
+    public UnivariatePolynomialZ64(long[] data) {
         this.data = data;
-        this.degree = data.length - 1;
+        this.Degree = data.Length - 1;
         fixDegree();
-        assert data.length > 0;
+        Debug.Assert( data.Length > 0);
     }
 
     /** copy constructor */
     private UnivariatePolynomialZ64(long[] data, int degree) {
         this.data = data;
-        this.degree = degree;
-        assert data.length > 0;
+        this.Degree = degree;
+        Debug.Assert(data.Length > 0);
     }
 
     /**
      * Parse string into polynomial
      */
-    public static UnivariatePolynomialZ64 parse(String string) {
-        return UnivariatePolynomial.asOverZ64(UnivariatePolynomial.parse(string, Rings.Z));
+    public static UnivariatePolynomialZ64 parse(String str) {
+        return UnivariatePolynomial<BigInteger>.asOverZ64(UnivariatePolynomial<BigInteger>.parse(str, Rings.Z));
     }
 
     /**
@@ -55,7 +35,7 @@ public final class UnivariatePolynomialZ64 extends AUnivariatePolynomial64<Univa
      * @param data coefficients
      * @return Z[x] polynomial
      */
-    public static UnivariatePolynomialZ64 create(long... data) {
+    public static UnivariatePolynomialZ64 create(params long[] data) {
         return new UnivariatePolynomialZ64(data);
     }
 
@@ -99,7 +79,7 @@ public final class UnivariatePolynomialZ64 extends AUnivariatePolynomial64<Univa
         return new UnivariatePolynomialZ64(new long[]{value}, 0);
     }
 
-    @Override
+    
     public UnivariatePolynomialZ64 setCoefficientRingFrom(UnivariatePolynomialZ64 univariatePolynomialZ64) {
         return univariatePolynomialZ64.clone();
     }
@@ -111,8 +91,8 @@ public final class UnivariatePolynomialZ64 extends AUnivariatePolynomial64<Univa
      * @param copy    whether to copy the internal data or reduce inplace (in which case the data of this will be lost)
      * @return this modulo {@code modulus}
      */
-    public UnivariatePolynomialZp64 modulus(long modulus, boolean copy) {
-        return UnivariatePolynomialZp64.create(modulus, copy ? data.clone() : data);
+    public UnivariatePolynomialZp64 modulus(long modulus, bool copy) {
+        return UnivariatePolynomialZp64.create(modulus, copy ? (long[])data.Clone() : data);
     }
 
     /**
@@ -121,8 +101,8 @@ public final class UnivariatePolynomialZ64 extends AUnivariatePolynomial64<Univa
      * @param modulus the modulus
      * @return a copy of this modulo {@code modulus}
      */
-    public UnivariatePolynomialZp64 modulus(long modulus) {
-        return modulus(modulus, true);
+    public UnivariatePolynomialZp64 modulus(long _modulus) {
+        return modulus(_modulus, true);
     }
 
     /**
@@ -132,9 +112,9 @@ public final class UnivariatePolynomialZ64 extends AUnivariatePolynomial64<Univa
      * @param copy whether to copy the internal data or reduce inplace (in which case the data of this will be lost)
      * @return this modulo {@code modulus}
      */
-    public UnivariatePolynomialZp64 modulus(IntegersZp64 ring, boolean copy) {
-        long[] data = copy ? this.data.clone() : this.data;
-        for (int i = degree; i >= 0; --i)
+    public UnivariatePolynomialZp64 modulus(IntegersZp64 ring, bool copy) {
+        long[] data = copy ? (long[])this.data.Clone() : this.data;
+        for (int i = Degree; i >= 0; --i)
             data[i] = ring.modulus(data[i]);
         return UnivariatePolynomialZp64.createUnsafe(ring, data);
     }
@@ -157,9 +137,9 @@ public final class UnivariatePolynomialZ64 extends AUnivariatePolynomial64<Univa
     /**
      * {@inheritDoc}. The ring of the result is {@link Rings#Z}
      */
-    @Override
-    public UnivariatePolynomial<BigInteger> toBigPoly() {
-        return UnivariatePolynomial.createUnsafe(Rings.Z, dataToBigIntegers());
+    
+    public override UnivariatePolynomial<BigInteger> toBigPoly() {
+        return UnivariatePolynomial<BigInteger>.createUnsafe(Rings.Z, dataToBigIntegers());
     }
 
     /**
@@ -168,7 +148,7 @@ public final class UnivariatePolynomialZ64 extends AUnivariatePolynomial64<Univa
      * @return Mignotte's bound
      */
     public double mignotteBound() {
-        return Math.pow(2.0, degree) * norm2();
+        return Math.Pow(2.0, Degree) * norm2();
     }
 
     /**
@@ -184,77 +164,62 @@ public final class UnivariatePolynomialZ64 extends AUnivariatePolynomial64<Univa
             return cc();
         long res = 0;
         Magic magic = magicSigned(den);
-        for (int i = degree; i >= 0; --i) {
+        for (int i = Degree; i >= 0; --i) {
             long x = multiply(res, num);
             long q = divideSignedFast(x, magic);
             if (q * den != x)
-                throw new IllegalArgumentException("The answer is not integer");
+                throw new ArgumentException("The answer is not integer");
             res = add(q, data[i]);
         }
         return res;
     }
 
-    @Override
+    
     public UnivariatePolynomialZ64 getRange(int from, int to) {
         return new UnivariatePolynomialZ64(Arrays.copyOfRange(data, from, to));
     }
+    
+    
+    public bool sameCoefficientRingWith(UnivariatePolynomialZ64 oth) {return true;}
 
-    @Override
-    public UnivariatePolynomialZ64[] createArray(int length) {
-        return new UnivariatePolynomialZ64[length];
-    }
-
-    @Override
-    public UnivariatePolynomialZ64[][] createArray2d(int length) {
-        return new UnivariatePolynomialZ64[length][];
-    }
-
-    @Override
-    public UnivariatePolynomialZ64[][] createArray2d(int length1, int length2) {
-        return new UnivariatePolynomialZ64[length1][length2];
-    }
-
-    @Override
-    public boolean sameCoefficientRingWith(UnivariatePolynomialZ64 oth) {return true;}
-
-    @Override
-    public UnivariatePolynomialZ64 createFromArray(long[] data) {
+    
+    public override UnivariatePolynomialZ64 createFromArray(long[] data) {
         return new UnivariatePolynomialZ64(data);
     }
 
-    @Override
-    public UnivariatePolynomialZ64 createMonomial(long coefficient, int degree) {
+    
+    public override UnivariatePolynomialZ64 createMonomial(long coefficient, int degree) {
         return monomial(coefficient, degree);
     }
 
-    @Override
-    public boolean isOverField() {return false;}
+    
+    public bool isOverField() {return false;}
 
-    @Override
-    public boolean isOverFiniteField() {return false;}
+    
+    public bool isOverFiniteField() {return false;}
 
-    @Override
-    public boolean isOverZ() {return true;}
+    
+    public bool isOverZ() {return true;}
 
-    @Override
+    
     public BigInteger coefficientRingCardinality() {return null;}
 
-    @Override
+    
     public BigInteger coefficientRingCharacteristic() {
-        return BigInteger.ZERO;
+        return BigInteger.Zero;
     }
 
-    @Override
-    public boolean isOverPerfectPower() {
+    
+    public bool isOverPerfectPower() {
         return false;
     }
 
-    @Override
+    
     public BigInteger coefficientRingPerfectPowerBase() {
         return null;
     }
 
-    @Override
+    
     public BigInteger coefficientRingPerfectPowerExponent() {
         return null;
     }
@@ -264,38 +229,38 @@ public final class UnivariatePolynomialZ64 extends AUnivariatePolynomial64<Univa
      *
      * @return polynomial content
      */
-    @Override
-    public long content() {
-        if (degree == 0)
+    
+    public override long content() {
+        if (Degree == 0)
             return data[0];
-        return MachineArithmetic.gcd(data, 0, degree + 1);
+        return MachineArithmetic.gcd(data, 0, Degree + 1);
     }
 
-    @Override
-    long add(long a, long b) {return MachineArithmetic.safeAdd(a, b);}
 
-    @Override
-    long subtract(long a, long b) {return MachineArithmetic.safeSubtract(a, b);}
+    public override long add(long a, long b) {return MachineArithmetic.safeAdd(a, b);}
 
-    @Override
-    long multiply(long a, long b) {return MachineArithmetic.safeMultiply(a, b);}
 
-    @Override
-    long negate(long a) {return MachineArithmetic.safeNegate(a);}
+    public override long  subtract(long a, long b) {return MachineArithmetic.safeSubtract(a, b);}
 
-    @Override
-    long valueOf(long a) {return a;}
 
-    @Override
+    public override long multiply(long a, long b) {return MachineArithmetic.safeMultiply(a, b);}
+
+
+    public override long negate(long a) {return MachineArithmetic.safeNegate(a);}
+
+
+    public override long valueOf(long a) {return a;}
+
+    
     public UnivariatePolynomialZ64 monic() {
         if (isZero())
             return this;
         return divideOrNull(lc());
     }
 
-    @Override
-    public UnivariatePolynomialZ64 monic(long factor) {
-        long lc = lc();
+    
+    public override UnivariatePolynomialZ64 monic(long factor) {
+        long lc = this.lc();
         long gcd = MachineArithmetic.gcd(lc, factor);
         factor = factor / gcd;
         lc = lc / gcd;
@@ -319,7 +284,7 @@ public final class UnivariatePolynomialZ64 extends AUnivariatePolynomial64<Univa
         if (factor == 1)
             return this;
         Magic magic = magicSigned(factor);
-        for (int i = degree; i >= 0; --i) {
+        for (int i = Degree; i >= 0; --i) {
             long l = divideSignedFast(data[i], magic);
             if (l * factor != data[i])
                 return null;
@@ -328,24 +293,24 @@ public final class UnivariatePolynomialZ64 extends AUnivariatePolynomial64<Univa
         return this;
     }
 
-    @Override
+    
     public UnivariatePolynomialZ64 divideByLC(UnivariatePolynomialZ64 other) {
         return divideOrNull(other.lc());
     }
 
-    @Override
+    
     public UnivariatePolynomialZ64 multiplyByBigInteger(BigInteger factor) {
-        return multiply(factor.longValueExact());
+        return multiply((long)factor);
     }
 
     /** internal API */
     UnivariatePolynomialZ64 multiplyUnsafe(long factor) {
-        for (int i = degree; i >= 0; --i)
+        for (int i = Degree; i >= 0; --i)
             data[i] *= factor;
         return this;
     }
 
-    @Override
+    
     public UnivariatePolynomialZ64 multiply(UnivariatePolynomialZ64 oth) {
         if (isZero())
             return this;
@@ -354,23 +319,23 @@ public final class UnivariatePolynomialZ64 extends AUnivariatePolynomial64<Univa
         if (this == oth)
             return square();
 
-        if (oth.degree == 0)
+        if (oth.Degree == 0)
             return multiply(oth.data[0]);
-        if (degree == 0) {
+        if (Degree == 0) {
             long factor = data[0];
-            data = oth.data.clone();
-            degree = oth.degree;
+            data = (long[])oth.data.Clone();
+            Degree = oth.Degree;
             return multiply(factor);
         }
 
-        double rBound = normMax() * oth.normMax() * Math.max(degree + 1, oth.degree + 1);
-        if (rBound < Long.MAX_VALUE)
+        double rBound = normMax() * oth.normMax() * Math.Max(Degree + 1, oth.Degree + 1);
+        if (rBound < long.MaxValue)
             // we can apply fast integer arithmetic
             data = multiplyUnsafe0(oth);
         else
             data = multiplySafe0(oth);
 
-        degree += oth.degree;
+        Degree += oth.Degree;
         fixDegree();
         return this;
     }
@@ -384,73 +349,73 @@ public final class UnivariatePolynomialZ64 extends AUnivariatePolynomial64<Univa
         if (this == oth)
             return square();
 
-        if (oth.degree == 0)
+        if (oth.Degree == 0)
             return multiply(oth.data[0]);
-        if (degree == 0) {
+        if (Degree == 0) {
             long factor = data[0];
-            data = oth.data.clone();
-            degree = oth.degree;
+            data = (long[])oth.data.Clone();
+            Degree = oth.Degree;
             return multiplyUnsafe(factor);
         }
 
         data = multiplyUnsafe0(oth);
-        degree += oth.degree;
+        Degree += oth.Degree;
         fixDegree();
         return this;
     }
 
-    @Override
+    
     public UnivariatePolynomialZ64 square() {
         if (isZero())
             return this;
-        if (degree == 0)
+        if (Degree == 0)
             return multiply(data[0]);
 
         double norm1 = normMax();
-        double rBound = norm1 * norm1 * (degree + 1);
-        if (rBound < Long.MAX_VALUE)
+        double rBound = norm1 * norm1 * (Degree + 1);
+        if (rBound < long.MaxValue)
             // we can apply fast integer arithmetic
             data = squareUnsafe0();
         else
             data = squareSafe0();
 
-        degree += degree;
+        Degree += Degree;
         fixDegree();
         return this;
     }
 
-    @Override
+    
     public UnivariatePolynomialZ64 derivative() {
         if (isConstant())
             return createZero();
-        long[] newData = new long[degree];
-        for (int i = degree; i > 0; --i)
+        long[] newData = new long[Degree];
+        for (int i = Degree; i > 0; --i)
             newData[i - 1] = multiply(data[i], i);
         return createFromArray(newData);
     }
 
-    @Override
+    
     public UnivariatePolynomialZ64 clone() {
-        return new UnivariatePolynomialZ64(data.clone(), degree);
+        return new UnivariatePolynomialZ64((long[])data.Clone(), Degree);
     }
 
-    @Override
-    public UnivariatePolynomialZ64 parsePoly(String string) {
-        return parse(string);
+    
+    public UnivariatePolynomialZ64 parsePoly(String str) {
+        return parse(str);
     }
 
-    @Override
+    
     public String coefficientRingToString(IStringifier<UnivariatePolynomialZ64> stringifier) {
         return "Z";
     }
 
-    @Override
+    
     public AMultivariatePolynomial composition(AMultivariatePolynomial value) {
-        throw new UnsupportedOperationException();
+        throw new InvalidOperationException();
     }
 
-    @Override
+    
     public AMultivariatePolynomial asMultivariate(Comparator<DegreeVector> ordering) {
-        throw new UnsupportedOperationException();
+        throw new InvalidOperationException();
     }
 }

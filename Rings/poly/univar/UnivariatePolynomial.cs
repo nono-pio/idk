@@ -13,7 +13,7 @@ public sealed class UnivariatePolynomial<E> : IUnivariatePolynomial<UnivariatePo
     
     public readonly Ring<E> ring;
     
-    E[] data;
+    public E[] data;
 
     public int Degree;
 

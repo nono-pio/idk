@@ -1,15 +1,11 @@
-package cc.redberry.rings.poly.univar;
+namespace Rings.poly.univar;
 
-/**
- * @author Stanislav Poslavsky
- * @since 2.1
- */
-public final class DiophantineEquations {
-    private DiophantineEquations() {}
+
+public static class DiophantineEquations {
 
     /** runs xgcd for coprime polynomials ensuring that gcd is 1 (not another constant) */
-    public static <Poly extends IUnivariatePolynomial<Poly>>
-    Poly[] monicExtendedEuclid(Poly a, Poly b) {
+    public static 
+    Poly[] monicExtendedEuclid<Poly>(Poly a, Poly b)  where Poly : IUnivariatePolynomial<Poly> {
         Poly[] xgcd = UnivariateGCD.PolynomialExtendedGCD(a, b);
         if (xgcd[0].isOne())
             return xgcd;
@@ -25,21 +21,20 @@ public final class DiophantineEquations {
     /**
      * Solves a1 * x1 + a2 * x2 + ... = rhs for given univariate and rhs and unknown x_i
      */
-    public static final class DiophantineSolver<Poly extends IUnivariatePolynomial<Poly>> {
+    public sealed class DiophantineSolver<Poly> where Poly : IUnivariatePolynomial<Poly> {
         /** the given factors */
-        final Poly[] factors;
-        final Poly[] solution;
-        final Poly gcd;
+        readonly Poly[] factors;
+        readonly Poly[] solution;
+        readonly Poly gcd;
 
-        @SuppressWarnings("unchecked")
         public DiophantineSolver(Poly[] factors) {
             this.factors = factors;
-            this.solution = factors[0].createArray(factors.length);
+            this.solution = new Poly[factors.Length];
 
             Poly prev = factors[0];
             solution[0] = factors[0].createOne();
 
-            for (int i = 1; i < factors.length; i++) {
+            for (int i = 1; i < factors.Length; i++) {
                 Poly[] xgcd = monicExtendedEuclid(prev, factors[i]);
                 for (int j = 0; j < i; j++)
                     solution[j].multiply(xgcd[1]);
@@ -52,9 +47,9 @@ public final class DiophantineEquations {
         public Poly[] solve(Poly rhs) {
             rhs = UnivariateDivision.divideOrNull(rhs, gcd, true);
             if (rhs == null)
-                throw new IllegalArgumentException("Not solvable.");
-            Poly[] solution = rhs.createArray(this.solution.length);
-            for (int i = 0; i < solution.length; i++)
+                throw new ArgumentException("Not solvable.");
+            Poly[] solution = new Poly[this.solution.Length];
+            for (int i = 0; i < solution.Length; i++)
                 solution[i] = this.solution[i].clone().multiply(rhs);
             return solution;
         }
