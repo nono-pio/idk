@@ -350,7 +350,7 @@ public class Risch
             var m = p.Degree - d.Deg(i) + 1;
 
             var coefficients = new RMPoly[m + 1];
-            Array.Fill(coefficients, RMPoly.Zero(ring.Ring, ring.NVars - 1));
+            Array.Fill(coefficients, RMPoly.Zero(ring.Ring, ring.NVars));
             coefficients[m] = p.LC / (d.LC(i) * m);
 
             var q0 = new UPoly(ring, coefficients);
@@ -363,23 +363,26 @@ public class Risch
         return (q, p);
     }
     
-    //
-    // public static (Poly Integral, bool IsElementary) ResidueReduce(PolyRational f, DiffField D)
+    
+    // public static (RUPoly Integral, bool IsElementary) ResidueReduce(RUPoly f, DiffField D, int index)
     // {
-    //     var d = f.Den;
-    //     var (p, a) = Poly.Div(f.Num, d);
+    //     var d = f.Denominator;
+    //     var (p, a) = UPoly.Divide(f.Ring, f.Numerator, d);
     //     var z = new Variable("z", dummy: true);
     //     Poly r;
     //     Poly[] R;
-    //     if (Derivative(d, D).Deg() <= d.Deg())
-    //         (r, R) = SubResultant_x(d, a - z * Derivative(d, D));
+    //     if (Derivative(d, D, index).Degree <= d.Degree)
+    //         (r, R) = SubResultant_x(d, a - z * Derivative(d, D, index));
     //     else 
-    //         (r, R) = SubResultant_x(d, a - z * Derivative(d, D));
+    //         (r, R) = SubResultant_x(a - z * Derivative(d, D, index), d);
     //
     //     var (n, s) = SplitSquarefreeFactor(r, kD);
-    //     for (int i = 0; i < ss.Length; i++)
+    //     for (int i = 0; i < s.Length; i++)
     //     {
-    //         if (i == d.Deg())
+    //         if (s[i].Degree == 0)
+    //             continue;
+    //         
+    //         if (i == d.Degree)
     //             S[i] = d;
     //         else
     //         {
@@ -389,8 +392,11 @@ public class Risch
     //                 S[i] = S[i] / gcd_x(A[j], s[i]) ^ j;
     //         }
     //     }
-    // }
     //
+    //     var b = n.All(ni => ni.IsConstant);
+    //     return (_, b);
+    // }
+    
     //
     // public static (Poly Integral, bool IsElementary) IntegratePrimitive(Poly f, DiffField D)
     // {
