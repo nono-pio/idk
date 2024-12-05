@@ -120,7 +120,7 @@ public abstract class AUnivariatePolynomial64<lPoly> : IUnivariatePolynomial<lPo
      *
      * @param desiredDegree desired Degree
      */
-    void ensureCapacity(int desiredDegree)
+    public void ensureCapacity(int desiredDegree)
     {
         if (Degree < desiredDegree)
             Degree = desiredDegree;
@@ -132,7 +132,7 @@ public abstract class AUnivariatePolynomial64<lPoly> : IUnivariatePolynomial<lPo
     /**
      * Removes zeroes from the end of {@code data} and adjusts the Degree
      */
-    protected void fixDegree()
+    public void fixDegree()
     {
         int i = Degree;
         while (i >= 0 && data[i] == 0) --i;

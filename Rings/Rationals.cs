@@ -43,7 +43,7 @@ public sealed class Rationals<E> : Ring<Rational<E>>
     /** Gives rational with a given numerator and denominator */
     public Rational<E> mk(E num, E den)
     {
-        return new Rational<>(ring, num, den);
+        return new Rational<E>(ring, num, den);
     }
 
     /** Gives rational with a given numerator and denominator */
@@ -73,7 +73,7 @@ public sealed class Rationals<E> : Ring<Rational<E>>
 
     public BigInteger characteristic()
     {
-        return BigInteger.ZERO;
+        return BigInteger.Zero;
     }
 
 
@@ -163,14 +163,14 @@ public sealed class Rationals<E> : Ring<Rational<E>>
 
     public Rational<E> gcd(Rational<E> a, Rational<E> b)
     {
-        return Rational.one(ring);
+        return Rational<E>.one(ring);
     }
 
 
-    private FactorDecomposition<Rational<E>> factor(Rational<E> element, JSType.Function<E, FactorDecomposition<E>> factor)
+    private FactorDecomposition<Rational<E>> factor(Rational<E> element, Func<E, FactorDecomposition<E>> factor)
     {
         if (element.isZero())
-            return FactorDecomposition.of(this, element);
+            return FactorDecomposition<Rational<E>>.of(this, element);
 
         FactorDecomposition<E> numFactors = element.numerator.stream()
             .map(factor)
@@ -178,15 +178,15 @@ public sealed class Rationals<E> : Ring<Rational<E>>
         FactorDecomposition<Rational<E>> factors = FactorDecomposition.empty(this);
 
         for (int i = 0; i < numFactors.size(); i++)
-            factors.addNonUnitFactor(new Rational<>(ring, numFactors.get(i)), numFactors.getExponent(i));
-        factors.addFactor(new Rational<>(ring, numFactors.unit), 1);
+            factors.addNonUnitFactor(new Rational<E>(ring, numFactors.get(i)), numFactors.getExponent(i));
+        factors.addFactor(new Rational<E>(ring, numFactors.unit), 1);
 
         FactorDecomposition<E> denFactors = element.denominator.stream()
             .map(factor)
             .reduce(FactorDecomposition.empty(ring), FactorDecomposition::addAll);
         for (int i = 0; i < denFactors.size(); i++)
-            factors.addNonUnitFactor(new Rational<>(ring, ring.getOne(), denFactors.get(i)), denFactors.getExponent(i));
-        factors.addFactor(new Rational<>(ring, ring.getOne(), denFactors.unit), 1);
+            factors.addNonUnitFactor(new Rational<E>(ring, ring.getOne(), denFactors.get(i)), denFactors.getExponent(i));
+        factors.addFactor(new Rational<E>(ring, ring.getOne(), denFactors.unit), 1);
 
         return factors;
     }
@@ -281,7 +281,7 @@ public sealed class Rationals<E> : Ring<Rational<E>>
             den = rnd.nextInt();
         } while (ring.isZero(eden = ring.valueOf(den)));
 
-        return new Rational<_>(ring, ring.valueOf(rnd.nextInt()), eden);
+        return new Rational<E>(ring, ring.valueOf(rnd.nextInt()), eden);
     }
 
 
@@ -293,7 +293,7 @@ public sealed class Rationals<E> : Ring<Rational<E>>
             den = ring.randomElementTree(rnd);
         } while (ring.isZero(den));
 
-        return new Rational<_>(ring, ring.randomElementTree(rnd), den);
+        return new Rational<E>(ring, ring.randomElementTree(rnd), den);
     }
 
 
@@ -308,7 +308,7 @@ public sealed class Rationals<E> : Ring<Rational<E>>
         if (this == o) return true;
         if (o == null || GetType() != o.GetType()) return false;
 
-        Rationals <_> rationals = (Rationals <_>) o;
+        var rationals = (Rationals <E>) o;
 
         return ring.Equals(rationals.ring);
     }
@@ -316,7 +316,7 @@ public sealed class Rationals<E> : Ring<Rational<E>>
 
     public int hashCode()
     {
-        return ring.hashCode();
+        return ring.GetHashCode();
     }
 
 

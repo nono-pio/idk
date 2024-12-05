@@ -1,9 +1,7 @@
 using System.Diagnostics;
 using System.Numerics;
-using System.Security.Cryptography;
 using System.Text;
 using Rings.io;
-using Rings.poly.univar;
 
 namespace Rings.poly.univar;
 
@@ -54,19 +52,19 @@ public sealed class UnivariatePolynomial<E> : IUnivariatePolynomial<UnivariatePo
     }
 
     
-    public static  UnivariatePolynomial<E> create<E>(Ring<E> ring, params E[] data) {
+    public static  UnivariatePolynomial<E> create(Ring<E> ring, params E[] data) {
         ring.setToValueOf(data);
         return new UnivariatePolynomial<E>(ring, data);
     }
 
     
-    public static  UnivariatePolynomial<E> createUnsafe<E>(Ring<E> ring, E[] data) {
+    public static  UnivariatePolynomial<E> createUnsafe(Ring<E> ring, E[] data) {
         return new UnivariatePolynomial<E>(ring, data);
     }
 
     
     public static UnivariatePolynomial<BigInteger> create(Ring<BigInteger> ring, params long[] data) {
-        return create(ring, ring.valueOf(data));
+        return UnivariatePolynomial<BigInteger>.create(ring, ring.valueOf(data));
     }
 
     
@@ -75,17 +73,17 @@ public sealed class UnivariatePolynomial<E> : IUnivariatePolynomial<UnivariatePo
     }
 
     
-    public static  UnivariatePolynomial<E> constant<E>(Ring<E> ring, E constant) {
-        return create(ring, ring.createArray(constant));
+    public static  UnivariatePolynomial<E> constant(Ring<E> ring, E constant) {
+        return create(ring, [constant]);
     }
 
     
-    public static  UnivariatePolynomial<E> zero<E>(Ring<E> ring) {
+    public static  UnivariatePolynomial<E> zero(Ring<E> ring) {
         return constant(ring, ring.getZero());
     }
 
     
-    public static  UnivariatePolynomial<E> one<E>(Ring<E> ring) {
+    public static  UnivariatePolynomial<E> one(Ring<E> ring) {
         return constant(ring, ring.getOne());
     }
 
@@ -110,7 +108,7 @@ public sealed class UnivariatePolynomial<E> : IUnivariatePolynomial<UnivariatePo
             throw new ArgumentException("Not a modular ring: " + poly.ring);
         long[] data = new long[poly.Degree + 1];
         for (int i = 0; i < data.Length; i++)
-            data[i] = ((BigInteger) poly.data[i]).longValueExact();
+            data[i] = (long) poly.data[i];
         return UnivariatePolynomialZp64.create((long)((IntegersZp) poly.ring).Modulus, data);
     }
 
@@ -127,7 +125,7 @@ public sealed class UnivariatePolynomial<E> : IUnivariatePolynomial<UnivariatePo
         long modulus = ring.Modulus;
         long[] data = new long[poly.Degree + 1];
         for (int i = 0; i < data.Length; i++)
-            data[i] = (poly.data[i] % modulus).longValueExact();
+            data[i] = (long)(poly.data[i] % modulus);
         return UnivariatePolynomialZp64.create(ring, data);
     }
 
@@ -144,7 +142,7 @@ public sealed class UnivariatePolynomial<E> : IUnivariatePolynomial<UnivariatePo
         long modulus = ring.Modulus;
         long[] data = new long[poly.Degree + 1];
         for (int i = 0; i < data.Length; i++)
-            data[i] = ring.divide((poly.data[i].numerator() % modulus).longValueExact(), (poly.data[i].denominator() % modulus).longValueExact());
+            data[i] = ring.divide((long)(poly.data[i].numerator() % modulus), (long)(poly.data[i].denominator() % modulus));
         return UnivariatePolynomialZp64.create(ring, data);
     }
 
@@ -164,13 +162,10 @@ public sealed class UnivariatePolynomial<E> : IUnivariatePolynomial<UnivariatePo
         BigInteger[] newData = new BigInteger[poly.Degree + 1];
         for (int i = poly.Degree; i >= 0; --i)
             newData[i] = ring.symmetricForm(poly.data[i]);
-        return UnivariatePolynomial.createUnsafe(Rings.Z, newData);
+        return UnivariatePolynomial<BigInteger>.createUnsafe(Rings.Z, newData);
     }
 
-    
-    public int degree() {return Degree;}
 
-    
     public E get(int i) { return i > Degree ? ring.getZero() : data[i];}
 
     
@@ -204,9 +199,10 @@ public sealed class UnivariatePolynomial<E> : IUnivariatePolynomial<UnivariatePo
 
     
     public UnivariatePolynomial<E> setRing(Ring<E> newRing) {
-        if (ring == newRing)
+        if (ring.Equals(newRing))
             return clone();
-        E[] newData = Arrays.copyOf(data, Degree + 1);
+        E[] newData = new E[Degree + 1];
+        Array.Copy(data, newData, Degree + 1);
         newRing.setToValueOf(newData);
         return new UnivariatePolynomial<E>(newRing, newData);
     }
@@ -235,13 +231,15 @@ public sealed class UnivariatePolynomial<E> : IUnivariatePolynomial<UnivariatePo
     public void ensureInternalCapacity(int desiredCapacity) {
         if (data.Length < desiredCapacity) {
             int oldLength = data.Length;
-            data = Arrays.copyOf(data, desiredCapacity);
+            var newData = new E[desiredCapacity];
+            Array.Copy(data, newData, desiredCapacity);
+            data = newData;
             fillZeroes(data, oldLength, data.Length);
         }
     }
 
-    
-    sealed void ensureCapacity(int desiredDegree) {
+
+    public void ensureCapacity(int desiredDegree) {
         if (Degree < desiredDegree)
             Degree = desiredDegree;
 
@@ -252,8 +250,8 @@ public sealed class UnivariatePolynomial<E> : IUnivariatePolynomial<UnivariatePo
         }
     }
 
-    
-    sealed void fixDegree() {
+
+    public void fixDegree() {
         int i = Degree;
         while (i >= 0 && ring.isZero(data[i])) --i;
         if (i < 0) i = 0;
@@ -267,7 +265,9 @@ public sealed class UnivariatePolynomial<E> : IUnivariatePolynomial<UnivariatePo
 
     
     public UnivariatePolynomial<E> getRange(int from, int to) {
-        return new UnivariatePolynomial<E>(ring, Arrays.copyOfRange(data, from, to));
+        var newData = new E[to - from];
+        Array.Copy(data, from, newData, 0, to - from);
+        return new UnivariatePolynomial<E>(ring, newData);
     }
 
     
@@ -343,7 +343,8 @@ public sealed class UnivariatePolynomial<E> : IUnivariatePolynomial<UnivariatePo
     
     public bool isUnitCC() {return ring.isOne(cc());}
 
-    
+
+
     public bool isConstant() {return Degree == 0;}
 
     
@@ -368,8 +369,11 @@ public sealed class UnivariatePolynomial<E> : IUnivariatePolynomial<UnivariatePo
     public bool isOverFiniteField() {
         return ring.isFinite();
     }
-
     
+    
+   
+
+
     public bool isOverZ() {return ring.Equals(Rings.Z);}
 
     
@@ -422,10 +426,10 @@ public sealed class UnivariatePolynomial<E> : IUnivariatePolynomial<UnivariatePo
     public static double norm2Double(UnivariatePolynomial<BigInteger> poly) {
         double norm = 0;
         for (int i = poly.Degree; i >= 0; --i) {
-            double d = poly.data[i].doubleValue();
+            double d = (double)poly.data[i];
             norm += d * d;
         }
-        return Math.sqrt(norm);
+        return Math.Sqrt(norm);
     }
 
     
@@ -457,17 +461,17 @@ public sealed class UnivariatePolynomial<E> : IUnivariatePolynomial<UnivariatePo
     public UnivariatePolynomial<E> set(UnivariatePolynomial<E> oth) {
         if (oth == this)
             return this;
-        this.data = oth.data.clone();
+        this.data = (E[])oth.data.Clone();
         this.Degree = oth.Degree;
         return this;
     }
 
     
-    public readonly UnivariatePolynomial<E> setAndDestroy(UnivariatePolynomial<E> oth) {
+    public UnivariatePolynomial<E> setAndDestroy(UnivariatePolynomial<E> oth) {
         this.data = oth.data;
         oth.data = null; // destroy
         this.Degree = oth.Degree;
-        assert data.Length > 0;
+        Debug.Assert(data.Length > 0);
         return this;
     }
 
@@ -478,7 +482,7 @@ public sealed class UnivariatePolynomial<E> : IUnivariatePolynomial<UnivariatePo
         if (offset > Degree)
             return toZero();
 
-        System.arraycopy(data, offset, data, 0, Degree - offset + 1);
+        Array.Copy(data, offset, data, 0, Degree - offset + 1);
         fillZeroes(data, Degree - offset + 1, Degree + 1);
         Degree = Degree - offset;
         return this;
@@ -490,7 +494,7 @@ public sealed class UnivariatePolynomial<E> : IUnivariatePolynomial<UnivariatePo
             return this;
         int degree = this.Degree;
         ensureCapacity(offset + degree);
-        System.arraycopy(data, 0, data, offset, degree + 1);
+        Array.Copy(data, 0, data, offset, degree + 1);
         fillZeroes(data, 0, offset);
         return this;
     }
@@ -516,7 +520,7 @@ public sealed class UnivariatePolynomial<E> : IUnivariatePolynomial<UnivariatePo
     public E content() {
         if (Degree == 0)
             return data[0];
-        return isOverField() ? lc() : ring.gcd(this);
+        return isOverField() ? lc() : ring.gcd(data);
 //        E gcd = data[degree];
 //        for (int i = degree - 1; i >= 0; --i)
 //            gcd = ring.gcd(gcd, data[i]);
@@ -530,7 +534,7 @@ public sealed class UnivariatePolynomial<E> : IUnivariatePolynomial<UnivariatePo
 
     
     public UnivariatePolynomial<E> primitivePart() {
-        E content = content();
+        E content = this.content();
         if (signumOfLC() < 0 && ring.signum(content) > 0)
             content = ring.negate(content);
         if (ring.isMinusOne(content))
@@ -549,9 +553,11 @@ public sealed class UnivariatePolynomial<E> : IUnivariatePolynomial<UnivariatePo
         if (ring.isOne(content))
             return this;
         for (int i = Degree; i >= 0; --i) {
-            data[i] = ring.divideOrNull(data[i], content);
-            if (data[i] == null)
+            var d = ring.divideOrNull(data[i], content);
+            if (d.IsNull)
                 return null;
+            
+            data[i] = d.Value;
         }
         return this;
     }
@@ -589,12 +595,11 @@ public sealed class UnivariatePolynomial<E> : IUnivariatePolynomial<UnivariatePo
     }
 
     
-    @SuppressWarnings("unchecked")
     public MultivariatePolynomial<E> composition(AMultivariatePolynomial value) {
-        if (!(value instanceof MultivariatePolynomial))
-            throw new IllegalArgumentException();
+        if (!(value is MultivariatePolynomial))
+            throw new ArgumentException();
         if (!((MultivariatePolynomial) value).ring.equals(ring))
-            throw new IllegalArgumentException();
+            throw new ArgumentException();
         if (value.isOne())
             return asMultivariate();
         if (value.isZero())
@@ -614,7 +619,7 @@ public sealed class UnivariatePolynomial<E> : IUnivariatePolynomial<UnivariatePo
             return ccAsPoly();
 
         E factor = ring.getOne();
-        E[] result = ring.createArray(Degree + 1);
+        E[] result = new E[Degree + 1];
         for (int i = 0; i <= Degree; ++i) {
             result[i] = ring.multiply(data[i], factor);
             factor = ring.multiply(factor, scaling);
@@ -848,8 +853,8 @@ public sealed class UnivariatePolynomial<E> : IUnivariatePolynomial<UnivariatePo
         if (ring is IntegersZp) {
             // faster method with exact operations
             UnivariatePolynomial<E>
-                    iThis = setRingUnsafe((Ring<E>) Rings.Z),
-                    iOth = oth.setRingUnsafe((Ring<E>) Rings.Z);
+                    iThis = setRingUnsafe(Rings.Z as Ring<E>),
+                    iOth = oth.setRingUnsafe(Rings.Z as Ring<E>);
             data = iThis.multiply(iOth).data;
             ring.setToValueOf(data);
         } else
@@ -868,7 +873,7 @@ public sealed class UnivariatePolynomial<E> : IUnivariatePolynomial<UnivariatePo
 
         if (ring is IntegersZp) {
             // faster method with exact operations
-            UnivariatePolynomial<E> iThis = setRingUnsafe((Ring<E>) Rings.Z);
+            UnivariatePolynomial<E> iThis = setRingUnsafe(Rings.Z as Ring<E>);
             data = iThis.square().data;
             ring.setToValueOf(data);
         } else
@@ -992,14 +997,14 @@ public sealed class UnivariatePolynomial<E> : IUnivariatePolynomial<UnivariatePo
 
             sb.Append(varString);
             if (i > 1)
-                sb.Append("^").append(i);
+                sb.Append("^").Append(i);
         }
         return sb.ToString();
     }
 
     String toStringForCopy() {
-        String s = ArraysUtil.toString(data, 0, Degree + 1, x -> "new BigInteger(\"" + x + "\")");
-        return "of(" + s.substring(1, s.Length - 1) + ")";
+        String s = ArraysUtil.toString(data, 0, Degree + 1, x => "new BigInteger(\"" + x + "\")");
+        return "of(" + s.Substring(1, s.Length - 1) + ")";
     }
 
     
@@ -1037,8 +1042,8 @@ public sealed class UnivariatePolynomial<E> : IUnivariatePolynomial<UnivariatePo
     
     E[] multiplySafe0(UnivariatePolynomial<E> oth) {
         long md = 1L * (Degree + 1) * (oth.Degree + 1);
-        if (isOverZ() && md >= MUL_KRONECKER_THRESHOLD){}
-            return (E[]) multiplyKronecker0((UnivariatePolynomial<BigInteger>) this, (UnivariatePolynomial<BigInteger>) oth);
+        if (isOverZ() && md >= MUL_KRONECKER_THRESHOLD)
+            return multiplyKronecker0(this as UnivariatePolynomial<BigInteger>, oth as UnivariatePolynomial<BigInteger>) as E[];
         if (md <= MUL_CLASSICAL_THRESHOLD)
             return multiplyClassicalSafe(data, 0, Degree + 1, oth.data, 0, oth.Degree + 1);
         else
@@ -1049,7 +1054,7 @@ public sealed class UnivariatePolynomial<E> : IUnivariatePolynomial<UnivariatePo
     E[] squareSafe0() {
         long md = 1L * (Degree + 1) * (Degree + 1);
         if (isOverZ() && md >= MUL_KRONECKER_THRESHOLD)
-            return (E[]) squareKronecker0((UnivariatePolynomial) this);
+            return squareKronecker0(this as UnivariatePolynomial<BigInteger>) as E[];
         if (md <= MUL_CLASSICAL_THRESHOLD)
             return squareClassicalSafe(data, 0, Degree + 1);
         else
@@ -1124,9 +1129,10 @@ public sealed class UnivariatePolynomial<E> : IUnivariatePolynomial<UnivariatePo
             E[] f0g = multiplyKaratsubaSafe(f, fFrom, fFrom + split, g, gFrom, gTo);
             E[] f1g = multiplyKaratsubaSafe(f, fFrom + split, fTo, g, gFrom, gTo);
 
-            int oldLen = f0g.Length, newLen = fTo - fFrom + gTo - gFrom - 1;
-            E[] result4 = Arrays.copyOf(f0g, newLen);
-            fillZeroes(result4, oldLen, newLen);
+            int _oldLen = f0g.Length, newLen = fTo - fFrom + gTo - gFrom - 1;
+            E[] result4 = new E[newLen];
+            Array.Copy(f0g, result4, newLen);
+            fillZeroes(result4, _oldLen, newLen);
             for (int i = 0; i < f1g.Length; i++)
                 result4[i + split] = ring.addMutable(result4[i + split], f1g[i]);
             return result4;
@@ -1137,15 +1143,15 @@ public sealed class UnivariatePolynomial<E> : IUnivariatePolynomial<UnivariatePo
         E[] f1g1 = multiplyKaratsubaSafe(f, fMid, fTo, g, gMid, gTo);
 
         // f0 + f1
-        E[] f0_plus_f1 = ring.createArray(Math.max(fMid - fFrom, fTo - fMid));
-        System.arraycopy(f, fFrom, f0_plus_f1, 0, fMid - fFrom);
+        E[] f0_plus_f1 = new E[Math.Max(fMid - fFrom, fTo - fMid)];
+        Array.Copy(f, fFrom, f0_plus_f1, 0, fMid - fFrom);
         fillZeroes(f0_plus_f1, fMid - fFrom, f0_plus_f1.Length);
         for (int i = fMid; i < fTo; ++i)
             f0_plus_f1[i - fMid] = ring.add(f0_plus_f1[i - fMid], f[i]);
 
         //g0 + g1
-        E[] g0_plus_g1 = ring.createArray(Math.max(gMid - gFrom, gTo - gMid));
-        System.arraycopy(g, gFrom, g0_plus_g1, 0, gMid - gFrom);
+        E[] g0_plus_g1 = new E[Math.Max(gMid - gFrom, gTo - gMid)];
+        Array.Copy(g, gFrom, g0_plus_g1, 0, gMid - gFrom);
         fillZeroes(g0_plus_g1, gMid - gFrom, g0_plus_g1.Length);
         for (int i = gMid; i < gTo; ++i)
             g0_plus_g1[i - gMid] = ring.add(g0_plus_g1[i - gMid], g[i]);
@@ -1153,14 +1159,16 @@ public sealed class UnivariatePolynomial<E> : IUnivariatePolynomial<UnivariatePo
         E[] mid = multiplyKaratsubaSafe(f0_plus_f1, 0, f0_plus_f1.Length, g0_plus_g1, 0, g0_plus_g1.Length);
 
         if (mid.Length < f0g0.Length) {
-            int oldLen = mid.Length;
-            mid = Arrays.copyOf(mid, f0g0.Length);
-            fillZeroes(mid, oldLen, mid.Length);
+            int _oldLen = mid.Length;
+            mid = new E[f0g0.Length];
+            Array.Copy(mid, mid, f0g0.Length);
+            fillZeroes(mid, _oldLen, mid.Length);
         }
         if (mid.Length < f1g1.Length) {
-            int oldLen = mid.Length;
-            mid = Arrays.copyOf(mid, f1g1.Length);
-            fillZeroes(mid, oldLen, mid.Length);
+            int _oldLen = mid.Length;
+            mid = new E[f1g1.Length];
+            Array.Copy(mid, mid, f1g1.Length);
+            fillZeroes(mid, _oldLen, mid.Length);
         }
 
         //subtract f0g0, f1g1
@@ -1171,7 +1179,8 @@ public sealed class UnivariatePolynomial<E> : IUnivariatePolynomial<UnivariatePo
 
 
         int oldLen = f0g0.Length;
-        E[] result5 = Arrays.copyOf(f0g0, (fTo - fFrom) + (gTo - gFrom) - 1);
+        E[] result5 = new E[(fTo - fFrom) + (gTo - gFrom) - 1];
+        Array.Copy(f0g0, result5, (fTo - fFrom) + (gTo - gFrom) - 1);
         fillZeroes(result5, oldLen, result5.Length);
         for (int i = 0; i < mid.Length; ++i)
             result5[i + split] = ring.addMutable(result5[i + split], mid[i]);
@@ -1225,8 +1234,8 @@ public sealed class UnivariatePolynomial<E> : IUnivariatePolynomial<UnivariatePo
         E[] f1g1 = squareKaratsubaSafe(f, fMid, fTo);
 
         // f0 + f1
-        E[] f0_plus_f1 = ring.createArray(Math.Max(fMid - fFrom, fTo - fMid));
-        System.arraycopy(f, fFrom, f0_plus_f1, 0, fMid - fFrom);
+        E[] f0_plus_f1 = new E[Math.Max(fMid - fFrom, fTo - fMid)];
+        Array.Copy(f, fFrom, f0_plus_f1, 0, fMid - fFrom);
         fillZeroes(f0_plus_f1, fMid - fFrom, f0_plus_f1.Length);
         for (int i = fMid; i < fTo; ++i)
             f0_plus_f1[i - fMid] = ring.add(f0_plus_f1[i - fMid], f[i]);
@@ -1235,12 +1244,12 @@ public sealed class UnivariatePolynomial<E> : IUnivariatePolynomial<UnivariatePo
 
         if (mid.Length < f0g0.Length) {
             int oldLen = mid.Length;
-            mid = Arrays.copyOf(mid, f0g0.Length);
+            Array.Copy(mid, mid, f0g0.Length);
             fillZeroes(mid, oldLen, mid.Length);
         }
         if (mid.Length < f1g1.Length) {
             int oldLen = mid.Length;
-            mid = Arrays.copyOf(mid, f1g1.Length);
+            Array.Copy(mid, mid, f1g1.Length);
             fillZeroes(mid, oldLen, mid.Length);
         }
 
@@ -1252,15 +1261,16 @@ public sealed class UnivariatePolynomial<E> : IUnivariatePolynomial<UnivariatePo
             mid[i] = ring.subtractMutable(mid[i], f1g1[i]);
 
 
-        int oldLen = f0g0.Length;
-        E[] result = Arrays.copyOf(f0g0, 2 * (fTo - fFrom) - 1);
-        fillZeroes(result, oldLen, result.Length);
+        int _oldLen = f0g0.Length;
+        E[] _result = new E[ 2 * (fTo - fFrom) - 1];
+        Array.Copy(f0g0, _result, 2 * (fTo - fFrom) - 1);
+        fillZeroes(_result, _oldLen, _result.Length);
         for (int i = 0; i < mid.Length; ++i)
-            result[i + split] = ring.addMutable(result[i + split], mid[i]);
+            _result[i + split] = ring.addMutable(_result[i + split], mid[i]);
         for (int i = 0; i < f1g1.Length; ++i)
-            result[i + 2 * split] = ring.addMutable(result[i + 2 * split], f1g1[i]);
+            _result[i + 2 * split] = ring.addMutable(_result[i + 2 * split], f1g1[i]);
 
-        return result;
+        return _result;
     }
 
     /* ====================== Schönhage–Strassen algorithm algorithm via Kronecker substitution ====================== */
@@ -1269,7 +1279,7 @@ public sealed class UnivariatePolynomial<E> : IUnivariatePolynomial<UnivariatePo
      * Kronecker substitution adapted from https://github.com/tbuktu/ntru/blob/master/src/main/java/net/sf/ntru/polynomial/BigIntPolynomial.java
      */
     static UnivariatePolynomial<BigInteger> squareKronecker(UnivariatePolynomial<BigInteger> poly) {
-        return create(Rings.Z, squareKronecker0(poly));
+        return UnivariatePolynomial<BigInteger>.create(Rings.Z, squareKronecker0(poly));
     }
 
     /**
@@ -1298,10 +1308,12 @@ public sealed class UnivariatePolynomial<E> : IUnivariatePolynomial<UnivariatePo
     }
 
     private static void decodePoly(int k, int[] cInt, BigInteger[] cPoly) {
-        BigInteger _2k = BigInteger.One.shiftLeft(k * 32);
+        BigInteger _2k = BigInteger.One << k * 32;
         Array.Fill(cPoly, BigInteger.Zero);
         for (int i = 0; i < cPoly.Length; i++) {
-            int[] cfInt = Arrays.copyOfRange(cInt, i * k, (i + 1) * k);
+            int[] cfInt = new int[k];
+            Array.Copy(cInt, i * k, cfInt, 0, k);
+            
             BigInteger cf = toBigInteger(cfInt);
             if (cfInt[k - 1] < 0) {   // if coeff > 2^(k-1)
                 cf = cf - _2k;
@@ -1322,17 +1334,15 @@ public sealed class UnivariatePolynomial<E> : IUnivariatePolynomial<UnivariatePo
     /**
      * Kronecker substitution adapted from https://github.com/tbuktu/ntru/blob/master/src/main/java/net/sf/ntru/polynomial/BigIntPolynomial.java
      */
-    static UnivariatePolynomial<BigInteger>
-    multiplyKronecker(UnivariatePolynomial<BigInteger> poly1,
+    static UnivariatePolynomial<BigInteger> multiplyKronecker(UnivariatePolynomial<BigInteger> poly1,
                       UnivariatePolynomial<BigInteger> poly2) {
-        return create(Rings.Z, multiplyKronecker0(poly1, poly2));
+        return UnivariatePolynomial<BigInteger>.create(Rings.Z, multiplyKronecker0(poly1, poly2));
     }
 
     /**
      * Kronecker substitution adapted from https://github.com/tbuktu/ntru/blob/master/src/main/java/net/sf/ntru/polynomial/BigIntPolynomial.java
      */
-    static BigInteger[]
-    multiplyKronecker0(UnivariatePolynomial<BigInteger> poly1,
+    static BigInteger[] multiplyKronecker0(UnivariatePolynomial<BigInteger> poly1,
                        UnivariatePolynomial<BigInteger> poly2) {
         if (poly2.Degree > poly1.Degree)
             return multiplyKronecker0(poly2, poly1);
@@ -1393,7 +1403,7 @@ public sealed class UnivariatePolynomial<E> : IUnivariatePolynomial<UnivariatePo
      * @return an <code>int</code> array that is compatible with the <code>mult()</code> methods
      */
     private static int[] toIntArray(BigInteger a) {
-        byte[] aArr = a.toByteArray();
+        byte[] aArr = a.ToByteArray();
         int[] b = new int[(aArr.Length + 3) / 4];
         for (int i = 0; i < aArr.Length; i++)
             b[i / 4] += (aArr[aArr.Length - 1 - i] & 0xFF) << ((i % 4) * 8);
@@ -1406,7 +1416,7 @@ public sealed class UnivariatePolynomial<E> : IUnivariatePolynomial<UnivariatePo
 
         int[] aInt = new int[len * k];
         for (int i = len - 1; i >= 0; i--) {
-            int[] cArr = toIntArray(a.data[i].abs());
+            int[] cArr = toIntArray(BigInteger.Abs(a.data[i]));
             if (a.data[i].Sign * sign < 0)
                 subShifted(aInt, cArr, i * k);
             else
@@ -1457,4 +1467,11 @@ public sealed class UnivariatePolynomial<E> : IUnivariatePolynomial<UnivariatePo
             i++;
         }
     }
+    
+    // From IUnivariatePolynomial
+    public int degree() => Degree;
+    public int size() => Degree + 1;
+    public bool isLinearOrConstant() => Degree <= 1;
+    public bool isLinearExactly() => Degree == 1;
+    public bool isZeroCC() => isZeroAt(0);
 }

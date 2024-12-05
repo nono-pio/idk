@@ -86,7 +86,7 @@ public interface IUnivariatePolynomial<Poly> : IPolynomial<Poly> where Poly : IU
     IEnumerable<Poly> streamAsPolys();
 
      UnivariatePolynomial<E> mapCoefficientsAsPolys<E>(Ring<E> ring, Func<Poly, E> mapper) {
-        return streamAsPolys().Select(mapper).collect(new UnivariatePolynomial.PolynomialCollector<>(ring));
+        return new UnivariatePolynomial<E>(ring, streamAsPolys().Select(mapper).ToArray());
     }
 
     

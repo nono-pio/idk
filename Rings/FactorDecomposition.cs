@@ -26,6 +26,7 @@ public class FactorDecomposition<E> : IEnumerable<E>, Stringifiable<E>
         this.unit = unit;
         this.factors = factors;
         this.exponents = exponents;
+        
         if (!isUnit(unit))
             throw new ArgumentException();
     }
@@ -59,7 +60,7 @@ public class FactorDecomposition<E> : IEnumerable<E>, Stringifiable<E>
     /** Exponent of i-th factor */
     public int getExponent(int i)
     {
-        return exponents.get(i);
+        return exponents[i];
     }
 
     /** Number of non-constant factors */
@@ -84,7 +85,7 @@ public class FactorDecomposition<E> : IEnumerable<E>, Stringifiable<E>
     public void raiseExponents(long val)
     {
         for (int i = exponents.size() - 1; i >= 0; --i)
-            exponents.set(i, MachineArithmetic.safeToInt(exponents.get(i) * val));
+            exponents.set(i, MachineArithmetic.safeToInt(exponents[i] * val));
     }
 
     /** Sets the unit factor */
@@ -121,7 +122,7 @@ public class FactorDecomposition<E> : IEnumerable<E>, Stringifiable<E>
     {
         if (isUnit(factor))
             return addUnit(factor, exponent);
-        factors.add(factor);
+        factors.Add(factor);
         exponents.add(exponent);
         return this;
     }
@@ -130,14 +131,14 @@ public class FactorDecomposition<E> : IEnumerable<E>, Stringifiable<E>
     public FactorDecomposition<E> addAll(FactorDecomposition<E> other)
     {
         addUnit(other.unit);
-        factors.addAll(other.factors);
+        factors.AddRange(other.factors);
         exponents.addAll(other.exponents);
         return this;
     }
 
     FactorDecomposition<E> addNonUnitFactor(E factor, int exponent)
     {
-        factors.add(factor);
+        factors.Add(factor);
         exponents.add(exponent);
         return this;
     }
@@ -149,7 +150,7 @@ public class FactorDecomposition<E> : IEnumerable<E>, Stringifiable<E>
     {
         List<E> newFactors = new();
         for (int i = 0; i < size(); i++)
-            newFactors.Add(ring.pow(factors.get(i), exponents.get(i)));
+            newFactors.Add(ring.pow(factors[i], exponents.get(i)));
         return new(ring, unit, newFactors, new TIntArrayList(ArraysUtil.arrayOf(1, size())));
     }
 
@@ -158,11 +159,11 @@ public class FactorDecomposition<E> : IEnumerable<E>, Stringifiable<E>
      */
     public FactorDecomposition<E> applyConstantFactor()
     {
-        List<E> newFactors = factors.stream().map(ring::copy).collect(Collectors.toList());
-        if (newFactors.isEmpty())
-            newFactors.add(ring.copy(unit));
+        List<E> newFactors = factors.Select(ring.copy).ToList();
+        if (newFactors.Count == 0)
+            newFactors.Add(ring.copy(unit));
         else
-            newFactors.set(0, ring.multiplyMutable(newFactors.get(0), ring.copy(unit)));
+            newFactors[0] = ring.multiplyMutable(newFactors[0], ring.copy(unit));
         return new(ring, ring.getOne(), newFactors, new TIntArrayList(exponents));
     }
 
@@ -194,29 +195,27 @@ public class FactorDecomposition<E> : IEnumerable<E>, Stringifiable<E>
     }
 
     /** Stream of all factors */
-    public Stream<E> stream()
+    public IEnumerable<E> stream()
     {
-        return Stream.concat(Stream.of(unit), factors.stream());
+        return [unit, ..factors];
     }
 
     /** Stream of all factors except {@link #unit} */
-    public Stream<E> streamWithoutUnit()
+    public IEnumerable<E> streamWithoutUnit()
     {
-        return factors.stream();
+        return factors;
     }
 
     /** Array of factors without constant factor */
     public E[] toArrayWithoutUnit()
     {
-        return factors.toArray(ring.createArray(size()));
+        return factors.ToArray();
     }
 
     /** Array of factors without constant factor */
     public E[] toArrayWithUnit()
     {
-        E[] array = factors.toArray(ring.createArray(1 + size()));
-        System.arraycopy(array, 0, array, 1, size());
-        array[0] = unit;
+        E[] array = [unit, ..factors];
         return array;
     }
 
@@ -253,12 +252,12 @@ public class FactorDecomposition<E> : IEnumerable<E>, Stringifiable<E>
 
     public FactorDecomposition<E> canonical()
     {
-        wrapper<E>[] wr = factors.stream().map(e-> new wrapper<>(ring, e)).toArray(wrapper[]::new);
+        wrapper<E>[] wr = factors.Select(e => new wrapper<E>(ring, e)).ToArray();
         int[] ex = exponents.toArray();
         ArraysUtil.quickSort(wr, ex);
-        factors.clear();
+        factors.Clear();
         exponents.clear();
-        factors.addAll(Arrays.stream(wr).map(w->w.el).collect(Collectors.toList()));
+        factors.AddRange(wr.Select(w => w.el).ToList());
         exponents.addAll(ex);
         return this;
     }
@@ -266,9 +265,9 @@ public class FactorDecomposition<E> : IEnumerable<E>, Stringifiable<E>
     private class wrapper<E> : IComparable<wrapper<E>>
     {
         readonly Ring<E> ring;
-        readonly E el;
+        public readonly E el;
 
-        wrapper(Ring<E> ring, E el)
+        public wrapper(Ring<E> ring, E el)
         {
             this.ring = ring;
             this.el = el;
@@ -281,34 +280,34 @@ public class FactorDecomposition<E> : IEnumerable<E>, Stringifiable<E>
         }
     }
 
-    public FactorDecomposition<R> mapTo<R>(Ring<R> othRing, JSType.Function<E, R> mapper)
+    public FactorDecomposition<R> mapTo<R>(Ring<R> othRing, Func<E, R> mapper)
     {
-        return of(othRing, mapper.apply(unit), factors.stream().map(mapper).collect(Collectors.toList()), exponents);
+        return of(othRing, mapper(unit), factors.Select(mapper).ToList(), exponents);
     }
 
-    public FactorDecomposition<E> apply(JSType.Function<E, E> mapper)
+    public FactorDecomposition<E> apply(Func<E, E> mapper)
     {
-        return of(ring, mapper.apply(unit), factors.stream().map(mapper).collect(Collectors.toList()), exponents);
+        return of(ring, mapper(unit), factors.Select(mapper).ToList(), exponents);
     }
 
 
     public String toString(IStringifier<E> stringifier)
     {
-        if (factors.isEmpty())
+        if (factors.Count == 0)
             return "(" + stringifier.stringify(unit) + ")";
         StringBuilder sb = new StringBuilder();
         if (!ring.isOne(unit))
-            sb.append("(").append(stringifier.stringify(unit)).append(")");
-        for (int i = 0; i < factors.size(); i++)
+            sb.Append("(").Append(stringifier.stringify(unit)).Append(")");
+        for (int i = 0; i < factors.Count; i++)
         {
-            if (sb.length() > 0)
-                sb.append("*");
-            sb.append("(").append(stringifier.stringify(factors.get(i))).append(")");
-            if (exponents.get(i) != 1)
-                sb.append("^").append(exponents.get(i));
+            if (sb.Length > 0)
+                sb.Append("*");
+            sb.Append("(").Append(stringifier.stringify(factors[i])).Append(")");
+            if (exponents[i] != 1)
+                sb.Append("^").Append(exponents.get(i));
         }
 
-        return sb.toString();
+        return sb.ToString();
     }
 
 
@@ -321,12 +320,12 @@ public class FactorDecomposition<E> : IEnumerable<E>, Stringifiable<E>
     public bool equals(Object o)
     {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null || GetType() != o.GetType()) return false;
 
-        FactorDecomposition < ?> factors1 = (FactorDecomposition < ?>) o;
+        FactorDecomposition <_> factors1 = (FactorDecomposition <_>) o;
 
-        if (!unit.equals(factors1.unit)) return false;
-        if (!factors.equals(factors1.factors)) return false;
+        if (!unit.Equals(factors1.unit)) return false;
+        if (!factors.Equals(factors1.factors)) return false;
         return exponents.equals(factors1.exponents);
     }
 
@@ -334,8 +333,8 @@ public class FactorDecomposition<E> : IEnumerable<E>, Stringifiable<E>
     public int hashCode()
     {
         int result = 17;
-        result = 31 * result + unit.hashCode();
-        result = 31 * result + factors.hashCode();
+        result = 31 * result + unit.GetHashCode();
+        result = 31 * result + factors.GetHashCode();
         result = 31 * result + exponents.hashCode();
         return result;
     }

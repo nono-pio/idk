@@ -642,7 +642,7 @@ public interface Ring<E> {
         E result = getOne();
         E k2p = copy(@base); // <= copy the base (mutable operations are used below)
         for (; ; ) {
-            if ((exponent.testBit(0)))
+            if ((!exponent.IsEven))
                 result = multiplyMutable(result, k2p);
             exponent = exponent >> 1;
             if (exponent.IsZero)
@@ -657,7 +657,7 @@ public interface Ring<E> {
      * @param num the number
      * @return {@code valueOf(1) * valueOf(2) * .... * valueOf(num) }
      */
-    E factorial(long num) {
+    public E factorial(long num) {
         E result = getOne();
         for (int i = 2; i <= num; ++i)
             result = multiplyMutable(result, valueOf(i));

@@ -1,10 +1,7 @@
-package cc.redberry.rings.poly.univar;
+using System.Diagnostics;
+using System.Numerics;
 
-import cc.redberry.rings.bigint.BigInteger;
-import cc.redberry.rings.poly.PolynomialFactorDecomposition;
-import cc.redberry.rings.poly.MachineArithmetic;
-import cc.redberry.rings.poly.Util;
-import org.apache.commons.math3.random.RandomGenerator;
+namespace Rings.poly.univar;
 
 
 /**
@@ -12,16 +9,14 @@ import org.apache.commons.math3.random.RandomGenerator;
  *
  * @since 1.0
  */
-public final class EqualDegreeFactorization {
-    private EqualDegreeFactorization() {}
+public static class EqualDegreeFactorization {
 
-    @SuppressWarnings("unchecked")
-    static <T extends IUnivariatePolynomial<T>> T randomMonicPoly(T factory) {
+    static T randomMonicPoly<T>(T factory) where T : IUnivariatePolynomial<T> {
         RandomGenerator rnd = PrivateRandom.getRandom();
-        int degree = Math.max(1, rnd.nextInt(2 * factory.degree() + 1));
-        if (factory instanceof UnivariatePolynomialZp64) {
+        int degree = Math.Max(1, rnd.nextInt(2 * factory.degree() + 1));
+        if (factory is UnivariatePolynomialZp64) {
             UnivariatePolynomialZp64 fm = (UnivariatePolynomialZp64) factory;
-            return (T) RandomUnivariatePolynomials.randomMonicPoly(degree, fm.ring.modulus, rnd);
+            return (T) RandomUnivariatePolynomials.randomMonicPoly(degree, fm.ring.Modulus, rnd);
         } else {
             UnivariatePolynomial fm = (UnivariatePolynomial) factory;
             return (T) RandomUnivariatePolynomials.randomMonicPoly(degree, fm.ring, rnd);
@@ -35,12 +30,12 @@ public final class EqualDegreeFactorization {
      * @param d     distinct degree
      * @return irreducible factor of {@code poly}
      */
-    public static <Poly extends IUnivariatePolynomial<Poly>> PolynomialFactorDecomposition<Poly> CantorZassenhaus(Poly input, int d) {
+    public static PolynomialFactorDecomposition<Poly> CantorZassenhaus<Poly>(Poly input, int d) where Poly : IUnivariatePolynomial<Poly> {
         Util.ensureOverFiniteField(input);
         PolynomialFactorDecomposition<Poly> result = PolynomialFactorDecomposition.unit(input.lcAsPoly());
         if (!input.coefficientRingCardinality().testBit(0))
             //even characteristic => GF2p
-            CantorZassenhaus(input, d, result, input.coefficientRingPerfectPowerExponent().intValueExact());
+            CantorZassenhaus(input, d, result, (int)input.coefficientRingPerfectPowerExponent());
         else
             CantorZassenhaus(input, d, result, -1);
         return result;
@@ -53,15 +48,15 @@ public final class EqualDegreeFactorization {
      * @param d     distinct degree
      * @return irreducible factor of {@code poly}
      */
-    private static <T extends IUnivariatePolynomial<T>> void CantorZassenhaus(T input, int d, PolynomialFactorDecomposition<T> result, int pPower) {
-        assert input.degree() % d == 0;
+    private static void CantorZassenhaus<T>(T input, int d, PolynomialFactorDecomposition<T> result, int pPower) where T : IUnivariatePolynomial<T>{
+        Debug.Assert(input.degree() % d == 0);
         int nFactors = input.degree() / d;
         if (input.degree() == 1 || nFactors == 1) {
             result.addFactor(input, 1);
             return;
         }
 
-        assert input.degree() != d;
+        Debug.Assert(input.degree() != d);
 
         T poly = input.clone();
         while (true) {
@@ -95,23 +90,23 @@ public final class EqualDegreeFactorization {
      * @param d    distinct degree
      * @return irreducible factor of {@code poly}
      */
-    private static <Poly extends IUnivariatePolynomial<Poly>> Poly CantorZassenhaus0(Poly poly, int d) {
-        assert poly.isMonic();
+    private static Poly CantorZassenhaus0<Poly>(Poly poly, int d) where Poly : IUnivariatePolynomial<Poly> {
+        Debug.Assert(poly.isMonic());
 
         Poly a = randomMonicPoly(poly);
-        if (a.isConstant() || a.equals(poly))
+        if (a.isConstant() || a.Equals(poly))
             return null;
 
         Poly gcd1 = UnivariateGCD.PolynomialGCD(a, poly);
-        if (!gcd1.isConstant() && !gcd1.equals(poly))
+        if (!gcd1.isConstant() && !gcd1.Equals(poly))
             return gcd1;
 
         // (modulus^d - 1) / 2
-        BigInteger exponent = poly.coefficientRingCardinality().pow(d).decrement().shiftRight(1);
+        BigInteger exponent = (BigInteger.Pow(poly.coefficientRingCardinality(), 2) - 1) >> 1;
         Poly b = UnivariatePolynomialArithmetic.polyPowMod(a, exponent, poly, UnivariateDivision.fastDivisionPreConditioning(poly), true);
 
         Poly gcd2 = UnivariateGCD.PolynomialGCD(b.decrement(), poly);
-        if (!gcd2.isConstant() && !gcd2.equals(poly))
+        if (!gcd2.isConstant() && !gcd2.Equals(poly))
             return gcd2;
 
         return null;
@@ -124,28 +119,28 @@ public final class EqualDegreeFactorization {
      * @param d    distinct degree
      * @return irreducible factor of {@code poly}
      */
-    private static <Poly extends IUnivariatePolynomial<Poly>> Poly CantorZassenhausGF2p(Poly poly, int d, int pPower) {
-        assert poly.isMonic();
+    private static Poly CantorZassenhausGF2p<Poly>(Poly poly, int d, int pPower)where Poly : IUnivariatePolynomial<Poly> {
+        Debug.Assert( poly.isMonic());
 
         Poly a = randomMonicPoly(poly);
-        if (a.isConstant() || a.equals(poly))
+        if (a.isConstant() || a.Equals(poly))
             return null;
 
         Poly gcd1 = UnivariateGCD.PolynomialGCD(a, poly);
-        if (!gcd1.isConstant() && !gcd1.equals(poly))
+        if (!gcd1.isConstant() && !gcd1.Equals(poly))
             return gcd1;
 
         UnivariateDivision.InverseModMonomial<Poly> invMod = UnivariateDivision.fastDivisionPreConditioning(poly);
         Poly b = tracePolyGF2(a, MachineArithmetic.safeToInt(1L * pPower * d), poly, invMod);
 
         Poly gcd2 = UnivariateGCD.PolynomialGCD(b, poly);
-        if (!gcd2.isConstant() && !gcd2.equals(poly))
+        if (!gcd2.isConstant() && !gcd2.Equals(poly))
             return gcd2;
 
         return null;
     }
 
-    static <Poly extends IUnivariatePolynomial<Poly>> Poly tracePolyGF2(Poly a, int m, Poly modulus, UnivariateDivision.InverseModMonomial<Poly> invMod) {
+    static Poly tracePolyGF2<Poly>(Poly a, int m, Poly modulus, UnivariateDivision.InverseModMonomial<Poly> invMod) where Poly : IUnivariatePolynomial<Poly> {
         Poly tmp = a.clone();
         Poly result = a.clone();
         for (int i = 0; i < (m - 1); i++) {

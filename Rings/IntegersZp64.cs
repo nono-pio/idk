@@ -1,4 +1,6 @@
 using System.Numerics;
+using Rings.poly;
+using Rings.util;
 
 namespace Rings;
 
@@ -8,11 +10,11 @@ public sealed class IntegersZp64
 
     public readonly long Modulus;
 
-    public readonly Magic magic, magic32MulMod;
+    public readonly FastDivision.Magic magic, magic32MulMod;
 
     public readonly bool ModulusFits32;
 
-    public IntegersZp64(long Modulus, Magic magic, Magic magic32MulMod, bool ModulusFits32)
+    public IntegersZp64(long Modulus, FastDivision.Magic magic, FastDivision.Magic magic32MulMod, bool ModulusFits32)
     {
         this.Modulus = Modulus;
         this.magic = magic;
@@ -31,13 +33,13 @@ public sealed class IntegersZp64
 
     public long modulus(BigInteger val)
     {
-        return val.isLong() ? modSignedFast(val.longValue(), magic) : (val % new BigInteger(Modulus)).longValue();
+        return val.IsLong() ? modSignedFast((long)val, magic) : (long)(val % Modulus);
     }
 
 
     public void modulus(long[] data)
     {
-        for (int i = 0; i < data.length; ++i)
+        for (int i = 0; i < data.Length; ++i)
             data[i] = modulus(data[i]);
     }
 
@@ -115,7 +117,7 @@ public sealed class IntegersZp64
     }
 
 
-    public long powMod(readonly long @base, long exponent)
+    public long powMod(long @base, long exponent)
     {
         if (exponent < 0)
             throw new ArgumentException();

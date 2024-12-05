@@ -1,4 +1,6 @@
 using System.Numerics;
+using Rings.poly;
+using Rings.poly.univar;
 
 namespace Rings;
 
@@ -66,7 +68,7 @@ public sealed class RationalReconstruction
             w[1] = -w[1];
         }
 
-        if (w[1].CompareTo(denominatorBound) <= 0 && BigIntegerUtil.gcd(w[0], w[1]).isOne())
+        if (w[1].CompareTo(denominatorBound) <= 0 && BigInteger.GreatestCommonDivisor(w[0], w[1]).IsOne)
             return w;
         return null;
     }
@@ -94,7 +96,7 @@ public sealed class RationalReconstruction
             w[1] = -w[1];
         }
 
-        if ((BigInteger.Pow(w[1], 2) * 2).CompareTo(modulus) <= 0 && BigIntegerUtil.gcd(w[0], w[1]).isOne())
+        if ((BigInteger.Pow(w[1], 2) * 2).CompareTo(modulus) <= 0 && BigInteger.GreatestCommonDivisor(w[0], w[1]).IsOne)
             return w;
         return null;
     }
@@ -152,15 +154,16 @@ public sealed class RationalReconstruction
         int numeratorBound,
         int denominatorBound) where Poly : IUnivariatePolynomial<Poly>
     {
-        Poly[] v = n.createArray(modulus, n.createZero());
-        Poly[] w = n.createArray(n, n.createOne());
+        Poly[] v = [modulus, n.createZero()];
+        Poly[] w = [n, n.createOne()];
 
         while (w[0].degree() > numeratorBound)
         {
             Poly q = UnivariateDivision.quotient(v[0], w[0], true);
-            Poly[] z = n.createArray(
+            Poly[] z = [
                 v[0].clone().subtract(q.clone().multiply(w[0])),
-                v[1].clone().subtract(q.clone().multiply(w[1])));
+                v[1].clone().subtract(q.clone().multiply(w[1]))
+            ];
             v = w;
             w = z;
         }

@@ -1,5 +1,6 @@
 using System.Numerics;
 using Rings.primes;
+using Rings.util;
 
 namespace Rings;
 
@@ -90,14 +91,14 @@ public sealed class Integers : AIntegers
     {
         if (exponent < int.MaxValue)
             return pow(@base, (int)exponent);
-        return base.pow(@base, exponent);
+        throw new Exception("Exponent too large.");
     }
 
     public BigInteger pow(BigInteger @base, BigInteger exponent)
     {
-        if (exponent.isLong())
-            return pow(@base, exponent.longValueExact());
-        return base.pow(@base, exponent);
+        if (exponent.IsLong())
+            return pow(@base, (long)exponent);
+        throw new Exception("Exponent too large.");
     }
 
     public BigInteger gcd(BigInteger a, BigInteger b)
@@ -112,7 +113,7 @@ public sealed class Integers : AIntegers
 
     public FactorDecomposition<BigInteger> factor(BigInteger element)
     {
-        return FactorDecomposition.of(this, BigPrimes.primeFactors(element));
+        return FactorDecomposition<BigInteger>.of(this, BigPrimes.primeFactors(element));
     }
 
     public override BigInteger valueOf(BigInteger val)
@@ -155,12 +156,18 @@ public sealed class Integers : AIntegers
         throw new InvalidOperationException("Ring of infinite cardinality.");
     }
 
-    /**
-     * Gives a binomial coefficient C(n, k)
-     */
+    
+    public BigInteger factorial(long num)
+    {
+        BigInteger result = getOne();
+        for (int i = 2; i <= num; ++i)
+            result *= valueOf(i);
+        return result;
+    }
+    
     public BigInteger binomial(long n, long k)
     {
-        return factorial(n).divideExact(factorial(k)).divideExact(factorial(n - k));
+        return (factorial(n) / factorial(k)) / factorial(n - k);
     }
 
     protected Object readResolve()
