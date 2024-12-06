@@ -5,7 +5,7 @@ namespace Rings.primes;
 
 
 public sealed class BigPrimes {
-    private static readonly BigInteger MAX_INT = BigInteger.valueOf(int.MaxValue);
+    private static readonly BigInteger MAX_INT = new BigInteger(int.MaxValue);
     private static readonly Well1024a privateRandom = new Well1024a(0x1a9e2b8f3c7d6a4bL);
 
     private BigPrimes() {}
@@ -30,11 +30,11 @@ public sealed class BigPrimes {
 
         //small known primes
         if (n.CompareTo(SieveOfAtkin.SmallPrimesSieve.getLimitAsBigInteger()) < 0)
-            return SieveOfAtkin.SmallPrimesSieve.isPrime(n.intValue());
+            return SieveOfAtkin.SmallPrimesSieve.isPrime((int) n);
 
         //switch to deterministic Miller-Rabin
         if (n.CompareTo(MAX_INT) < 0)
-            return SmallPrimes.isPrime(n.intValue());
+            return SmallPrimes.isPrime((int)n);
 
         //ok <- some trial divisions
         foreach (int p in SmallPrimes.SmallPrimes12)
@@ -54,11 +54,10 @@ public sealed class BigPrimes {
     }
 
     public static bool LucasPrimalityTest(BigInteger n, int k, RandomGenerator rnd) {
-        int bound = n.CompareTo(MAX_INT) > 0 ? int.MaxValue : n.intValue();
+        int bound = n.CompareTo(MAX_INT) > 0 ? int.MaxValue : (int)n;
         BigInteger nMinusOne = n - 1;
 
         List<BigInteger> factors = null;
-        loop1:
         while (k-- > 0) {
             BigInteger a = new BigInteger(7 + rnd.nextInt(bound - 7));
             if (!BigInteger.ModPow(a, nMinusOne, n).IsOne)
@@ -68,8 +67,9 @@ public sealed class BigPrimes {
                 factors = primeFactors(nMinusOne);
             foreach (BigInteger q in factors)
                 if (BigInteger.ModPow(a, nMinusOne / q, n).IsOne)
-                    continue loop1;
+                    goto loop1; // Verify is that correct
             return true;
+            loop1: ;
         }
         return false;
     }
@@ -98,7 +98,7 @@ public sealed class BigPrimes {
         BigInteger nb = new BigInteger(n);
         while (!isPrime(nb))
             nb = nb.nextProbablePrime();
-        return nb.longValueExact();
+        return (long)nb;
     }
 
     /**
@@ -111,24 +111,24 @@ public sealed class BigPrimes {
      */
     public static BigInteger fermat(BigInteger n, long upperBound) {
         long cnt = 0;
-        BigInteger x = QuadraticSieve.sqrtBigInt(n).add(BigInteger.ONE);
-        BigInteger u = x.multiply(BigInteger.TWO).add(BigInteger.ONE);
-        BigInteger v = BigInteger.ONE;
-        BigInteger r = x.multiply(x).subtract(n);
-        while (!r.isZero()) {
+        BigInteger x = primes.QuadraticSieve.sqrtBigInt(n) + 1;
+        BigInteger u = (x << 1) + 1;
+        BigInteger v = 1;
+        BigInteger r = x * x - n;
+        while (!r.IsZero) {
             cnt++;
             if (cnt > upperBound)
-                return BigInteger.ZERO;
-            while (r.compareTo(BigInteger.ZERO) > 0) {
-                r = r.subtract(v);
-                v = v.add(BigInteger.TWO);
+                return 0;
+            while (r.CompareTo(0) > 0) {
+                r -= v;
+                v += 2;
             }
-            if (r.compareTo(BigInteger.ZERO) < 0) {
-                r = r.add(u);
-                u = u.add(BigInteger.TWO);
+            if (r.CompareTo(0) < 0) {
+                r += u;
+                u += 2;
             }
         }
-        return u.subtract(v).divide(BigInteger.TWO);
+        return (u - v) >> 1;
     }
 
     /**
@@ -138,9 +138,10 @@ public sealed class BigPrimes {
      * @param attempts number of random attempts
      * @return a single factor of {@code n} or null if no factors found
      */
-    public static BigInteger PollardRho(BigInteger n, int attempts, RandomGenerator rn) {
+    public static BigInteger? PollardRho(BigInteger n, int attempts, RandomGenerator rn) {
         // check divisibility by 2
-        if (n.mod(BigInteger.TWO).isZero()) return BigInteger.TWO;
+        if ((n % 2).IsZero) 
+            return 2;
 
         BigInteger divisor;
         BigInteger c = new BigInteger(n.bitLength(), rn);
@@ -148,13 +149,13 @@ public sealed class BigPrimes {
         BigInteger xx = x;
 
         do {
-            x = x.multiply(x).mod(n).add(c).mod(n);
-            xx = xx.multiply(xx).mod(n).add(c).mod(n);
-            xx = xx.multiply(xx).mod(n).add(c).mod(n);
-            divisor = x.subtract(xx).gcd(n);
-        } while (attempts-- > 0 && divisor.isOne());
+            x = (x * x % n + c) % n;
+            xx = (xx * xx % n + c) % n;
+            xx = (xx * xx % n + c) % n;
+            divisor = BigInteger.GreatestCommonDivisor(x - xx, n);
+        } while (attempts-- > 0 && divisor.IsOne);
 
-        return divisor.isOne() ? null : divisor;
+        return divisor.IsOne ? null : divisor;
     }
 
     /**
@@ -164,30 +165,31 @@ public sealed class BigPrimes {
      * @param upperBound expected B-smoothness
      * @return a single factor of {@code n} or null if no factors found
      */
-    public static BigInteger PollardRho(BigInteger n, long upperBound) {
+    public static BigInteger? PollardRho(BigInteger n, long upperBound) {
         long range = 1;
         long terms = 0;
-        BigInteger x1 = BigInteger.TWO;
-        BigInteger x2 = BigInteger.FIVE;
-        BigInteger product = BigInteger.ONE;
+        BigInteger x1 = 2;
+        BigInteger x2 = 5;
+        BigInteger product = BigInteger.One;
         while (terms <= upperBound) {
-            for (long j = 1; j <= range; j++) {
-                x2 = x2.multiply(x2).add(BigInteger.ONE).mod(n);
-                product = product.multiply(x1.subtract(x2)).mod(n);
+            for (long j = 1; j <= range; j++)
+            {
+                x2 = (x2 * x2 + 1) % n;
+                product = product * (x1 - x2) % n;
                 if (terms++ > upperBound)
                     break;
                 if (terms % 5 == 0) {
-                    BigInteger g = n.gcd(product);
-                    if (g.compareTo(BigInteger.ONE) > 0) {
+                    BigInteger g = BigInteger.GreatestCommonDivisor(n, product);
+                    if (g.CompareTo(BigInteger.One) > 0) {
                         return g;
                     }
-                    product = BigInteger.ONE;
+                    product = BigInteger.One;
                 }
             }
             x1 = x2;
             range *= 2;
             for (long j = 1; j <= range; j++)
-                x2 = x2.multiply(x2).add(BigInteger.ONE).mod(n);
+                x2 = (x2 * x2 + 1) % n;
         }
         return null;
     }
@@ -200,35 +202,25 @@ public sealed class BigPrimes {
      * @param upperBound expected B-smoothness
      * @return a single factor of {@code n} or null if no factors found
      */
-    public static BigInteger PollardP1(BigInteger n, long upperBound) {
+    public static BigInteger? PollardP1(BigInteger n, long upperBound) {
         BigInteger g, i, m;
         for (int outerCnt = 0; outerCnt < 5; outerCnt++) {
-            switch (outerCnt) {
-                case 0:
-                    m = BigInteger.TWO;
-                    break;
-                case 1:
-                    m = BigInteger.THREE;
-                    break;
-                case 2:
-                    m = BigInteger.FOUR;
-                    break;
-                case 3:
-                    m = BigInteger.FIVE;
-                    break;
-                case 4:
-                    m = BigInteger.SEVEN;
-                    break;
-                default:
-                    m = BigInteger.TWO;
-            }
-            i = BigInteger.ONE;
+            m = outerCnt switch
+            {
+                0 => 2,
+                1 => 3,
+                2 => 4,
+                3 => 5,
+                4 => 7,
+                _ => 2
+            };
+            i = BigInteger.One;
             for (long cnt = 2; cnt <= upperBound; cnt++) {
-                i = i.add(BigInteger.ONE);
-                m = m.modPow(i, n);
+                i += 1;
+                m = BigInteger.ModPow(m, i, n);
                 if (cnt % 5 == 0) {
-                    g = n.gcd(m.subtract(BigInteger.ONE));
-                    if ((g.compareTo(BigInteger.ONE) > 0) && (g.compareTo(n) < 0)) {
+                    g = BigInteger.GreatestCommonDivisor(n, m - 1);
+                    if ((g.CompareTo(BigInteger.One) > 0) && (g.CompareTo(n) < 0)) {
                         return g;
                     }
                 }
@@ -237,13 +229,13 @@ public sealed class BigPrimes {
         return null;
     }
 
-    public static BigInteger QuadraticSieve(BigInteger n, int bound) {
+    public static BigInteger? QuadraticSieve(BigInteger n, int bound) {
         return new QuadraticSieve(n).quadraticSieve(bound);
     }
 
     static BigInteger findFactorHard(BigInteger n) {
         int numBits = n.bitCount();
-        BigInteger r;
+        BigInteger? r;
 
         //switching between algorithms
         //some hard heuristics is here
@@ -251,70 +243,70 @@ public sealed class BigPrimes {
         if (numBits < 20) {
             // t = 1e4 - 3e6
             r = PollardRho(n, 131_072);
-            if (r != null)
-                return r;
+            if (r is not null)
+                return r.Value;
         }
 
         if (numBits < 30) {
             // t = 5e6
             r = PollardRho(n, 1024, privateRandom);
-            if (r != null)
-                return r;
+            if (r is not null)
+                return r.Value;
             // t = 2e6 - 5e7
             r = PollardRho(n, 131_072);
-            if (r != null)
-                return r;
+            if (r is not null)
+                return r.Value;
         }
 
         if (numBits < 60) {
             // t = 2e5
             r = PollardRho(n, 128);
-            if (r != null)
-                return r;
+            if (r is not null)
+                return r.Value;
 
             // t = 5e5
             r = PollardRho(n, 128, privateRandom);
-            if (r != null)
-                return r;
+            if (r is not null)
+                return r.Value;
 
             // t = 1e6
             r = PollardP1(n, 128);
-            if (r != null)
-                return r;
+            if (r is not null)
+                return r.Value;
 
             // t = 2e7
             r = PollardRho(n, 131_072);
-            if (r != null)
-                return r;
+            if (r is not null)
+                return r.Value;
         }
 
         //<-really large number with large primes
 
         // t = 5e5
         r = PollardRho(n, 128);
-        if (r != null)
-            return r;
+        if (r is not null)
+            return r.Value;
 
         // t = 5e5
         r = PollardP1(n, 128);
-        if (r != null)
-            return r;
+        if (r is not null)
+            return r.Value;
 
         // t = 5e6
         r = PollardRho(n, 1032, privateRandom);
-        if (r != null)
-            return r;
+        if (r is not null)
+            return r.Value;
 
         // t = 1e8
         r = PollardRho(n, 131_072);
-        if (r != null)
-            return r;
+        if (r is not null)
+            return r.Value;
 
 
         // t = 1e9
         r = PollardP1(n, 131_072);
-        if (r != null)
-            return r;
+        if (r is not null)
+            return r.Value;
 
         // t = 1e9 -> oo
         // be sure that trial division is done
@@ -322,14 +314,14 @@ public sealed class BigPrimes {
         r = QuadraticSieve(n, 32768);
         Debug.Assert(r is not null);
 
-        if (r.isOne()) //<- overcome issue with QS
+        if (r.Value.IsOne) //<- overcome issue with QS
             return n;
-        return r;
+        return r.Value;
     }
 
     private static bool checkKnownSmallPrime(BigInteger b) {
-        return b.compareTo(SieveOfAtkin.SmallPrimesSieve.getLimitAsBigInteger()) < 0
-                && SieveOfAtkin.SmallPrimesSieve.isPrime(b.intValue());
+        return b.CompareTo(SieveOfAtkin.SmallPrimesSieve.getLimitAsBigInteger()) < 0
+                && SieveOfAtkin.SmallPrimesSieve.isPrime((int)b);
     }
 
     /**
@@ -341,7 +333,7 @@ public sealed class BigPrimes {
      * @throws IllegalArgumentException if n is negative
      */
     public static long[] primeFactors(long num) {
-        return primeFactors(BigInteger.valueOf(num)).Select(BigInteger.longValueExact).ToArray();
+        return primeFactors(new BigInteger(num)).Select(b => (long)b).ToArray();
     }
 
     /**
@@ -355,7 +347,7 @@ public sealed class BigPrimes {
     public static List<BigInteger> primeFactors(BigInteger num) {
         List<BigInteger> factors = new ();
 
-        if (num.compareTo(BigInteger.TWO) < 0) {
+        if (num.CompareTo(2) < 0) {
             factors.Add(num);
             return factors;
         }
@@ -369,7 +361,7 @@ public sealed class BigPrimes {
         //start with trial divisions
         num = TrialDivision(num, factors);
 
-        if (num.isOne())
+        if (num.IsOne)
             return factors;
 
         if (isPrime(num)) {
@@ -383,14 +375,14 @@ public sealed class BigPrimes {
         return factors;
     }
 
-    static BigInteger TrialDivision(BigInteger num, ArrayList<BigInteger> factors) {
+    static BigInteger TrialDivision(BigInteger num, List<BigInteger> factors) {
         foreach (int p in SmallPrimes.SmallPrimes12) {
-            BigInteger prime = BigInteger.valueOf(p);
-            BigInteger[] qr = num.divideAndRemainder(prime);
-            while (qr[1].isZero()) {
-                num = qr[0];
-                factors.add(prime);
-                qr = num.divideAndRemainder(prime);
+            BigInteger prime = new BigInteger(p);
+            var (q, r) = BigInteger.DivRem(num, prime);
+            while (r.IsZero) {
+                num = q;
+                factors.Add(prime);
+                (q, r) = BigInteger.DivRem(num, prime);
             }
         }
         return num;
@@ -400,7 +392,7 @@ public sealed class BigPrimes {
         BigInteger factor;
         while (true) {
             factor = findFactorHard(num);
-            if (factor.isOne() || factor.equals(num)) {
+            if (factor.IsOne || factor.Equals(num)) {
                 factors.Add(num);
                 return;
             } else {
@@ -409,7 +401,7 @@ public sealed class BigPrimes {
                 else
                     factors.Add(factor);
             }
-            num = num.divide(factor);
+            num = num / factor;
         }
     }
 }

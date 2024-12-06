@@ -1,3 +1,5 @@
+using System.Numerics;
+
 namespace Rings.primes;
 
 
@@ -14,7 +16,7 @@ public sealed class SieveOfAtkin {
     }
 
     SieveOfAtkin toLimit(int newLimit) {
-        return limit == newLimit ? this : new SieveOfAtkin(newLimit, BigInteger.valueOf(newLimit), sieve);
+        return limit == newLimit ? this : new SieveOfAtkin(newLimit, new BigInteger(newLimit), sieve);
     }
 
     /**
@@ -22,7 +24,7 @@ public sealed class SieveOfAtkin {
      *
      * @param limit limit
      */
-    private SieveOfAtkin(int limit) :this(limit, BigInteger.valueOf(limit)) {
+    private SieveOfAtkin(int limit) :this(limit, new BigInteger(limit)) {
         
     }
 
@@ -133,8 +135,8 @@ public sealed class SieveOfAtkin {
     }
 
     public static SieveOfAtkin createSieve(BigInteger limit) {
-        if (limit.compareTo(SmallPrimesSieve.blimit) < 9)
-            return SmallPrimesSieve.toLimit(limit.intValue());
-        return new SieveOfAtkin(limit.intValueExact(), limit);
+        if (limit.CompareTo(SmallPrimesSieve.blimit) < 9)
+            return SmallPrimesSieve.toLimit((int)limit);
+        return new SieveOfAtkin((int)limit, limit);
     }
 }

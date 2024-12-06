@@ -1,3 +1,5 @@
+using System.Numerics;
+
 namespace Rings.primes;
 
 public sealed class PrimesIterator {
@@ -50,7 +52,7 @@ public sealed class PrimesIterator {
 
         if (pointer < long.MaxValue - 1)
             try {
-                return pointer = BigPrimes.nextPrime(BigInteger.valueOf(pointer + 1)).longValueExact();
+                return pointer = (long)BigPrimes.nextPrime(new BigInteger(pointer + 1));
             } catch (ArithmeticException e) {
                 return -1;
             }

@@ -1,0 +1,334 @@
+using Cc.Redberry.Rings.Bigint;
+using Cc.Redberry.Rings.Poly;
+using Gnu.Trove.Map.Hash;
+using Java.Util.Stream;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Text;
+using static Cc.Redberry.Rings.Poly.RoundingMode;
+using static Cc.Redberry.Rings.Poly.Associativity;
+using static Cc.Redberry.Rings.Poly.Operator;
+using static Cc.Redberry.Rings.Poly.TokenType;
+using static Cc.Redberry.Rings.Poly.SystemInfo;
+
+namespace Cc.Redberry.Rings.Poly
+{
+    /// <summary>
+    /// High-level methods for polynomials.
+    /// </summary>
+    /// <remarks>@since1.0</remarks>
+    public sealed class PolynomialMethods
+    {
+        private PolynomialMethods()
+        {
+        }
+
+        /// <summary>
+        /// Factor polynomial.
+        /// </summary>
+        /// <param name="poly">the polynomial</param>
+        /// <returns>irreducible factor decomposition</returns>
+        public static PolynomialFactorDecomposition<Poly> Factor<Poly extends IPolynomial<Poly>>(Poly poly)
+        {
+            if (poly is IUnivariatePolynomial)
+                return (PolynomialFactorDecomposition<Poly>)UnivariateFactorization.Factor((IUnivariatePolynomial)poly);
+            else if (poly is AMultivariatePolynomial)
+                return (PolynomialFactorDecomposition<Poly>)MultivariateFactorization.Factor((AMultivariatePolynomial)poly);
+            else
+                throw new Exception();
+        }
+
+        /// <summary>
+        /// Square-free factorization of polynomial.
+        /// </summary>
+        /// <param name="poly">the polynomial</param>
+        /// <returns>irreducible square-free factor decomposition</returns>
+        public static PolynomialFactorDecomposition<Poly> FactorSquareFree<Poly extends IPolynomial<Poly>>(Poly poly)
+        {
+            if (poly is IUnivariatePolynomial)
+                return (PolynomialFactorDecomposition<Poly>)UnivariateSquareFreeFactorization.SquareFreeFactorization((IUnivariatePolynomial)poly);
+            else if (poly is AMultivariatePolynomial)
+                return (PolynomialFactorDecomposition<Poly>)MultivariateSquareFreeFactorization.SquareFreeFactorization((AMultivariatePolynomial)poly);
+            else
+                throw new Exception();
+        }
+
+        /// <summary>
+        /// Compute GCD of two polynomials.
+        /// </summary>
+        /// <param name="a">the polynomial</param>
+        /// <param name="b">the polynomial</param>
+        /// <returns>the GCD</returns>
+        public static Poly PolynomialGCD<Poly extends IPolynomial<Poly>>(Poly a, Poly b)
+        {
+            if (a is IUnivariatePolynomial)
+                return (Poly)UnivariateGCD.PolynomialGCD((IUnivariatePolynomial)a, (IUnivariatePolynomial)b);
+            else if (a is AMultivariatePolynomial)
+                return (Poly)MultivariateGCD.PolynomialGCD((AMultivariatePolynomial)a, (AMultivariatePolynomial)b);
+            else
+                throw new Exception();
+        }
+
+        /// <summary>
+        /// Compute GCD of array of polynomials.
+        /// </summary>
+        /// <param name="array">the polynomials</param>
+        /// <returns>the GCD</returns>
+        public static Poly PolynomialGCD<Poly extends IPolynomial<Poly>>(params Poly[] array)
+        {
+            Poly a = array[0];
+            if (a is IUnivariatePolynomial)
+                return (Poly)UnivariateGCD.PolynomialGCD((IUnivariatePolynomial[])array);
+            else if (a is AMultivariatePolynomial)
+                return (Poly)MultivariateGCD.PolynomialGCD((AMultivariatePolynomial[])array);
+            else
+                throw new Exception();
+        }
+
+        /// <summary>
+        /// Compute GCD of collection of polynomials.
+        /// </summary>
+        /// <param name="array">the polynomials</param>
+        /// <returns>the GCD</returns>
+        public static Poly PolynomialGCD<Poly extends IPolynomial<Poly>>(Iterable<Poly> array)
+        {
+            Poly a = array.Iterator().Next();
+            if (a is IUnivariatePolynomial)
+                return (Poly)UnivariateGCD.PolynomialGCD((Iterable)array);
+            else if (a is AMultivariatePolynomial)
+                return (Poly)MultivariateGCD.PolynomialGCD((Iterable)array);
+            else
+                throw new Exception();
+        }
+
+        /// <summary>
+        /// Computes {@code [gcd(a,b), s, t]} such that {@code s * a + t * b = gcd(a, b)}. Half-GCD algorithm is used.
+        /// </summary>
+        /// <param name="a">the univariate polynomial</param>
+        /// <param name="b">the univariate  polynomial</param>
+        /// <returns>array of {@code [gcd(a,b), s, t]} such that {@code s * a + t * b = gcd(a, b)} (gcd is monic)</returns>
+        /// <remarks>@seeUnivariateGCD#PolynomialExtendedGCD(IUnivariatePolynomial, IUnivariatePolynomial)</remarks>
+        public static T[] PolynomialExtendedGCD<T extends IUnivariatePolynomial<T>>(T a, T b)
+        {
+            if (a.IsOverField())
+                return UnivariateGCD.PolynomialExtendedGCD(a, b);
+            else
+                throw new ArgumentException("Polynomial over field is expected");
+        }
+
+        /// <summary>
+        /// Returns quotient and remainder of a and b.
+        /// </summary>
+        /// <param name="a">the dividend</param>
+        /// <param name="b">the divider</param>
+        /// <returns>{quotient, remainder}</returns>
+        public static Poly[] DivideAndRemainder<Poly extends IPolynomial<Poly>>(Poly a, Poly b)
+        {
+            if (a is IUnivariatePolynomial)
+                return (Poly[])UnivariateDivision.DivideAndRemainder((IUnivariatePolynomial)a, (IUnivariatePolynomial)b, true);
+            else if (a is AMultivariatePolynomial)
+                return (Poly[])MultivariateDivision.DivideAndRemainder((AMultivariatePolynomial)a, (AMultivariatePolynomial)b);
+            else
+                throw new Exception();
+        }
+
+        /// <summary>
+        /// Returns quotient and remainder of a and b.
+        /// </summary>
+        /// <param name="a">the dividend</param>
+        /// <param name="b">the divider</param>
+        /// <returns>{quotient, remainder}</returns>
+        public static Poly Remainder<Poly extends IPolynomial<Poly>>(Poly a, Poly b)
+        {
+            if (a is IUnivariatePolynomial)
+                return (Poly)UnivariateDivision.Remainder((IUnivariatePolynomial)a, (IUnivariatePolynomial)b, true);
+            else if (a is AMultivariatePolynomial)
+                return (Poly)MultivariateDivision.DivideAndRemainder((AMultivariatePolynomial)a, (AMultivariatePolynomial)b)[1];
+            else
+                throw new Exception();
+        }
+
+        /// <summary>
+        /// Returns the quotient of a and b or throws {@code ArithmeticException} if exact division is not possible
+        /// </summary>
+        /// <param name="a">the dividend</param>
+        /// <param name="b">the divider</param>
+        /// <returns>quotient</returns>
+        /// <exception cref="ArithmeticException">if exact division is not possible</exception>
+        public static Poly DivideOrNull<Poly extends IPolynomial<Poly>>(Poly a, Poly b)
+        {
+            if (a is IUnivariatePolynomial)
+                return (Poly)UnivariateDivision.DivideOrNull((IUnivariatePolynomial)a, (IUnivariatePolynomial)b, true);
+            else if (a is AMultivariatePolynomial)
+                return (Poly)MultivariateDivision.DivideOrNull((AMultivariatePolynomial)a, (AMultivariatePolynomial)b);
+            else
+                throw new Exception();
+        }
+
+        /// <summary>
+        /// Returns the quotient of a and b or throws {@code ArithmeticException} if exact division is not possible
+        /// </summary>
+        /// <param name="a">the dividend</param>
+        /// <param name="b">the divider</param>
+        /// <returns>quotient</returns>
+        /// <exception cref="ArithmeticException">if exact division is not possible</exception>
+        public static Poly DivideExact<Poly extends IPolynomial<Poly>>(Poly a, Poly b)
+        {
+            if (a is IUnivariatePolynomial)
+                return (Poly)UnivariateDivision.DivideExact((IUnivariatePolynomial)a, (IUnivariatePolynomial)b, true);
+            else if (a is AMultivariatePolynomial)
+                return (Poly)MultivariateDivision.DivideExact((AMultivariatePolynomial)a, (AMultivariatePolynomial)b);
+            else
+                throw new Exception();
+        }
+
+        /// <summary>
+        /// Returns whether specified polynomials are coprime.
+        /// </summary>
+        /// <param name="polynomials">the polynomials</param>
+        /// <returns>whether specified polynomials are coprime</returns>
+        public static bool CoprimeQ<Poly extends IPolynomial<Poly>>(params Poly[] polynomials)
+        {
+            for (int i = 0; i < polynomials.Length - 1; i++)
+                for (int j = i + 1; j < polynomials.Length; j++)
+                    if (!PolynomialGCD(polynomials[i], polynomials[j]).IsConstant())
+                        return false;
+            return true;
+        }
+
+        /// <summary>
+        /// Returns whether specified polynomials are coprime.
+        /// </summary>
+        /// <param name="polynomials">the polynomials</param>
+        /// <returns>whether specified polynomials are coprime</returns>
+        public static bool CoprimeQ<Poly extends IPolynomial<Poly>>(Iterable<Poly> polynomials)
+        {
+            if (!polynomials.Iterator().HasNext())
+                throw new ArgumentException();
+            Poly factory = polynomials.Iterator().Next();
+            return CoprimeQ(StreamSupport.Stream(polynomials.Spliterator(), false).ToArray(factory.CreateArray()));
+        }
+
+        /// <summary>
+        /// Returns whether specified polynomial is irreducible
+        /// </summary>
+        public static bool IrreducibleQ<Poly extends IPolynomial<Poly>>(Poly poly)
+        {
+            if (poly is IUnivariatePolynomial)
+                return IrreduciblePolynomials.IrreducibleQ((IUnivariatePolynomial)poly);
+            else
+                return MultivariateFactorization.Factor((AMultivariatePolynomial)poly).IsTrivial();
+        }
+
+        /// <summary>
+        /// Returns {@code base} in a power of non-negative {@code exponent}.
+        /// </summary>
+        /// <param name="base">the base</param>
+        /// <param name="exponent">the non-negative exponent</param>
+        /// <param name="copy">whether to clone {@code base}; if not the data of {@code base} will be lost</param>
+        /// <returns>{@code base} in a power of {@code e}</returns>
+        public static T PolyPow<T extends IPolynomial<T>>(T @base, BigInteger exponent, bool copy)
+        {
+            if (exponent.Signum() < 0)
+                throw new ArgumentException();
+            if (exponent.IsOne() || @base.IsOne())
+                return copy ? @base.Clone() : @base;
+            T result = @base.CreateOne();
+            T k2p = copy ? @base.Clone() : @base;
+            for (;;)
+            {
+                if (exponent.TestBit(0))
+                    result = result.Multiply(k2p);
+                exponent = exponent.ShiftRight(1);
+                if (exponent.IsZero())
+                    return result;
+                k2p = k2p.Multiply(k2p);
+            }
+        }
+
+        /// <summary>
+        /// Returns {@code base} in a power of non-negative {@code exponent}
+        /// </summary>
+        /// <param name="base">the base</param>
+        /// <param name="exponent">the non-negative exponent</param>
+        /// <returns>{@code base} in a power of {@code e}</returns>
+        public static T PolyPow<T extends IPolynomial<T>>(T @base, long exponent)
+        {
+            return PolyPow(@base, exponent, true);
+        }
+
+        /// <summary>
+        /// Returns {@code base} in a power of non-negative {@code exponent}
+        /// </summary>
+        /// <param name="base">the base</param>
+        /// <param name="exponent">the non-negative exponent</param>
+        /// <returns>{@code base} in a power of {@code e}</returns>
+        public static T PolyPow<T extends IPolynomial<T>>(T @base, BigInteger exponent)
+        {
+            return PolyPow(@base, exponent, true);
+        }
+
+        /// <summary>
+        /// Returns {@code base} in a power of non-negative {@code exponent}
+        /// </summary>
+        /// <param name="base">the base</param>
+        /// <param name="exponent">the non-negative exponent</param>
+        /// <param name="copy">whether to clone {@code base}; if not the data of {@code base} will be lost</param>
+        /// <returns>{@code base} in a power of {@code e}</returns>
+        public static T PolyPow<T extends IPolynomial<T>>(T @base, long exponent, bool copy)
+        {
+            if (exponent < 0)
+                throw new ArgumentException();
+            if (exponent == 1 || @base.IsOne())
+                return copy ? @base.Clone() : @base;
+            T result = @base.CreateOne();
+            T k2p = copy ? @base.Clone() : @base;
+            for (;;)
+            {
+                if ((exponent & 1) != 0)
+                    result = result.Multiply(k2p);
+                exponent = exponent >> 1;
+                if (exponent == 0)
+                    return result;
+                k2p = k2p.Multiply(k2p);
+            }
+        }
+
+        /// <summary>
+        /// Returns {@code base} in a power of non-negative {@code exponent}
+        /// </summary>
+        /// <param name="base">the base</param>
+        /// <param name="exponent">the non-negative exponent</param>
+        /// <param name="copy">whether to clone {@code base}; if not the data of {@code base} will be lost</param>
+        /// <param name="cache">cache to store all intermediate powers</param>
+        /// <returns>{@code base} in a power of {@code e}</returns>
+        public static T PolyPow<T extends IPolynomial<T>>(T @base, int exponent, bool copy, TIntObjectHashMap<T> cache)
+        {
+            if (exponent < 0)
+                throw new ArgumentException();
+            if (exponent == 1)
+                return copy ? @base.Clone() : @base;
+            T cached = cache[exponent];
+            if (cached != null)
+                return cached.Clone();
+            T result = @base.CreateOne();
+            T k2p = copy ? @base.Clone() : @base;
+            int rExp = 0, kExp = 1;
+            for (;;)
+            {
+                if ((exponent & 1) != 0)
+                    cache.Put(rExp += kExp, result.Multiply(k2p).Clone());
+                exponent = exponent >> 1;
+                if (exponent == 0)
+                {
+                    cache.Put(rExp, result);
+                    return result;
+                }
+
+                cache.Put(kExp *= 2, k2p.Square().Clone());
+            }
+        }
+    }
+}

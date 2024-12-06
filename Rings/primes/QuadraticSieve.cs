@@ -1,3 +1,5 @@
+using System.Numerics;
+
 namespace Rings.primes;
 
 public sealed class QuadraticSieve {
@@ -25,7 +27,7 @@ public sealed class QuadraticSieve {
         foreach (int j in SmallPrimes.SmallPrimes12) {
             if (j == 2)
                 continue;
-            nModP = n.mod(BigInteger.valueOf(j)).intValue();
+            nModP = (int)(n % j);
             if (legendreSymbol(nModP, j) == 1) {
                 primes[k++] = j;
                 if (k == PRIME_BASE)
@@ -37,7 +39,7 @@ public sealed class QuadraticSieve {
             int j = primes[k - 1] + 2;
             while (k < PRIME_BASE) {
                 if (SmallPrimes.isPrime(j)) {
-                    nModP = n.mod(BigInteger.valueOf(j)).intValue();
+                    nModP = (int)(n % j);
                     if (legendreSymbol(nModP, j) == 1)
                         primes[k++] = j;
                 }
@@ -47,7 +49,7 @@ public sealed class QuadraticSieve {
         primesBig = new BigInteger[PRIME_BASE];
         primeLogs = new double[PRIME_BASE];
         for (k = 1; k < PRIME_BASE; k++) {
-            primesBig[k] = BigInteger.valueOf(primes[k]);
+            primesBig[k] = new BigInteger(primes[k]);
             primeLogs[k] = Math.Log(primes[k]);
         }
         primeLog = primeLogs[PRIME_BASE - 1];
@@ -75,30 +77,30 @@ public sealed class QuadraticSieve {
     }
 
     private static BigInteger quadraticF(BigInteger x, BigInteger n) {
-        return x.multiply(x).subtract(n);
+        return x*x-n;
     }
 
     private byte[] decomposeNumber(BigInteger number) {
         int j;
         byte[] result = new byte[PRIME_BASE];
         bool divided = false;
-        if (number.signum() < 0) {
-            number = ZERO.subtract(number);
+        if (number.Sign < 0) {
+            number = -number;
             result[0] = 1;
         } else
             result[0] = 0;
         for (j = 1; j < PRIME_BASE; j++) {
             result[j] = 0;
             BigInteger k = primesBig[j];
-            while (number.mod(k).compareTo(ZERO) == 0) {
+            while ((number % k).CompareTo(BigInteger.Zero) == 0) {
                 divided = true;
-                number = number.divide(k);
+                number = number / k;
                 result[j]++;
             }
             if ((j * 2 == PRIME_BASE) && (!divided))
                 break;
         }
-        if (number.compareTo(ONE) > 0)
+        if (number.CompareTo(BigInteger.One) > 0)
             result[0] = -1;
         return result;
     }
@@ -109,17 +111,17 @@ public sealed class QuadraticSieve {
         int j, k;
         for (j = 0; j < size; j++) {
             temp = numbers[j];
-            if (temp.signum() < 0) {
-                temp = temp.negate();
+            if (temp.Sign < 0) {
+                temp = -temp;
                 matrix[j][0] = 1;
             } else
                 matrix[j][0] = 0;
             for (k = 1; k < PRIME_BASE; k++) {
                 matrix[j][k] = 0;
                 prim = primesBig[k];
-                while (temp.mod(prim).compareTo(ZERO) == 0) {
+                while ((temp % prim).CompareTo(BigInteger.Zero) == 0) {
                     matrix[j][k]++; // = 1 - matrix[j][k];
-                    temp = temp.divide(prim);
+                    temp = temp / prim;
                 }
             }
             for (k = PRIME_BASE; k < size; k++)
@@ -276,12 +278,12 @@ public sealed class QuadraticSieve {
 
 
     private void removeHighestPower(int index, BigInteger p) {
-        if (fs[index].mod(p).compareTo(ZERO) == 0) {
-            do fs[index] = fs[index].divide(p);
-            while (fs[index].mod(p).compareTo(ZERO) == 0);
-            if (fs[index].compareTo(ONE) == 0) {
+        if ((fs[index] % p).CompareTo(BigInteger.Zero) == 0) {
+            do fs[index] = fs[index] / p;
+            while ((fs[index] % p).CompareTo(BigInteger.Zero) == 0);
+            if (fs[index].CompareTo(BigInteger.One) == 0) {
                 logs[index] = 0;
-                decomposedNumbers.add(s[index]);
+                decomposedNumbers.Add(s[index]);
                 decomposed++;
             }
         } else {
@@ -313,9 +315,9 @@ public sealed class QuadraticSieve {
 
         BigInteger sqrt = sqrtBigInt(n);
         Bj = sqrt;
-        Ck = ONE;
-        Cj = n.subtract(sqrt.multiply(sqrt));
-        Pk = ONE;
+        Ck = BigInteger.One;
+        Cj = n - sqrt * sqrt;
+        Pk = BigInteger.One;
         Pj = sqrt;
 
         byte[] facs;
@@ -329,13 +331,13 @@ public sealed class QuadraticSieve {
         i = 1;
         while (decomposed < PRIME_BASE + ADDITIONAL) {
             i = i + 1;
-            Ai = sqrt.add(Bj).divide(Cj).mod(n);
-            Bi = Ai.multiply(Cj).subtract(Bj).mod(n);
-            Ci = Ck.add(Ai.multiply(Bj.subtract(Bi))).mod(n);
-            Pi = Pk.add(Ai.multiply(Pj)).mod(n);
+            Ai = ((sqrt + Bj) / Cj) % n;
+            Bi = (Ai * Cj - Bj) % n;
+            Ci = (Ck + Ai * (Bj - Bi)) % n;
+            Pi = (Pk + Ai * Pj) % n;
 
             if (i % 2 == 0) sqr = Ci;
-            else sqr = ZERO.subtract(Ci);
+            else sqr = -Ci;
 
             facs = decomposeNumber(sqr);
 
@@ -379,29 +381,29 @@ public sealed class QuadraticSieve {
             int[] primefacs = new int[PRIME_BASE];
             byte[] factorLine = extractLine(identity, loop);
 
-            x = ONE;
+            x = BigInteger.One;
             for (i = 0; i < PRIME_BASE; i++)
                 primefacs[i] = 0;
             for (i = 0; i < decomposed; i++) {
                 if (factorLine[i] == 1) {
                     for (int j = 0; j < PRIME_BASE; j++)
                         primefacs[j] += (int) factors[i][j];
-                    x = x.multiply(s[i]).mod(n);
+                    x = (x*s[i])%n;
                 }
             }
 
-            y = ONE;
+            y = BigInteger.One;
             for (i = 0; i < PRIME_BASE; i++)
-                y = y.multiply(BigInteger.valueOf(primes[i]).modPow(BigInteger.valueOf(primefacs[i] / 2), n)).mod(n);
+                y = (y * BigInteger.ModPow(new BigInteger(primes[i]), new BigInteger(primefacs[i] / 2), n)) % n;
 
-            x = x.mod(n);
-            y = y.mod(n);
+            x = x % n;
+            y = y % n;
 
-            x = x.add(y);
-            y = x.subtract(y).subtract(y);
+            x += y;
+            y = x - y - y;
 
-            x = n.gcd(x);
-            if ((x.compareTo(ONE) != 0) && (x.compareTo(n) != 0))
+            x = BigInteger.GreatestCommonDivisor(x, n);
+            if ((x.CompareTo(BigInteger.One) != 0) && (x.CompareTo(n) != 0))
                 break;
         } while (--loop > PRIME_BASE);
 
@@ -424,14 +426,14 @@ public sealed class QuadraticSieve {
         long[] tempflat;
 
         for (i = 1; i < PRIME_BASE; i++) {
-            tempflat = findFlats(primes[i], quadraticN.mod(primesBig[i]).intValue());
+            tempflat = findFlats(primes[i], (int)(quadraticN % primesBig[i]));
             flats[i][0] = (int) tempflat[0];
             flats[i][1] = (int) tempflat[1];
         }
 
         int offset = 0;
         int direction = 0;
-        m = sqrtBigInt(n).add(ONE);
+        m = sqrtBigInt(n) + 1;
 
         s = new BigInteger[upperBound + 2];
         fs = new BigInteger[upperBound + 2];
@@ -461,7 +463,7 @@ public sealed class QuadraticSieve {
             for (i = 1; i < PRIME_BASE; i++) {
                 p = primes[i];
                 logp = primeLogs[i];
-                mInt = m.mod(primesBig[i]).intValue() + offset;
+                mInt = (int)(m % primesBig[i]) + offset;
 
                 if (flats[i][0] >= 0) {
                     loop = ((flats[i][0] - mInt) % p);
@@ -483,18 +485,18 @@ public sealed class QuadraticSieve {
                 }
             }
 
-            double TARGET = (Math.Log(m.doubleValue()) + Math.Log(upperBound) - primeLog);
+            double TARGET = (Math.Log((double)m) + Math.Log(upperBound) - primeLog);
 
             for (i = 0; i < upperBound; i++) {
                 if (logs[i] > TARGET) {
-                    s[i] = BigInteger.valueOf(i + offset).add(m);
-                    fs[i] = quadraticF(s[i], quadraticN).abs();
+                    s[i] = new BigInteger(i + offset) + m;
+                    fs[i] = BigInteger.Abs(quadraticF(s[i], quadraticN));
                 }
             }
 
             for (i = 1; i < PRIME_BASE; i++) {
                 p = primes[i];
-                mInt = m.mod(primesBig[i]).intValue() + offset;
+                mInt = (int)(m % primesBig[i]) + offset;
 
                 if (flats[i][0] >= 0) {
                     loop = ((flats[i][0] - mInt) % p);
@@ -528,7 +530,7 @@ public sealed class QuadraticSieve {
         s = new BigInteger[decomposed + 1];
         fs = new BigInteger[decomposed + 1];
         for (i = 0; i < decomposed; i++) {
-            s[i] = decomposedNumbers.get(i);
+            s[i] = decomposedNumbers[i];
             fs[i] = quadraticF(s[i], quadraticN);
         }
 
@@ -544,31 +546,31 @@ public sealed class QuadraticSieve {
             int[] primefacs = new int[PRIME_BASE];
             byte[] factorLine = extractLine(identity, loop);
 
-            test = ONE;
+            test = BigInteger.One;
             for (i = 0; i < PRIME_BASE; i++)
                 primefacs[i] = 0;
             for (i = 0; i < decomposed; i++) {
                 if (factorLine[i] == 1) {
                     for (j = 0; j < PRIME_BASE; j++)
                         primefacs[j] += (int) factors[i][j];
-                    test = test.multiply(s[i]).mod(n);
+                    test = (test *s[i]) % n;
                 }
             }
 
-            prim = ONE;
+            prim = BigInteger.One;
             for (i = 0; i < PRIME_BASE; i++) {
-                y = BigInteger.valueOf(primes[i]).modPow(BigInteger.valueOf(primefacs[i] / 2), n);
-                prim = prim.multiply(y).mod(n);
+                y = BigInteger.ModPow(new BigInteger(primes[i]), new BigInteger(primefacs[i] / 2), n);
+                prim = prim * y % n;
             }
 
-            test = test.mod(n);
-            prim = prim.mod(n);
+            test = test % n;
+            prim = prim % n;
 
-            x = test.add(prim);
-            y = test.subtract(prim);
+            x = test + prim;
+            y = test - prim;
 
-            test = n.gcd(x);
-            if ((test.compareTo(ONE) != 0) && (test.compareTo(n) != 0))
+            test = BigInteger.GreatestCommonDivisor(x, n);
+            if ((test.CompareTo(BigInteger.One) != 0) && (test.CompareTo(n) != 0))
                 break;
         } while (--loop > PRIME_BASE);
 
@@ -613,20 +615,20 @@ public sealed class QuadraticSieve {
         }
     }
 
-    static BigInteger sqrtBigInt(BigInteger i) {
+    public static BigInteger sqrtBigInt(BigInteger i) {
         long c;
         BigInteger medium;
         BigInteger high = i;
-        BigInteger low = BigInteger.ONE;
-        while (high.subtract(low).compareTo(BigInteger.ONE) > 0) {
-            medium = high.add(low).divide(BigInteger.ONE.add(BigInteger.ONE));
-            c = medium.multiply(medium).compareTo(i);
+        BigInteger low = BigInteger.One;
+        while ((high - low).CompareTo(BigInteger.One) > 0) {
+            medium = (high + low) >> 1;
+            c = (medium * medium).CompareTo(i);
             if (c > 0) high = medium;
             if (c < 0) low = medium;
             if (c == 0)
                 return medium;
         }
-        if (high.multiply(high).compareTo(i) == 0)
+        if ((high * high).CompareTo(i) == 0)
             return high;
         else
             return low;
