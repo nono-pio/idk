@@ -1,27 +1,11 @@
-using Cc.Redberry.Combinatorics;
+using System.Numerics;
+using System.Runtime.InteropServices.JavaScript;
 using Cc.Redberry.Rings;
 using Cc.Redberry.Rings.Bigint;
-using Cc.Redberry.Rings.Poly.Util;
 using Cc.Redberry.Rings.Poly;
-using Cc.Redberry.Rings.Poly.Univar.HenselLifting;
+using Cc.Redberry.Rings.Poly.Multivar;
 using Cc.Redberry.Rings.Primes;
 using Cc.Redberry.Rings.Util;
-using Java.Util;
-using Java.Util.Function;
-using Cc.Redberry.Rings.Poly.Univar.Conversions64bit;
-using Cc.Redberry.Rings.Poly.Univar.DistinctDegreeFactorization;
-using Cc.Redberry.Rings.Poly.Univar.EqualDegreeFactorization;
-using Cc.Redberry.Rings.Poly.Univar.UnivariateSquareFreeFactorization;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using static Cc.Redberry.Rings.Poly.Univar.RoundingMode;
-using static Cc.Redberry.Rings.Poly.Univar.Associativity;
-using static Cc.Redberry.Rings.Poly.Univar.Operator;
-using static Cc.Redberry.Rings.Poly.Univar.TokenType;
-using static Cc.Redberry.Rings.Poly.Univar.SystemInfo;
 
 namespace Cc.Redberry.Rings.Poly.Univar
 {
@@ -40,7 +24,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// </summary>
         /// <param name="poly">the polynomial</param>
         /// <returns>factor decomposition</returns>
-        public static PolynomialFactorDecomposition<Poly> Factor<Poly extends IUnivariatePolynomial<Poly>>(Poly poly)
+        public static PolynomialFactorDecomposition<Poly> Factor<Poly>(Poly poly) where Poly : IUnivariatePolynomial<Poly>
         {
             if (poly.IsOverFiniteField())
                 return FactorInGF(poly);
@@ -60,24 +44,24 @@ namespace Cc.Redberry.Rings.Poly.Univar
                 throw new Exception("ring is not supported: " + poly.CoefficientRingToString());
         }
 
-        static bool IsOverMultivariate<T extends IUnivariatePolynomial<T>>(T poly)
+        static bool IsOverMultivariate<T>(T poly) where T : IUnivariatePolynomial<T>
         {
             return (poly is UnivariatePolynomial && ((UnivariatePolynomial)poly).ring is MultivariateRing);
         }
 
-        static bool IsOverUnivariate<T extends IUnivariatePolynomial<T>>(T poly)
+        static bool IsOverUnivariate<T>(T poly) where T : IUnivariatePolynomial<T>
         {
             return (poly is UnivariatePolynomial && ((UnivariatePolynomial)poly).ring is UnivariateRing);
         }
 
-        static PolynomialFactorDecomposition<UnivariatePolynomial<Poly>> FactorOverMultivariate<Term extends AMonomial<Term>, Poly extends AMultivariatePolynomial<Term, Poly>>(UnivariatePolynomial<Poly> poly, Function<Poly, PolynomialFactorDecomposition<Poly>> factorFunction)
+        static PolynomialFactorDecomposition<UnivariatePolynomial<Poly>> FactorOverMultivariate<Term extends AMonomial<Term>, Poly extends AMultivariatePolynomial<Term, Poly>>(UnivariatePolynomial<Poly> poly, Func<Poly, PolynomialFactorDecomposition<Poly>> factorFunction)
         {
             return factorFunction.Apply(AMultivariatePolynomial.AsMultivariate(poly, 0, true)).MapTo((p) => p.AsUnivariateEliminate(0));
         }
 
-        static PolynomialFactorDecomposition<UnivariatePolynomial<uPoly>> FactorOverUnivariate<uPoly extends IUnivariatePolynomial<uPoly>>(UnivariatePolynomial<uPoly> poly, Function<MultivariatePolynomial<uPoly>, PolynomialFactorDecomposition<MultivariatePolynomial<uPoly>>> factorFunction)
+        static PolynomialFactorDecomposition<UnivariatePolynomial<uPoly>> FactorOverUnivariate<uPoly>(UnivariatePolynomial<uPoly> poly, Func<MultivariatePolynomial<uPoly>, PolynomialFactorDecomposition<MultivariatePolynomial<uPoly>>> factorFunction) where uPoly : IUnivariatePolynomial<uPoly>
         {
-            return factorFunction.Apply(AMultivariatePolynomial.AsMultivariate(poly, 1, 0, MonomialOrder.DEFAULT)).MapTo(MultivariatePolynomial.AsUnivariate());
+            return factorFunction(AMultivariatePolynomial.AsMultivariate(poly, 1, 0, MonomialOrder.DEFAULT)).MapTo(m => m.AsUnivariate());
         }
 
         /// <summary>
@@ -87,10 +71,10 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <returns>irreducible factor decomposition</returns>
         public static PolynomialFactorDecomposition<UnivariatePolynomial<Rational<E>>> FactorInQ<E>(UnivariatePolynomial<Rational<E>> poly)
         {
-            Tuple2<UnivariatePolynomial<E>, E> cmd = Util.ToCommonDenominator(poly);
-            UnivariatePolynomial<E> integral = cmd._1;
-            E denominator = cmd._2;
-            return Factor(integral).MapTo((p) => Util.AsOverRationals(poly.ring, p)).AddUnit(poly.CreateConstant(new Rational(integral.ring, integral.ring.GetOne(), denominator)));
+            (UnivariatePolynomial<E>, E) cmd = Util.ToCommonDenominator(poly);
+            UnivariatePolynomial<E> integral = cmd.Item1;
+            E denominator = cmd.Item2;
+            return Factor(integral).MapTo((p) => Util.AsOverRationals(poly.ring, p)).AddUnit(poly.CreateConstant(new Rational<E>(integral.ring, integral.ring.GetOne(), denominator)));
         }
 
         private static PolynomialFactorDecomposition<UnivariatePolynomial<mPoly>> FactorInMultipleFieldExtension<Term extends AMonomial<Term>, mPoly extends AMultivariatePolynomial<Term, mPoly>, sPoly extends IUnivariatePolynomial<sPoly>>(UnivariatePolynomial<mPoly> poly)
@@ -105,8 +89,10 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// </summary>
         private sealed class FactorMonomial<T>
         {
-            readonly T theRest, monomial;
-            FactorMonomial(T theRest, T monomial)
+            public readonly T theRest;
+            public readonly T monomial;
+
+            public FactorMonomial(T theRest, T monomial)
             {
                 this.theRest = theRest;
                 this.monomial = monomial;
@@ -116,21 +102,21 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <summary>
         /// factor out common monomial term (x^n)
         /// </summary>
-        private static FactorMonomial<Poly> FactorOutMonomial<Poly extends IUnivariatePolynomial<Poly>>(Poly poly)
+        private static FactorMonomial<Poly> FactorOutMonomial<Poly>(Poly poly) where Poly : IUnivariatePolynomial<Poly>
         {
             int i = poly.FirstNonZeroCoefficientPosition();
             if (i == 0)
-                return new FactorMonomial(poly, poly.CreateOne());
-            return new FactorMonomial(poly.Clone().ShiftLeft(i), poly.CreateMonomial(i));
+                return new FactorMonomial<Poly>(poly, poly.CreateOne());
+            return new FactorMonomial<Poly>(poly.Clone().ShiftLeft(i), poly.CreateMonomial(i));
         }
 
         /// <summary>
         /// early check for trivial cases
         /// </summary>
-        private static PolynomialFactorDecomposition<Poly> EarlyFactorizationChecks<Poly extends IUnivariatePolynomial<Poly>>(Poly poly)
+        private static PolynomialFactorDecomposition<Poly> EarlyFactorizationChecks<Poly>(Poly poly) where Poly : IUnivariatePolynomial<Poly>
         {
             if (poly.Degree() <= 1 || poly.IsMonomial())
-                return PolynomialFactorDecomposition.Of(poly.LcAsPoly(), poly.IsMonic() ? poly : poly.Clone().Monic());
+                return PolynomialFactorDecomposition<Poly>.Of(poly.LcAsPoly(), poly.IsMonic() ? poly : poly.Clone().Monic());
             return null;
         }
 
@@ -145,7 +131,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// @seeDistinctDegreeFactorization
         /// @seeEqualDegreeFactorization
         /// </remarks>
-        public static PolynomialFactorDecomposition<Poly> FactorInGF<Poly extends IUnivariatePolynomial<Poly>>(Poly poly)
+        public static PolynomialFactorDecomposition<Poly> FactorInGF<Poly>(Poly poly) where Poly : IUnivariatePolynomial<Poly>
         {
             Util.EnsureOverFiniteField(poly);
             if (CanConvertToZp64(poly))
@@ -153,7 +139,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
             PolynomialFactorDecomposition<Poly> result = EarlyFactorizationChecks(poly);
             if (result != null)
                 return result;
-            result = PolynomialFactorDecomposition.Empty(poly);
+            result = PolynomialFactorDecomposition<Poly>.Empty(poly);
             FactorInGF(poly, result);
             return result.SetUnit(poly.LcAsPoly());
         }
@@ -167,7 +153,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// @seeDistinctDegreeFactorization
         /// @seeEqualDegreeFactorization
         /// </remarks>
-        public static PolynomialFactorDecomposition<T> FactorSquareFreeInGF<T extends IUnivariatePolynomial<T>>(T poly)
+        public static PolynomialFactorDecomposition<T> FactorSquareFreeInGF<T>(T poly) where T : IUnivariatePolynomial<T>
         {
             Util.EnsureOverFiniteField(poly);
             if (CanConvertToZp64(poly))
@@ -177,11 +163,11 @@ namespace Cc.Redberry.Rings.Poly.Univar
             return result;
         }
 
-        private static void FactorSquareFreeInGF<T extends IUnivariatePolynomial<T>>(T poly, int exponent, PolynomialFactorDecomposition<T> result)
+        private static void FactorSquareFreeInGF<T>(T poly, int exponent, PolynomialFactorDecomposition<T> result) where T :IUnivariatePolynomial<T>
         {
 
             //do distinct-degree factorization
-            PolynomialFactorDecomposition<T> ddf = DistinctDegreeFactorization(poly);
+            PolynomialFactorDecomposition<T> ddf = DistinctDegreeFactorization.DistinctDegreeFactorization(poly);
 
             //assertDistinctDegreeFactorization(sqfFactor, ddf);
             for (int j = 0; j < ddf.Count; ++j)
@@ -200,9 +186,9 @@ namespace Cc.Redberry.Rings.Poly.Univar
             }
         }
 
-        private static void FactorInGF<T extends IUnivariatePolynomial<T>>(T poly, PolynomialFactorDecomposition<T> result)
+        private static void FactorInGF<T>(T poly, PolynomialFactorDecomposition<T> result) where T :IUnivariatePolynomial<T>
         {
-            FactorMonomial<T> base = FactorOutMonomial(poly);
+            FactorMonomial<T> @base = FactorOutMonomial(poly);
             if (!@base.monomial.IsConstant())
                 result.AddFactor(poly.CreateMonomial(1), @base.monomial.Degree());
 
@@ -220,7 +206,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
             }
         }
 
-        private static void AssertDistinctDegreeFactorization<T extends IUnivariatePolynomial<T>>(T poly, PolynomialFactorDecomposition<T> factorization)
+        private static void AssertDistinctDegreeFactorization<T>(T poly, PolynomialFactorDecomposition<T> factorization) where T :IUnivariatePolynomial<T>
         {
         }
 
@@ -228,14 +214,14 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <summary>
         /// assertion for correct Hensel structure
         /// </summary>
-        static void AssertHenselLift<T extends IUnivariatePolynomial<T>>(QuadraticLiftAbstract<T> lift)
+        static void AssertHenselLift<T>(HenselLifting.QuadraticLiftAbstract<T> lift) where T : IUnivariatePolynomial<T>
         {
         }
 
         /// <summary>
         /// cache of references *
         /// </summary>
-        private static int[, ] naturalSequenceRefCache = new int[32];
+        private static int[][] naturalSequenceRefCache = new int[32][];
         private static int[] CreateSeq(int n)
         {
             int[] r = new int[n];
@@ -274,10 +260,10 @@ namespace Cc.Redberry.Rings.Poly.Univar
         static PolynomialFactorDecomposition<UnivariatePolynomialZ64> ReconstructFactorsZ(UnivariatePolynomialZ64 poly, PolynomialFactorDecomposition<UnivariatePolynomialZp64> modularFactors)
         {
             if (modularFactors.IsTrivial())
-                return PolynomialFactorDecomposition.Of(poly);
+                return PolynomialFactorDecomposition<UnivariatePolynomialZ64>.Of(poly);
             UnivariatePolynomialZp64 factory = modularFactors[0];
             int[] modIndexes = NaturalSequenceRef(modularFactors.Count);
-            PolynomialFactorDecomposition<UnivariatePolynomialZ64> trueFactors = PolynomialFactorDecomposition.Empty(poly);
+            PolynomialFactorDecomposition<UnivariatePolynomialZ64> trueFactors = PolynomialFactorDecomposition<UnivariatePolynomialZ64>.Empty(poly);
             UnivariatePolynomialZ64 fRest = poly;
             int s = 1;
             factor_combinations:
@@ -322,10 +308,10 @@ namespace Cc.Redberry.Rings.Poly.Univar
         static PolynomialFactorDecomposition<UnivariatePolynomial<BigInteger>> ReconstructFactorsZ(UnivariatePolynomial<BigInteger> poly, PolynomialFactorDecomposition<UnivariatePolynomial<BigInteger>> modularFactors)
         {
             if (modularFactors.IsTrivial())
-                return PolynomialFactorDecomposition.Of(poly);
+                return PolynomialFactorDecomposition<UnivariatePolynomial<BigInteger>>.Of(poly);
             UnivariatePolynomial<BigInteger> factory = modularFactors[0];
             int[] modIndexes = NaturalSequenceRef(modularFactors.Count);
-            PolynomialFactorDecomposition<UnivariatePolynomial<BigInteger>> trueFactors = PolynomialFactorDecomposition.Empty(poly);
+            PolynomialFactorDecomposition<UnivariatePolynomial<BigInteger>> trueFactors = PolynomialFactorDecomposition<UnivariatePolynomial<BigInteger>>.Empty(poly);
             UnivariatePolynomial<BigInteger> fRest = poly;
             int s = 1;
             factor_combinations:
@@ -337,14 +323,14 @@ namespace Cc.Redberry.Rings.Poly.Univar
                         UnivariatePolynomial<BigInteger> mFactor = factory.CreateConstant(fRest.Lc());
                         foreach (int i in indexes)
                             mFactor = mFactor.Multiply(modularFactors[i]);
-                        UnivariatePolynomial<BigInteger> factor = UnivariatePolynomial.AsPolyZSymmetric(mFactor).PrimitivePart();
-                        if (!fRest.Lc().Remainder(factor.Lc()).IsZero() || !fRest.Cc().Remainder(factor.Cc()).IsZero())
+                        UnivariatePolynomial<BigInteger> factor = UnivariatePolynomial<BigInteger>.AsPolyZSymmetric(mFactor).PrimitivePart();
+                        if (!fRest.Lc().Remainder(factor.Lc()).IsZero || !fRest.Cc().Remainder(factor.Cc()).IsZero)
                             continue;
                         UnivariatePolynomial<BigInteger> mRest = factory.CreateConstant(fRest.Lc().Divide(factor.Lc()));
                         int[] restIndexes = ArraysUtil.IntSetDifference(modIndexes, indexes);
                         foreach (int i in restIndexes)
                             mRest = mRest.Multiply(modularFactors[i]);
-                        UnivariatePolynomial<BigInteger> rest = UnivariatePolynomial.AsPolyZSymmetric(mRest).PrimitivePart();
+                        UnivariatePolynomial<BigInteger> rest = UnivariatePolynomial<BigInteger>.AsPolyZSymmetric(mRest).PrimitivePart();
                         if (!factor.Lc().Multiply(rest.Lc()).Equals(fRest.Lc()) || !factor.Cc().Multiply(rest.Cc()).Equals(fRest.Cc()))
                             continue;
                         if (rest.Clone().Multiply(factor).Equals(fRest))
@@ -364,18 +350,18 @@ namespace Cc.Redberry.Rings.Poly.Univar
             return trueFactors;
         }
 
-        private static readonly double MAX_PRIME_GAP = 382, MIGNOTTE_MAX_DOUBLE_32 = (2 * Integer.MAX_VALUE) - 10 * MAX_PRIME_GAP, MIGNOTTE_MAX_DOUBLE_64 = MIGNOTTE_MAX_DOUBLE_32 * MIGNOTTE_MAX_DOUBLE_32;
+        private static readonly double MAX_PRIME_GAP = 382, MIGNOTTE_MAX_DOUBLE_32 = (2.0 * int.MaxValue) - 10 * MAX_PRIME_GAP, MIGNOTTE_MAX_DOUBLE_64 = MIGNOTTE_MAX_DOUBLE_32 * MIGNOTTE_MAX_DOUBLE_32;
         private static readonly int LOWER_RND_MODULUS_BOUND = 1 << 24, UPPER_RND_MODULUS_BOUND = 1 << 30;
         private static int RandomModulusInf()
         {
-            return LOWER_RND_MODULUS_BOUND + PrivateRandom.GetRandom().NextInt(UPPER_RND_MODULUS_BOUND - LOWER_RND_MODULUS_BOUND);
+            return LOWER_RND_MODULUS_BOUND + PrivateRandom.GetRandom().Next(UPPER_RND_MODULUS_BOUND - LOWER_RND_MODULUS_BOUND);
         }
 
         private static int Next32BitPrime(int val)
         {
             if (val < 0)
             {
-                long l = BigPrimes.NextPrime(Integer.ToUnsignedLong(val));
+                long l = BigPrimes.NextPrime(int.ToUnsignedLong(val));
                 return (int)l;
             }
             else
@@ -389,10 +375,10 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <param name="poly">Z[x] primitive square-free polynomial</param>
         static PolynomialFactorDecomposition<UnivariatePolynomial<BigInteger>> FactorSquareFreeInZ0(UnivariatePolynomial<BigInteger> poly)
         {
-            BigInteger bound2 = BigInteger.TWO.Multiply(UnivariatePolynomial.MignotteBound(poly)).Multiply(poly.Lc().Abs());
+            BigInteger bound2 = new BigInteger(2).Multiply(UnivariatePolynomial<BigInteger>.MignotteBound(poly)).Multiply(poly.Lc().Abs());
             if (bound2.CompareTo(MachineArithmetic.b_MAX_SUPPORTED_MODULUS) < 0)
             {
-                PolynomialFactorDecomposition<UnivariatePolynomialZ64> tryLong = FactorSquareFreeInZ0(UnivariatePolynomial.AsOverZ64(poly));
+                PolynomialFactorDecomposition<UnivariatePolynomialZ64> tryLong = FactorSquareFreeInZ0(UnivariatePolynomial<BigInteger>.AsOverZ64(poly));
                 if (tryLong != null)
                     return ConvertFactorizationToBigIntegers(tryLong);
             }
@@ -413,14 +399,14 @@ namespace Cc.Redberry.Rings.Poly.Univar
                 do
                 {
                     tmpModulus = SmallPrimes.NextPrime(RandomModulusInf());
-                    moduloImage = UnivariatePolynomial.AsOverZp64(poly.SetRing(new IntegersZp(tmpModulus)));
+                    moduloImage = UnivariatePolynomial<BigInteger>.AsOverZp64(poly.SetRing(new IntegersZp(tmpModulus)));
                 }
                 while (moduloImage.Cc() == 0 || moduloImage.Degree() != poly.Degree() || !UnivariateSquareFreeFactorization.IsSquareFree(moduloImage));
 
                 // do modular factorization
                 PolynomialFactorDecomposition<UnivariatePolynomialZp64> tmpFactors = FactorInGF(moduloImage.Monic());
                 if (tmpFactors.Count == 1)
-                    return PolynomialFactorDecomposition.Of(poly);
+                    return PolynomialFactorDecomposition<UnivariatePolynomial<BigInteger>>.Of(poly);
                 if (lModularFactors == null || lModularFactors.Count > tmpFactors.Count)
                 {
                     lModularFactors = tmpFactors;
@@ -431,16 +417,16 @@ namespace Cc.Redberry.Rings.Poly.Univar
                     break;
             }
 
-            IList<UnivariatePolynomial<BigInteger>> modularFactors = HenselLifting.LiftFactorization(BigInteger.ValueOf(modulus), bound2, poly, lModularFactors.factors);
-            return ReconstructFactorsZ(poly, PolynomialFactorDecomposition.Of(modularFactors));
+            IList<UnivariatePolynomial<BigInteger>> modularFactors = HenselLifting.LiftFactorization(new BigInteger(modulus), bound2, poly, lModularFactors.factors);
+            return ReconstructFactorsZ(poly, PolynomialFactorDecomposition<UnivariatePolynomial<BigInteger>>.Of(modularFactors));
         }
 
         /// <summary>
         /// machine integers -> BigIntegers
         /// </summary>
-        static PolynomialFactorDecomposition<UnivariatePolynomial<BigInteger>> ConvertFactorizationToBigIntegers<T extends AUnivariatePolynomial64<T>>(PolynomialFactorDecomposition<T> decomposition)
+        static PolynomialFactorDecomposition<UnivariatePolynomial<BigInteger>> ConvertFactorizationToBigIntegers<T>(PolynomialFactorDecomposition<T> decomposition) where T : AUnivariatePolynomial64<T>
         {
-            return decomposition.MapTo(AUnivariatePolynomial64.ToBigPoly());
+            return decomposition.MapTo(p => p.ToBigPoly());
         }
 
         /// <summary>
@@ -492,7 +478,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
             do
             {
                 trial32Modulus = Next32BitPrime(trial32Modulus + 1);
-                modulus = Integer.ToUnsignedLong(trial32Modulus);
+                modulus = int.ToUnsignedLong(trial32Modulus);
                 moduloImage = poly.Modulus(modulus, true);
             }
             while (!UnivariateSquareFreeFactorization.IsSquareFree(moduloImage));
@@ -515,22 +501,22 @@ namespace Cc.Redberry.Rings.Poly.Univar
 
             // actual lift
             if (henselIterations > 0)
-                modularFactors = PolynomialFactorDecomposition.Of(HenselLifting.LiftFactorization(modulus, liftedModulus, henselIterations, poly, modularFactors.factors, true)).AddUnit(modularFactors.unit.SetModulus(liftedModulus));
+                modularFactors = PolynomialFactorDecomposition<UnivariatePolynomialZp64>.Of(HenselLifting.LiftFactorization(modulus, liftedModulus, henselIterations, poly, modularFactors.factors, true)).AddUnit(modularFactors.unit.SetModulus(liftedModulus));
 
             //reconstruct true factors
             return ReconstructFactorsZ(poly, modularFactors);
         }
 
-        public static PolynomialFactorDecomposition<PolyZ> FactorSquareFreeInZ<PolyZ extends IUnivariatePolynomial<PolyZ>>(PolyZ poly)
+        public static PolynomialFactorDecomposition<PolyZ> FactorSquareFreeInZ<PolyZ>(PolyZ poly) where PolyZ : IUnivariatePolynomial<PolyZ>
         {
             EnsureIntegersDomain(poly);
             if (poly.Degree() <= 1 || poly.IsMonomial())
                 if (poly.IsMonic())
-                    return PolynomialFactorDecomposition.Of(poly);
+                    return PolynomialFactorDecomposition<PolyZ>.Of(poly);
                 else
                 {
                     PolyZ c = poly.ContentAsPoly();
-                    return PolynomialFactorDecomposition.Of(c, poly.Clone().DivideByLC(c));
+                    return PolynomialFactorDecomposition<PolyZ>.Of(c, poly.Clone().DivideByLC(c));
                 }
 
             PolyZ content = poly.ContentAsPoly();
@@ -539,7 +525,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
             return FactorSquareFreeInZ0(poly.Clone().DivideByLC(content)).SetUnit(content);
         }
 
-        private static PolynomialFactorDecomposition<PolyZ> FactorSquareFreeInZ0<PolyZ extends IUnivariatePolynomial<PolyZ>>(PolyZ poly)
+        private static PolynomialFactorDecomposition<PolyZ> FactorSquareFreeInZ0<PolyZ>(PolyZ poly) where PolyZ : IUnivariatePolynomial<PolyZ>
         {
             if (poly is UnivariatePolynomialZ64)
                 return (PolynomialFactorDecomposition<PolyZ>)FactorSquareFreeInZ0((UnivariatePolynomialZ64)poly);
@@ -547,9 +533,9 @@ namespace Cc.Redberry.Rings.Poly.Univar
                 return (PolynomialFactorDecomposition<PolyZ>)FactorSquareFreeInZ0((UnivariatePolynomial)poly);
         }
 
-        private static void EnsureIntegersDomain(IUnivariatePolynomial poly)
+        private static void EnsureIntegersDomain<PolyZ>(IUnivariatePolynomial<PolyZ> poly) where PolyZ : IUnivariatePolynomial<PolyZ>
         {
-            if (poly is UnivariatePolynomialZ64 || (poly is UnivariatePolynomial && ((UnivariatePolynomial)poly).ring.Equals(Rings.Z)))
+            if (poly is UnivariatePolynomialZ64 || (poly is UnivariatePolynomial<PolyZ> && ((UnivariatePolynomial<PolyZ>)poly).ring.Equals(Rings.Z)))
                 return;
             throw new ArgumentException("Not an integers ring for factorization in Z[x]");
         }
@@ -563,19 +549,19 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// @see#FactorInGF(IUnivariatePolynomial)
         /// @seeHenselLifting
         /// </remarks>
-        public static PolynomialFactorDecomposition<Poly> FactorInZ<Poly extends IUnivariatePolynomial<Poly>>(Poly poly)
+        public static PolynomialFactorDecomposition<Poly> FactorInZ<Poly>(Poly poly) where Poly : IUnivariatePolynomial<Poly>
         {
             EnsureIntegersDomain(poly);
             if (poly.Degree() <= 1 || poly.IsMonomial())
                 if (poly.IsMonic())
-                    return PolynomialFactorDecomposition.Of(poly);
+                    return PolynomialFactorDecomposition<Poly>.Of(poly);
                 else
                 {
                     Poly c = poly.ContentAsPoly();
-                    return PolynomialFactorDecomposition.Of(c, poly.Clone().DivideByLC(c));
+                    return PolynomialFactorDecomposition<Poly>.Of(c, poly.Clone().DivideByLC(c));
                 }
 
-            PolynomialFactorDecomposition<Poly> result = PolynomialFactorDecomposition.Empty(poly);
+            PolynomialFactorDecomposition<Poly> result = PolynomialFactorDecomposition<Poly>.Empty(poly);
             Poly content = poly.ContentAsPoly();
             if (poly.SignumOfLC() < 0)
                 content = content.Negate();
@@ -583,14 +569,14 @@ namespace Cc.Redberry.Rings.Poly.Univar
             return result.SetUnit(content);
         }
 
-        private static void FactorInZ<T extends IUnivariatePolynomial<T>>(T poly, PolynomialFactorDecomposition<T> result)
+        private static void FactorInZ<T>(T poly, PolynomialFactorDecomposition<T> result) where T :IUnivariatePolynomial<T>
         {
-            FactorGeneric(poly, result, UnivariateFactorization.FactorSquareFreeInZ0());
+            FactorGeneric(poly, result, UnivariateFactorization.FactorSquareFreeInZ0);
         }
 
-        private static void FactorGeneric<T extends IUnivariatePolynomial<T>>(T poly, PolynomialFactorDecomposition<T> result, Function<T, PolynomialFactorDecomposition<T>> factorSquareFree)
+        private static void FactorGeneric<T>(T poly, PolynomialFactorDecomposition<T> result, Func<T, PolynomialFactorDecomposition<T>> factorSquareFree) where T :IUnivariatePolynomial<T>
         {
-            FactorMonomial<T> base = FactorOutMonomial(poly);
+            FactorMonomial<T> @base = FactorOutMonomial(poly);
             if (!@base.monomial.IsConstant())
                 result.AddFactor(poly.CreateMonomial(1), @base.monomial.Degree());
 
@@ -604,7 +590,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
                 int sqfExponent = sqf.GetExponent(i);
 
                 //do distinct-degree factorization
-                PolynomialFactorDecomposition<T> cz = factorSquareFree.Apply(sqfFactor);
+                PolynomialFactorDecomposition<T> cz = factorSquareFree(sqfFactor);
 
                 //do equal-degree factorization
                 foreach (T irreducibleFactor in cz.factors)
@@ -627,11 +613,11 @@ namespace Cc.Redberry.Rings.Poly.Univar
         public static PolynomialFactorDecomposition<UnivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>>> FactorInNumberField(UnivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> poly)
         {
             if (poly.Degree() <= 1 || poly.IsMonomial())
-                return PolynomialFactorDecomposition.Of(poly);
-            PolynomialFactorDecomposition<UnivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>>> result = PolynomialFactorDecomposition.Empty(poly);
+                return PolynomialFactorDecomposition<UnivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>>>.Of(poly);
+            PolynomialFactorDecomposition<UnivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>>> result = PolynomialFactorDecomposition<UnivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>>>.Empty(poly);
             FactorInNumberField(poly, result);
             if (result.IsTrivial())
-                return PolynomialFactorDecomposition.Of(poly);
+                return PolynomialFactorDecomposition<UnivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>>>.Of(poly);
 
             // correct l.c.
             AlgebraicNumberField<UnivariatePolynomial<Rational<BigInteger>>> numberField = (AlgebraicNumberField<UnivariatePolynomial<Rational<BigInteger>>>)poly.ring;
@@ -639,13 +625,13 @@ namespace Cc.Redberry.Rings.Poly.Univar
             for (int i = 0; i < result.Count; i++)
                 unit = numberField.Multiply(unit, numberField.Pow(result[i].Lc(), result.GetExponent(i)));
             unit = numberField.DivideExact(poly.Lc(), unit);
-            result.AddUnit(UnivariatePolynomial.Constant(numberField, unit));
+            result.AddUnit(UnivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>>.Constant(numberField, unit));
             return result;
         }
 
         private static void FactorInNumberField(UnivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> poly, PolynomialFactorDecomposition<UnivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>>> result)
         {
-            FactorGeneric(poly, result, UnivariateFactorization.FactorSquareFreeInNumberField());
+            FactorGeneric(poly, result, UnivariateFactorization.FactorSquareFreeInNumberField);
         }
 
         /// <summary>
@@ -677,8 +663,8 @@ namespace Cc.Redberry.Rings.Poly.Univar
                 // factorize norm
                 PolynomialFactorDecomposition<UnivariatePolynomial<Rational<BigInteger>>> normFactors = Factor(sPolyNorm);
                 if (normFactors.IsTrivial())
-                    return PolynomialFactorDecomposition.Of(poly);
-                PolynomialFactorDecomposition<UnivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>>> result = PolynomialFactorDecomposition.Empty(poly);
+                    return PolynomialFactorDecomposition<UnivariatePolynomial<Rational<BigInteger>>>.Of(poly);
+                PolynomialFactorDecomposition<UnivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>>> result = PolynomialFactorDecomposition<UnivariatePolynomial<Rational<BigInteger>>>.Empty(poly);
                 for (int i = 0; i < normFactors.Count; i++)
                 {
                     UnivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> factor = UnivariateGCD.PolynomialGCD(sPoly, ToNumberField(numberField, normFactors[i]));
@@ -693,7 +679,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
 
         private static UnivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> ToNumberField(AlgebraicNumberField<UnivariatePolynomial<Rational<BigInteger>>> numberField, UnivariatePolynomial<Rational<BigInteger>> poly)
         {
-            return poly.MapCoefficients(numberField, (cf) => UnivariatePolynomial.Constant(Rings.Q, cf));
+            return poly.MapCoefficients(numberField, (cf) => UnivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>>.Constant(Rings.Q, cf));
         }
     }
 }

@@ -1,15 +1,4 @@
-using Cc.Redberry.Rings;
 using Cc.Redberry.Rings.Io;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using static Cc.Redberry.Rings.Poly.RoundingMode;
-using static Cc.Redberry.Rings.Poly.Associativity;
-using static Cc.Redberry.Rings.Poly.Operator;
-using static Cc.Redberry.Rings.Poly.TokenType;
-using static Cc.Redberry.Rings.Poly.SystemInfo;
 
 namespace Cc.Redberry.Rings.Poly
 {
@@ -17,25 +6,18 @@ namespace Cc.Redberry.Rings.Poly
     /// Polynomial ring.
     /// </summary>
     /// <remarks>@since1.0</remarks>
-    public interface IPolynomialRing<Poly> : Ring<Poly>
+    public interface IPolynomialRing<Poly> : Ring<Poly> where Poly : IPolynomial<Poly>
     {
         /// <summary>
         /// Number of polynomial variables
         /// </summary>
         int NVariables();
-        /// <summary>
-        /// Number of polynomial variables
-        /// </summary>
+
         /// <summary>
         /// Factory polynomial
         /// </summary>
         Poly Factory();
-        /// <summary>
-        /// Number of polynomial variables
-        /// </summary>
-        /// <summary>
-        /// Factory polynomial
-        /// </summary>
+
         /// <summary>
         /// Creates poly representing a single specified variable
         /// </summary>
@@ -49,7 +31,7 @@ namespace Cc.Redberry.Rings.Poly
         /// <summary>
         /// Creates poly representing a single specified variable
         /// </summary>
-        int Signum(Poly element)
+        new int Signum(Poly element)
         {
             return element.SignumOfLC();
         }
@@ -86,7 +68,7 @@ namespace Cc.Redberry.Rings.Poly
         /// <summary>
         /// Simple coder for this ring
         /// </summary>
-        Coder<Poly, ?, ?> MkCoder(params string[] variables)
+        Coder<Poly, _, _> MkCoder(params string[] variables)
         {
             return Coder.MkPolynomialCoder(this, variables);
         }

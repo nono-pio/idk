@@ -1,18 +1,7 @@
-using Cc.Redberry.Rings;
+using System.Numerics;
+using System.Runtime.InteropServices.JavaScript;
 using Cc.Redberry.Rings.Bigint;
 using Cc.Redberry.Rings.Util;
-using Org.Apache.Commons.Math3.Random;
-using Java.Util.Function;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using static Cc.Redberry.Rings.Poly.Univar.RoundingMode;
-using static Cc.Redberry.Rings.Poly.Univar.Associativity;
-using static Cc.Redberry.Rings.Poly.Univar.Operator;
-using static Cc.Redberry.Rings.Poly.Univar.TokenType;
-using static Cc.Redberry.Rings.Poly.Univar.SystemInfo;
 
 namespace Cc.Redberry.Rings.Poly.Univar
 {
@@ -34,7 +23,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <param name="degree">polynomial degree</param>
         /// <param name="rnd">random source</param>
         /// <returns>random polynomial of specified {@code degree}</returns>
-        public static Poly RandomPoly<Poly extends IUnivariatePolynomial<Poly>>(Poly factory, int degree, RandomGenerator rnd)
+        public static Poly RandomPoly<Poly>(Poly factory, int degree, Random rnd) where Poly : IUnivariatePolynomial<Poly>
         {
             if (factory is UnivariatePolynomialZ64)
                 return (Poly)RandomPoly(degree, rnd);
@@ -57,7 +46,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <param name="degree">polynomial degree</param>
         /// <param name="rnd">random source</param>
         /// <returns>random polynomial of specified {@code degree}</returns>
-        public static UnivariatePolynomialZ64 RandomPoly(int degree, RandomGenerator rnd)
+        public static UnivariatePolynomialZ64 RandomPoly(int degree, Random rnd)
         {
             return RandomPoly(degree, DEFAULT_BOUND, rnd);
         }
@@ -68,12 +57,12 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <param name="degree">polynomial degree</param>
         /// <param name="rnd">random source</param>
         /// <returns>random polynomial of specified {@code degree}</returns>
-        public static UnivariatePolynomialZp64 RandomMonicPoly(int degree, long modulus, RandomGenerator rnd)
+        public static UnivariatePolynomialZp64 RandomMonicPoly(int degree, long modulus, Random rnd)
         {
             UnivariatePolynomialZ64 r = RandomPoly(degree, modulus, rnd);
             while (r.data[degree] % modulus == 0)
             {
-                r.data[r.degree] = rnd.NextLong();
+                r.data[r.degree] = rnd.NextInt64();
             }
 
             return r.Modulus(modulus, false).Monic();
@@ -85,10 +74,10 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <param name="degree">polynomial degree</param>
         /// <param name="rnd">random source</param>
         /// <returns>random polynomial of specified {@code degree}</returns>
-        public static UnivariatePolynomial<BigInteger> RandomMonicPoly(int degree, BigInteger modulus, RandomGenerator rnd)
+        public static UnivariatePolynomial<BigInteger> RandomMonicPoly(int degree, BigInteger modulus, Random rnd)
         {
             UnivariatePolynomial<BigInteger> r = RandomPoly(degree, modulus, rnd);
-            while ((r.data[degree].Mod(modulus)).IsZero())
+            while ((r.data[degree].Mod(modulus)).IsZero)
             {
                 r.data[r.degree] = RandomUtil.RandomInt(modulus, rnd);
             }
@@ -103,7 +92,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <param name="ring">the ring</param>
         /// <param name="rnd">random source</param>
         /// <returns>random polynomial of specified {@code degree}</returns>
-        public static UnivariatePolynomial<E> RandomMonicPoly<E>(int degree, Ring<E> ring, RandomGenerator rnd)
+        public static UnivariatePolynomial<E> RandomMonicPoly<E>(int degree, Ring<E> ring, Random rnd)
         {
             return RandomPoly(degree, ring, rnd).Monic();
         }
@@ -116,7 +105,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <param name="bound">absolute bound for coefficients</param>
         /// <param name="rnd">random source</param>
         /// <returns>random polynomial of specified {@code degree} with elements bounded by {@code bound} (by absolute value)</returns>
-        public static UnivariatePolynomialZ64 RandomPoly(int degree, long bound, RandomGenerator rnd)
+        public static UnivariatePolynomialZ64 RandomPoly(int degree, long bound, Random rnd)
         {
             return UnivariatePolynomialZ64.Create(RandomLongArray(degree, bound, rnd));
         }
@@ -129,9 +118,9 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <param name="bound">absolute bound for coefficients</param>
         /// <param name="rnd">random source</param>
         /// <returns>random polynomial of specified {@code degree} with elements bounded by {@code bound} (by absolute value)</returns>
-        public static UnivariatePolynomial<BigInteger> RandomPoly(int degree, BigInteger bound, RandomGenerator rnd)
+        public static UnivariatePolynomial<BigInteger> RandomPoly(int degree, BigInteger bound, Random rnd)
         {
-            return UnivariatePolynomial.CreateUnsafe(Rings.Z, RandomBigArray(degree, bound, rnd));
+            return UnivariatePolynomial<BigInteger>.CreateUnsafe(Rings.Z, RandomBigArray(degree, bound, rnd));
         }
 
         /// <summary>
@@ -143,7 +132,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <returns>random polynomial of specified {@code degree} with elements bounded by {@code bound} (by absolute value)</returns>
         public static UnivariatePolynomial<E> RandomPoly<E>(int degree, Ring<E> ring, RandomGenerator rnd)
         {
-            return UnivariatePolynomial.CreateUnsafe(ring, RandomArray(degree, ring, rnd));
+            return UnivariatePolynomial<E>.CreateUnsafe(ring, RandomArray(degree, ring, rnd));
         }
 
         /// <summary>
@@ -154,9 +143,9 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <param name="method">method for generating random coefficients</param>
         /// <param name="rnd">random source</param>
         /// <returns>random polynomial of specified {@code degree} with elements bounded by {@code bound} (by absolute value)</returns>
-        public static UnivariatePolynomial<E> RandomPoly<E>(int degree, Ring<E> ring, Function<RandomGenerator, E> method, RandomGenerator rnd)
+        public static UnivariatePolynomial<E> RandomPoly<E>(int degree, Ring<E> ring, Func<Random, E> method, Random rnd)
         {
-            return UnivariatePolynomial.CreateUnsafe(ring, RandomArray(degree, ring, method, rnd));
+            return UnivariatePolynomial<E>.CreateUnsafe(ring, RandomArray(degree, ring, method, rnd));
         }
 
         /// <summary>
@@ -166,7 +155,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <param name="bound">absolute bound for coefficients</param>
         /// <param name="rnd">random source</param>
         /// <returns>array of length {@code degree + 1} with elements bounded by {@code bound} (by absolute value)</returns>
-        public static long[] RandomLongArray(int degree, long bound, RandomGenerator rnd)
+        public static long[] RandomLongArray(int degree, long bound, Random rnd)
         {
             long[] data = new long[degree + 1];
             RandomDataGenerator rndd = new RandomDataGenerator(rnd);
@@ -189,9 +178,9 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <param name="bound">absolute bound for coefficients</param>
         /// <param name="rnd">random source</param>
         /// <returns>array of length {@code degree + 1} with elements bounded by {@code bound} (by absolute value)</returns>
-        public static BigInteger[] RandomBigArray(int degree, BigInteger bound, RandomGenerator rnd)
+        public static BigInteger[] RandomBigArray(int degree, BigInteger bound, Random rnd)
         {
-            long lBound = bound.IsLong() ? bound.LongValue() : Long.MAX_VALUE;
+            long lBound = bound.IsLong() ? bound.LongValue() : long.MaxValue;
             RandomDataGenerator rndd = new RandomDataGenerator(rnd);
             BigInteger[] data = new BigInteger[degree + 1];
             for (int i = 0; i <= degree; ++i)
@@ -201,8 +190,8 @@ namespace Cc.Redberry.Rings.Poly.Univar
                     data[i] = data[i].Negate();
             }
 
-            while (data[degree].Equals(BigInteger.ZERO))
-                data[degree] = BigInteger.ValueOf(rndd.NextLong(0, lBound));
+            while (data[degree].Equals(BigInteger.Zero))
+                data[degree] = new BigInteger(rndd.NextLong(0, lBound));
             return data;
         }
 
@@ -213,7 +202,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <param name="ring">the ring</param>
         /// <param name="rnd">random source</param>
         /// <returns>array of length {@code degree + 1} with elements from specified ring</returns>
-        public static E[] RandomArray<E>(int degree, Ring<E> ring, RandomGenerator rnd)
+        public static E[] RandomArray<E>(int degree, Ring<E> ring, Random rnd)
         {
             return RandomArray(degree, ring, ring.RandomElement(), rnd);
         }
@@ -226,13 +215,13 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <param name="method">method for generating random coefficients</param>
         /// <param name="rnd">random source</param>
         /// <returns>array of length {@code degree + 1} with elements from specified ring</returns>
-        public static E[] RandomArray<E>(int degree, Ring<E> ring, Function<RandomGenerator, E> method, RandomGenerator rnd)
+        public static E[] RandomArray<E>(int degree, Ring<E> ring, Func<Random, E> method, Random rnd)
         {
             E[] data = ring.CreateArray(degree + 1);
             for (int i = 0; i <= degree; ++i)
-                data[i] = method.Apply(rnd);
+                data[i] = method(rnd);
             while (ring.IsZero(data[degree]))
-                data[degree] = method.Apply(rnd);
+                data[degree] = method(rnd);
             return data;
         }
     }

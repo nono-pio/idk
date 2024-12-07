@@ -12,7 +12,7 @@ namespace Cc.Redberry.Rings.Primes
     public sealed class BigPrimes
     {
         private static readonly BigInteger MAX_INT = new BigInteger(int.MaxValue);
-        private static readonly Well1024a privateRandom = new Well1024a(0x1a9e2b8f3c7d6a4b);
+        private static readonly Random privateRandom = new Random(0x1a9e2b8f);
         private BigPrimes()
         {
         }
@@ -77,12 +77,12 @@ namespace Cc.Redberry.Rings.Primes
                 while (k-- > 0)
                 {
                     BigInteger a = new BigInteger(7 + rnd.Next(bound - 7));
-                    if (!a.ModPow(nMinusOne, n).IsOne())
+                    if (!a.ModPow(nMinusOne, n).IsOne)
                         return false;
                     if (factors == null)
                         factors = PrimeFactors(nMinusOne);
                     foreach (BigInteger q in factors)
-                        if (a.ModPow(nMinusOne.Divide(q), n).IsOne())
+                        if (a.ModPow(nMinusOne.Divide(q), n).IsOne)
                             continue;
                     return true;
                 }
@@ -127,29 +127,29 @@ namespace Cc.Redberry.Rings.Primes
         public static BigInteger Fermat(BigInteger n, long upperBound)
         {
             long cnt = 0;
-            BigInteger x = QuadraticSieve.SqrtBigInt(n).Add(BigInteger.ONE);
-            BigInteger u = x.Multiply(BigInteger.TWO).Add(BigInteger.ONE);
-            BigInteger v = BigInteger.ONE;
+            BigInteger x = Primes.QuadraticSieve.SqrtBigInt(n).Add(BigInteger.One);
+            BigInteger u = x.Multiply(2).Add(BigInteger.One);
+            BigInteger v = BigInteger.One;
             BigInteger r = x.Multiply(x).Subtract(n);
             while (!r.IsZero)
             {
                 cnt++;
                 if (cnt > upperBound)
-                    return BigInteger.ZERO;
-                while (r.CompareTo(BigInteger.ZERO) > 0)
+                    return BigInteger.Zero;
+                while (r.CompareTo(BigInteger.Zero) > 0)
                 {
                     r = r.Subtract(v);
-                    v = v.Add(BigInteger.TWO);
+                    v = v.Add(2);
                 }
 
-                if (r.CompareTo(BigInteger.ZERO) < 0)
+                if (r.CompareTo(BigInteger.Zero) < 0)
                 {
                     r = r.Add(u);
-                    u = u.Add(BigInteger.TWO);
+                    u = u.Add(2);
                 }
             }
 
-            return u.Subtract(v).Divide(BigInteger.TWO);
+            return u.Subtract(v).Divide(2);
         }
 
         /// <summary>
@@ -158,12 +158,12 @@ namespace Cc.Redberry.Rings.Primes
         /// <param name="n">integer to factor</param>
         /// <param name="attempts">number of random attempts</param>
         /// <returns>a single factor of {@code n} or null if no factors found</returns>
-        public static BigInteger PollardRho(BigInteger n, int attempts, RandomGenerator rn)
+        public static BigInteger? PollardRho(BigInteger n, int attempts, Random rn)
         {
 
             // check divisibility by 2
-            if (n.Mod(BigInteger.TWO).IsZero())
-                return BigInteger.TWO;
+            if (n.Mod(2).IsZero)
+                return 2;
             BigInteger divisor;
             BigInteger c = new BigInteger(n.BitLength(), rn);
             BigInteger x = new BigInteger(n.BitLength(), rn);
@@ -175,8 +175,8 @@ namespace Cc.Redberry.Rings.Primes
                 xx = xx.Multiply(xx).Mod(n).Add(c).Mod(n);
                 divisor = x.Subtract(xx).Gcd(n);
             }
-            while (attempts-- > 0 && divisor.IsOne());
-            return divisor.IsOne() ? null : divisor;
+            while (attempts-- > 0 && divisor.IsOne);
+            return divisor.IsOne ? null : divisor;
         }
 
         /// <summary>
@@ -185,37 +185,37 @@ namespace Cc.Redberry.Rings.Primes
         /// <param name="n">integer to factor</param>
         /// <param name="upperBound">expected B-smoothness</param>
         /// <returns>a single factor of {@code n} or null if no factors found</returns>
-        public static BigInteger PollardRho(BigInteger n, long upperBound)
+        public static BigInteger? PollardRho(BigInteger n, long upperBound)
         {
             long range = 1;
             long terms = 0;
-            BigInteger x1 = BigInteger.TWO;
-            BigInteger x2 = BigInteger.FIVE;
-            BigInteger product = BigInteger.ONE;
+            BigInteger x1 = 2;
+            BigInteger x2 = 5;
+            BigInteger product = BigInteger.One;
             while (terms <= upperBound)
             {
                 for (long j = 1; j <= range; j++)
                 {
-                    x2 = x2.Multiply(x2).Add(BigInteger.ONE).Mod(n);
+                    x2 = x2.Multiply(x2).Add(BigInteger.One).Mod(n);
                     product = product.Multiply(x1.Subtract(x2)).Mod(n);
                     if (terms++ > upperBound)
                         break;
                     if (terms % 5 == 0)
                     {
                         BigInteger g = n.Gcd(product);
-                        if (g.CompareTo(BigInteger.ONE) > 0)
+                        if (g.CompareTo(BigInteger.One) > 0)
                         {
                             return g;
                         }
 
-                        product = BigInteger.ONE;
+                        product = BigInteger.One;
                     }
                 }
 
                 x1 = x2;
                 range *= 2;
                 for (long j = 1; j <= range; j++)
-                    x2 = x2.Multiply(x2).Add(BigInteger.ONE).Mod(n);
+                    x2 = x2.Multiply(x2).Add(BigInteger.One).Mod(n);
             }
 
             return null;
@@ -227,42 +227,30 @@ namespace Cc.Redberry.Rings.Primes
         /// <param name="n">integer to factor</param>
         /// <param name="upperBound">expected B-smoothness</param>
         /// <returns>a single factor of {@code n} or null if no factors found</returns>
-        public static BigInteger PollardP1(BigInteger n, long upperBound)
+        public static BigInteger? PollardP1(BigInteger n, long upperBound)
         {
             BigInteger g, i, m;
             for (int outerCnt = 0; outerCnt < 5; outerCnt++)
             {
-                switch (outerCnt)
+                m = outerCnt switch
                 {
-                    case 0:
-                        m = BigInteger.TWO;
-                        break;
-                    case 1:
-                        m = BigInteger.THREE;
-                        break;
-                    case 2:
-                        m = BigInteger.FOUR;
-                        break;
-                    case 3:
-                        m = BigInteger.FIVE;
-                        break;
-                    case 4:
-                        m = BigInteger.SEVEN;
-                        break;
-                    default:
-                        m = BigInteger.TWO;
-                        break;
-                }
+                    0 => 2,
+                    1 => 3,
+                    2 => 4,
+                    3 => 5,
+                    4 => 7,
+                    _ => 2
+                };
 
-                i = BigInteger.ONE;
+                i = BigInteger.One;
                 for (long cnt = 2; cnt <= upperBound; cnt++)
                 {
-                    i = i.Add(BigInteger.ONE);
+                    i = i.Add(BigInteger.One);
                     m = m.ModPow(i, n);
                     if (cnt % 5 == 0)
                     {
-                        g = n.Gcd(m.Subtract(BigInteger.ONE));
-                        if ((g.CompareTo(BigInteger.ONE) > 0) && (g.CompareTo(n) < 0))
+                        g = n.Gcd(m.Subtract(BigInteger.One));
+                        if ((g.CompareTo(BigInteger.One) > 0) && (g.CompareTo(n) < 0))
                         {
                             return g;
                         }
@@ -281,7 +269,7 @@ namespace Cc.Redberry.Rings.Primes
         static BigInteger FindFactorHard(BigInteger n)
         {
             int numBits = n.BitCount();
-            BigInteger r;
+            BigInteger? r;
 
             //switching between algorithms
             //some hard heuristics is here
@@ -290,8 +278,8 @@ namespace Cc.Redberry.Rings.Primes
 
                 // t = 1e4 - 3e6
                 r = PollardRho(n, 131072);
-                if (r != null)
-                    return r;
+                if (r is not null)
+                    return r.Value;
             }
 
             if (numBits < 30)
@@ -299,13 +287,13 @@ namespace Cc.Redberry.Rings.Primes
 
                 // t = 5e6
                 r = PollardRho(n, 1024, privateRandom);
-                if (r != null)
-                    return r;
+                if (r is not null)
+                    return r.Value;
 
                 // t = 2e6 - 5e7
                 r = PollardRho(n, 131072);
-                if (r != null)
-                    return r;
+                if (r is not null)
+                    return r.Value;
             }
 
             if (numBits < 60)
@@ -313,55 +301,56 @@ namespace Cc.Redberry.Rings.Primes
 
                 // t = 2e5
                 r = PollardRho(n, 128);
-                if (r != null)
-                    return r;
+                if (r is not null)
+                    return r.Value;
 
                 // t = 5e5
                 r = PollardRho(n, 128, privateRandom);
-                if (r != null)
-                    return r;
+                if (r is not null)
+                    return r.Value;
 
                 // t = 1e6
                 r = PollardP1(n, 128);
-                if (r != null)
-                    return r;
+                if (r is not null)
+                    return r.Value;
 
                 // t = 2e7
                 r = PollardRho(n, 131072);
-                if (r != null)
-                    return r;
+                if (r is not null)
+                    return r.Value;
             }
 
 
             //<-really large number with large primes
             // t = 5e5
             r = PollardRho(n, 128);
-            if (r != null)
-                return r;
+            if (r is not null)
+                return r.Value;
 
             // t = 5e5
             r = PollardP1(n, 128);
-            if (r != null)
-                return r;
+            if (r is not null)
+                return r.Value;
 
             // t = 5e6
             r = PollardRho(n, 1032, privateRandom);
-            if (r != null)
-                return r;
+            if (r is not null)
+                return r.Value;
 
             // t = 1e8
             r = PollardRho(n, 131072);
-            if (r != null)
-                return r;
+            if (r is not null)
+                return r.Value;
 
             // t = 1e9
             r = PollardP1(n, 131072);
-            if (r != null)
-                return r;
-            r = QuadraticSieve(n, 32768);
-            if (r.IsOne())
+            if (r is not null)
+                return r.Value;
+            
+            var _r = QuadraticSieve(n, 32768);
+            if (_r.IsOne)
                 return n;
-            return r;
+            return _r;
         }
 
         private static bool CheckKnownSmallPrime(BigInteger b)
@@ -378,7 +367,7 @@ namespace Cc.Redberry.Rings.Primes
         /// <exception cref="IllegalArgumentException">if n is negative</exception>
         public static long[] PrimeFactors(long num)
         {
-            return PrimeFactors(new BigInteger(num)).Stream().MapToLong(BigInteger.LongValueExact()).ToArray();
+            return PrimeFactors(new BigInteger(num)).Select(p => p.LongValueExact()).ToArray();
         }
 
         /// <summary>
@@ -388,10 +377,10 @@ namespace Cc.Redberry.Rings.Primes
         /// <param name="num">number to factorize</param>
         /// <returns>list of prime factors of n</returns>
         /// <exception cref="IllegalArgumentException">if n is negative</exception>
-        public static IList<BigInteger> PrimeFactors(BigInteger num)
+        public static List<BigInteger> PrimeFactors(BigInteger num)
         {
-            List<BigInteger> factors = new List();
-            if (num.CompareTo(BigInteger.TWO) < 0)
+            List<BigInteger> factors = [];
+            if (num.CompareTo(2) < 0)
             {
                 factors.Add(num);
                 return factors;
@@ -408,7 +397,7 @@ namespace Cc.Redberry.Rings.Primes
 
             //start with trial divisions
             num = TrialDivision(num, factors);
-            if (num.IsOne())
+            if (num.IsOne)
                 return factors;
             if (IsPrime(num))
             {
@@ -428,7 +417,7 @@ namespace Cc.Redberry.Rings.Primes
             {
                 BigInteger prime = new BigInteger(p);
                 BigInteger[] qr = num.DivideAndRemainder(prime);
-                while (qr[1].IsZero())
+                while (qr[1].IsZero)
                 {
                     num = qr[0];
                     factors.Add(prime);
@@ -445,7 +434,7 @@ namespace Cc.Redberry.Rings.Primes
             while (true)
             {
                 factor = FindFactorHard(num);
-                if (factor.IsOne() || factor.Equals(num))
+                if (factor.IsOne || factor.Equals(num))
                 {
                     factors.Add(num);
                     return;

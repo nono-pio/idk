@@ -1,18 +1,6 @@
-using Cc.Redberry.Rings;
+using System.Numerics;
 using Cc.Redberry.Rings.Bigint;
-using Cc.Redberry.Rings.Poly;
-using Java.Util;
-using Java.Util.Stream;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using static Cc.Redberry.Rings.Poly.Univar.RoundingMode;
-using static Cc.Redberry.Rings.Poly.Univar.Associativity;
-using static Cc.Redberry.Rings.Poly.Univar.Operator;
-using static Cc.Redberry.Rings.Poly.Univar.TokenType;
-using static Cc.Redberry.Rings.Poly.Univar.SystemInfo;
+
 
 namespace Cc.Redberry.Rings.Poly.Univar
 {
@@ -202,36 +190,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
                 LiftLast();
             }
 
-            /// <summary>
-            /// Returns initial Z[x] polynomial modulo lifted modulus
-            /// </summary>
-            /// <returns>initial Z[x] polynomial modulo lifted modulus</returns>
-            /// <summary>
-            /// Returns first factor lifted
-            /// </summary>
-            /// <returns>first factor lifted</returns>
-            /// <summary>
-            /// Returns second factor lifted
-            /// </summary>
-            /// <returns>second factor lifted</returns>
-            /// <summary>
-            /// Returns first co-factor lifted
-            /// </summary>
-            /// <returns>first co-factor lifted</returns>
-            /// <summary>
-            /// Returns second co-factor lifted
-            /// </summary>
-            /// <returns>second co-factor lifted</returns>
-            /// <summary>
-            /// Performs single lift step.
-            /// </summary>
-            /// <summary>
-            /// Performs single lift step but don't lift co-factors (xgcd coefficients).
-            /// </summary>
-            /// <summary>
-            /// Lifts {@code nIterations} times. Co-factor will be lost on the last step.
-            /// </summary>
-            /// <param name="nIterations">number of lift iterations</param>
+   
             /// <summary>
             /// Lifts {@code nIterations} times.
             /// </summary>
@@ -372,7 +331,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         public static bLinearLift CreateLinearLift(long modulus, UnivariatePolynomial<BigInteger> poly, UnivariatePolynomialZp64 aFactor, UnivariatePolynomialZp64 bFactor)
         {
             EnsureIntegersDomain(poly);
-            BigInteger bModulus = BigInteger.ValueOf(modulus);
+            BigInteger bModulus = new BigInteger(modulus);
             bFactor = EnsureMonic(bFactor);
             long lc = poly.Lc().Mod(bModulus).LongValueExact();
             if (lc != aFactor.Lc())
@@ -384,7 +343,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <summary>
         /// runs xgcd for coprime polynomials ensuring that gcd is 1 (not another constant)
         /// </summary>
-        private static PolyZp[] MonicExtendedEuclid<PolyZp extends IUnivariatePolynomial<PolyZp>>(PolyZp a, PolyZp b)
+        private static PolyZp[] MonicExtendedEuclid<PolyZp>(PolyZp a, PolyZp b) where PolyZp : IUnivariatePolynomial<PolyZp>
         {
             PolyZp[] xgcd = UnivariateGCD.PolynomialExtendedGCD(a, b);
             if (xgcd[0].IsOne())
@@ -397,7 +356,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
             return xgcd;
         }
 
-        private static PolyZp EnsureMonic<PolyZp extends IUnivariatePolynomial<PolyZp>>(PolyZp p)
+        private static PolyZp EnsureMonic<PolyZp>(PolyZp p) where PolyZp : IUnivariatePolynomial<PolyZp>
         {
             return p.IsMonic() ? p : p.Clone().Monic();
         }
@@ -430,7 +389,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <param name="quadratic">whether to use quadratic of linear lift</param>
         /// <returns>factorization of {@code poly.modulus(finalModulus) } with some {@code finalModulus} greater than {@code
         /// desiredBound}</returns>
-        public static IList<UnivariatePolynomialZp64> LiftFactorization(long modulus, long desiredBound, UnivariatePolynomialZ64 poly, IList<UnivariatePolynomialZp64> modularFactors, bool quadratic)
+        public static List<UnivariatePolynomialZp64> LiftFactorization(long modulus, long desiredBound, UnivariatePolynomialZ64 poly, List<UnivariatePolynomialZp64> modularFactors, bool quadratic)
         {
             long[] im = NIterations(modulus, desiredBound, quadratic);
             return LiftFactorization(modulus, im[1], (int)im[0], poly, modularFactors, quadratic);
@@ -447,14 +406,14 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <param name="modularFactors">factorization of {@code poly.modulus(modulus)}</param>
         /// <param name="quadratic">whether to use quadratic of linear lift</param>
         /// <returns>factorization of {@code poly.modulus(finalModulus) }</returns>
-        public static IList<UnivariatePolynomialZp64> LiftFactorization(long modulus, long finalModulus, int nIterations, UnivariatePolynomialZ64 poly, IList<UnivariatePolynomialZp64> modularFactors, bool quadratic)
+        public static List<UnivariatePolynomialZp64> LiftFactorization(long modulus, long finalModulus, int nIterations, UnivariatePolynomialZ64 poly, List<UnivariatePolynomialZp64> modularFactors, bool quadratic)
         {
 
             // for the future:
             // recursion may be replaced with precomputed binary tree
             // for now the major part of execution time (~99%) is spent in actual lifting step, so irrelevant
             if (modularFactors.Count == 1)
-                return Collections.SingletonList(poly.Modulus(finalModulus, true).Monic());
+                return [poly.Modulus(finalModulus, true).Monic()];
             UnivariatePolynomialZp64 factory = modularFactors[0];
             UnivariatePolynomialZp64 aFactor = factory.CreateConstant(poly.Lc()), bFactor = factory.CreateOne();
             int nHalf = modularFactors.Count / 2, i = 0;
@@ -466,9 +425,9 @@ namespace Cc.Redberry.Rings.Poly.Univar
             hensel.Lift(nIterations);
             UnivariatePolynomialZp64 aFactorRaised = hensel.AFactorMod();
             UnivariatePolynomialZp64 bFactorRaised = hensel.BFactorMod();
-            List<UnivariatePolynomialZp64> result = new List();
-            result.AddAll(LiftFactorization(modulus, finalModulus, nIterations, aFactorRaised.AsPolyZSymmetric(), modularFactors.SubList(0, nHalf), quadratic));
-            result.AddAll(LiftFactorization(modulus, finalModulus, nIterations, bFactorRaised.AsPolyZSymmetric(), modularFactors.SubList(nHalf, modularFactors.Count), quadratic));
+            List<UnivariatePolynomialZp64> result = [];
+            result.AddRange(LiftFactorization(modulus, finalModulus, nIterations, aFactorRaised.AsPolyZSymmetric(), modularFactors.SubList(0, nHalf), quadratic));
+            result.AddRange(LiftFactorization(modulus, finalModulus, nIterations, bFactorRaised.AsPolyZSymmetric(), modularFactors.SubList(nHalf, modularFactors.Count), quadratic));
             return result;
         }
 
@@ -480,14 +439,14 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <summary>
         /// actual multifactor Hensel lifting implementation *
         /// </summary>
-        static IList<UnivariatePolynomial<BigInteger>> LiftFactorization0<PolyZp extends IUnivariatePolynomial<PolyZp>>(BigInteger modulus, BigInteger finalModulus, int nIterations, UnivariatePolynomial<BigInteger> poly, IList<PolyZp> modularFactors, LiftFactory<PolyZp> liftFactory)
+        static List<UnivariatePolynomial<BigInteger>> LiftFactorization0<PolyZp>(BigInteger modulus, BigInteger finalModulus, int nIterations, UnivariatePolynomial<BigInteger> poly, List<PolyZp> modularFactors, LiftFactory<PolyZp> liftFactory) where PolyZp : IUnivariatePolynomial<PolyZp>
         {
 
             // for the future:
             // recursion may be replaced with precomputed binary tree
             // for now the major part of execution time (~99%) is spent in actual lifting step, so irrelevant
             if (modularFactors.Count == 1)
-                return Collections.SingletonList(poly.SetRing(new IntegersZp(finalModulus)).Monic());
+                return [poly.SetRing(new IntegersZp(finalModulus)).Monic()];
             PolyZp factory = modularFactors[0];
             PolyZp aFactor = factory.CreateOne(), bFactor = factory.CreateOne();
             int nHalf = modularFactors.Count / 2, i = 0;
@@ -499,17 +458,18 @@ namespace Cc.Redberry.Rings.Poly.Univar
             hensel.Lift(nIterations);
             UnivariatePolynomial<BigInteger> aFactorRaised = hensel.AFactorMod();
             UnivariatePolynomial<BigInteger> bFactorRaised = hensel.BFactorMod();
-            List<UnivariatePolynomial<BigInteger>> result = new List();
-            result.AddAll(LiftFactorization0(modulus, finalModulus, nIterations, UnivariatePolynomial.AsPolyZSymmetric(aFactorRaised), modularFactors.SubList(0, nHalf), liftFactory));
-            result.AddAll(LiftFactorization0(modulus, finalModulus, nIterations, UnivariatePolynomial.AsPolyZSymmetric(bFactorRaised), modularFactors.SubList(nHalf, modularFactors.Count), liftFactory));
+            List<UnivariatePolynomial<BigInteger>> result = [];
+            result.AddRange(LiftFactorization0(modulus, finalModulus, nIterations, UnivariatePolynomial.AsPolyZSymmetric(aFactorRaised), modularFactors.SubList(0, nHalf), liftFactory));
+            result.AddRange(LiftFactorization0(modulus, finalModulus, nIterations, UnivariatePolynomial.AsPolyZSymmetric(bFactorRaised), modularFactors.SubList(nHalf, modularFactors.Count), liftFactory));
             return result;
         }
 
         sealed class LiftingInfo
         {
-            readonly int nIterations;
-            readonly BigInteger finalModulus;
-            private LiftingInfo(int nIterations, BigInteger finalModulus)
+            public readonly int nIterations;
+            public readonly BigInteger finalModulus;
+
+            public LiftingInfo(int nIterations, BigInteger finalModulus)
             {
                 this.nIterations = nIterations;
                 this.finalModulus = finalModulus;
@@ -541,13 +501,13 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <param name="quadratic">whether to use quadratic of linear lift</param>
         /// <returns>factorization of {@code poly.modulus(finalModulus) } with some {@code finalModulus} greater than {@code
         /// desiredBound}</returns>
-        public static IList<UnivariatePolynomial<BigInteger>> LiftFactorization(BigInteger modulus, BigInteger desiredBound, UnivariatePolynomial<BigInteger> poly, IList<UnivariatePolynomialZp64> modularFactors, bool quadratic)
+        public static List<UnivariatePolynomial<BigInteger>> LiftFactorization(BigInteger modulus, BigInteger desiredBound, UnivariatePolynomial<BigInteger> poly, List<UnivariatePolynomialZp64> modularFactors, bool quadratic)
         {
             if (!quadratic && !modulus.IsLong())
                 throw new ArgumentException("Only max 64-bit modulus for linear lift allowed.");
             LiftingInfo im = NIterations(modulus, desiredBound, quadratic);
             if (im.nIterations == 0)
-                return modularFactors.Stream().Map(UnivariatePolynomialZp64.ToBigPoly()).Collect(Collectors.ToList());
+                return modularFactors.Select(f => f.ToBigPoly()).ToList();
             LiftFactory<UnivariatePolynomialZp64> factory = quadratic ? HenselLifting.CreateQuadraticLift() : HenselLifting.CreateLinearLift();
             return LiftFactorization0(modulus, im.finalModulus, im.nIterations, poly, modularFactors, factory);
         }
@@ -562,7 +522,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <param name="modularFactors">factorization of {@code poly.modulus(modulus)}</param>
         /// <returns>factorization of {@code poly.modulus(finalModulus) } with some {@code finalModulus} greater than {@code
         /// desiredBound}</returns>
-        public static IList<UnivariatePolynomial<BigInteger>> LiftFactorizationQuadratic(BigInteger modulus, BigInteger desiredBound, UnivariatePolynomial<BigInteger> poly, IList<UnivariatePolynomial<BigInteger>> modularFactors)
+        public static List<UnivariatePolynomial<BigInteger>> LiftFactorizationQuadratic(BigInteger modulus, BigInteger desiredBound, UnivariatePolynomial<BigInteger> poly, List<UnivariatePolynomial<BigInteger>> modularFactors)
         {
             LiftingInfo im = NIterations(modulus, desiredBound, true);
             return LiftFactorization0(modulus, im.finalModulus, im.nIterations, poly, modularFactors, HenselLifting.CreateQuadraticLift());
@@ -579,7 +539,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <param name="modularFactors">factorization of {@code poly.modulus(modulus)}</param>
         /// <returns>factorization of {@code poly.modulus(finalModulus) } with some {@code finalModulus} greater than {@code
         /// desiredBound}</returns>
-        public static IList<UnivariatePolynomial<BigInteger>> LiftFactorization(BigInteger modulus, BigInteger desiredBound, UnivariatePolynomial<BigInteger> poly, IList<UnivariatePolynomialZp64> modularFactors)
+        public static List<UnivariatePolynomial<BigInteger>> LiftFactorization(BigInteger modulus, BigInteger desiredBound, UnivariatePolynomial<BigInteger> poly, List<UnivariatePolynomialZp64> modularFactors)
         {
             return LiftFactorization(poly, modularFactors, new AdaptiveLift(modulus, desiredBound));
         }
@@ -587,14 +547,14 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <summary>
         /// actual multifactor Hensel lifting implementation *
         /// </summary>
-        private static IList<UnivariatePolynomial<BigInteger>> LiftFactorization(UnivariatePolynomial<BigInteger> poly, IList<UnivariatePolynomialZp64> modularFactors, AdaptiveLift lifter)
+        private static List<UnivariatePolynomial<BigInteger>> LiftFactorization(UnivariatePolynomial<BigInteger> poly, List<UnivariatePolynomialZp64> modularFactors, AdaptiveLift lifter)
         {
 
             // for the future:
             // recursion may be replaced with precomputed binary tree
             // for now the major part of execution time (~99%) is spent in actual lifting step, so irrelevant
             if (modularFactors.Count == 1)
-                return Collections.SingletonList(poly.SetRing(new IntegersZp(lifter.finalModulus)).Monic());
+                return [poly.SetRing(new IntegersZp(lifter.finalModulus)).Monic()];
             UnivariatePolynomialZp64 factory = modularFactors[0];
             UnivariatePolynomialZp64 aFactor = factory.CreateOne(), bFactor = factory.CreateOne();
             int nHalf = modularFactors.Count / 2, i = 0;
@@ -605,9 +565,9 @@ namespace Cc.Redberry.Rings.Poly.Univar
             UnivariatePolynomial<BigInteger>[] lifted = lifter.Lift(poly, aFactor, bFactor);
             UnivariatePolynomial<BigInteger> aFactorRaised = lifted[0];
             UnivariatePolynomial<BigInteger> bFactorRaised = lifted[1];
-            List<UnivariatePolynomial<BigInteger>> result = new List();
-            result.AddAll(LiftFactorization(UnivariatePolynomial.AsPolyZSymmetric(aFactorRaised), modularFactors.SubList(0, nHalf), lifter));
-            result.AddAll(LiftFactorization(UnivariatePolynomial.AsPolyZSymmetric(bFactorRaised), modularFactors.SubList(nHalf, modularFactors.Count), lifter));
+            List<UnivariatePolynomial<BigInteger>> result = [];
+            result.AddRange(LiftFactorization(UnivariatePolynomial.AsPolyZSymmetric(aFactorRaised), modularFactors.SubList(0, nHalf), lifter));
+            result.AddRange(LiftFactorization(UnivariatePolynomial.AsPolyZSymmetric(bFactorRaised), modularFactors.SubList(nHalf, modularFactors.Count), lifter));
             return result;
         }
 
@@ -636,12 +596,12 @@ namespace Cc.Redberry.Rings.Poly.Univar
                 }
             }
 
-            UnivariatePolynomial<BigInteger>[] Lift(UnivariatePolynomial<BigInteger> poly, UnivariatePolynomialZp64 a, UnivariatePolynomialZp64 b)
+            public UnivariatePolynomial<BigInteger>[] Lift(UnivariatePolynomial<BigInteger> poly, UnivariatePolynomialZp64 a, UnivariatePolynomialZp64 b)
             {
                 bool quadratic = nLinearIterations == -1;
                 LiftableQuintet<UnivariatePolynomial<BigInteger>> lift = quadratic ? CreateQuadraticLift(initialModulus, poly, a.ToBigPoly(), b.ToBigPoly()) : CreateLinearLift(initialModulus, poly, a, b);
                 lift.Lift(quadratic ? nQuadraticIterations : nLinearIterations);
-                return new UnivariatePolynomial[]
+                return new UnivariatePolynomial<BigInteger>[]
                 {
                     lift.AFactorMod(),
                     lift.BFactorMod()
@@ -649,7 +609,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
             }
         }
 
-        private static void AssertHenselLift<T extends IUnivariatePolynomial<T>>(LiftableQuintet<T> lift)
+        private static void AssertHenselLift<T>(LiftableQuintet<T> lift) where T : IUnivariatePolynomial<T>
         {
         }
 
@@ -657,7 +617,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <summary>
         /// data used in Hensel lifting *
         /// </summary>
-        abstract class QuadraticLiftAbstract<PolyZp> : LiftableQuintet<PolyZp>
+        public abstract class QuadraticLiftAbstract<PolyZp> : LiftableQuintet<PolyZp>
         {
             /// <summary>
             /// Two factors of the initial Z[x] poly *
@@ -734,7 +694,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
             /// <summary>
             /// xgcd coefficients *
             /// </summary>
-            abstract void Prepare();
+            public abstract void Prepare();
             /// <summary>
             /// Two factors of the initial Z[x] poly *
             /// </summary>
@@ -819,7 +779,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
             /// <summary>
             /// Initial Z[x] poly *
             /// </summary>
-            public readonly UnivariatePolynomialZ64 base;
+            public readonly UnivariatePolynomialZ64 @base;
             /// <summary>
             /// The modulus
             /// </summary>
@@ -849,7 +809,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
             /// <summary>
             /// Initial Z[x] poly *
             /// </summary>
-            override void Prepare()
+            public override void Prepare()
             {
                 modulus = MachineArithmetic.SafeMultiply(modulus, modulus);
                 aFactor = aFactor.SetModulusUnsafe(modulus);
@@ -875,7 +835,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
             /// <summary>
             /// Initial Z[x] poly *
             /// </summary>
-            public readonly UnivariatePolynomial<BigInteger> base;
+            public readonly UnivariatePolynomial<BigInteger> @base;
             /// <summary>
             /// The modulus
             /// </summary>
@@ -905,7 +865,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
             /// <summary>
             /// Initial Z[x] poly *
             /// </summary>
-            override void Prepare()
+            public override void Prepare()
             {
                 ring = new IntegersZp(ring.modulus.Multiply(ring.modulus));
                 aFactor = aFactor.SetRingUnsafe(ring);
@@ -916,19 +876,44 @@ namespace Cc.Redberry.Rings.Poly.Univar
         }
 
         /* ************************************ Linear lifts ************************************ */
-        private class LinearLiftAbstract<PolyZ>
+        public class LinearLiftAbstract<PolyZ>
         {
             /// <summary>
             /// initial Z[x] poly
             /// </summary>
-            readonly PolyZ poly;
+            public readonly PolyZ poly;
+
             /// <summary>
             /// initial Z[x] poly
             /// </summary>
             /// <summary>
             /// lifted polynomials
             /// </summary>
-            PolyZ aFactor, bFactor, aCoFactor, bCoFactor;
+            public PolyZ aFactor;
+
+            /// <summary>
+            /// initial Z[x] poly
+            /// </summary>
+            /// <summary>
+            /// lifted polynomials
+            /// </summary>
+            public PolyZ bFactor;
+
+            /// <summary>
+            /// initial Z[x] poly
+            /// </summary>
+            /// <summary>
+            /// lifted polynomials
+            /// </summary>
+            public PolyZ aCoFactor;
+
+            /// <summary>
+            /// initial Z[x] poly
+            /// </summary>
+            /// <summary>
+            /// lifted polynomials
+            /// </summary>
+            public PolyZ bCoFactor;
             /// <summary>
             /// initial Z[x] poly
             /// </summary>
@@ -1005,7 +990,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
             /// <summary>
             /// precomputed inverses
             /// </summary>
-            void CalculateFactorsDiff(UnivariatePolynomialZp64 diff)
+            public void CalculateFactorsDiff(UnivariatePolynomialZp64 diff)
             {
                 aAdd = diff.Clone();
                 aAdd = UnivariatePolynomialArithmetic.PolyMod(aAdd, aFactorModMonic, aFactorModMonicInv, false);
@@ -1029,7 +1014,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
             /// <summary>
             /// precomputed inverses
             /// </summary>
-            void CalculateCoFactorsDiff(UnivariatePolynomialZp64 diff)
+            public void CalculateCoFactorsDiff(UnivariatePolynomialZp64 diff)
             {
                 aAdd = diff.Clone();
                 aAdd = UnivariatePolynomialArithmetic.PolyMod(aAdd, bFactorMod, bFactorModInv, false);

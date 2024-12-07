@@ -1,16 +1,7 @@
+using System.Numerics;
 using Cc.Redberry.Rings.Bigint;
 using Cc.Redberry.Rings.Poly;
-using Org.Apache.Commons.Math3.Random;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using static Cc.Redberry.Rings.Poly.Univar.RoundingMode;
-using static Cc.Redberry.Rings.Poly.Univar.Associativity;
-using static Cc.Redberry.Rings.Poly.Univar.Operator;
-using static Cc.Redberry.Rings.Poly.Univar.TokenType;
-using static Cc.Redberry.Rings.Poly.Univar.SystemInfo;
+
 
 namespace Cc.Redberry.Rings.Poly.Univar
 {
@@ -24,10 +15,10 @@ namespace Cc.Redberry.Rings.Poly.Univar
         {
         }
 
-        static T RandomMonicPoly<T extends IUnivariatePolynomial<T>>(T factory)
+        static T RandomMonicPoly<T>(T factory) where T : IUnivariatePolynomial<T>
         {
-            RandomGenerator rnd = PrivateRandom.GetRandom();
-            int degree = Math.Max(1, rnd.NextInt(2 * factory.Degree() + 1));
+            Random rnd = PrivateRandom.GetRandom();
+            int degree = Math.Max(1, rnd.Next(2 * factory.Degree() + 1));
             if (factory is UnivariatePolynomialZp64)
             {
                 UnivariatePolynomialZp64 fm = (UnivariatePolynomialZp64)factory;
@@ -46,10 +37,10 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <param name="input">the polynomial</param>
         /// <param name="d">distinct degree</param>
         /// <returns>irreducible factor of {@code poly}</returns>
-        public static PolynomialFactorDecomposition<Poly> CantorZassenhaus<Poly extends IUnivariatePolynomial<Poly>>(Poly input, int d)
+        public static PolynomialFactorDecomposition<Poly> CantorZassenhaus<Poly>(Poly input, int d) where Poly : IUnivariatePolynomial<Poly>
         {
             Util.EnsureOverFiniteField(input);
-            PolynomialFactorDecomposition<Poly> result = PolynomialFactorDecomposition.Unit(input.LcAsPoly());
+            PolynomialFactorDecomposition<Poly> result = PolynomialFactorDecomposition<Poly>.Unit(input.LcAsPoly());
             if (!input.CoefficientRingCardinality().TestBit(0))
 
                 //even characteristic => GF2p
@@ -65,7 +56,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <param name="input">the polynomial</param>
         /// <param name="d">distinct degree</param>
         /// <returns>irreducible factor of {@code poly}</returns>
-        private static void CantorZassenhaus<T extends IUnivariatePolynomial<T>>(T input, int d, PolynomialFactorDecomposition<T> result, int pPower)
+        private static void CantorZassenhaus<T>(T input, int d, PolynomialFactorDecomposition<T> result, int pPower) where T : IUnivariatePolynomial<T>
         {
             int nFactors = input.Degree() / d;
             if (input.Degree() == 1 || nFactors == 1)
@@ -107,7 +98,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <param name="poly">the monic polynomial</param>
         /// <param name="d">distinct degree</param>
         /// <returns>irreducible factor of {@code poly}</returns>
-        private static Poly CantorZassenhaus0<Poly extends IUnivariatePolynomial<Poly>>(Poly poly, int d)
+        private static Poly CantorZassenhaus0<Poly>(Poly poly, int d) where Poly : IUnivariatePolynomial<Poly>
         {
             Poly a = RandomMonicPoly(poly);
             if (a.IsConstant() || a.Equals(poly))
@@ -131,7 +122,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <param name="poly">the monic polynomial</param>
         /// <param name="d">distinct degree</param>
         /// <returns>irreducible factor of {@code poly}</returns>
-        private static Poly CantorZassenhausGF2p<Poly extends IUnivariatePolynomial<Poly>>(Poly poly, int d, int pPower)
+        private static Poly CantorZassenhausGF2p<Poly>(Poly poly, int d, int pPower) where Poly : IUnivariatePolynomial<Poly>
         {
             Poly a = RandomMonicPoly(poly);
             if (a.IsConstant() || a.Equals(poly))
@@ -147,7 +138,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
             return null;
         }
 
-        static Poly TracePolyGF2<Poly extends IUnivariatePolynomial<Poly>>(Poly a, int m, Poly modulus, UnivariateDivision.InverseModMonomial<Poly> invMod)
+        static Poly TracePolyGF2<Poly >(Poly a, int m, Poly modulus, UnivariateDivision.InverseModMonomial<Poly> invMod) where Poly : IUnivariatePolynomial<Poly>
         {
             Poly tmp = a.Clone();
             Poly result = a.Clone();

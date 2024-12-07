@@ -1,16 +1,7 @@
+
+
+using System.Numerics;
 using Cc.Redberry.Rings.Bigint;
-using Org.Apache.Commons.Math3.Random;
-using Java.Util;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using static Cc.Redberry.Rings.Primes.RoundingMode;
-using static Cc.Redberry.Rings.Primes.Associativity;
-using static Cc.Redberry.Rings.Primes.Operator;
-using static Cc.Redberry.Rings.Primes.TokenType;
-using static Cc.Redberry.Rings.Primes.SystemInfo;
 
 namespace Cc.Redberry.Rings.Primes
 {
@@ -33,14 +24,14 @@ namespace Cc.Redberry.Rings.Primes
 
         SieveOfAtkin ToLimit(int newLimit)
         {
-            return limit == newLimit ? this : new SieveOfAtkin(newLimit, BigInteger.ValueOf(newLimit), sieve);
+            return limit == newLimit ? this : new SieveOfAtkin(newLimit, new BigInteger(newLimit), sieve);
         }
 
         /// <summary>
         /// Constructs Atkin sieve.
         /// </summary>
         /// <param name="limit">limit</param>
-        private SieveOfAtkin(int limit) : this(limit, BigInteger.ValueOf(limit))
+        private SieveOfAtkin(int limit) : this(limit, new BigInteger(limit))
         {
         }
 
@@ -117,7 +108,7 @@ namespace Cc.Redberry.Rings.Primes
         public bool IsPrime(int n)
         {
             if (n > limit)
-                throw new IndexOutOfBoundsException("Out of sieve bounds.");
+                throw new IndexOutOfRangeException("Out of sieve bounds.");
             return sieve[n];
         }
 
@@ -132,12 +123,12 @@ namespace Cc.Redberry.Rings.Primes
             throw new InvalidOperationException("No ant primes in the sieve");
         }
 
-        public int RandomPrime(RandomGenerator rnd)
+        public int RandomPrime(Random rnd)
         {
             int i;
             do
             {
-                i = rnd.NextInt(limit);
+                i = rnd.Next(limit);
             }
             while (!IsPrime(i));
             return i;

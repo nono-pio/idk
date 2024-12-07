@@ -1,13 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using static Cc.Redberry.Rings.Poly.Univar.RoundingMode;
-using static Cc.Redberry.Rings.Poly.Univar.Associativity;
-using static Cc.Redberry.Rings.Poly.Univar.Operator;
-using static Cc.Redberry.Rings.Poly.Univar.TokenType;
-using static Cc.Redberry.Rings.Poly.Univar.SystemInfo;
+
 
 namespace Cc.Redberry.Rings.Poly.Univar
 {
@@ -26,7 +17,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <summary>
         /// runs xgcd for coprime polynomials ensuring that gcd is 1 (not another constant)
         /// </summary>
-        public static Poly[] MonicExtendedEuclid<Poly extends IUnivariatePolynomial<Poly>>(Poly a, Poly b)
+        public static Poly[] MonicExtendedEuclid<Poly>(Poly a, Poly b) where Poly : IUnivariatePolynomial<Poly>
         {
             Poly[] xgcd = UnivariateGCD.PolynomialExtendedGCD(a, b);
             if (xgcd[0].IsOne())
@@ -42,7 +33,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <summary>
         /// Solves a1 * x1 + a2 * x2 + ... = rhs for given univariate and rhs and unknown x_i
         /// </summary>
-        public sealed class DiophantineSolver<Poly>
+        public sealed class DiophantineSolver<Poly> where Poly : IUnivariatePolynomial<Poly>
         {
             /// <summary>
             /// the given factors
@@ -62,7 +53,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
             public DiophantineSolver(Poly[] factors)
             {
                 this.factors = factors;
-                this.solution = factors[0].CreateArray(factors.Length);
+                this.solution = new Poly[factors.Length];
                 Poly prev = factors[0];
                 solution[0] = factors[0].CreateOne();
                 for (int i = 1; i < factors.Length; i++)

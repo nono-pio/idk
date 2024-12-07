@@ -1,14 +1,4 @@
-using Java.Util;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using static Cc.Redberry.Rings.Poly.Univar.RoundingMode;
-using static Cc.Redberry.Rings.Poly.Univar.Associativity;
-using static Cc.Redberry.Rings.Poly.Univar.Operator;
-using static Cc.Redberry.Rings.Poly.Univar.TokenType;
-using static Cc.Redberry.Rings.Poly.Univar.SystemInfo;
+
 
 namespace Cc.Redberry.Rings.Poly.Univar
 {
@@ -31,7 +21,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <returns>{@code x^{i*modulus} mod polyModulus} for i in {@code [0...degree]}, where {@code degree} is {@code
         /// polyModulus} degree</returns>
         /// <remarks>@seeUnivariateDivision#fastDivisionPreConditioning(IUnivariatePolynomial)</remarks>
-        public static List<T> XPowers<T extends IUnivariatePolynomial<T>>(T polyModulus, UnivariateDivision.InverseModMonomial<T> invMod)
+        public static List<T> XPowers<T>(T polyModulus, UnivariateDivision.InverseModMonomial<T> invMod) where T : IUnivariatePolynomial<T>
         {
             return PolyPowers(UnivariatePolynomialArithmetic.CreateMonomialMod(polyModulus.CoefficientRingCardinality(), polyModulus, invMod), polyModulus, invMod, polyModulus.Degree());
         }
@@ -44,9 +34,9 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <param name="invMod">pre-conditioned modulus ({@link UnivariateDivision#fastDivisionPreConditioning(IUnivariatePolynomial)})</param>
         /// <returns>{@code poly^{i} mod polyModulus} for i in {@code [0...nIterations]}</returns>
         /// <remarks>@seeUnivariateDivision#fastDivisionPreConditioning(IUnivariatePolynomial)</remarks>
-        public static List<T> PolyPowers<T extends IUnivariatePolynomial<T>>(T poly, T polyModulus, UnivariateDivision.InverseModMonomial<T> invMod, int nIterations)
+        public static List<T> PolyPowers<T>(T poly, T polyModulus, UnivariateDivision.InverseModMonomial<T> invMod, int nIterations) where T : IUnivariatePolynomial<T>
         {
-            List<T> exponents = new List();
+            List<T> exponents = new List<T>();
             PolyPowers(UnivariatePolynomialArithmetic.PolyMod(poly, polyModulus, invMod, true), polyModulus, invMod, nIterations, exponents);
             return exponents;
         }
@@ -54,12 +44,12 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <summary>
         /// writes poly^{i} mod polyModulus for i in [0...nIterations] to exponents
         /// </summary>
-        private static void PolyPowers<T extends IUnivariatePolynomial<T>>(T polyReduced, T polyModulus, UnivariateDivision.InverseModMonomial<T> invMod, int nIterations, List<T> exponents)
+        private static void PolyPowers<T>(T polyReduced, T polyModulus, UnivariateDivision.InverseModMonomial<T> invMod, int nIterations, List<T> exponents) where T : IUnivariatePolynomial<T>
         {
             exponents.Add(polyReduced.CreateOne());
 
             // polyReduced must be reduced!
-            T base = polyReduced.Clone(); //polyMod(poly, polyModulus, invMod, true);
+            T @base = polyReduced.Clone(); //polyMod(poly, polyModulus, invMod, true);
             exponents.Add(@base);
             T prev = @base;
             for (int i = 0; i < nIterations; i++)
@@ -152,7 +142,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// @see#xPowers(IUnivariatePolynomial, UnivariateDivision.InverseModMonomial)
         /// @seeUnivariateDivision#fastDivisionPreConditioning(IUnivariatePolynomial)
         /// </remarks>
-        public static T PowModulusMod<T extends IUnivariatePolynomial<T>>(T poly, T polyModulus, UnivariateDivision.InverseModMonomial<T> invMod, List<T> xPowers)
+        public static T PowModulusMod<T>(T poly, T polyModulus, UnivariateDivision.InverseModMonomial<T> invMod, List<T> xPowers) where T : IUnivariatePolynomial<T>
         {
             if (poly is UnivariatePolynomialZp64)
                 return (T)PowModulusMod((UnivariatePolynomialZp64)poly, (UnivariatePolynomialZp64)polyModulus, (UnivariateDivision.InverseModMonomial<UnivariatePolynomialZp64>)invMod, (List<UnivariatePolynomialZp64>)xPowers);
@@ -162,7 +152,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
                 throw new Exception();
         }
 
-        private static T PowModulusMod0<T extends IUnivariatePolynomial<T>>(T poly, T polyModulus, UnivariateDivision.InverseModMonomial<T> invMod, List<T> xPowers)
+        private static T PowModulusMod0<T>(T poly, T polyModulus, UnivariateDivision.InverseModMonomial<T> invMod, List<T> xPowers) where T : IUnivariatePolynomial<T>
         {
             if (poly is UnivariatePolynomialZp64)
                 return (T)PowModulusMod0((UnivariatePolynomialZp64)poly, (UnivariatePolynomialZp64)polyModulus, (UnivariateDivision.InverseModMonomial)invMod, (List)xPowers);
@@ -186,11 +176,11 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// @see#polyPowers(IUnivariatePolynomial, IUnivariatePolynomial, UnivariateDivision.InverseModMonomial, int)
         /// @seeUnivariateDivision#fastDivisionPreConditioning(IUnivariatePolynomial)
         /// </remarks>
-        public static T CompositionBrentKung<T extends IUnivariatePolynomial<T>>(T poly, List<T> pointPowers, T polyModulus, UnivariateDivision.InverseModMonomial<T> invMod, int tBrentKung)
+        public static T CompositionBrentKung<T>(T poly, List<T> pointPowers, T polyModulus, UnivariateDivision.InverseModMonomial<T> invMod, int tBrentKung) where T : IUnivariatePolynomial<T>
         {
             if (poly.IsConstant())
                 return poly;
-            List<T> gj = new List();
+            List<T> gj = new List<T>();
             int degree = poly.Degree();
             for (int i = 0; i <= degree;)
             {
@@ -204,7 +194,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
 
             T pt = pointPowers[tBrentKung];
             T res = poly.CreateZero();
-            for (int i = gj.size() - 1; i >= 0; --i)
+            for (int i = gj.Count - 1; i >= 0; --i)
                 res = UnivariatePolynomialArithmetic.PolyMod(res.Multiply(pt).Add(gj[i]), polyModulus, invMod, false);
             return res;
         }
@@ -220,7 +210,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         ///                    )})</param>
         /// <returns>modular composition {@code poly(point) mod polyModulus }</returns>
         /// <remarks>@seeUnivariateDivision#fastDivisionPreConditioning(IUnivariatePolynomial)</remarks>
-        public static T CompositionBrentKung<T extends IUnivariatePolynomial<T>>(T poly, T point, T polyModulus, UnivariateDivision.InverseModMonomial<T> invMod)
+        public static T CompositionBrentKung<T>(T poly, T point, T polyModulus, UnivariateDivision.InverseModMonomial<T> invMod) where T : IUnivariatePolynomial<T>
         {
             if (poly.IsConstant())
                 return poly;
@@ -231,7 +221,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
 
         private static int SafeToInt(double dbl)
         {
-            if (dbl > Integer.MAX_VALUE || dbl < Integer.MIN_VALUE)
+            if (dbl > int.MaxValue || dbl < int.MinValue)
                 throw new ArithmeticException("int overflow");
             return (int)dbl;
         }
@@ -270,7 +260,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// @see#polyPowers(IUnivariatePolynomial, IUnivariatePolynomial, UnivariateDivision.InverseModMonomial, int)
         /// @seeUnivariateDivision#fastDivisionPreConditioning(IUnivariatePolynomial)
         /// </remarks>
-        public static T Composition<T extends IUnivariatePolynomial<T>>(T poly, T point, T polyModulus, UnivariateDivision.InverseModMonomial<T> invMod)
+        public static T Composition<T>(T poly, T point, T polyModulus, UnivariateDivision.InverseModMonomial<T> invMod) where T : IUnivariatePolynomial<T>
         {
             return CompositionBrentKung(poly, point, polyModulus, invMod);
         }
@@ -288,7 +278,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// @see#polyPowers(IUnivariatePolynomial, IUnivariatePolynomial, UnivariateDivision.InverseModMonomial, int)
         /// @seeUnivariateDivision#fastDivisionPreConditioning(IUnivariatePolynomial)
         /// </remarks>
-        public static T Composition<T extends IUnivariatePolynomial<T>>(T poly, T point, T polyModulus)
+        public static T Composition<T>(T poly, T point, T polyModulus) where T : IUnivariatePolynomial<T>
         {
             return CompositionBrentKung(poly, point, polyModulus, UnivariateDivision.FastDivisionPreConditioning(point));
         }

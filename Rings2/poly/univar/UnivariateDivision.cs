@@ -1,18 +1,3 @@
-using Cc.Redberry.Libdivide4j.FastDivision;
-using Cc.Redberry.Rings;
-using Cc.Redberry.Rings.Poly;
-using Java.Util;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using static Cc.Redberry.Rings.Poly.Univar.RoundingMode;
-using static Cc.Redberry.Rings.Poly.Univar.Associativity;
-using static Cc.Redberry.Rings.Poly.Univar.Operator;
-using static Cc.Redberry.Rings.Poly.Univar.TokenType;
-using static Cc.Redberry.Rings.Poly.Univar.SystemInfo;
-
 namespace Cc.Redberry.Rings.Poly.Univar
 {
     /// <summary>
@@ -34,12 +19,12 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <param name="copy">whether to clone {@code dividend}; if not, the remainder will be placed directly to {@code
         ///                 dividend} and {@code dividend} data will be lost</param>
         /// <returns>the remainder</returns>
-        public static T RemainderMonomial<T extends IUnivariatePolynomial<T>>(T dividend, int xDegree, bool copy)
+        public static T RemainderMonomial<T>(T dividend, int xDegree, bool copy) where T :IUnivariatePolynomial<T>
         {
             return (copy ? dividend.Clone() : dividend).Truncate(xDegree - 1);
         }
 
-        private static void CheckZeroDivider(IUnivariatePolynomial p)
+        private static void CheckZeroDivider<T>(IUnivariatePolynomial<T> p) where T : IUnivariatePolynomial<T>
         {
             if (p.IsZero())
                 throw new ArithmeticException("divide by zero");
@@ -402,7 +387,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <summary>
         /// when to switch between classical and Newton's
         /// </summary>
-        private static bool UseClassicalDivision(IUnivariatePolynomial dividend, IUnivariatePolynomial divider)
+        private static bool UseClassicalDivision<T>(IUnivariatePolynomial<T> dividend, IUnivariatePolynomial<T> divider) where T : IUnivariatePolynomial<T>
         {
 
             // practical benchmarks show that without pre-conditioning,
@@ -720,22 +705,22 @@ namespace Cc.Redberry.Rings.Poly.Univar
         {
             CheckZeroDivider(divider);
             if (dividend.IsZero())
-                return new UnivariatePolynomial[]
+                return new UnivariatePolynomial<E>[]
                 {
-                    UnivariatePolynomial.Zero(dividend.ring),
-                    UnivariatePolynomial.Zero(dividend.ring)
+                    UnivariatePolynomial<E>.Zero(dividend.ring),
+                    UnivariatePolynomial<E>.Zero(dividend.ring)
                 };
             if (dividend.degree < divider.degree)
-                return new UnivariatePolynomial[]
+                return new UnivariatePolynomial<E>[]
                 {
-                    UnivariatePolynomial.Zero(dividend.ring),
+                    UnivariatePolynomial<E>.Zero(dividend.ring),
                     copy ? dividend.Clone() : dividend
                 };
             if (divider.degree == 0)
-                return new UnivariatePolynomial[]
+                return new UnivariatePolynomial<E>[]
                 {
                     copy ? dividend.Clone() : dividend,
-                    UnivariatePolynomial.Zero(dividend.ring)
+                    UnivariatePolynomial<E>.Zero(dividend.ring)
                 };
             if (divider.degree == 1)
                 return PseudoDivideAndRemainderLinearDividerAdaptive(dividend, divider, copy);
@@ -773,9 +758,9 @@ namespace Cc.Redberry.Rings.Poly.Univar
                     quotient[i] = ring.GetZero();
             }
 
-            return new UnivariatePolynomial[]
+            return new UnivariatePolynomial<E>[]
             {
-                UnivariatePolynomial.Create(ring, quotient),
+                UnivariatePolynomial<E>.Create(ring, quotient),
                 remainder
             };
         }
@@ -806,7 +791,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
                     factor = ring.Multiply(factor, f);
                     res = ring.Multiply(res, f);
                     if (i != dividend.degree)
-                        for (int j = quotient.length - 1; j >= i; --j)
+                        for (int j = quotient.Length - 1; j >= i; --j)
                             quotient[j] = ring.Multiply(quotient[j], f);
                     quot = ring.DivideExact(res, lc);
                 }
@@ -816,10 +801,10 @@ namespace Cc.Redberry.Rings.Poly.Univar
 
             if (!copy)
                 quotient[dividend.degree] = ring.GetZero();
-            return new UnivariatePolynomial[]
+            return new UnivariatePolynomial<E>[]
             {
-                UnivariatePolynomial.Create(ring, quotient),
-                UnivariatePolynomial.Create(ring, res)
+                UnivariatePolynomial<E>.Create(ring, quotient),
+                UnivariatePolynomial<E>.Create(ring, res)
             };
         }
 
@@ -835,11 +820,11 @@ namespace Cc.Redberry.Rings.Poly.Univar
         {
             CheckZeroDivider(divider);
             if (dividend.IsZero())
-                return UnivariatePolynomial.Zero(dividend.ring);
+                return UnivariatePolynomial<E>.Zero(dividend.ring);
             if (dividend.degree < divider.degree)
                 return copy ? dividend.Clone() : dividend;
             if (divider.degree == 0)
-                return UnivariatePolynomial.Zero(dividend.ring);
+                return UnivariatePolynomial<E>.Zero(dividend.ring);
             if (divider.degree == 1)
                 return PseudoRemainderLinearDividerAdaptive(dividend, divider, copy);
             return PseudoRemainderAdaptive0(dividend, divider, copy);
@@ -901,7 +886,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
                 res = quot;
             }
 
-            return UnivariatePolynomial.Create(ring, res);
+            return UnivariatePolynomial<E>.Create(ring, res);
         }
 
         /* ********************************** Fast division algorithm ********************************** */
@@ -910,17 +895,18 @@ namespace Cc.Redberry.Rings.Poly.Univar
         {
             if (l <= 0)
                 throw new ArgumentException();
-            return 33 - Integer.NumberOfLeadingZeros(l - 1);
+            return 33 - int.LeadingZeroCount(l - 1);
         }
 
         /// <summary>
         /// Holds {@code poly^(-1) mod x^i }
         /// </summary>
-        public sealed class InverseModMonomial<Poly> : Serializable
+        public sealed class InverseModMonomial<Poly> where Poly : IUnivariatePolynomial<Poly>
         {
             private static readonly long serialVersionUID = 1;
             readonly Poly poly;
-            private InverseModMonomial(Poly poly)
+
+            public InverseModMonomial(Poly poly)
             {
                 if (!poly.IsUnitCC())
                     throw new ArgumentException("Smallest coefficient is not a unit: " + poly);
@@ -930,7 +916,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
             /// <summary>
             /// the inverses
             /// </summary>
-            private readonly List<Poly> inverses = new List();
+            private readonly List<Poly> inverses = new List<Poly>();
             /// <summary>
             /// the inverses
             /// </summary>
@@ -962,26 +948,26 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// Prepares {@code rev(divider)^(-1) mod x^i } for fast division.
         /// </summary>
         /// <param name="divider">the divider</param>
-        public static InverseModMonomial<Poly> FastDivisionPreConditioning<Poly extends IUnivariatePolynomial<Poly>>(Poly divider)
+        public static InverseModMonomial<Poly> FastDivisionPreConditioning<Poly>(Poly divider) where Poly : IUnivariatePolynomial<Poly>
         {
             if (!divider.IsMonic())
                 throw new ArgumentException("Only monic polynomials allowed. Input: " + divider);
-            return new InverseModMonomial(divider.Clone().Reverse());
+            return new InverseModMonomial<Poly>(divider.Clone().Reverse());
         }
 
         /// <summary>
         /// Prepares {@code rev(divider)^(-1) mod x^i } for fast division.
         /// </summary>
         /// <param name="divider">the divider</param>
-        public static InverseModMonomial<Poly> FastDivisionPreConditioningWithLCCorrection<Poly extends IUnivariatePolynomial<Poly>>(Poly divider)
+        public static InverseModMonomial<Poly> FastDivisionPreConditioningWithLCCorrection<Poly>(Poly divider) where Poly : IUnivariatePolynomial<Poly>
         {
-            return new InverseModMonomial(divider.Clone().Monic().Reverse());
+            return new InverseModMonomial<Poly>(divider.Clone().Monic().Reverse());
         }
 
         /// <summary>
         /// fast division implementation
         /// </summary>
-        public static Poly[] DivideAndRemainderFast0<Poly extends IUnivariatePolynomial<Poly>>(Poly dividend, Poly divider, InverseModMonomial<Poly> invRevMod, bool copy)
+        public static Poly[] DivideAndRemainderFast0<Poly>(Poly dividend, Poly divider, InverseModMonomial<Poly> invRevMod, bool copy) where Poly : IUnivariatePolynomial<Poly>
         {
             int m = dividend.Degree() - divider.Degree();
             Poly q = RemainderMonomial(dividend.Clone().Reverse().Multiply(invRevMod.GetInverse(m + 1)), m + 1, false).Reverse();
@@ -1384,7 +1370,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <param name="copy">whether to clone {@code dividend}; if not, the remainder will be placed directly to {@code
         ///                 dividend} and {@code dividend} data will be lost</param>
         /// <returns>{quotient, remainder}</returns>
-        public static Poly[] PseudoDivideAndRemainder<Poly extends IUnivariatePolynomial<Poly>>(Poly dividend, Poly divider, bool copy)
+        public static Poly[] PseudoDivideAndRemainder<Poly>(Poly dividend, Poly divider, bool copy) where Poly : IUnivariatePolynomial<Poly>
         {
             if (dividend is UnivariatePolynomialZ64)
                 return (Poly[])PseudoDivideAndRemainder((UnivariatePolynomialZ64)dividend, (UnivariatePolynomialZ64)divider, copy);
@@ -1410,7 +1396,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <param name="copy">whether to clone {@code dividend}; if not, the remainder will be placed directly to {@code
         ///                 dividend} and {@code dividend} data will be lost</param>
         /// <returns>{quotient, remainder} or {@code null} if the division is not possible</returns>
-        public static Poly[] DivideAndRemainder<Poly extends IUnivariatePolynomial<Poly>>(Poly dividend, Poly divider, bool copy)
+        public static Poly[] DivideAndRemainder<Poly>(Poly dividend, Poly divider, bool copy) where Poly : IUnivariatePolynomial<Poly>
         {
             if (dividend is UnivariatePolynomialZ64)
                 return (Poly[])DivideAndRemainder((UnivariatePolynomialZ64)dividend, (UnivariatePolynomialZ64)divider, copy);
@@ -1431,7 +1417,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         ///                 dividend} and {@code dividend} data will be lost</param>
         /// <param name="invMod">precomputed Newton inverses</param>
         /// <returns>{quotient, remainder} or {@code null} if the division is not possible</returns>
-        public static Poly[] DivideAndRemainderFast<Poly extends IUnivariatePolynomial<Poly>>(Poly dividend, Poly divider, InverseModMonomial<Poly> invMod, bool copy)
+        public static Poly[] DivideAndRemainderFast<Poly>(Poly dividend, Poly divider, InverseModMonomial<Poly> invMod, bool copy) where Poly : IUnivariatePolynomial<Poly>
         {
             if (dividend is UnivariatePolynomialZp64)
                 return (Poly[])DivideAndRemainderFast((UnivariatePolynomialZp64)dividend, (UnivariatePolynomialZp64)divider, (InverseModMonomial)invMod, copy);
@@ -1449,7 +1435,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <param name="divider">the divider</param>
         /// <returns>{@code dividend / divider}</returns>
         /// <exception cref="ArithmeticException">if exact division is not possible</exception>
-        public static Poly DivideExact<Poly extends IUnivariatePolynomial<Poly>>(Poly dividend, Poly divider, bool copy)
+        public static Poly DivideExact<Poly>(Poly dividend, Poly divider, bool copy) where Poly : IUnivariatePolynomial<Poly>
         {
             Poly[] qr = DivideAndRemainder(dividend, divider, copy);
             if (qr == null || !qr[1].IsZero())
@@ -1463,7 +1449,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <param name="dividend">the dividend</param>
         /// <param name="divider">the divider</param>
         /// <returns>{@code dividend / divider} or {@code null} if exact division is not possible</returns>
-        public static Poly DivideOrNull<Poly extends IUnivariatePolynomial<Poly>>(Poly dividend, Poly divider, bool copy)
+        public static Poly DivideOrNull<Poly>(Poly dividend, Poly divider, bool copy) where Poly : IUnivariatePolynomial<Poly>
         {
             Poly[] qr = DivideAndRemainder(dividend, divider, copy);
             if (qr == null || !qr[1].IsZero())
@@ -1479,7 +1465,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <param name="copy">whether to clone {@code dividend}; if not, the remainder will be placed directly to {@code
         ///                 dividend} and {@code dividend} data will be lost</param>
         /// <returns>the remainder</returns>
-        public static Poly Remainder<Poly extends IUnivariatePolynomial<Poly>>(Poly dividend, Poly divider, bool copy)
+        public static Poly Remainder<Poly>(Poly dividend, Poly divider, bool copy) where Poly : IUnivariatePolynomial<Poly>
         {
             if (dividend is UnivariatePolynomialZ64)
                 return (Poly)Remainder((UnivariatePolynomialZ64)dividend, (UnivariatePolynomialZ64)divider, copy);
@@ -1499,7 +1485,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <param name="copy">whether to clone {@code dividend}; if not, the remainder will be placed directly to {@code
         ///                 dividend} and {@code dividend} data will be lost</param>
         /// <returns>the quotient</returns>
-        public static Poly Quotient<Poly extends IUnivariatePolynomial<Poly>>(Poly dividend, Poly divider, bool copy)
+        public static Poly Quotient<Poly>(Poly dividend, Poly divider, bool copy) where Poly : IUnivariatePolynomial<Poly>
         {
             if (dividend is UnivariatePolynomialZ64)
                 return (Poly)Quotient((UnivariatePolynomialZ64)dividend, (UnivariatePolynomialZ64)divider, copy);
@@ -1520,7 +1506,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <param name="copy">whether to clone {@code dividend}; if not, the remainder will be placed directly to {@code
         ///                 dividend} and {@code dividend} data will be lost</param>
         /// <returns>the remainder</returns>
-        public static Poly RemainderFast<Poly extends IUnivariatePolynomial<Poly>>(Poly dividend, Poly divider, InverseModMonomial<Poly> invMod, bool copy)
+        public static Poly RemainderFast<Poly>(Poly dividend, Poly divider, InverseModMonomial<Poly> invMod, bool copy) where Poly : IUnivariatePolynomial<Poly>
         {
             if (dividend is UnivariatePolynomialZp64)
                 return (Poly)RemainderFast((UnivariatePolynomialZp64)dividend, (UnivariatePolynomialZp64)divider, (InverseModMonomial<UnivariatePolynomialZp64>)invMod, copy);

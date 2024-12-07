@@ -1,17 +1,8 @@
+using System.Numerics;
 using Cc.Redberry.Rings;
 using Cc.Redberry.Rings.Bigint;
 using Cc.Redberry.Rings.Poly.Multivar;
 using Cc.Redberry.Rings.Poly.Univar;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using static Cc.Redberry.Rings.Poly.RoundingMode;
-using static Cc.Redberry.Rings.Poly.Associativity;
-using static Cc.Redberry.Rings.Poly.Operator;
-using static Cc.Redberry.Rings.Poly.TokenType;
-using static Cc.Redberry.Rings.Poly.SystemInfo;
 
 namespace Cc.Redberry.Rings.Poly
 {
@@ -24,23 +15,23 @@ namespace Cc.Redberry.Rings.Poly
         {
         }
 
-        public static void EnsureOverFiniteField(params IPolynomial[] polys)
+        public static void EnsureOverFiniteField<Poly>(params IPolynomial<Poly>[] polys) where Poly : IPolynomial<Poly>
         {
-            foreach (IPolynomial poly in polys)
+            foreach (IPolynomial<Poly> poly in polys)
                 if (!poly.IsOverFiniteField())
                     throw new ArgumentException("Polynomial over finite field is expected; " + poly.GetType());
         }
 
-        public static void EnsureOverField(params IPolynomial[] polys)
+        public static void EnsureOverField<Poly>(params IPolynomial<Poly>[] polys)where Poly : IPolynomial<Poly>
         {
-            foreach (IPolynomial poly in polys)
+            foreach (IPolynomial<Poly> poly in polys)
                 if (!poly.IsOverField())
                     throw new ArgumentException("Polynomial over finite field is expected; " + poly.GetType());
         }
 
-        public static void EnsureOverZ(params IPolynomial[] polys)
+        public static void EnsureOverZ<Poly>(params IPolynomial<Poly>[] polys)where Poly : IPolynomial<Poly>
         {
-            foreach (IPolynomial poly in polys)
+            foreach (IPolynomial<Poly> poly in polys)
                 if (!poly.IsOverZ())
                     throw new ArgumentException("Polynomial over Z is expected, but got " + poly.GetType());
         }
@@ -48,7 +39,7 @@ namespace Cc.Redberry.Rings.Poly
         /// <summary>
         /// Test whether poly is over Zp with modulus less then 2^63
         /// </summary>
-        public static bool CanConvertToZp64(IPolynomial poly)
+        public static bool CanConvertToZp64<Poly>(IPolynomial<Poly> poly) where Poly : IPolynomial<Poly>
         {
             Ring ring;
             if (poly is UnivariatePolynomial)
@@ -63,7 +54,7 @@ namespace Cc.Redberry.Rings.Poly
         /// <summary>
         /// Whether coefficient domain is rationals
         /// </summary>
-        public static bool IsOverRationals<T extends IPolynomial<T>>(T poly)
+        public static bool IsOverRationals<T>(T poly) where T : IPolynomial<T>
         {
             if (poly is UnivariatePolynomial && ((UnivariatePolynomial)poly).ring is Rationals)
                 return true;
@@ -76,7 +67,7 @@ namespace Cc.Redberry.Rings.Poly
         /// <summary>
         /// Whether coefficient domain is F(alpha)
         /// </summary>
-        public static bool IsOverSimpleFieldExtension<T extends IPolynomial<T>>(T poly)
+        public static bool IsOverSimpleFieldExtension<T>(T poly) where T : IPolynomial<T>
         {
             if (poly is UnivariatePolynomial && ((UnivariatePolynomial)poly).ring is SimpleFieldExtension)
                 return true;
@@ -89,7 +80,7 @@ namespace Cc.Redberry.Rings.Poly
         /// <summary>
         /// Whether coefficient domain is F(alpha1, alpha2, ...)
         /// </summary>
-        public static bool IsOverMultipleFieldExtension<T extends IPolynomial<T>>(T poly)
+        public static bool IsOverMultipleFieldExtension<T>(T poly) where T : IPolynomial<T>
         {
             if (poly is UnivariatePolynomial && ((UnivariatePolynomial)poly).ring is MultipleFieldExtension)
                 return true;
@@ -102,7 +93,7 @@ namespace Cc.Redberry.Rings.Poly
         /// <summary>
         /// Whether coefficient domain is Q(alpha)
         /// </summary>
-        public static bool IsOverSimpleNumberField<T extends IPolynomial<T>>(T poly)
+        public static bool IsOverSimpleNumberField<T>(T poly) where T : IPolynomial<T>
         {
             if (poly is UnivariatePolynomial && ((UnivariatePolynomial)poly).ring is AlgebraicNumberField && IsOverQ(((AlgebraicNumberField)((UnivariatePolynomial)poly).ring).GetMinimalPolynomial()))
                 return true;
@@ -115,8 +106,8 @@ namespace Cc.Redberry.Rings.Poly
         /// <summary>
         /// Whether coefficient domain is Q(alpha)
         /// </summary>
-        public static bool IsOverRingOfIntegersOfSimpleNumberField<T extends IPolynomial<T>>(T poly)
-        {
+        public static bool IsOverRingOfIntegersOfSimpleNumberField<T>(T poly) where T : IPolynomial<T>
+        { 
             if (poly is UnivariatePolynomial && ((UnivariatePolynomial)poly).ring is AlgebraicNumberField && IsOverZ(((AlgebraicNumberField)((UnivariatePolynomial)poly).ring).GetMinimalPolynomial()))
                 return true;
             else if (poly is MultivariatePolynomial && ((MultivariatePolynomial)poly).ring is AlgebraicNumberField && IsOverZ(((AlgebraicNumberField)((MultivariatePolynomial)poly).ring).GetMinimalPolynomial()))
@@ -128,7 +119,7 @@ namespace Cc.Redberry.Rings.Poly
         /// <summary>
         /// Whether coefficient domain is Q
         /// </summary>
-        public static bool IsOverQ<T extends IPolynomial<T>>(T poly)
+        public static bool IsOverQ<T >(T poly) where T : IPolynomial<T>
         {
             object rep;
             if (poly is UnivariatePolynomial)
@@ -145,28 +136,18 @@ namespace Cc.Redberry.Rings.Poly
         /// <summary>
         /// Whether coefficient domain is Z
         /// </summary>
-        public static bool IsOverZ<T extends IPolynomial<T>>(T poly)
+        public static bool IsOverZ<T>(T poly) where T : IPolynomial<T>
         {
             return poly.IsOverZ();
         }
-
-        public sealed class Tuple2<A, B>
-        {
-            public readonly A _1;
-            public readonly B _2;
-            public Tuple2(A _1, B _2)
-            {
-                this._1 = _1;
-                this._2 = _2;
-            }
-        }
+        
 
         /// <summary>
         /// Brings polynomial with rational coefficients to common denominator
         /// </summary>
         /// <param name="poly">the polynomial</param>
         /// <returns>(reduced poly, common denominator)</returns>
-        public static Tuple2<UnivariatePolynomial<E>, E> ToCommonDenominator<E>(UnivariatePolynomial<Rational<E>> poly)
+        public static (UnivariatePolynomial<E>, E) ToCommonDenominator<E>(UnivariatePolynomial<Rational<E>> poly)
         {
             Ring<Rational<E>> field = poly.ring;
             Ring<E> integralRing = field.GetOne().ring;
@@ -181,7 +162,7 @@ namespace Cc.Redberry.Rings.Poly
                 data[i] = cf.Numerator();
             }
 
-            return new Tuple2(UnivariatePolynomial.CreateUnsafe(integralRing, data), denominator);
+            return (UnivariatePolynomial<E>.CreateUnsafe(integralRing, data), denominator);
         }
 
         /// <summary>
@@ -216,7 +197,7 @@ namespace Cc.Redberry.Rings.Poly
         /// </summary>
         /// <param name="poly">the polynomial</param>
         /// <returns>(reduced poly, common denominator)</returns>
-        public static Tuple2<MultivariatePolynomial<E>, E> ToCommonDenominator<E>(MultivariatePolynomial<Rational<E>> poly)
+        public static (MultivariatePolynomial<E>, E) ToCommonDenominator<E>(MultivariatePolynomial<Rational<E>> poly)
         {
             Ring<Rational<E>> field = poly.ring;
             Ring<E> integralRing = field.GetOne().ring;
@@ -229,27 +210,27 @@ namespace Cc.Redberry.Rings.Poly
                 Rational<E> r = cf.Multiply(d);
                 return r.Numerator();
             });
-            return new Tuple2(integral, denominator);
+            return (integral, denominator);
         }
 
         public static UnivariatePolynomial<Rational<E>> AsOverRationals<E>(Ring<Rational<E>> field, UnivariatePolynomial<E> poly)
         {
-            return poly.MapCoefficients(field, (cf) => new Rational(poly.ring, cf));
+            return poly.MapCoefficients(field, cf => new Rational<E>(poly.ring, cf));
         }
 
         public static MultivariatePolynomial<Rational<E>> AsOverRationals<E>(Ring<Rational<E>> field, MultivariatePolynomial<E> poly)
         {
-            return poly.MapCoefficients(field, (cf) => new Rational(poly.ring, cf));
+            return poly.MapCoefficients(field, (cf) => new Rational<E>(poly.ring, cf));
         }
 
         public static UnivariatePolynomial<Rational<E>> DivideOverRationals<E>(Ring<Rational<E>> field, UnivariatePolynomial<E> poly, E denominator)
         {
-            return poly.MapCoefficients(field, (cf) => new Rational(poly.ring, cf, denominator));
+            return poly.MapCoefficients(field, (cf) => new Rational<E>(poly.ring, cf, denominator));
         }
 
         public static MultivariatePolynomial<Rational<E>> DivideOverRationals<E>(Ring<Rational<E>> field, MultivariatePolynomial<E> poly, E denominator)
         {
-            return poly.MapCoefficients(field, (cf) => new Rational(poly.ring, cf, denominator));
+            return poly.MapCoefficients(field, (cf) => new Rational<E>(poly.ring, cf, denominator));
         }
     }
 }

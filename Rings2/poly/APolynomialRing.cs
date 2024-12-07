@@ -1,24 +1,14 @@
-using Cc.Redberry.Rings;
-using Cc.Redberry.Rings.Bigint;
+using System.Numerics;
 using Cc.Redberry.Rings.Io;
-using Java.Util;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
 using System.Text;
-using static Cc.Redberry.Rings.Poly.RoundingMode;
-using static Cc.Redberry.Rings.Poly.Associativity;
-using static Cc.Redberry.Rings.Poly.Operator;
-using static Cc.Redberry.Rings.Poly.TokenType;
-using static Cc.Redberry.Rings.Poly.SystemInfo;
+
 
 namespace Cc.Redberry.Rings.Poly
 {
     /// <summary>
     /// </summary>
     /// <remarks>@since1.0</remarks>
-    abstract class APolynomialRing<Poly> : ARing<Poly>, IPolynomialRing<Poly>
+    public abstract class APolynomialRing<Poly> : ARing<Poly>, IPolynomialRing<Poly> where Poly : IPolynomial<Poly>
     {
         private static readonly long serialVersionUID = 1;
         /// <summary>
@@ -28,10 +18,12 @@ namespace Cc.Redberry.Rings.Poly
         /// <summary>
         /// the factory polynomial
         /// </summary>
-        APolynomialRing(Poly factory)
+        public APolynomialRing(Poly factory)
         {
             this.factory = factory.CreateZero();
         }
+
+        public abstract int NVariables();
 
         /// <summary>
         /// the factory polynomial
@@ -40,6 +32,8 @@ namespace Cc.Redberry.Rings.Poly
         {
             return factory;
         }
+
+        public abstract Poly Variable(int variable);
 
         /// <summary>
         /// the factory polynomial
@@ -108,7 +102,7 @@ namespace Cc.Redberry.Rings.Poly
         /// <summary>
         /// the factory polynomial
         /// </summary>
-        public override Poly Pow(Poly @base, BigInteger exponent)
+        public Poly Pow(Poly @base, BigInteger exponent)
         {
             return PolynomialMethods.PolyPow(@base, exponent, true);
         }
@@ -116,7 +110,7 @@ namespace Cc.Redberry.Rings.Poly
         /// <summary>
         /// the factory polynomial
         /// </summary>
-        public override Poly AddMutable(Poly a, Poly b)
+        public Poly AddMutable(Poly a, Poly b)
         {
             return a.Add(b);
         }
@@ -124,7 +118,7 @@ namespace Cc.Redberry.Rings.Poly
         /// <summary>
         /// the factory polynomial
         /// </summary>
-        public override Poly SubtractMutable(Poly a, Poly b)
+        public Poly SubtractMutable(Poly a, Poly b)
         {
             return a.Subtract(b);
         }
@@ -132,7 +126,7 @@ namespace Cc.Redberry.Rings.Poly
         /// <summary>
         /// the factory polynomial
         /// </summary>
-        public override Poly MultiplyMutable(Poly a, Poly b)
+        public Poly MultiplyMutable(Poly a, Poly b)
         {
             return a.Multiply(b);
         }
@@ -140,7 +134,7 @@ namespace Cc.Redberry.Rings.Poly
         /// <summary>
         /// the factory polynomial
         /// </summary>
-        public override Poly NegateMutable(Poly element)
+        public Poly NegateMutable(Poly element)
         {
             return element.Negate();
         }
@@ -278,7 +272,7 @@ namespace Cc.Redberry.Rings.Poly
         /// <summary>
         /// the factory polynomial
         /// </summary>
-        public override string ToString(IStringifier<Poly> stringifier)
+        public string ToString(IStringifier<Poly> stringifier)
         {
             string cfRing = factory.CoefficientRingToString(stringifier);
             if (cfRing.Length > 2)
@@ -314,5 +308,6 @@ namespace Cc.Redberry.Rings.Poly
         {
             return ToString(IStringifier.DefaultVars(NVariables()));
         }
+
     }
 }

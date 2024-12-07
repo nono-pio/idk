@@ -310,7 +310,7 @@ namespace Cc.Redberry.Rings
         /// <param name="dividend">the dividend</param>
         /// <param name="divider">the divider</param>
         /// <returns>the remainder of {@code dividend / divider}</returns>
-        E Remainder(E dividend, E divider)
+        public E Remainder(E dividend, E divider)
         {
             return DivideAndRemainder(dividend, divider)[1];
         }

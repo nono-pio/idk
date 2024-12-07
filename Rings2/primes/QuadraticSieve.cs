@@ -1,16 +1,7 @@
+
+
+using System.Numerics;
 using Cc.Redberry.Rings.Bigint;
-using Java.Util;
-using Cc.Redberry.Rings.Bigint.BigInteger;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using static Cc.Redberry.Rings.Primes.RoundingMode;
-using static Cc.Redberry.Rings.Primes.Associativity;
-using static Cc.Redberry.Rings.Primes.Operator;
-using static Cc.Redberry.Rings.Primes.TokenType;
-using static Cc.Redberry.Rings.Primes.SystemInfo;
 
 namespace Cc.Redberry.Rings.Primes
 {
@@ -25,7 +16,7 @@ namespace Cc.Redberry.Rings.Primes
         private readonly BigInteger[] primesBig;
         private readonly double primeLog;
         private readonly double[] primeLogs;
-        private readonly List<BigInteger> decomposedNumbers = new List();
+        private readonly List<BigInteger> decomposedNumbers = new List<BigInteger>();
         private BigInteger[] s, fs;
         private double[] logs;
         private int decomposed = 0;
@@ -40,7 +31,7 @@ namespace Cc.Redberry.Rings.Primes
             {
                 if (j == 2)
                     continue;
-                nModP = n.Mod(BigInteger.ValueOf(j)).IntValue();
+                nModP = n.Mod(new BigInteger(j)).IntValue();
                 if (LegendreSymbol(nModP, j) == 1)
                 {
                     primes[k++] = j;
@@ -56,7 +47,7 @@ namespace Cc.Redberry.Rings.Primes
                 {
                     if (SmallPrimes.IsPrime(j))
                     {
-                        nModP = n.Mod(BigInteger.ValueOf(j)).IntValue();
+                        nModP = n.Mod(new BigInteger(j)).IntValue();
                         if (LegendreSymbol(nModP, j) == 1)
                             primes[k++] = j;
                     }
@@ -69,7 +60,7 @@ namespace Cc.Redberry.Rings.Primes
             primeLogs = new double[PRIME_BASE];
             for (k = 1; k < PRIME_BASE; k++)
             {
-                primesBig[k] = BigInteger.ValueOf(primes[k]);
+                primesBig[k] = new BigInteger(primes[k]);
                 primeLogs[k] = Math.Log(primes[k]);
             }
 
@@ -107,7 +98,7 @@ namespace Cc.Redberry.Rings.Primes
             bool divided = false;
             if (number.Signum() < 0)
             {
-                number = ZERO.Subtract(number);
+                number = -number;
                 result[0] = 1;
             }
             else
@@ -116,7 +107,7 @@ namespace Cc.Redberry.Rings.Primes
             {
                 result[j] = 0;
                 BigInteger k = primesBig[j];
-                while (number.Mod(k).CompareTo(ZERO) == 0)
+                while (number.Mod(k).CompareTo(BigInteger.Zero) == 0)
                 {
                     divided = true;
                     number = number.Divide(k);
@@ -127,12 +118,12 @@ namespace Cc.Redberry.Rings.Primes
                     break;
             }
 
-            if (number.CompareTo(ONE) > 0)
+            if (number.CompareTo(BigInteger.One) > 0)
                 result[0] = -1;
             return result;
         }
 
-        private byte[][] BuildMatrix(BigInteger[] numbers, int size)
+        private byte[,] BuildMatrix(BigInteger[] numbers, int size)
         {
             byte[, ] matrix = new byte[size, size];
             BigInteger temp, prim;
@@ -143,29 +134,29 @@ namespace Cc.Redberry.Rings.Primes
                 if (temp.Signum() < 0)
                 {
                     temp = temp.Negate();
-                    matrix[j][0] = 1;
+                    matrix[j,0] = 1;
                 }
                 else
-                    matrix[j][0] = 0;
+                    matrix[j,0] = 0;
                 for (k = 1; k < PRIME_BASE; k++)
                 {
-                    matrix[j][k] = 0;
+                    matrix[j,k] = 0;
                     prim = primesBig[k];
-                    while (temp.Mod(prim).CompareTo(ZERO) == 0)
+                    while (temp.Mod(prim).CompareTo(BigInteger.Zero) == 0)
                     {
-                        matrix[j][k]++; // = 1 - matrix[j][k];
+                        matrix[j,k]++; // = 1 - matrix[j][k];
                         temp = temp.Divide(prim);
                     }
                 }
 
                 for (k = PRIME_BASE; k < size; k++)
-                    matrix[j][k] = 0;
+                    matrix[j,k] = 0;
             }
 
             return matrix;
         }
 
-        private static int[][] FlattenMatrix(byte[, ] matrix)
+        private static int[,] FlattenMatrix(byte[, ] matrix)
         {
             int[, ] m = new int[matrix.Length, matrix.Length / bitChunkSize];
             int j, k, n;
@@ -174,11 +165,11 @@ namespace Cc.Redberry.Rings.Primes
                 for (k = 0; k < matrix.Length / bitChunkSize; k++)
                 {
                     comparation = 1;
-                    m[j][k] = 0;
+                    m[j,k] = 0;
                     for (n = 0; n < bitChunkSize; n++)
                     {
-                        if ((matrix[j][k * bitChunkSize + n] & 1) > 0)
-                            m[j][k] += comparation;
+                        if ((matrix[j,k * bitChunkSize + n] & 1) > 0)
+                            m[j,k] += comparation;
                         comparation *= 2;
                     }
                 }
@@ -186,13 +177,13 @@ namespace Cc.Redberry.Rings.Primes
             return m;
         }
 
-        private static int[][] BuildIdentity(int size)
+        private static int[,] BuildIdentity(int size)
         {
             int[, ] matrix = new int[size, size / bitChunkSize];
             int j, k;
             for (j = 0; j < size; j++)
                 for (k = 0; k < size / bitChunkSize; k++)
-                    matrix[j][k] = 0;
+                    matrix[j,k] = 0;
             k = -1;
             int comparation = 0;
             for (j = 0; j < size; j++)
@@ -204,7 +195,7 @@ namespace Cc.Redberry.Rings.Primes
                 }
                 else
                     comparation *= 2;
-                matrix[j][k] = comparation;
+                matrix[j,k] = comparation;
             }
 
             return matrix;
@@ -217,35 +208,35 @@ namespace Cc.Redberry.Rings.Primes
             int comparation = 1;
             for (c1 = 1; c1 <= (j % bitChunkSize); c1++)
                 comparation *= 2;
-            if ((matrix[j][j / bitChunkSize] & comparation) == 0)
+            if ((matrix[j,j / bitChunkSize] & comparation) == 0)
                 for (c1 = j + 1; c1 < k; c1++)
-                    if ((matrix[c1][j / bitChunkSize] & comparation) > 0)
+                    if ((matrix[c1,j / bitChunkSize] & comparation) > 0)
                     {
                         for (c2 = j / bitChunkSize; c2 < k / bitChunkSize; c2++)
                         {
-                            temp = matrix[j][c2];
-                            matrix[j][c2] = matrix[c1][c2];
-                            matrix[c1][c2] = temp;
+                            temp = matrix[j,c2];
+                            matrix[j,c2] = matrix[c1,c2];
+                            matrix[c1,c2] = temp;
                         }
 
                         for (c2 = 0; c2 < k / bitChunkSize; c2++)
                         {
-                            temp = right[j][c2];
-                            right[j][c2] = right[c1][c2];
-                            right[c1][c2] = temp;
+                            temp = right[j,c2];
+                            right[j,c2] = right[c1,c2];
+                            right[c1,c2] = temp;
                         }
 
                         break;
                     }
 
-            if ((matrix[j][j / bitChunkSize] & comparation) > 0)
+            if ((matrix[j,j / bitChunkSize] & comparation) > 0)
                 for (c1 = j + 1; c1 < k; c1++)
-                    if ((matrix[c1][j / bitChunkSize] & comparation) > 0)
+                    if ((matrix[c1,j / bitChunkSize] & comparation) > 0)
                     {
                         for (c2 = j / bitChunkSize; c2 < k / bitChunkSize; c2++)
-                            matrix[c1][c2] = (matrix[c1][c2] ^ matrix[j][c2]);
+                            matrix[c1,c2] = (matrix[c1,c2] ^ matrix[j,c2]);
                         for (c2 = 0; c2 < k / bitChunkSize; c2++)
-                            right[c1][c2] = (right[c1][c2] ^ right[j][c2]);
+                            right[c1,c2] = (right[c1,c2] ^ right[j,c2]);
                     }
         }
 
@@ -337,11 +328,11 @@ namespace Cc.Redberry.Rings.Primes
 
         private void RemoveHighestPower(int index, BigInteger p)
         {
-            if (fs[index].Mod(p).CompareTo(ZERO) == 0)
+            if (fs[index].Mod(p).CompareTo(BigInteger.Zero) == 0)
             {
                 do fs[index] = fs[index].Divide(p);
-                while (fs[index].Mod(p).CompareTo(ZERO) == 0);
-                if (fs[index].CompareTo(ONE) == 0)
+                while (fs[index].Mod(p).CompareTo(BigInteger.Zero) == 0);
+                if (fs[index].CompareTo(BigInteger.One) == 0)
                 {
                     logs[index] = 0;
                     decomposedNumbers.Add(s[index]);
@@ -388,15 +379,15 @@ namespace Cc.Redberry.Rings.Primes
             BigInteger x, y;
             BigInteger sqrt = SqrtBigInt(n);
             Bj = sqrt;
-            Ck = ONE;
+            Ck = BigInteger.One;
             Cj = n.Subtract(sqrt.Multiply(sqrt));
-            Pk = ONE;
+            Pk = BigInteger.One;
             Pj = sqrt;
             byte[] facs;
             byte[, ] factors = new byte[PRIME_BASE + ADDITIONAL, PRIME_BASE + ADDITIONAL];
             for (i = 0; i < PRIME_BASE + ADDITIONAL; i++)
                 for (k = 0; k < PRIME_BASE + ADDITIONAL; k++)
-                    factors[i][k] = 0;
+                    factors[i,k] = 0;
             BigInteger[] s = new BigInteger[PRIME_BASE + ADDITIONAL];
             decomposed = 0;
             i = 1;
@@ -410,12 +401,12 @@ namespace Cc.Redberry.Rings.Primes
                 if (i % 2 == 0)
                     sqr = Ci;
                 else
-                    sqr = ZERO.Subtract(Ci);
+                    sqr = -Ci;
                 facs = DecomposeNumber(sqr);
                 if (facs[0] >= 0)
                 {
                     for (k = 0; k < PRIME_BASE; k++)
-                        factors[decomposed][k] = facs[k];
+                        factors[decomposed,k] = facs[k];
                     s[decomposed] = Pi;
                 }
 
@@ -451,7 +442,7 @@ namespace Cc.Redberry.Rings.Primes
             {
                 int[] primefacs = new int[PRIME_BASE];
                 byte[] factorLine = ExtractLine(identity, loop);
-                x = ONE;
+                x = BigInteger.One;
                 for (i = 0; i < PRIME_BASE; i++)
                     primefacs[i] = 0;
                 for (i = 0; i < decomposed; i++)
@@ -459,20 +450,20 @@ namespace Cc.Redberry.Rings.Primes
                     if (factorLine[i] == 1)
                     {
                         for (int j = 0; j < PRIME_BASE; j++)
-                            primefacs[j] += (int)factors[i][j];
+                            primefacs[j] += (int)factors[i,j];
                         x = x.Multiply(s[i]).Mod(n);
                     }
                 }
 
-                y = ONE;
+                y = BigInteger.One;
                 for (i = 0; i < PRIME_BASE; i++)
-                    y = y.Multiply(BigInteger.ValueOf(primes[i]).ModPow(BigInteger.ValueOf(primefacs[i] / 2), n)).Mod(n);
+                    y = y.Multiply(new BigInteger(primes[i]).ModPow(new BigInteger(primefacs[i] / 2), n)).Mod(n);
                 x = x.Mod(n);
                 y = y.Mod(n);
                 x = x.Add(y);
                 y = x.Subtract(y).Subtract(y);
                 x = n.Gcd(x);
-                if ((x.CompareTo(ONE) != 0) && (x.CompareTo(n) != 0))
+                if ((x.CompareTo(BigInteger.One) != 0) && (x.CompareTo(n) != 0))
                     break;
             }
             while (--loop > PRIME_BASE);
@@ -508,13 +499,13 @@ namespace Cc.Redberry.Rings.Primes
             for (i = 1; i < PRIME_BASE; i++)
             {
                 tempflat = FindFlats(primes[i], quadraticN.Mod(primesBig[i]).IntValue());
-                flats[i][0] = (int)tempflat[0];
-                flats[i][1] = (int)tempflat[1];
+                flats[i, 0] = (int)tempflat[0];
+                flats[i, 1] = (int)tempflat[1];
             }
 
             int offset = 0;
             int direction = 0;
-            m = SqrtBigInt(n).Add(ONE);
+            m = SqrtBigInt(n).Add(BigInteger.One);
             s = new BigInteger[upperBound + 2];
             fs = new BigInteger[upperBound + 2];
             logs = new double[upperBound + 2];
@@ -548,9 +539,9 @@ namespace Cc.Redberry.Rings.Primes
                     p = primes[i];
                     logp = primeLogs[i];
                     mInt = m.Mod(primesBig[i]).IntValue() + offset;
-                    if (flats[i][0] >= 0)
+                    if (flats[i,0] >= 0)
                     {
-                        loop = ((flats[i][0] - mInt) % p);
+                        loop = ((flats[i,0] - mInt) % p);
                         if (loop < 0)
                             loop += p;
                         while (loop < upperBound)
@@ -560,9 +551,9 @@ namespace Cc.Redberry.Rings.Primes
                         }
                     }
 
-                    if (flats[i][1] >= 0)
+                    if (flats[i,1] >= 0)
                     {
-                        loop = ((flats[i][1] - mInt) % p);
+                        loop = ((flats[i,1] - mInt) % p);
                         if (loop < 0)
                             loop += p;
                         while (loop < upperBound)
@@ -578,7 +569,7 @@ namespace Cc.Redberry.Rings.Primes
                 {
                     if (logs[i] > TARGET)
                     {
-                        s[i] = BigInteger.ValueOf(i + offset).Add(m);
+                        s[i] = new BigInteger(i + offset).Add(m);
                         fs[i] = QuadraticF(s[i], quadraticN).Abs();
                     }
                 }
@@ -587,9 +578,9 @@ namespace Cc.Redberry.Rings.Primes
                 {
                     p = primes[i];
                     mInt = m.Mod(primesBig[i]).IntValue() + offset;
-                    if (flats[i][0] >= 0)
+                    if (flats[i,0] >= 0)
                     {
-                        loop = ((flats[i][0] - mInt) % p);
+                        loop = ((flats[i,0] - mInt) % p);
                         if (loop < 0)
                             loop += p;
                         while (loop < upperBound)
@@ -605,9 +596,9 @@ namespace Cc.Redberry.Rings.Primes
                         }
                     }
 
-                    if (flats[i][1] >= 0)
+                    if (flats[i,1] >= 0)
                     {
-                        loop = ((flats[i][1] - mInt) % p);
+                        loop = ((flats[i,1] - mInt) % p);
                         if (loop < 0)
                             loop += p;
                         while (loop < upperBound)
@@ -647,7 +638,7 @@ namespace Cc.Redberry.Rings.Primes
             {
                 int[] primefacs = new int[PRIME_BASE];
                 byte[] factorLine = ExtractLine(identity, loop);
-                test = ONE;
+                test = BigInteger.One;
                 for (i = 0; i < PRIME_BASE; i++)
                     primefacs[i] = 0;
                 for (i = 0; i < decomposed; i++)
@@ -655,15 +646,15 @@ namespace Cc.Redberry.Rings.Primes
                     if (factorLine[i] == 1)
                     {
                         for (j = 0; j < PRIME_BASE; j++)
-                            primefacs[j] += (int)factors[i][j];
+                            primefacs[j] += (int)factors[i,j];
                         test = test.Multiply(s[i]).Mod(n);
                     }
                 }
 
-                prim = ONE;
+                prim = BigInteger.One;
                 for (i = 0; i < PRIME_BASE; i++)
                 {
-                    y = BigInteger.ValueOf(primes[i]).ModPow(BigInteger.ValueOf(primefacs[i] / 2), n);
+                    y = new BigInteger(primes[i]).ModPow(new BigInteger(primefacs[i] / 2), n);
                     prim = prim.Multiply(y).Mod(n);
                 }
 
@@ -672,7 +663,7 @@ namespace Cc.Redberry.Rings.Primes
                 x = test.Add(prim);
                 y = test.Subtract(prim);
                 test = n.Gcd(x);
-                if ((test.CompareTo(ONE) != 0) && (test.CompareTo(n) != 0))
+                if ((test.CompareTo(BigInteger.One) != 0) && (test.CompareTo(n) != 0))
                     break;
             }
             while (--loop > PRIME_BASE);
@@ -726,15 +717,15 @@ namespace Cc.Redberry.Rings.Primes
             }
         }
 
-        static BigInteger SqrtBigInt(BigInteger i)
+        public static BigInteger SqrtBigInt(BigInteger i)
         {
             long c;
             BigInteger medium;
             BigInteger high = i;
-            BigInteger low = BigInteger.ONE;
-            while (high.Subtract(low).CompareTo(BigInteger.ONE) > 0)
+            BigInteger low = BigInteger.One;
+            while (high.Subtract(low).CompareTo(BigInteger.One) > 0)
             {
-                medium = high.Add(low).Divide(BigInteger.ONE.Add(BigInteger.ONE));
+                medium = high.Add(low).Divide(BigInteger.One.Add(BigInteger.One));
                 c = medium.Multiply(medium).CompareTo(i);
                 if (c > 0)
                     high = medium;

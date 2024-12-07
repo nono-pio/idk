@@ -1,16 +1,6 @@
-using Cc.Redberry.Rings;
 using Cc.Redberry.Rings.Poly;
-using Java.Util;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using static Cc.Redberry.Rings.Poly.RoundingMode;
-using static Cc.Redberry.Rings.Poly.Associativity;
-using static Cc.Redberry.Rings.Poly.Operator;
-using static Cc.Redberry.Rings.Poly.TokenType;
-using static Cc.Redberry.Rings.Poly.SystemInfo;
+using Cc.Redberry.Rings.Poly.Univar;
+
 
 namespace Cc.Redberry.Rings.Poly
 {

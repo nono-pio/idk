@@ -1,15 +1,5 @@
+using System.Numerics;
 using Cc.Redberry.Rings.Bigint;
-using Java.Util;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using static Cc.Redberry.Rings.Primes.RoundingMode;
-using static Cc.Redberry.Rings.Primes.Associativity;
-using static Cc.Redberry.Rings.Primes.Operator;
-using static Cc.Redberry.Rings.Primes.TokenType;
-using static Cc.Redberry.Rings.Primes.SystemInfo;
 
 namespace Cc.Redberry.Rings.Primes
 {
@@ -20,10 +10,10 @@ namespace Cc.Redberry.Rings.Primes
     {
         private readonly int[] smallPrimes = SmallPrimes.SmallPrimes12;
         private long pointer;
-        private int smallPrimesPointer = Integer.MAX_VALUE;
+        private int smallPrimesPointer = int.MaxValue;
         private static readonly int largeSieveLimit = 16777216;
         private readonly SieveOfAtkin smallSieve = SieveOfAtkin.SmallPrimesSieve;
-        private SieveOfAtkin largeSieve = null;
+        private SieveOfAtkin? largeSieve = null;
         /// <summary>
         /// Create iterator over prime numbers starting from 2.
         /// </summary>
@@ -39,7 +29,7 @@ namespace Cc.Redberry.Rings.Primes
         {
             if (from < smallPrimes[smallPrimes.Length - 1])
             {
-                smallPrimesPointer = Arrays.BinarySearch(smallPrimes, (int)from);
+                smallPrimesPointer = Array.BinarySearch(smallPrimes, (int)from);
                 if (smallPrimesPointer < 0)
                     smallPrimesPointer = ~smallPrimesPointer;
                 pointer = smallPrimes[smallPrimesPointer];
@@ -70,12 +60,12 @@ namespace Cc.Redberry.Rings.Primes
                         return pointer - 1;
             }
 
-            if (pointer < Integer.MAX_VALUE - 1)
+            if (pointer < int.MaxValue - 1)
                 return pointer = SmallPrimes.NextPrime((int)(pointer + 1));
-            if (pointer < Long.MAX_VALUE - 1)
+            if (pointer < long.MaxValue - 1)
                 try
                 {
-                    return pointer = BigPrimes.NextPrime(BigInteger.ValueOf(pointer + 1)).LongValueExact();
+                    return pointer = BigPrimes.NextPrime(new BigInteger(pointer + 1)).LongValueExact();
                 }
                 catch (ArithmeticException e)
                 {

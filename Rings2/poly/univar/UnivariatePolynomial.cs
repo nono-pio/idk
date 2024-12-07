@@ -39,7 +39,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <summary>
         /// list of coefficients { x^0, x^1, ... , x^degree }
         /// </summary>
-        E[] data;
+        public E[] data;
         /// <summary>
         /// The coefficient ring
         /// </summary>
@@ -49,7 +49,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <summary>
         /// points to the last non zero element in the data array
         /// </summary>
-        int degree;
+        public int degree;
         /// <summary>
         /// The coefficient ring
         /// </summary>

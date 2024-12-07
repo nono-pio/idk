@@ -2889,7 +2889,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <summary>
         /// internal API
         /// </summary>
-        UnivariatePolynomialZ64 MultiplyUnsafe(long factor)
+        public UnivariatePolynomialZ64 MultiplyUnsafe(long factor)
         {
             for (int i = degree; i >= 0; --i)
                 data[i] *= factor;
@@ -3100,7 +3100,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <summary>
         /// internal API
         /// </summary>
-        UnivariatePolynomialZ64 MultiplyUnsafe(UnivariatePolynomialZ64 oth)
+        public UnivariatePolynomialZ64 MultiplyUnsafe(UnivariatePolynomialZ64 oth)
         {
             if (IsZero())
                 return this;

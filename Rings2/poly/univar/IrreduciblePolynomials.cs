@@ -1,22 +1,6 @@
-using Cc.Redberry.Rings;
-using Cc.Redberry.Rings.Bigint;
-using Cc.Redberry.Rings.Poly;
+using System.Numerics;
 using Cc.Redberry.Rings.Primes;
 using Cc.Redberry.Rings.Util;
-using Gnu.Trove.Map;
-using Gnu.Trove.Map.Hash;
-using Org.Apache.Commons.Math3.Random;
-using Cc.Redberry.Rings.Poly.Univar.Conversions64bit;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using static Cc.Redberry.Rings.Poly.Univar.RoundingMode;
-using static Cc.Redberry.Rings.Poly.Univar.Associativity;
-using static Cc.Redberry.Rings.Poly.Univar.Operator;
-using static Cc.Redberry.Rings.Poly.Univar.TokenType;
-using static Cc.Redberry.Rings.Poly.Univar.SystemInfo;
 
 namespace Cc.Redberry.Rings.Poly.Univar
 {
@@ -35,7 +19,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// </summary>
         /// <param name="poly">the polynomial</param>
         /// <returns>whether {@code poly} is an irreducible polynomial</returns>
-        public static bool IrreducibleQ<Poly extends IUnivariatePolynomial<Poly>>(Poly poly)
+        public static bool IrreducibleQ<Poly>(Poly poly) where Poly : IUnivariatePolynomial<Poly>
         {
             if (poly.IsOverFiniteField())
                 return FiniteFieldIrreducibleQ(poly);
@@ -48,7 +32,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// </summary>
         /// <param name="poly">the polynomial over finite field</param>
         /// <returns>whether {@code poly} is an irreducible polynomial</returns>
-        public static bool FiniteFieldIrreducibleQ<Poly extends IUnivariatePolynomial<Poly>>(Poly poly)
+        public static bool FiniteFieldIrreducibleQ<Poly>(Poly poly) where Poly : IUnivariatePolynomial<Poly>
         {
             return FiniteFieldIrreducibleBenOr(poly);
         }
@@ -58,7 +42,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// </summary>
         /// <param name="poly">the polynomial over finite field</param>
         /// <returns>whether {@code poly} is an irreducible polynomial</returns>
-        public static bool FiniteFieldIrreducibleViaModularComposition<Poly extends IUnivariatePolynomial<Poly>>(Poly poly)
+        public static bool FiniteFieldIrreducibleViaModularComposition<Poly>(Poly poly) where Poly : IUnivariatePolynomial<Poly>
         {
             Util.EnsureOverFiniteField(poly);
             if (poly.IsMonomial())
@@ -100,7 +84,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         }
 
         /* fives xq^exponent using repeated compositions */
-        static Poly Composition<Poly extends IUnivariatePolynomial<Poly>>(Poly xq, int exponent, Poly poly, UnivariateDivision.InverseModMonomial<Poly> invMod, TIntObjectMap<Poly> cache)
+        static Poly Composition<Poly>(Poly xq, int exponent, Poly poly, UnivariateDivision.InverseModMonomial<Poly> invMod, TIntObjectMap<Poly> cache) where Poly : IUnivariatePolynomial<Poly>
         {
             Poly cached = cache[exponent];
             if (cached != null)
@@ -128,7 +112,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// </summary>
         /// <param name="poly">the polynomial over finite field</param>
         /// <returns>whether {@code poly} is an irreducible polynomial</returns>
-        public static bool FiniteFieldIrreducibleBenOr<Poly extends IUnivariatePolynomial<Poly>>(Poly poly)
+        public static bool FiniteFieldIrreducibleBenOr<Poly>(Poly poly) where Poly : IUnivariatePolynomial<Poly>
         {
             Util.EnsureOverFiniteField(poly);
             if (poly.IsMonomial())
@@ -165,7 +149,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <param name="degree">the degree</param>
         /// <param name="rnd">random source</param>
         /// <returns>irreducible polynomial</returns>
-        public static UnivariatePolynomialZp64 RandomIrreduciblePolynomial(long modulus, int degree, RandomGenerator rnd)
+        public static UnivariatePolynomialZp64 RandomIrreduciblePolynomial(long modulus, int degree, Random rnd)
         {
             return RandomIrreduciblePolynomial(UnivariatePolynomialZp64.Zero(modulus), degree, rnd);
         }
@@ -177,7 +161,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <param name="degree">the degree</param>
         /// <param name="rnd">random source</param>
         /// <returns>irreducible polynomial</returns>
-        public static UnivariatePolynomial<E> RandomIrreduciblePolynomial<E>(Ring<E> ring, int degree, RandomGenerator rnd)
+        public static UnivariatePolynomial<E> RandomIrreduciblePolynomial<E>(Ring<E> ring, int degree, Random rnd)
         {
             UnivariatePolynomial<E> poly;
             do
@@ -196,7 +180,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <param name="degree">the degree</param>
         /// <param name="rnd">random source</param>
         /// <returns>irreducible polynomial over Z</returns>
-        public static UnivariatePolynomial<BigInteger> RandomIrreduciblePolynomialOverZ(int degree, RandomGenerator rnd)
+        public static UnivariatePolynomial<BigInteger> RandomIrreduciblePolynomialOverZ(int degree, Random rnd)
         {
 
             // some prime number
@@ -211,7 +195,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <param name="degree">the degree</param>
         /// <param name="rnd">random source</param>
         /// <returns>irreducible polynomial</returns>
-        public static Poly RandomIrreduciblePolynomial<Poly extends IUnivariatePolynomial<Poly>>(Poly factory, int degree, RandomGenerator rnd)
+        public static Poly RandomIrreduciblePolynomial<Poly>(Poly factory, int degree, Random rnd) where Poly : IUnivariatePolynomial<Poly>
         {
             Poly poly;
             do

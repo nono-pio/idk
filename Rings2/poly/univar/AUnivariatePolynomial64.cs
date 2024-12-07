@@ -29,14 +29,14 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <summary>
         /// array of coefficients { x^0, x^1, ... , x^degree }
         /// </summary>
-        long[] data;
+        public long[] data;
         /// <summary>
         /// array of coefficients { x^0, x^1, ... , x^degree }
         /// </summary>
         /// <summary>
         /// points to the last non zero element in the data array
         /// </summary>
-        int degree;
+        public int degree;
         /// <summary>
         /// array of coefficients { x^0, x^1, ... , x^degree }
         /// </summary>
@@ -367,7 +367,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// degree of {@code this} is set to {@code desiredDegree} if the latter is greater than the former.
         /// </summary>
         /// <param name="desiredDegree">desired degree</param>
-        void EnsureCapacity(int desiredDegree)
+        public void EnsureCapacity(int desiredDegree)
         {
             if (degree < desiredDegree)
                 degree = desiredDegree;
@@ -410,7 +410,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <summary>
         /// Removes zeroes from the end of {@code data} and adjusts the degree
         /// </summary>
-        void FixDegree()
+        public void FixDegree()
         {
             int i = degree;
             while (i >= 0 && data[i] == 0)

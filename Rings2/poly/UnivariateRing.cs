@@ -1,17 +1,6 @@
+using System.Runtime.InteropServices.JavaScript;
 using Cc.Redberry.Rings;
-using Cc.Redberry.Rings.Poly;
-using Org.Apache.Commons.Math3.Random;
-using Java.Util.Function;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using static Cc.Redberry.Rings.Poly.RoundingMode;
-using static Cc.Redberry.Rings.Poly.Associativity;
-using static Cc.Redberry.Rings.Poly.Operator;
-using static Cc.Redberry.Rings.Poly.TokenType;
-using static Cc.Redberry.Rings.Poly.SystemInfo;
+using Cc.Redberry.Rings.Poly.Univar;
 
 namespace Cc.Redberry.Rings.Poly
 {
@@ -20,7 +9,7 @@ namespace Cc.Redberry.Rings.Poly
     /// </summary>
     /// <param name="<Poly>">type of univariate polynomials</param>
     /// <remarks>@since1.0</remarks>
-    public sealed class UnivariateRing<Poly> : APolynomialRing<Poly>
+    public sealed class UnivariateRing<Poly> : APolynomialRing<Poly> where Poly : IPolynomial<Poly>
     {
         private static readonly long serialVersionUID = 1;
         /// <summary>
@@ -310,7 +299,7 @@ namespace Cc.Redberry.Rings.Poly
             {
                 UnivariatePolynomial f = (UnivariatePolynomial)this.factory;
                 Ring cfRing = f.ring;
-                Function<RandomGenerator, TWildcardTodo> method = cfRing.RandomElementTree();
+                JSType.Function<RandomGenerator, TWildcardTodo> method = cfRing.RandomElementTree();
                 return (Poly)RandomUnivariatePolynomials.RandomPoly(minDegree + (minDegree == maxDegree ? 0 : rnd.NextInt(maxDegree - minDegree)), cfRing, method, rnd);
             }
             else

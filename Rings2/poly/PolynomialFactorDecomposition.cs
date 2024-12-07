@@ -1,22 +1,5 @@
-using Cc.Redberry.Rings;
 using Cc.Redberry.Rings.Util;
-using Gnu.Trove.List.Array;
-using Gnu.Trove.Map.Hash;
-using Java.Util;
-using Java.Util.Function;
-using Java.Util.Stream;
-using Cc.Redberry.Rings.Rings;
-using Cc.Redberry.Rings.Poly.PolynomialMethods;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using static Cc.Redberry.Rings.Poly.RoundingMode;
-using static Cc.Redberry.Rings.Poly.Associativity;
-using static Cc.Redberry.Rings.Poly.Operator;
-using static Cc.Redberry.Rings.Poly.TokenType;
-using static Cc.Redberry.Rings.Poly.SystemInfo;
 
 namespace Cc.Redberry.Rings.Poly
 {
@@ -27,7 +10,7 @@ namespace Cc.Redberry.Rings.Poly
     /// @since1.0
     /// @since2.2 FactorDecomposition renamed to PolynomialFactorDecomposition
     /// </remarks>
-    public sealed class PolynomialFactorDecomposition<Poly> : FactorDecomposition<Poly>, Serializable
+    public sealed class PolynomialFactorDecomposition<Poly> : FactorDecomposition<Poly> where Poly : IPolynomial<Poly>
     {
         private static readonly long serialVersionUID = 1;
         private PolynomialFactorDecomposition(Poly unit, IList<Poly> factors, TIntArrayList exponents) : base(PolynomialRing(unit), unit, factors, exponents)
@@ -74,7 +57,7 @@ namespace Cc.Redberry.Rings.Poly
             ReduceUnitContent();
             Poly[] fTmp = factors.ToArray(factors[0].CreateArray(factors.Count));
             int[] eTmp = exponents.ToArray();
-            for (int i = fTmp.length - 1; i >= 0; --i)
+            for (int i = fTmp.Length - 1; i >= 0; --i)
             {
                 Poly poly = fTmp[i];
                 if (poly.IsMonomial() && eTmp[i] != 1)
@@ -225,9 +208,9 @@ namespace Cc.Redberry.Rings.Poly
         /// <summary>
         /// Makes each factor primitive (moving contents to the {@link #unit})
         /// </summary>
-        public PolynomialFactorDecomposition<OthPoly> MapTo<OthPoly extends IPolynomial<OthPoly>>(Function<Poly, OthPoly> mapper)
+        public PolynomialFactorDecomposition<OthPoly> MapTo<OthPoly>(Func<Poly, OthPoly> mapper) where OthPoly : IPolynomial<OthPoly>
         {
-            return Of(mapper.Apply(unit), factors.Stream().Map(mapper).Collect(Collectors.ToList()), exponents);
+            return Of(mapper.Apply(unit), factors.Select(mapper).ToList(), exponents);
         }
 
         /// <summary>
@@ -255,125 +238,39 @@ namespace Cc.Redberry.Rings.Poly
             return unit.IsOverField() ? Monic() : Primitive();
         }
 
-        /// <summary>
-        /// Makes the lead coefficient of this factorization equal to the l.c. of specified poly via multiplication of this
-        /// by appropriate unit
-        /// </summary>
-        /// <summary>
-        /// Resulting lead coefficient
-        /// </summary>
-        /// <summary>
-        /// Calculates the signum of the polynomial constituted by this decomposition
-        /// </summary>
-        /// <returns>the signum of the polynomial constituted by this decomposition</returns>
-        /// <summary>
-        /// Makes each factor monic (moving leading coefficients to the {@link #unit})
-        /// </summary>
-        /// <summary>
-        /// Makes each factor primitive (moving contents to the {@link #unit})
-        /// </summary>
-        /// <summary>
-        /// Calls {@link #monic()} if the coefficient ring is field and {@link #primitive()} otherwise
-        /// </summary>
         public override PolynomialFactorDecomposition<Poly> Clone()
         {
-            return new PolynomialFactorDecomposition(unit.Clone(), factors.Stream().Map(Poly.Clone()).Collect(Collectors.ToList()), new TIntArrayList(exponents));
+            return new PolynomialFactorDecomposition<Poly>(unit.Clone(), factors.Select(f => f.Clone()).ToList(), new TIntArrayList(exponents));
         }
 
-        /// <summary>
-        /// Makes the lead coefficient of this factorization equal to the l.c. of specified poly via multiplication of this
-        /// by appropriate unit
-        /// </summary>
-        /// <summary>
-        /// Resulting lead coefficient
-        /// </summary>
-        /// <summary>
-        /// Calculates the signum of the polynomial constituted by this decomposition
-        /// </summary>
-        /// <returns>the signum of the polynomial constituted by this decomposition</returns>
-        /// <summary>
-        /// Makes each factor monic (moving leading coefficients to the {@link #unit})
-        /// </summary>
-        /// <summary>
-        /// Makes each factor primitive (moving contents to the {@link #unit})
-        /// </summary>
-        /// <summary>
-        /// Calls {@link #monic()} if the coefficient ring is field and {@link #primitive()} otherwise
-        /// </summary>
+      
         /// <summary>
         /// Unit factorization
         /// </summary>
-        public static PolynomialFactorDecomposition<Poly> Unit<Poly extends IPolynomial<Poly>>(Poly unit)
+        public static PolynomialFactorDecomposition<Poly> Unit(Poly unit)
         {
             if (!unit.IsConstant())
                 throw new ArgumentException();
             return Empty(unit).AddUnit(unit);
         }
 
-        /// <summary>
-        /// Makes the lead coefficient of this factorization equal to the l.c. of specified poly via multiplication of this
-        /// by appropriate unit
-        /// </summary>
-        /// <summary>
-        /// Resulting lead coefficient
-        /// </summary>
-        /// <summary>
-        /// Calculates the signum of the polynomial constituted by this decomposition
-        /// </summary>
-        /// <returns>the signum of the polynomial constituted by this decomposition</returns>
-        /// <summary>
-        /// Makes each factor monic (moving leading coefficients to the {@link #unit})
-        /// </summary>
-        /// <summary>
-        /// Makes each factor primitive (moving contents to the {@link #unit})
-        /// </summary>
-        /// <summary>
-        /// Calls {@link #monic()} if the coefficient ring is field and {@link #primitive()} otherwise
-        /// </summary>
-        /// <summary>
-        /// Unit factorization
-        /// </summary>
+      
         /// <summary>
         /// Empty factorization
         /// </summary>
-        public static PolynomialFactorDecomposition<Poly> Empty<Poly extends IPolynomial<Poly>>(Poly factory)
+        public static PolynomialFactorDecomposition<Poly> Empty(Poly factory)
         {
-            return new PolynomialFactorDecomposition(factory.CreateOne(), new List(), new TIntArrayList());
+            return new PolynomialFactorDecomposition<Poly>(factory.CreateOne(), [], new TIntArrayList());
         }
 
-        /// <summary>
-        /// Makes the lead coefficient of this factorization equal to the l.c. of specified poly via multiplication of this
-        /// by appropriate unit
-        /// </summary>
-        /// <summary>
-        /// Resulting lead coefficient
-        /// </summary>
-        /// <summary>
-        /// Calculates the signum of the polynomial constituted by this decomposition
-        /// </summary>
-        /// <returns>the signum of the polynomial constituted by this decomposition</returns>
-        /// <summary>
-        /// Makes each factor monic (moving leading coefficients to the {@link #unit})
-        /// </summary>
-        /// <summary>
-        /// Makes each factor primitive (moving contents to the {@link #unit})
-        /// </summary>
-        /// <summary>
-        /// Calls {@link #monic()} if the coefficient ring is field and {@link #primitive()} otherwise
-        /// </summary>
-        /// <summary>
-        /// Unit factorization
-        /// </summary>
-        /// <summary>
-        /// Empty factorization
-        /// </summary>
+    
         /// <summary>
         /// Factor decomposition with specified factors and exponents
         /// </summary>
         /// <param name="unit">the unit coefficient</param>
         /// <param name="factors">the factors</param>
         /// <param name="exponents">the exponents</param>
-        public static PolynomialFactorDecomposition<Poly> Of<Poly extends IPolynomial<Poly>>(Poly unit, IList<Poly> factors, TIntArrayList exponents)
+        public static PolynomialFactorDecomposition<Poly> Of(Poly unit, IList<Poly> factors, TIntArrayList exponents)
         {
             if (factors.Count != exponents.Count)
                 throw new ArgumentException();
@@ -383,228 +280,38 @@ namespace Cc.Redberry.Rings.Poly
             return r;
         }
 
-        /// <summary>
-        /// Makes the lead coefficient of this factorization equal to the l.c. of specified poly via multiplication of this
-        /// by appropriate unit
-        /// </summary>
-        /// <summary>
-        /// Resulting lead coefficient
-        /// </summary>
-        /// <summary>
-        /// Calculates the signum of the polynomial constituted by this decomposition
-        /// </summary>
-        /// <returns>the signum of the polynomial constituted by this decomposition</returns>
-        /// <summary>
-        /// Makes each factor monic (moving leading coefficients to the {@link #unit})
-        /// </summary>
-        /// <summary>
-        /// Makes each factor primitive (moving contents to the {@link #unit})
-        /// </summary>
-        /// <summary>
-        /// Calls {@link #monic()} if the coefficient ring is field and {@link #primitive()} otherwise
-        /// </summary>
-        /// <summary>
-        /// Unit factorization
-        /// </summary>
-        /// <summary>
-        /// Empty factorization
-        /// </summary>
-        /// <summary>
-        /// Factor decomposition with specified factors and exponents
-        /// </summary>
-        /// <param name="unit">the unit coefficient</param>
-        /// <param name="factors">the factors</param>
-        /// <param name="exponents">the exponents</param>
+        
         /// <summary>
         /// Factor decomposition with specified factors and exponents
         /// </summary>
         /// <param name="factors">factors</param>
-        public static PolynomialFactorDecomposition<Poly> Of<Poly extends IPolynomial<Poly>>(params Poly[] factors)
+        public static PolynomialFactorDecomposition<Poly> Of(params Poly[] factors)
         {
             if (factors.Length == 0)
                 throw new ArgumentException();
-            return Of(Arrays.AsList(factors));
+            return Of(factors.ToList());
         }
 
-        /// <summary>
-        /// Makes the lead coefficient of this factorization equal to the l.c. of specified poly via multiplication of this
-        /// by appropriate unit
-        /// </summary>
-        /// <summary>
-        /// Resulting lead coefficient
-        /// </summary>
-        /// <summary>
-        /// Calculates the signum of the polynomial constituted by this decomposition
-        /// </summary>
-        /// <returns>the signum of the polynomial constituted by this decomposition</returns>
-        /// <summary>
-        /// Makes each factor monic (moving leading coefficients to the {@link #unit})
-        /// </summary>
-        /// <summary>
-        /// Makes each factor primitive (moving contents to the {@link #unit})
-        /// </summary>
-        /// <summary>
-        /// Calls {@link #monic()} if the coefficient ring is field and {@link #primitive()} otherwise
-        /// </summary>
-        /// <summary>
-        /// Unit factorization
-        /// </summary>
-        /// <summary>
-        /// Empty factorization
-        /// </summary>
-        /// <summary>
-        /// Factor decomposition with specified factors and exponents
-        /// </summary>
-        /// <param name="unit">the unit coefficient</param>
-        /// <param name="factors">the factors</param>
-        /// <param name="exponents">the exponents</param>
+        
         /// <summary>
         /// Factor decomposition with specified factors and exponents
         /// </summary>
         /// <param name="factors">factors</param>
-        public static PolynomialFactorDecomposition<Poly> Of<Poly extends IPolynomial<Poly>>(Poly a)
-        {
-            Poly[] array = a.CreateArray(1);
-            array[0] = a;
-            return Of(array);
-        }
-
-        /// <summary>
-        /// Makes the lead coefficient of this factorization equal to the l.c. of specified poly via multiplication of this
-        /// by appropriate unit
-        /// </summary>
-        /// <summary>
-        /// Resulting lead coefficient
-        /// </summary>
-        /// <summary>
-        /// Calculates the signum of the polynomial constituted by this decomposition
-        /// </summary>
-        /// <returns>the signum of the polynomial constituted by this decomposition</returns>
-        /// <summary>
-        /// Makes each factor monic (moving leading coefficients to the {@link #unit})
-        /// </summary>
-        /// <summary>
-        /// Makes each factor primitive (moving contents to the {@link #unit})
-        /// </summary>
-        /// <summary>
-        /// Calls {@link #monic()} if the coefficient ring is field and {@link #primitive()} otherwise
-        /// </summary>
-        /// <summary>
-        /// Unit factorization
-        /// </summary>
-        /// <summary>
-        /// Empty factorization
-        /// </summary>
-        /// <summary>
-        /// Factor decomposition with specified factors and exponents
-        /// </summary>
-        /// <param name="unit">the unit coefficient</param>
-        /// <param name="factors">the factors</param>
-        /// <param name="exponents">the exponents</param>
-        /// <summary>
-        /// Factor decomposition with specified factors and exponents
-        /// </summary>
-        /// <param name="factors">factors</param>
-        public static PolynomialFactorDecomposition<Poly> Of<Poly extends IPolynomial<Poly>>(Poly a, Poly b)
-        {
-            return Of(a.CreateArray(a, b));
-        }
-
-        /// <summary>
-        /// Makes the lead coefficient of this factorization equal to the l.c. of specified poly via multiplication of this
-        /// by appropriate unit
-        /// </summary>
-        /// <summary>
-        /// Resulting lead coefficient
-        /// </summary>
-        /// <summary>
-        /// Calculates the signum of the polynomial constituted by this decomposition
-        /// </summary>
-        /// <returns>the signum of the polynomial constituted by this decomposition</returns>
-        /// <summary>
-        /// Makes each factor monic (moving leading coefficients to the {@link #unit})
-        /// </summary>
-        /// <summary>
-        /// Makes each factor primitive (moving contents to the {@link #unit})
-        /// </summary>
-        /// <summary>
-        /// Calls {@link #monic()} if the coefficient ring is field and {@link #primitive()} otherwise
-        /// </summary>
-        /// <summary>
-        /// Unit factorization
-        /// </summary>
-        /// <summary>
-        /// Empty factorization
-        /// </summary>
-        /// <summary>
-        /// Factor decomposition with specified factors and exponents
-        /// </summary>
-        /// <param name="unit">the unit coefficient</param>
-        /// <param name="factors">the factors</param>
-        /// <param name="exponents">the exponents</param>
-        /// <summary>
-        /// Factor decomposition with specified factors and exponents
-        /// </summary>
-        /// <param name="factors">factors</param>
-        public static PolynomialFactorDecomposition<Poly> Of<Poly extends IPolynomial<Poly>>(Poly a, Poly b, Poly c)
-        {
-            return Of(a.CreateArray(a, b, c));
-        }
-
-        /// <summary>
-        /// Makes the lead coefficient of this factorization equal to the l.c. of specified poly via multiplication of this
-        /// by appropriate unit
-        /// </summary>
-        /// <summary>
-        /// Resulting lead coefficient
-        /// </summary>
-        /// <summary>
-        /// Calculates the signum of the polynomial constituted by this decomposition
-        /// </summary>
-        /// <returns>the signum of the polynomial constituted by this decomposition</returns>
-        /// <summary>
-        /// Makes each factor monic (moving leading coefficients to the {@link #unit})
-        /// </summary>
-        /// <summary>
-        /// Makes each factor primitive (moving contents to the {@link #unit})
-        /// </summary>
-        /// <summary>
-        /// Calls {@link #monic()} if the coefficient ring is field and {@link #primitive()} otherwise
-        /// </summary>
-        /// <summary>
-        /// Unit factorization
-        /// </summary>
-        /// <summary>
-        /// Empty factorization
-        /// </summary>
-        /// <summary>
-        /// Factor decomposition with specified factors and exponents
-        /// </summary>
-        /// <param name="unit">the unit coefficient</param>
-        /// <param name="factors">the factors</param>
-        /// <param name="exponents">the exponents</param>
-        /// <summary>
-        /// Factor decomposition with specified factors and exponents
-        /// </summary>
-        /// <param name="factors">factors</param>
-        /// <summary>
-        /// Factor decomposition with specified factors and exponents
-        /// </summary>
-        /// <param name="factors">factors</param>
-        public static PolynomialFactorDecomposition<Poly> Of<Poly extends IPolynomial<Poly>>(Collection<Poly> factors)
+        public static PolynomialFactorDecomposition<Poly> Of(IEnumerable<Poly> factors)
         {
             TObjectIntHashMap<Poly> map = new TObjectIntHashMap();
-            foreach (Poly e in factors)
+            var polynomials = factors as Poly[] ?? factors.ToArray();
+            foreach (Poly e in polynomials)
                 map.AdjustOrPutValue(e, 1, 1);
-            IList<Poly> l = new List();
-            TIntArrayList e = new TIntArrayList();
+            List<Poly> l = [];
+            TIntArrayList _e = new TIntArrayList();
             map.ForEachEntry((a, b) =>
             {
                 l.Add(a);
-                e.Add(b);
+                _e.Add(b);
                 return true;
             });
-            return Of(factors.Iterator().Next().CreateOne(), l, e);
+            return Of(polynomials[0].CreateOne(), l, _e);
         }
     }
 }

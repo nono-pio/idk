@@ -1,20 +1,4 @@
-using Cc.Redberry.Rings;
-using Cc.Redberry.Rings.Poly;
 using Cc.Redberry.Rings.Poly.Multivar;
-using Gnu.Trove.Set.Hash;
-using Java.Util;
-using Java.Util.Function;
-using Java.Util.Stream;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using static Cc.Redberry.Rings.Poly.Univar.RoundingMode;
-using static Cc.Redberry.Rings.Poly.Univar.Associativity;
-using static Cc.Redberry.Rings.Poly.Univar.Operator;
-using static Cc.Redberry.Rings.Poly.Univar.TokenType;
-using static Cc.Redberry.Rings.Poly.Univar.SystemInfo;
 
 namespace Cc.Redberry.Rings.Poly.Univar
 {
@@ -24,13 +8,13 @@ namespace Cc.Redberry.Rings.Poly.Univar
     /// </summary>
     /// <param name="<Poly>">the type of polynomial (self type)</param>
     /// <remarks>@since1.0</remarks>
-    public interface IUnivariatePolynomial<Poly> : IPolynomial<Poly>
+    public interface IUnivariatePolynomial<Poly> : IPolynomial<Poly> where Poly : IUnivariatePolynomial<Poly>
     {
         /// <summary>
         /// Returns the degree of this polynomial
         /// </summary>
         /// <returns>the degree of this polynomial</returns>
-        int Size()
+        new int Size()
         {
             return Degree() + 1;
         }
@@ -45,7 +29,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         int NNonZeroTerms()
         {
             int c = 0;
-            for (int i = degree(); i >= 0; --i)
+            for (int i = Degree(); i >= 0; --i)
                 if (!IsZeroAt(i))
                     ++c;
             return c;
@@ -76,7 +60,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// </summary>
         /// <param name="i">the position</param>
         /// <returns>whether i-th coefficient of this is zero</returns>
-        bool IsZeroCC()
+        new bool IsZeroCC()
         {
             return IsZeroAt(0);
         }
@@ -190,7 +174,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         TIntHashSet Exponents()
         {
             TIntHashSet degrees = new TIntHashSet();
-            for (int i = degree(); i >= 0; --i)
+            for (int i = Degree(); i >= 0; --i)
                 if (!IsZeroAt(i))
                     degrees.Add(i);
             return degrees;
@@ -1004,7 +988,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
             if (value.IsZero())
                 return CcAsPoly();
             Poly result = ring.GetZero();
-            for (int i = degree(); i >= 0; --i)
+            for (int i = Degree(); i >= 0; --i)
                 result = ring.Add(ring.Multiply(result, value), GetAsPoly(i));
             return result;
         }
@@ -1102,7 +1086,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <summary>
         /// Stream polynomial coefficients as constant polynomials
         /// </summary>
-        Stream<Poly> StreamAsPolys();
+        IEnumerable<Poly> StreamAsPolys();
         /// <summary>
         /// Returns the degree of this polynomial
         /// </summary>
@@ -1196,9 +1180,9 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <summary>
         /// Stream polynomial coefficients as constant polynomials
         /// </summary>
-        UnivariatePolynomial<E> MapCoefficientsAsPolys<E>(Ring<E> ring, Function<Poly, E> mapper)
+        UnivariatePolynomial<E> MapCoefficientsAsPolys<E>(Ring<E> ring, Func<Poly, E> mapper)
         {
-            return StreamAsPolys().Map(mapper).Collect(new PolynomialCollector(ring));
+            return StreamAsPolys().Select(mapper).Collect(new PolynomialCollector(ring));
         }
 
         /// <summary>

@@ -1,17 +1,9 @@
+
+
+using System.Numerics;
 using Cc.Redberry.Rings.Bigint;
-using Cc.Redberry.Rings.Poly;
-using Gnu.Trove.Map.Hash;
-using Java.Util.Stream;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using static Cc.Redberry.Rings.Poly.RoundingMode;
-using static Cc.Redberry.Rings.Poly.Associativity;
-using static Cc.Redberry.Rings.Poly.Operator;
-using static Cc.Redberry.Rings.Poly.TokenType;
-using static Cc.Redberry.Rings.Poly.SystemInfo;
+using Cc.Redberry.Rings.Poly.Multivar;
+using Cc.Redberry.Rings.Poly.Univar;
 
 namespace Cc.Redberry.Rings.Poly
 {
@@ -21,20 +13,18 @@ namespace Cc.Redberry.Rings.Poly
     /// <remarks>@since1.0</remarks>
     public sealed class PolynomialMethods
     {
-        private PolynomialMethods()
-        {
-        }
+
 
         /// <summary>
         /// Factor polynomial.
         /// </summary>
         /// <param name="poly">the polynomial</param>
         /// <returns>irreducible factor decomposition</returns>
-        public static PolynomialFactorDecomposition<Poly> Factor<Poly extends IPolynomial<Poly>>(Poly poly)
+        public static PolynomialFactorDecomposition<Poly> Factor<Poly>(Poly poly) where Poly : IPolynomial<Poly>
         {
             if (poly is IUnivariatePolynomial)
-                return (PolynomialFactorDecomposition<Poly>)UnivariateFactorization.Factor((IUnivariatePolynomial)poly);
-            else if (poly is AMultivariatePolynomial)
+                return (PolynomialFactorDecomposition<Poly>) UnivariateFactorization.Factor((IUnivariatePolynomial)poly);
+            else if (poly is AMultivariatePolynomial<,>)
                 return (PolynomialFactorDecomposition<Poly>)MultivariateFactorization.Factor((AMultivariatePolynomial)poly);
             else
                 throw new Exception();
@@ -45,8 +35,8 @@ namespace Cc.Redberry.Rings.Poly
         /// </summary>
         /// <param name="poly">the polynomial</param>
         /// <returns>irreducible square-free factor decomposition</returns>
-        public static PolynomialFactorDecomposition<Poly> FactorSquareFree<Poly extends IPolynomial<Poly>>(Poly poly)
-        {
+        public static PolynomialFactorDecomposition<Poly> FactorSquareFree<Poly>(Poly poly) where Poly : IPolynomial<Poly>
+        { 
             if (poly is IUnivariatePolynomial)
                 return (PolynomialFactorDecomposition<Poly>)UnivariateSquareFreeFactorization.SquareFreeFactorization((IUnivariatePolynomial)poly);
             else if (poly is AMultivariatePolynomial)
@@ -61,7 +51,7 @@ namespace Cc.Redberry.Rings.Poly
         /// <param name="a">the polynomial</param>
         /// <param name="b">the polynomial</param>
         /// <returns>the GCD</returns>
-        public static Poly PolynomialGCD<Poly extends IPolynomial<Poly>>(Poly a, Poly b)
+        public static Poly PolynomialGCD<Poly>(Poly a, Poly b) where Poly : IPolynomial<Poly>
         {
             if (a is IUnivariatePolynomial)
                 return (Poly)UnivariateGCD.PolynomialGCD((IUnivariatePolynomial)a, (IUnivariatePolynomial)b);
@@ -76,7 +66,7 @@ namespace Cc.Redberry.Rings.Poly
         /// </summary>
         /// <param name="array">the polynomials</param>
         /// <returns>the GCD</returns>
-        public static Poly PolynomialGCD<Poly extends IPolynomial<Poly>>(params Poly[] array)
+        public static Poly PolynomialGCD<Poly>(params Poly[] array) where Poly : IPolynomial<Poly>
         {
             Poly a = array[0];
             if (a is IUnivariatePolynomial)
@@ -92,7 +82,7 @@ namespace Cc.Redberry.Rings.Poly
         /// </summary>
         /// <param name="array">the polynomials</param>
         /// <returns>the GCD</returns>
-        public static Poly PolynomialGCD<Poly extends IPolynomial<Poly>>(Iterable<Poly> array)
+        public static Poly PolynomialGCD<Poly>(Iterable<Poly> array) where Poly : IPolynomial<Poly>
         {
             Poly a = array.Iterator().Next();
             if (a is IUnivariatePolynomial)
@@ -110,7 +100,7 @@ namespace Cc.Redberry.Rings.Poly
         /// <param name="b">the univariate  polynomial</param>
         /// <returns>array of {@code [gcd(a,b), s, t]} such that {@code s * a + t * b = gcd(a, b)} (gcd is monic)</returns>
         /// <remarks>@seeUnivariateGCD#PolynomialExtendedGCD(IUnivariatePolynomial, IUnivariatePolynomial)</remarks>
-        public static T[] PolynomialExtendedGCD<T extends IUnivariatePolynomial<T>>(T a, T b)
+        public static T[] PolynomialExtendedGCD<T>(T a, T b) where T : IUnivariatePolynomial<T>
         {
             if (a.IsOverField())
                 return UnivariateGCD.PolynomialExtendedGCD(a, b);
@@ -124,7 +114,7 @@ namespace Cc.Redberry.Rings.Poly
         /// <param name="a">the dividend</param>
         /// <param name="b">the divider</param>
         /// <returns>{quotient, remainder}</returns>
-        public static Poly[] DivideAndRemainder<Poly extends IPolynomial<Poly>>(Poly a, Poly b)
+        public static Poly[] DivideAndRemainder<Poly >(Poly a, Poly b) where Poly : IPolynomial<Poly>
         {
             if (a is IUnivariatePolynomial)
                 return (Poly[])UnivariateDivision.DivideAndRemainder((IUnivariatePolynomial)a, (IUnivariatePolynomial)b, true);
@@ -140,7 +130,7 @@ namespace Cc.Redberry.Rings.Poly
         /// <param name="a">the dividend</param>
         /// <param name="b">the divider</param>
         /// <returns>{quotient, remainder}</returns>
-        public static Poly Remainder<Poly extends IPolynomial<Poly>>(Poly a, Poly b)
+        public static Poly Remainder<Poly  >(Poly a, Poly b) where Poly : IPolynomial<Poly>
         {
             if (a is IUnivariatePolynomial)
                 return (Poly)UnivariateDivision.Remainder((IUnivariatePolynomial)a, (IUnivariatePolynomial)b, true);
@@ -157,7 +147,7 @@ namespace Cc.Redberry.Rings.Poly
         /// <param name="b">the divider</param>
         /// <returns>quotient</returns>
         /// <exception cref="ArithmeticException">if exact division is not possible</exception>
-        public static Poly DivideOrNull<Poly extends IPolynomial<Poly>>(Poly a, Poly b)
+        public static Poly DivideOrNull<Poly >(Poly a, Poly b) where Poly : IPolynomial<Poly>
         {
             if (a is IUnivariatePolynomial)
                 return (Poly)UnivariateDivision.DivideOrNull((IUnivariatePolynomial)a, (IUnivariatePolynomial)b, true);
@@ -174,7 +164,7 @@ namespace Cc.Redberry.Rings.Poly
         /// <param name="b">the divider</param>
         /// <returns>quotient</returns>
         /// <exception cref="ArithmeticException">if exact division is not possible</exception>
-        public static Poly DivideExact<Poly extends IPolynomial<Poly>>(Poly a, Poly b)
+        public static Poly DivideExact<Poly >(Poly a, Poly b) where Poly : IPolynomial<Poly>
         {
             if (a is IUnivariatePolynomial)
                 return (Poly)UnivariateDivision.DivideExact((IUnivariatePolynomial)a, (IUnivariatePolynomial)b, true);
@@ -189,7 +179,7 @@ namespace Cc.Redberry.Rings.Poly
         /// </summary>
         /// <param name="polynomials">the polynomials</param>
         /// <returns>whether specified polynomials are coprime</returns>
-        public static bool CoprimeQ<Poly extends IPolynomial<Poly>>(params Poly[] polynomials)
+        public static bool CoprimeQ<Poly>(params Poly[] polynomials) where Poly : IPolynomial<Poly>
         {
             for (int i = 0; i < polynomials.Length - 1; i++)
                 for (int j = i + 1; j < polynomials.Length; j++)
@@ -203,18 +193,15 @@ namespace Cc.Redberry.Rings.Poly
         /// </summary>
         /// <param name="polynomials">the polynomials</param>
         /// <returns>whether specified polynomials are coprime</returns>
-        public static bool CoprimeQ<Poly extends IPolynomial<Poly>>(Iterable<Poly> polynomials)
+        public static bool CoprimeQ<Poly  >(IEnumerable<Poly> polynomials) where Poly : IPolynomial<Poly>
         {
-            if (!polynomials.Iterator().HasNext())
-                throw new ArgumentException();
-            Poly factory = polynomials.Iterator().Next();
-            return CoprimeQ(StreamSupport.Stream(polynomials.Spliterator(), false).ToArray(factory.CreateArray()));
+            return CoprimeQ(polynomials.ToArray());
         }
 
         /// <summary>
         /// Returns whether specified polynomial is irreducible
         /// </summary>
-        public static bool IrreducibleQ<Poly extends IPolynomial<Poly>>(Poly poly)
+        public static bool IrreducibleQ<Poly  >(Poly poly) where Poly : IPolynomial<Poly>
         {
             if (poly is IUnivariatePolynomial)
                 return IrreduciblePolynomials.IrreducibleQ((IUnivariatePolynomial)poly);
@@ -229,11 +216,11 @@ namespace Cc.Redberry.Rings.Poly
         /// <param name="exponent">the non-negative exponent</param>
         /// <param name="copy">whether to clone {@code base}; if not the data of {@code base} will be lost</param>
         /// <returns>{@code base} in a power of {@code e}</returns>
-        public static T PolyPow<T extends IPolynomial<T>>(T @base, BigInteger exponent, bool copy)
+        public static T PolyPow<T  >(T @base, BigInteger exponent, bool copy) where T : IPolynomial<T>
         {
             if (exponent.Signum() < 0)
                 throw new ArgumentException();
-            if (exponent.IsOne() || @base.IsOne())
+            if (exponent.IsOne|| @base.IsOne())
                 return copy ? @base.Clone() : @base;
             T result = @base.CreateOne();
             T k2p = copy ? @base.Clone() : @base;
@@ -242,7 +229,7 @@ namespace Cc.Redberry.Rings.Poly
                 if (exponent.TestBit(0))
                     result = result.Multiply(k2p);
                 exponent = exponent.ShiftRight(1);
-                if (exponent.IsZero())
+                if (exponent.IsZero)
                     return result;
                 k2p = k2p.Multiply(k2p);
             }
@@ -254,7 +241,7 @@ namespace Cc.Redberry.Rings.Poly
         /// <param name="base">the base</param>
         /// <param name="exponent">the non-negative exponent</param>
         /// <returns>{@code base} in a power of {@code e}</returns>
-        public static T PolyPow<T extends IPolynomial<T>>(T @base, long exponent)
+        public static T PolyPow<T >(T @base, long exponent) where T : IPolynomial<T>
         {
             return PolyPow(@base, exponent, true);
         }
@@ -265,7 +252,7 @@ namespace Cc.Redberry.Rings.Poly
         /// <param name="base">the base</param>
         /// <param name="exponent">the non-negative exponent</param>
         /// <returns>{@code base} in a power of {@code e}</returns>
-        public static T PolyPow<T extends IPolynomial<T>>(T @base, BigInteger exponent)
+        public static T PolyPow<T  >(T @base, BigInteger exponent) where T : IPolynomial<T>
         {
             return PolyPow(@base, exponent, true);
         }
@@ -277,7 +264,7 @@ namespace Cc.Redberry.Rings.Poly
         /// <param name="exponent">the non-negative exponent</param>
         /// <param name="copy">whether to clone {@code base}; if not the data of {@code base} will be lost</param>
         /// <returns>{@code base} in a power of {@code e}</returns>
-        public static T PolyPow<T extends IPolynomial<T>>(T @base, long exponent, bool copy)
+        public static T PolyPow<T >(T @base, long exponent, bool copy) where T : IPolynomial<T>
         {
             if (exponent < 0)
                 throw new ArgumentException();
@@ -304,7 +291,7 @@ namespace Cc.Redberry.Rings.Poly
         /// <param name="copy">whether to clone {@code base}; if not the data of {@code base} will be lost</param>
         /// <param name="cache">cache to store all intermediate powers</param>
         /// <returns>{@code base} in a power of {@code e}</returns>
-        public static T PolyPow<T extends IPolynomial<T>>(T @base, int exponent, bool copy, TIntObjectHashMap<T> cache)
+        public static T PolyPow<T >(T @base, int exponent, bool copy, TIntObjectHashMap<T> cache) where T : IPolynomial<T>
         {
             if (exponent < 0)
                 throw new ArgumentException();
