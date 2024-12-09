@@ -1,15 +1,5 @@
-using Cc.Redberry.Rings.Util;
-using Java.Util;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using static Cc.Redberry.Rings.Poly.Multivar.RoundingMode;
-using static Cc.Redberry.Rings.Poly.Multivar.Associativity;
-using static Cc.Redberry.Rings.Poly.Multivar.Operator;
-using static Cc.Redberry.Rings.Poly.Multivar.TokenType;
-using static Cc.Redberry.Rings.Poly.Multivar.SystemInfo;
+using Cc.Redberry.Rings.Util;
 
 namespace Cc.Redberry.Rings.Poly.Multivar
 {
@@ -17,28 +7,28 @@ namespace Cc.Redberry.Rings.Poly.Multivar
     /// Parent auxiliary interface for multivariate polynomials.
     /// </summary>
     /// <remarks>@since2.3</remarks>
-    interface MonomialSetView<Term> : Iterable<Term>
+    interface MonomialSetView<Term> : IEnumerable<Term>
     {
-        IEnumerator<Term> AscendingIterator();
-        IEnumerator<Term> DescendingIterator();
-        IEnumerator<Term> Iterator()
+        IEnumerable<Term> AscendingIterator();
+        IEnumerable<Term> DescendingIterator();
+        IEnumerable<Term> Iterator()
         {
             return AscendingIterator();
         }
 
         Term First()
         {
-            return AscendingIterator().Next();
+            return AscendingIterator().First();
         }
 
         Term Last()
         {
-            return DescendingIterator().Next();
+            return DescendingIterator().Last();
         }
 
         Term Lt()
         {
-            return DescendingIterator().Next();
+            return DescendingIterator().Last();
         }
 
         int Size();

@@ -1,6 +1,4 @@
 using System.Numerics;
-using System.Runtime.InteropServices.JavaScript;
-using Cc.Redberry.Rings;
 using Cc.Redberry.Rings.Bigint;
 using Cc.Redberry.Rings.Poly;
 using Cc.Redberry.Rings.Poly.Multivar;
@@ -44,22 +42,22 @@ namespace Cc.Redberry.Rings.Poly.Univar
                 throw new Exception("ring is not supported: " + poly.CoefficientRingToString());
         }
 
-        static bool IsOverMultivariate<T>(T poly) where T : IUnivariatePolynomial<T>
+        public static bool IsOverMultivariate<T>(T poly) where T : IUnivariatePolynomial<T>
         {
             return (poly is UnivariatePolynomial && ((UnivariatePolynomial)poly).ring is MultivariateRing);
         }
 
-        static bool IsOverUnivariate<T>(T poly) where T : IUnivariatePolynomial<T>
+        public static bool IsOverUnivariate<T>(T poly) where T : IUnivariatePolynomial<T>
         {
             return (poly is UnivariatePolynomial && ((UnivariatePolynomial)poly).ring is UnivariateRing);
         }
 
-        static PolynomialFactorDecomposition<UnivariatePolynomial<Poly>> FactorOverMultivariate<Term extends AMonomial<Term>, Poly extends AMultivariatePolynomial<Term, Poly>>(UnivariatePolynomial<Poly> poly, Func<Poly, PolynomialFactorDecomposition<Poly>> factorFunction)
+        public static PolynomialFactorDecomposition<UnivariatePolynomial<Poly>> FactorOverMultivariate<Term extends AMonomial<Term>, Poly extends AMultivariatePolynomial<Term, Poly>>(UnivariatePolynomial<Poly> poly, Func<Poly, PolynomialFactorDecomposition<Poly>> factorFunction)
         {
-            return factorFunction.Apply(AMultivariatePolynomial.AsMultivariate(poly, 0, true)).MapTo((p) => p.AsUnivariateEliminate(0));
+            return factorFunction(AMultivariatePolynomial.AsMultivariate(poly, 0, true)).MapTo((p) => p.AsUnivariateEliminate(0));
         }
 
-        static PolynomialFactorDecomposition<UnivariatePolynomial<uPoly>> FactorOverUnivariate<uPoly>(UnivariatePolynomial<uPoly> poly, Func<MultivariatePolynomial<uPoly>, PolynomialFactorDecomposition<MultivariatePolynomial<uPoly>>> factorFunction) where uPoly : IUnivariatePolynomial<uPoly>
+        public static PolynomialFactorDecomposition<UnivariatePolynomial<uPoly>> FactorOverUnivariate<uPoly>(UnivariatePolynomial<uPoly> poly, Func<MultivariatePolynomial<uPoly>, PolynomialFactorDecomposition<MultivariatePolynomial<uPoly>>> factorFunction) where uPoly : IUnivariatePolynomial<uPoly>
         {
             return factorFunction(AMultivariatePolynomial.AsMultivariate(poly, 1, 0, MonomialOrder.DEFAULT)).MapTo(m => m.AsUnivariate());
         }
@@ -135,7 +133,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         {
             Util.EnsureOverFiniteField(poly);
             if (CanConvertToZp64(poly))
-                return FactorInGF(AsOverZp64(poly)).MapTo(Conversions64bit.Convert());
+                return FactorInGF(AsOverZp64(poly)).MapTo(Conversions64bit.Convert);
             PolynomialFactorDecomposition<Poly> result = EarlyFactorizationChecks(poly);
             if (result != null)
                 return result;
@@ -157,8 +155,8 @@ namespace Cc.Redberry.Rings.Poly.Univar
         {
             Util.EnsureOverFiniteField(poly);
             if (CanConvertToZp64(poly))
-                return FactorInGF(AsOverZp64(poly)).MapTo(Conversions64bit.Convert());
-            PolynomialFactorDecomposition<T> result = PolynomialFactorDecomposition.Empty(poly);
+                return FactorInGF(AsOverZp64(poly)).MapTo(Conversions64bit.Convert);
+            PolynomialFactorDecomposition<T> result = PolynomialFactorDecomposition<T>.Empty(poly);
             FactorSquareFreeInGF(poly, 1, result);
             return result;
         }

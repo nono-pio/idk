@@ -1,20 +1,7 @@
-using Cc.Redberry.Libdivide4j.FastDivision;
-using Cc.Redberry.Rings;
+using System.Numerics;
 using Cc.Redberry.Rings.Bigint;
 using Cc.Redberry.Rings.Io;
-using Cc.Redberry.Rings.Poly;
 using Cc.Redberry.Rings.Poly.Multivar;
-using Java.Util;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using static Cc.Redberry.Rings.Poly.Univar.RoundingMode;
-using static Cc.Redberry.Rings.Poly.Univar.Associativity;
-using static Cc.Redberry.Rings.Poly.Univar.Operator;
-using static Cc.Redberry.Rings.Poly.Univar.TokenType;
-using static Cc.Redberry.Rings.Poly.Univar.SystemInfo;
 
 namespace Cc.Redberry.Rings.Poly.Univar
 {
@@ -29,6 +16,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
     public sealed class UnivariatePolynomialZ64 : AUnivariatePolynomial64<UnivariatePolynomialZ64>
     {
         private static readonly long serialVersionUID = 1;
+
         /// <summary>
         /// main constructor
         /// </summary>
@@ -39,9 +27,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
             FixDegree();
         }
 
-        /// <summary>
-        /// main constructor
-        /// </summary>
+
         /// <summary>
         /// copy constructor
         /// </summary>
@@ -51,29 +37,16 @@ namespace Cc.Redberry.Rings.Poly.Univar
             this.degree = degree;
         }
 
-        /// <summary>
-        /// main constructor
-        /// </summary>
-        /// <summary>
-        /// copy constructor
-        /// </summary>
+
         /// <summary>
         /// Parse string into polynomial
         /// </summary>
         public static UnivariatePolynomialZ64 Parse(string @string)
         {
-            return UnivariatePolynomial.AsOverZ64(UnivariatePolynomial.Parse(@string, Rings.Z));
+            return UnivariatePolynomial<BigInteger>.AsOverZ64(UnivariatePolynomial<BigInteger>.Parse(@string, Rings.Z));
         }
 
-        /// <summary>
-        /// main constructor
-        /// </summary>
-        /// <summary>
-        /// copy constructor
-        /// </summary>
-        /// <summary>
-        /// Parse string into polynomial
-        /// </summary>
+
         /// <summary>
         /// Creates Z[x] polynomial from the specified coefficients
         /// </summary>
@@ -84,20 +57,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
             return new UnivariatePolynomialZ64(data);
         }
 
-        /// <summary>
-        /// main constructor
-        /// </summary>
-        /// <summary>
-        /// copy constructor
-        /// </summary>
-        /// <summary>
-        /// Parse string into polynomial
-        /// </summary>
-        /// <summary>
-        /// Creates Z[x] polynomial from the specified coefficients
-        /// </summary>
-        /// <param name="data">coefficients</param>
-        /// <returns>Z[x] polynomial</returns>
+
         /// <summary>
         /// Creates monomial {@code coefficient * x^exponent}
         /// </summary>
@@ -111,26 +71,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
             return new UnivariatePolynomialZ64(data);
         }
 
-        /// <summary>
-        /// main constructor
-        /// </summary>
-        /// <summary>
-        /// copy constructor
-        /// </summary>
-        /// <summary>
-        /// Parse string into polynomial
-        /// </summary>
-        /// <summary>
-        /// Creates Z[x] polynomial from the specified coefficients
-        /// </summary>
-        /// <param name="data">coefficients</param>
-        /// <returns>Z[x] polynomial</returns>
-        /// <summary>
-        /// Creates monomial {@code coefficient * x^exponent}
-        /// </summary>
-        /// <param name="coefficient">monomial coefficient</param>
-        /// <param name="exponent">monomial exponent</param>
-        /// <returns>{@code coefficient * x^exponent}</returns>
+
         /// <summary>
         /// Creates zero polynomial
         /// </summary>
@@ -140,30 +81,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
             return new UnivariatePolynomialZ64(new long[] { 0 }, 0);
         }
 
-        /// <summary>
-        /// main constructor
-        /// </summary>
-        /// <summary>
-        /// copy constructor
-        /// </summary>
-        /// <summary>
-        /// Parse string into polynomial
-        /// </summary>
-        /// <summary>
-        /// Creates Z[x] polynomial from the specified coefficients
-        /// </summary>
-        /// <param name="data">coefficients</param>
-        /// <returns>Z[x] polynomial</returns>
-        /// <summary>
-        /// Creates monomial {@code coefficient * x^exponent}
-        /// </summary>
-        /// <param name="coefficient">monomial coefficient</param>
-        /// <param name="exponent">monomial exponent</param>
-        /// <returns>{@code coefficient * x^exponent}</returns>
-        /// <summary>
-        /// Creates zero polynomial
-        /// </summary>
-        /// <returns>zero polynomial</returns>
+
         /// <summary>
         /// Creates unit polynomial
         /// </summary>
@@ -173,34 +91,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
             return new UnivariatePolynomialZ64(new long[] { 1 }, 0);
         }
 
-        /// <summary>
-        /// main constructor
-        /// </summary>
-        /// <summary>
-        /// copy constructor
-        /// </summary>
-        /// <summary>
-        /// Parse string into polynomial
-        /// </summary>
-        /// <summary>
-        /// Creates Z[x] polynomial from the specified coefficients
-        /// </summary>
-        /// <param name="data">coefficients</param>
-        /// <returns>Z[x] polynomial</returns>
-        /// <summary>
-        /// Creates monomial {@code coefficient * x^exponent}
-        /// </summary>
-        /// <param name="coefficient">monomial coefficient</param>
-        /// <param name="exponent">monomial exponent</param>
-        /// <returns>{@code coefficient * x^exponent}</returns>
-        /// <summary>
-        /// Creates zero polynomial
-        /// </summary>
-        /// <returns>zero polynomial</returns>
-        /// <summary>
-        /// Creates unit polynomial
-        /// </summary>
-        /// <returns>unit polynomial</returns>
+
         /// <summary>
         /// Returns constant with specified value
         /// </summary>
@@ -210,34 +101,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
             return new UnivariatePolynomialZ64(new long[] { value }, 0);
         }
 
-        /// <summary>
-        /// main constructor
-        /// </summary>
-        /// <summary>
-        /// copy constructor
-        /// </summary>
-        /// <summary>
-        /// Parse string into polynomial
-        /// </summary>
-        /// <summary>
-        /// Creates Z[x] polynomial from the specified coefficients
-        /// </summary>
-        /// <param name="data">coefficients</param>
-        /// <returns>Z[x] polynomial</returns>
-        /// <summary>
-        /// Creates monomial {@code coefficient * x^exponent}
-        /// </summary>
-        /// <param name="coefficient">monomial coefficient</param>
-        /// <param name="exponent">monomial exponent</param>
-        /// <returns>{@code coefficient * x^exponent}</returns>
-        /// <summary>
-        /// Creates zero polynomial
-        /// </summary>
-        /// <returns>zero polynomial</returns>
-        /// <summary>
-        /// Creates unit polynomial
-        /// </summary>
-        /// <returns>unit polynomial</returns>
+
         /// <summary>
         /// Returns constant with specified value
         /// </summary>
@@ -247,38 +111,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
             return univariatePolynomialZ64.Clone();
         }
 
-        /// <summary>
-        /// main constructor
-        /// </summary>
-        /// <summary>
-        /// copy constructor
-        /// </summary>
-        /// <summary>
-        /// Parse string into polynomial
-        /// </summary>
-        /// <summary>
-        /// Creates Z[x] polynomial from the specified coefficients
-        /// </summary>
-        /// <param name="data">coefficients</param>
-        /// <returns>Z[x] polynomial</returns>
-        /// <summary>
-        /// Creates monomial {@code coefficient * x^exponent}
-        /// </summary>
-        /// <param name="coefficient">monomial coefficient</param>
-        /// <param name="exponent">monomial exponent</param>
-        /// <returns>{@code coefficient * x^exponent}</returns>
-        /// <summary>
-        /// Creates zero polynomial
-        /// </summary>
-        /// <returns>zero polynomial</returns>
-        /// <summary>
-        /// Creates unit polynomial
-        /// </summary>
-        /// <returns>unit polynomial</returns>
-        /// <summary>
-        /// Returns constant with specified value
-        /// </summary>
-        /// <returns>constant with specified value</returns>
+
         /// <summary>
         /// Reduces this polynomial modulo {@code modulus} and returns the result.
         /// </summary>
@@ -287,47 +120,10 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <returns>this modulo {@code modulus}</returns>
         public UnivariatePolynomialZp64 Modulus(long modulus, bool copy)
         {
-            return UnivariatePolynomialZp64.Create(modulus, copy ? data.Clone() : data);
+            return UnivariatePolynomialZp64.Create(modulus, copy ? (long[])data.Clone() : data);
         }
 
-        /// <summary>
-        /// main constructor
-        /// </summary>
-        /// <summary>
-        /// copy constructor
-        /// </summary>
-        /// <summary>
-        /// Parse string into polynomial
-        /// </summary>
-        /// <summary>
-        /// Creates Z[x] polynomial from the specified coefficients
-        /// </summary>
-        /// <param name="data">coefficients</param>
-        /// <returns>Z[x] polynomial</returns>
-        /// <summary>
-        /// Creates monomial {@code coefficient * x^exponent}
-        /// </summary>
-        /// <param name="coefficient">monomial coefficient</param>
-        /// <param name="exponent">monomial exponent</param>
-        /// <returns>{@code coefficient * x^exponent}</returns>
-        /// <summary>
-        /// Creates zero polynomial
-        /// </summary>
-        /// <returns>zero polynomial</returns>
-        /// <summary>
-        /// Creates unit polynomial
-        /// </summary>
-        /// <returns>unit polynomial</returns>
-        /// <summary>
-        /// Returns constant with specified value
-        /// </summary>
-        /// <returns>constant with specified value</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
+
         /// <summary>
         /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
         /// </summary>
@@ -338,49 +134,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
             return Modulus(modulus, true);
         }
 
-        /// <summary>
-        /// main constructor
-        /// </summary>
-        /// <summary>
-        /// copy constructor
-        /// </summary>
-        /// <summary>
-        /// Parse string into polynomial
-        /// </summary>
-        /// <summary>
-        /// Creates Z[x] polynomial from the specified coefficients
-        /// </summary>
-        /// <param name="data">coefficients</param>
-        /// <returns>Z[x] polynomial</returns>
-        /// <summary>
-        /// Creates monomial {@code coefficient * x^exponent}
-        /// </summary>
-        /// <param name="coefficient">monomial coefficient</param>
-        /// <param name="exponent">monomial exponent</param>
-        /// <returns>{@code coefficient * x^exponent}</returns>
-        /// <summary>
-        /// Creates zero polynomial
-        /// </summary>
-        /// <returns>zero polynomial</returns>
-        /// <summary>
-        /// Creates unit polynomial
-        /// </summary>
-        /// <returns>unit polynomial</returns>
-        /// <summary>
-        /// Returns constant with specified value
-        /// </summary>
-        /// <returns>constant with specified value</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
+
         /// <summary>
         /// Reduces this polynomial modulo {@code modulus} and returns the result.
         /// </summary>
@@ -389,61 +143,13 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <returns>this modulo {@code modulus}</returns>
         public UnivariatePolynomialZp64 Modulus(IntegersZp64 ring, bool copy)
         {
-            long[] data = copy ? this.data.Clone() : this.data;
+            long[] data = copy ? (long[])this.data.Clone() : this.data;
             for (int i = degree; i >= 0; --i)
                 data[i] = ring.Modulus(data[i]);
             return UnivariatePolynomialZp64.CreateUnsafe(ring, data);
         }
 
-        /// <summary>
-        /// main constructor
-        /// </summary>
-        /// <summary>
-        /// copy constructor
-        /// </summary>
-        /// <summary>
-        /// Parse string into polynomial
-        /// </summary>
-        /// <summary>
-        /// Creates Z[x] polynomial from the specified coefficients
-        /// </summary>
-        /// <param name="data">coefficients</param>
-        /// <returns>Z[x] polynomial</returns>
-        /// <summary>
-        /// Creates monomial {@code coefficient * x^exponent}
-        /// </summary>
-        /// <param name="coefficient">monomial coefficient</param>
-        /// <param name="exponent">monomial exponent</param>
-        /// <returns>{@code coefficient * x^exponent}</returns>
-        /// <summary>
-        /// Creates zero polynomial
-        /// </summary>
-        /// <returns>zero polynomial</returns>
-        /// <summary>
-        /// Creates unit polynomial
-        /// </summary>
-        /// <returns>unit polynomial</returns>
-        /// <summary>
-        /// Returns constant with specified value
-        /// </summary>
-        /// <returns>constant with specified value</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
+
         /// <summary>
         /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
         /// </summary>
@@ -454,60 +160,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
             return Modulus(ring, true);
         }
 
-        /// <summary>
-        /// main constructor
-        /// </summary>
-        /// <summary>
-        /// copy constructor
-        /// </summary>
-        /// <summary>
-        /// Parse string into polynomial
-        /// </summary>
-        /// <summary>
-        /// Creates Z[x] polynomial from the specified coefficients
-        /// </summary>
-        /// <param name="data">coefficients</param>
-        /// <returns>Z[x] polynomial</returns>
-        /// <summary>
-        /// Creates monomial {@code coefficient * x^exponent}
-        /// </summary>
-        /// <param name="coefficient">monomial coefficient</param>
-        /// <param name="exponent">monomial exponent</param>
-        /// <returns>{@code coefficient * x^exponent}</returns>
-        /// <summary>
-        /// Creates zero polynomial
-        /// </summary>
-        /// <returns>zero polynomial</returns>
-        /// <summary>
-        /// Creates unit polynomial
-        /// </summary>
-        /// <returns>unit polynomial</returns>
-        /// <summary>
-        /// Returns constant with specified value
-        /// </summary>
-        /// <returns>constant with specified value</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
+
         /// <summary>
         /// internal API
         /// </summary>
@@ -516,131 +169,16 @@ namespace Cc.Redberry.Rings.Poly.Univar
             return UnivariatePolynomialZp64.CreateUnsafe(modulus, data);
         }
 
-        /// <summary>
-        /// main constructor
-        /// </summary>
-        /// <summary>
-        /// copy constructor
-        /// </summary>
-        /// <summary>
-        /// Parse string into polynomial
-        /// </summary>
-        /// <summary>
-        /// Creates Z[x] polynomial from the specified coefficients
-        /// </summary>
-        /// <param name="data">coefficients</param>
-        /// <returns>Z[x] polynomial</returns>
-        /// <summary>
-        /// Creates monomial {@code coefficient * x^exponent}
-        /// </summary>
-        /// <param name="coefficient">monomial coefficient</param>
-        /// <param name="exponent">monomial exponent</param>
-        /// <returns>{@code coefficient * x^exponent}</returns>
-        /// <summary>
-        /// Creates zero polynomial
-        /// </summary>
-        /// <returns>zero polynomial</returns>
-        /// <summary>
-        /// Creates unit polynomial
-        /// </summary>
-        /// <returns>unit polynomial</returns>
-        /// <summary>
-        /// Returns constant with specified value
-        /// </summary>
-        /// <returns>constant with specified value</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// internal API
-        /// </summary>
+
         /// <summary>
         /// {@inheritDoc}. The ring of the result is {@link Rings#Z}
         /// </summary>
         public override UnivariatePolynomial<BigInteger> ToBigPoly()
         {
-            return UnivariatePolynomial.CreateUnsafe(Rings.Z, DataToBigIntegers());
+            return UnivariatePolynomial<BigInteger>.CreateUnsafe(Rings.Z, DataToBigIntegers());
         }
 
-        /// <summary>
-        /// main constructor
-        /// </summary>
-        /// <summary>
-        /// copy constructor
-        /// </summary>
-        /// <summary>
-        /// Parse string into polynomial
-        /// </summary>
-        /// <summary>
-        /// Creates Z[x] polynomial from the specified coefficients
-        /// </summary>
-        /// <param name="data">coefficients</param>
-        /// <returns>Z[x] polynomial</returns>
-        /// <summary>
-        /// Creates monomial {@code coefficient * x^exponent}
-        /// </summary>
-        /// <param name="coefficient">monomial coefficient</param>
-        /// <param name="exponent">monomial exponent</param>
-        /// <returns>{@code coefficient * x^exponent}</returns>
-        /// <summary>
-        /// Creates zero polynomial
-        /// </summary>
-        /// <returns>zero polynomial</returns>
-        /// <summary>
-        /// Creates unit polynomial
-        /// </summary>
-        /// <returns>unit polynomial</returns>
-        /// <summary>
-        /// Returns constant with specified value
-        /// </summary>
-        /// <returns>constant with specified value</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// {@inheritDoc}. The ring of the result is {@link Rings#Z}
-        /// </summary>
+
         /// <summary>
         /// Returns Mignotte's bound (sqrt(n+1) * 2^n max |this|)
         /// </summary>
@@ -650,70 +188,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
             return Math.Pow(2, degree) * Norm2();
         }
 
-        /// <summary>
-        /// main constructor
-        /// </summary>
-        /// <summary>
-        /// copy constructor
-        /// </summary>
-        /// <summary>
-        /// Parse string into polynomial
-        /// </summary>
-        /// <summary>
-        /// Creates Z[x] polynomial from the specified coefficients
-        /// </summary>
-        /// <param name="data">coefficients</param>
-        /// <returns>Z[x] polynomial</returns>
-        /// <summary>
-        /// Creates monomial {@code coefficient * x^exponent}
-        /// </summary>
-        /// <param name="coefficient">monomial coefficient</param>
-        /// <param name="exponent">monomial exponent</param>
-        /// <returns>{@code coefficient * x^exponent}</returns>
-        /// <summary>
-        /// Creates zero polynomial
-        /// </summary>
-        /// <returns>zero polynomial</returns>
-        /// <summary>
-        /// Creates unit polynomial
-        /// </summary>
-        /// <returns>unit polynomial</returns>
-        /// <summary>
-        /// Returns constant with specified value
-        /// </summary>
-        /// <returns>constant with specified value</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// {@inheritDoc}. The ring of the result is {@link Rings#Z}
-        /// </summary>
-        /// <summary>
-        /// Returns Mignotte's bound (sqrt(n+1) * 2^n max |this|)
-        /// </summary>
-        /// <returns>Mignotte's bound</returns>
+
         /// <summary>
         /// Evaluates this poly at a given rational point {@code num/den}
         /// </summary>
@@ -739,1217 +214,73 @@ namespace Cc.Redberry.Rings.Poly.Univar
             return res;
         }
 
-        /// <summary>
-        /// main constructor
-        /// </summary>
-        /// <summary>
-        /// copy constructor
-        /// </summary>
-        /// <summary>
-        /// Parse string into polynomial
-        /// </summary>
-        /// <summary>
-        /// Creates Z[x] polynomial from the specified coefficients
-        /// </summary>
-        /// <param name="data">coefficients</param>
-        /// <returns>Z[x] polynomial</returns>
-        /// <summary>
-        /// Creates monomial {@code coefficient * x^exponent}
-        /// </summary>
-        /// <param name="coefficient">monomial coefficient</param>
-        /// <param name="exponent">monomial exponent</param>
-        /// <returns>{@code coefficient * x^exponent}</returns>
-        /// <summary>
-        /// Creates zero polynomial
-        /// </summary>
-        /// <returns>zero polynomial</returns>
-        /// <summary>
-        /// Creates unit polynomial
-        /// </summary>
-        /// <returns>unit polynomial</returns>
-        /// <summary>
-        /// Returns constant with specified value
-        /// </summary>
-        /// <returns>constant with specified value</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// {@inheritDoc}. The ring of the result is {@link Rings#Z}
-        /// </summary>
-        /// <summary>
-        /// Returns Mignotte's bound (sqrt(n+1) * 2^n max |this|)
-        /// </summary>
-        /// <returns>Mignotte's bound</returns>
-        /// <summary>
-        /// Evaluates this poly at a given rational point {@code num/den}
-        /// </summary>
-        /// <param name="num">point numerator</param>
-        /// <param name="den">point denominator</param>
-        /// <returns>value at {@code num/den}</returns>
-        /// <exception cref="ArithmeticException">if the result is not integer</exception>
-        public override UnivariatePolynomialZ64 GetRange(int from, int to)
-        {
-            return new UnivariatePolynomialZ64(Arrays.CopyOfRange(data, from, to));
-        }
 
-        /// <summary>
-        /// main constructor
-        /// </summary>
-        /// <summary>
-        /// copy constructor
-        /// </summary>
-        /// <summary>
-        /// Parse string into polynomial
-        /// </summary>
-        /// <summary>
-        /// Creates Z[x] polynomial from the specified coefficients
-        /// </summary>
-        /// <param name="data">coefficients</param>
-        /// <returns>Z[x] polynomial</returns>
-        /// <summary>
-        /// Creates monomial {@code coefficient * x^exponent}
-        /// </summary>
-        /// <param name="coefficient">monomial coefficient</param>
-        /// <param name="exponent">monomial exponent</param>
-        /// <returns>{@code coefficient * x^exponent}</returns>
-        /// <summary>
-        /// Creates zero polynomial
-        /// </summary>
-        /// <returns>zero polynomial</returns>
-        /// <summary>
-        /// Creates unit polynomial
-        /// </summary>
-        /// <returns>unit polynomial</returns>
-        /// <summary>
-        /// Returns constant with specified value
-        /// </summary>
-        /// <returns>constant with specified value</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// {@inheritDoc}. The ring of the result is {@link Rings#Z}
-        /// </summary>
-        /// <summary>
-        /// Returns Mignotte's bound (sqrt(n+1) * 2^n max |this|)
-        /// </summary>
-        /// <returns>Mignotte's bound</returns>
-        /// <summary>
-        /// Evaluates this poly at a given rational point {@code num/den}
-        /// </summary>
-        /// <param name="num">point numerator</param>
-        /// <param name="den">point denominator</param>
-        /// <returns>value at {@code num/den}</returns>
-        /// <exception cref="ArithmeticException">if the result is not integer</exception>
-        public override UnivariatePolynomialZ64[] CreateArray(int length)
-        {
-            return new UnivariatePolynomialZ64[length];
-        }
-
-        /// <summary>
-        /// main constructor
-        /// </summary>
-        /// <summary>
-        /// copy constructor
-        /// </summary>
-        /// <summary>
-        /// Parse string into polynomial
-        /// </summary>
-        /// <summary>
-        /// Creates Z[x] polynomial from the specified coefficients
-        /// </summary>
-        /// <param name="data">coefficients</param>
-        /// <returns>Z[x] polynomial</returns>
-        /// <summary>
-        /// Creates monomial {@code coefficient * x^exponent}
-        /// </summary>
-        /// <param name="coefficient">monomial coefficient</param>
-        /// <param name="exponent">monomial exponent</param>
-        /// <returns>{@code coefficient * x^exponent}</returns>
-        /// <summary>
-        /// Creates zero polynomial
-        /// </summary>
-        /// <returns>zero polynomial</returns>
-        /// <summary>
-        /// Creates unit polynomial
-        /// </summary>
-        /// <returns>unit polynomial</returns>
-        /// <summary>
-        /// Returns constant with specified value
-        /// </summary>
-        /// <returns>constant with specified value</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// {@inheritDoc}. The ring of the result is {@link Rings#Z}
-        /// </summary>
-        /// <summary>
-        /// Returns Mignotte's bound (sqrt(n+1) * 2^n max |this|)
-        /// </summary>
-        /// <returns>Mignotte's bound</returns>
-        /// <summary>
-        /// Evaluates this poly at a given rational point {@code num/den}
-        /// </summary>
-        /// <param name="num">point numerator</param>
-        /// <param name="den">point denominator</param>
-        /// <returns>value at {@code num/den}</returns>
-        /// <exception cref="ArithmeticException">if the result is not integer</exception>
-        public override UnivariatePolynomialZ64[][] CreateArray2d(int length)
-        {
-            return new UnivariatePolynomialZ64[length];
-        }
-
-        /// <summary>
-        /// main constructor
-        /// </summary>
-        /// <summary>
-        /// copy constructor
-        /// </summary>
-        /// <summary>
-        /// Parse string into polynomial
-        /// </summary>
-        /// <summary>
-        /// Creates Z[x] polynomial from the specified coefficients
-        /// </summary>
-        /// <param name="data">coefficients</param>
-        /// <returns>Z[x] polynomial</returns>
-        /// <summary>
-        /// Creates monomial {@code coefficient * x^exponent}
-        /// </summary>
-        /// <param name="coefficient">monomial coefficient</param>
-        /// <param name="exponent">monomial exponent</param>
-        /// <returns>{@code coefficient * x^exponent}</returns>
-        /// <summary>
-        /// Creates zero polynomial
-        /// </summary>
-        /// <returns>zero polynomial</returns>
-        /// <summary>
-        /// Creates unit polynomial
-        /// </summary>
-        /// <returns>unit polynomial</returns>
-        /// <summary>
-        /// Returns constant with specified value
-        /// </summary>
-        /// <returns>constant with specified value</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// {@inheritDoc}. The ring of the result is {@link Rings#Z}
-        /// </summary>
-        /// <summary>
-        /// Returns Mignotte's bound (sqrt(n+1) * 2^n max |this|)
-        /// </summary>
-        /// <returns>Mignotte's bound</returns>
-        /// <summary>
-        /// Evaluates this poly at a given rational point {@code num/den}
-        /// </summary>
-        /// <param name="num">point numerator</param>
-        /// <param name="den">point denominator</param>
-        /// <returns>value at {@code num/den}</returns>
-        /// <exception cref="ArithmeticException">if the result is not integer</exception>
-        public override UnivariatePolynomialZ64[][] CreateArray2d(int length1, int length2)
-        {
-            return new UnivariatePolynomialZ64[length1, length2];
-        }
-
-        /// <summary>
-        /// main constructor
-        /// </summary>
-        /// <summary>
-        /// copy constructor
-        /// </summary>
-        /// <summary>
-        /// Parse string into polynomial
-        /// </summary>
-        /// <summary>
-        /// Creates Z[x] polynomial from the specified coefficients
-        /// </summary>
-        /// <param name="data">coefficients</param>
-        /// <returns>Z[x] polynomial</returns>
-        /// <summary>
-        /// Creates monomial {@code coefficient * x^exponent}
-        /// </summary>
-        /// <param name="coefficient">monomial coefficient</param>
-        /// <param name="exponent">monomial exponent</param>
-        /// <returns>{@code coefficient * x^exponent}</returns>
-        /// <summary>
-        /// Creates zero polynomial
-        /// </summary>
-        /// <returns>zero polynomial</returns>
-        /// <summary>
-        /// Creates unit polynomial
-        /// </summary>
-        /// <returns>unit polynomial</returns>
-        /// <summary>
-        /// Returns constant with specified value
-        /// </summary>
-        /// <returns>constant with specified value</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// {@inheritDoc}. The ring of the result is {@link Rings#Z}
-        /// </summary>
-        /// <summary>
-        /// Returns Mignotte's bound (sqrt(n+1) * 2^n max |this|)
-        /// </summary>
-        /// <returns>Mignotte's bound</returns>
-        /// <summary>
-        /// Evaluates this poly at a given rational point {@code num/den}
-        /// </summary>
-        /// <param name="num">point numerator</param>
-        /// <param name="den">point denominator</param>
-        /// <returns>value at {@code num/den}</returns>
-        /// <exception cref="ArithmeticException">if the result is not integer</exception>
         public override bool SameCoefficientRingWith(UnivariatePolynomialZ64 oth)
         {
             return true;
         }
 
-        /// <summary>
-        /// main constructor
-        /// </summary>
-        /// <summary>
-        /// copy constructor
-        /// </summary>
-        /// <summary>
-        /// Parse string into polynomial
-        /// </summary>
-        /// <summary>
-        /// Creates Z[x] polynomial from the specified coefficients
-        /// </summary>
-        /// <param name="data">coefficients</param>
-        /// <returns>Z[x] polynomial</returns>
-        /// <summary>
-        /// Creates monomial {@code coefficient * x^exponent}
-        /// </summary>
-        /// <param name="coefficient">monomial coefficient</param>
-        /// <param name="exponent">monomial exponent</param>
-        /// <returns>{@code coefficient * x^exponent}</returns>
-        /// <summary>
-        /// Creates zero polynomial
-        /// </summary>
-        /// <returns>zero polynomial</returns>
-        /// <summary>
-        /// Creates unit polynomial
-        /// </summary>
-        /// <returns>unit polynomial</returns>
-        /// <summary>
-        /// Returns constant with specified value
-        /// </summary>
-        /// <returns>constant with specified value</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// {@inheritDoc}. The ring of the result is {@link Rings#Z}
-        /// </summary>
-        /// <summary>
-        /// Returns Mignotte's bound (sqrt(n+1) * 2^n max |this|)
-        /// </summary>
-        /// <returns>Mignotte's bound</returns>
-        /// <summary>
-        /// Evaluates this poly at a given rational point {@code num/den}
-        /// </summary>
-        /// <param name="num">point numerator</param>
-        /// <param name="den">point denominator</param>
-        /// <returns>value at {@code num/den}</returns>
-        /// <exception cref="ArithmeticException">if the result is not integer</exception>
+
         public override UnivariatePolynomialZ64 CreateFromArray(long[] data)
         {
             return new UnivariatePolynomialZ64(data);
         }
 
-        /// <summary>
-        /// main constructor
-        /// </summary>
-        /// <summary>
-        /// copy constructor
-        /// </summary>
-        /// <summary>
-        /// Parse string into polynomial
-        /// </summary>
-        /// <summary>
-        /// Creates Z[x] polynomial from the specified coefficients
-        /// </summary>
-        /// <param name="data">coefficients</param>
-        /// <returns>Z[x] polynomial</returns>
-        /// <summary>
-        /// Creates monomial {@code coefficient * x^exponent}
-        /// </summary>
-        /// <param name="coefficient">monomial coefficient</param>
-        /// <param name="exponent">monomial exponent</param>
-        /// <returns>{@code coefficient * x^exponent}</returns>
-        /// <summary>
-        /// Creates zero polynomial
-        /// </summary>
-        /// <returns>zero polynomial</returns>
-        /// <summary>
-        /// Creates unit polynomial
-        /// </summary>
-        /// <returns>unit polynomial</returns>
-        /// <summary>
-        /// Returns constant with specified value
-        /// </summary>
-        /// <returns>constant with specified value</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// {@inheritDoc}. The ring of the result is {@link Rings#Z}
-        /// </summary>
-        /// <summary>
-        /// Returns Mignotte's bound (sqrt(n+1) * 2^n max |this|)
-        /// </summary>
-        /// <returns>Mignotte's bound</returns>
-        /// <summary>
-        /// Evaluates this poly at a given rational point {@code num/den}
-        /// </summary>
-        /// <param name="num">point numerator</param>
-        /// <param name="den">point denominator</param>
-        /// <returns>value at {@code num/den}</returns>
-        /// <exception cref="ArithmeticException">if the result is not integer</exception>
+
         public override UnivariatePolynomialZ64 CreateMonomial(long coefficient, int degree)
         {
             return Monomial(coefficient, degree);
         }
 
-        /// <summary>
-        /// main constructor
-        /// </summary>
-        /// <summary>
-        /// copy constructor
-        /// </summary>
-        /// <summary>
-        /// Parse string into polynomial
-        /// </summary>
-        /// <summary>
-        /// Creates Z[x] polynomial from the specified coefficients
-        /// </summary>
-        /// <param name="data">coefficients</param>
-        /// <returns>Z[x] polynomial</returns>
-        /// <summary>
-        /// Creates monomial {@code coefficient * x^exponent}
-        /// </summary>
-        /// <param name="coefficient">monomial coefficient</param>
-        /// <param name="exponent">monomial exponent</param>
-        /// <returns>{@code coefficient * x^exponent}</returns>
-        /// <summary>
-        /// Creates zero polynomial
-        /// </summary>
-        /// <returns>zero polynomial</returns>
-        /// <summary>
-        /// Creates unit polynomial
-        /// </summary>
-        /// <returns>unit polynomial</returns>
-        /// <summary>
-        /// Returns constant with specified value
-        /// </summary>
-        /// <returns>constant with specified value</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// {@inheritDoc}. The ring of the result is {@link Rings#Z}
-        /// </summary>
-        /// <summary>
-        /// Returns Mignotte's bound (sqrt(n+1) * 2^n max |this|)
-        /// </summary>
-        /// <returns>Mignotte's bound</returns>
-        /// <summary>
-        /// Evaluates this poly at a given rational point {@code num/den}
-        /// </summary>
-        /// <param name="num">point numerator</param>
-        /// <param name="den">point denominator</param>
-        /// <returns>value at {@code num/den}</returns>
-        /// <exception cref="ArithmeticException">if the result is not integer</exception>
+
         public override bool IsOverField()
         {
             return false;
         }
 
-        /// <summary>
-        /// main constructor
-        /// </summary>
-        /// <summary>
-        /// copy constructor
-        /// </summary>
-        /// <summary>
-        /// Parse string into polynomial
-        /// </summary>
-        /// <summary>
-        /// Creates Z[x] polynomial from the specified coefficients
-        /// </summary>
-        /// <param name="data">coefficients</param>
-        /// <returns>Z[x] polynomial</returns>
-        /// <summary>
-        /// Creates monomial {@code coefficient * x^exponent}
-        /// </summary>
-        /// <param name="coefficient">monomial coefficient</param>
-        /// <param name="exponent">monomial exponent</param>
-        /// <returns>{@code coefficient * x^exponent}</returns>
-        /// <summary>
-        /// Creates zero polynomial
-        /// </summary>
-        /// <returns>zero polynomial</returns>
-        /// <summary>
-        /// Creates unit polynomial
-        /// </summary>
-        /// <returns>unit polynomial</returns>
-        /// <summary>
-        /// Returns constant with specified value
-        /// </summary>
-        /// <returns>constant with specified value</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// {@inheritDoc}. The ring of the result is {@link Rings#Z}
-        /// </summary>
-        /// <summary>
-        /// Returns Mignotte's bound (sqrt(n+1) * 2^n max |this|)
-        /// </summary>
-        /// <returns>Mignotte's bound</returns>
-        /// <summary>
-        /// Evaluates this poly at a given rational point {@code num/den}
-        /// </summary>
-        /// <param name="num">point numerator</param>
-        /// <param name="den">point denominator</param>
-        /// <returns>value at {@code num/den}</returns>
-        /// <exception cref="ArithmeticException">if the result is not integer</exception>
+
         public override bool IsOverFiniteField()
         {
             return false;
         }
 
-        /// <summary>
-        /// main constructor
-        /// </summary>
-        /// <summary>
-        /// copy constructor
-        /// </summary>
-        /// <summary>
-        /// Parse string into polynomial
-        /// </summary>
-        /// <summary>
-        /// Creates Z[x] polynomial from the specified coefficients
-        /// </summary>
-        /// <param name="data">coefficients</param>
-        /// <returns>Z[x] polynomial</returns>
-        /// <summary>
-        /// Creates monomial {@code coefficient * x^exponent}
-        /// </summary>
-        /// <param name="coefficient">monomial coefficient</param>
-        /// <param name="exponent">monomial exponent</param>
-        /// <returns>{@code coefficient * x^exponent}</returns>
-        /// <summary>
-        /// Creates zero polynomial
-        /// </summary>
-        /// <returns>zero polynomial</returns>
-        /// <summary>
-        /// Creates unit polynomial
-        /// </summary>
-        /// <returns>unit polynomial</returns>
-        /// <summary>
-        /// Returns constant with specified value
-        /// </summary>
-        /// <returns>constant with specified value</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// {@inheritDoc}. The ring of the result is {@link Rings#Z}
-        /// </summary>
-        /// <summary>
-        /// Returns Mignotte's bound (sqrt(n+1) * 2^n max |this|)
-        /// </summary>
-        /// <returns>Mignotte's bound</returns>
-        /// <summary>
-        /// Evaluates this poly at a given rational point {@code num/den}
-        /// </summary>
-        /// <param name="num">point numerator</param>
-        /// <param name="den">point denominator</param>
-        /// <returns>value at {@code num/den}</returns>
-        /// <exception cref="ArithmeticException">if the result is not integer</exception>
+
         public override bool IsOverZ()
         {
             return true;
         }
 
-        /// <summary>
-        /// main constructor
-        /// </summary>
-        /// <summary>
-        /// copy constructor
-        /// </summary>
-        /// <summary>
-        /// Parse string into polynomial
-        /// </summary>
-        /// <summary>
-        /// Creates Z[x] polynomial from the specified coefficients
-        /// </summary>
-        /// <param name="data">coefficients</param>
-        /// <returns>Z[x] polynomial</returns>
-        /// <summary>
-        /// Creates monomial {@code coefficient * x^exponent}
-        /// </summary>
-        /// <param name="coefficient">monomial coefficient</param>
-        /// <param name="exponent">monomial exponent</param>
-        /// <returns>{@code coefficient * x^exponent}</returns>
-        /// <summary>
-        /// Creates zero polynomial
-        /// </summary>
-        /// <returns>zero polynomial</returns>
-        /// <summary>
-        /// Creates unit polynomial
-        /// </summary>
-        /// <returns>unit polynomial</returns>
-        /// <summary>
-        /// Returns constant with specified value
-        /// </summary>
-        /// <returns>constant with specified value</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// {@inheritDoc}. The ring of the result is {@link Rings#Z}
-        /// </summary>
-        /// <summary>
-        /// Returns Mignotte's bound (sqrt(n+1) * 2^n max |this|)
-        /// </summary>
-        /// <returns>Mignotte's bound</returns>
-        /// <summary>
-        /// Evaluates this poly at a given rational point {@code num/den}
-        /// </summary>
-        /// <param name="num">point numerator</param>
-        /// <param name="den">point denominator</param>
-        /// <returns>value at {@code num/den}</returns>
-        /// <exception cref="ArithmeticException">if the result is not integer</exception>
+
         public override BigInteger CoefficientRingCardinality()
         {
             return null;
         }
 
-        /// <summary>
-        /// main constructor
-        /// </summary>
-        /// <summary>
-        /// copy constructor
-        /// </summary>
-        /// <summary>
-        /// Parse string into polynomial
-        /// </summary>
-        /// <summary>
-        /// Creates Z[x] polynomial from the specified coefficients
-        /// </summary>
-        /// <param name="data">coefficients</param>
-        /// <returns>Z[x] polynomial</returns>
-        /// <summary>
-        /// Creates monomial {@code coefficient * x^exponent}
-        /// </summary>
-        /// <param name="coefficient">monomial coefficient</param>
-        /// <param name="exponent">monomial exponent</param>
-        /// <returns>{@code coefficient * x^exponent}</returns>
-        /// <summary>
-        /// Creates zero polynomial
-        /// </summary>
-        /// <returns>zero polynomial</returns>
-        /// <summary>
-        /// Creates unit polynomial
-        /// </summary>
-        /// <returns>unit polynomial</returns>
-        /// <summary>
-        /// Returns constant with specified value
-        /// </summary>
-        /// <returns>constant with specified value</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// {@inheritDoc}. The ring of the result is {@link Rings#Z}
-        /// </summary>
-        /// <summary>
-        /// Returns Mignotte's bound (sqrt(n+1) * 2^n max |this|)
-        /// </summary>
-        /// <returns>Mignotte's bound</returns>
-        /// <summary>
-        /// Evaluates this poly at a given rational point {@code num/den}
-        /// </summary>
-        /// <param name="num">point numerator</param>
-        /// <param name="den">point denominator</param>
-        /// <returns>value at {@code num/den}</returns>
-        /// <exception cref="ArithmeticException">if the result is not integer</exception>
+
         public override BigInteger CoefficientRingCharacteristic()
         {
-            return BigInteger.ZERO;
+            return BigInteger.Zero;
         }
 
-        /// <summary>
-        /// main constructor
-        /// </summary>
-        /// <summary>
-        /// copy constructor
-        /// </summary>
-        /// <summary>
-        /// Parse string into polynomial
-        /// </summary>
-        /// <summary>
-        /// Creates Z[x] polynomial from the specified coefficients
-        /// </summary>
-        /// <param name="data">coefficients</param>
-        /// <returns>Z[x] polynomial</returns>
-        /// <summary>
-        /// Creates monomial {@code coefficient * x^exponent}
-        /// </summary>
-        /// <param name="coefficient">monomial coefficient</param>
-        /// <param name="exponent">monomial exponent</param>
-        /// <returns>{@code coefficient * x^exponent}</returns>
-        /// <summary>
-        /// Creates zero polynomial
-        /// </summary>
-        /// <returns>zero polynomial</returns>
-        /// <summary>
-        /// Creates unit polynomial
-        /// </summary>
-        /// <returns>unit polynomial</returns>
-        /// <summary>
-        /// Returns constant with specified value
-        /// </summary>
-        /// <returns>constant with specified value</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// {@inheritDoc}. The ring of the result is {@link Rings#Z}
-        /// </summary>
-        /// <summary>
-        /// Returns Mignotte's bound (sqrt(n+1) * 2^n max |this|)
-        /// </summary>
-        /// <returns>Mignotte's bound</returns>
-        /// <summary>
-        /// Evaluates this poly at a given rational point {@code num/den}
-        /// </summary>
-        /// <param name="num">point numerator</param>
-        /// <param name="den">point denominator</param>
-        /// <returns>value at {@code num/den}</returns>
-        /// <exception cref="ArithmeticException">if the result is not integer</exception>
+
         public override bool IsOverPerfectPower()
         {
             return false;
         }
 
-        /// <summary>
-        /// main constructor
-        /// </summary>
-        /// <summary>
-        /// copy constructor
-        /// </summary>
-        /// <summary>
-        /// Parse string into polynomial
-        /// </summary>
-        /// <summary>
-        /// Creates Z[x] polynomial from the specified coefficients
-        /// </summary>
-        /// <param name="data">coefficients</param>
-        /// <returns>Z[x] polynomial</returns>
-        /// <summary>
-        /// Creates monomial {@code coefficient * x^exponent}
-        /// </summary>
-        /// <param name="coefficient">monomial coefficient</param>
-        /// <param name="exponent">monomial exponent</param>
-        /// <returns>{@code coefficient * x^exponent}</returns>
-        /// <summary>
-        /// Creates zero polynomial
-        /// </summary>
-        /// <returns>zero polynomial</returns>
-        /// <summary>
-        /// Creates unit polynomial
-        /// </summary>
-        /// <returns>unit polynomial</returns>
-        /// <summary>
-        /// Returns constant with specified value
-        /// </summary>
-        /// <returns>constant with specified value</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// {@inheritDoc}. The ring of the result is {@link Rings#Z}
-        /// </summary>
-        /// <summary>
-        /// Returns Mignotte's bound (sqrt(n+1) * 2^n max |this|)
-        /// </summary>
-        /// <returns>Mignotte's bound</returns>
-        /// <summary>
-        /// Evaluates this poly at a given rational point {@code num/den}
-        /// </summary>
-        /// <param name="num">point numerator</param>
-        /// <param name="den">point denominator</param>
-        /// <returns>value at {@code num/den}</returns>
-        /// <exception cref="ArithmeticException">if the result is not integer</exception>
+
         public override BigInteger CoefficientRingPerfectPowerBase()
         {
             return null;
         }
 
-        /// <summary>
-        /// main constructor
-        /// </summary>
-        /// <summary>
-        /// copy constructor
-        /// </summary>
-        /// <summary>
-        /// Parse string into polynomial
-        /// </summary>
-        /// <summary>
-        /// Creates Z[x] polynomial from the specified coefficients
-        /// </summary>
-        /// <param name="data">coefficients</param>
-        /// <returns>Z[x] polynomial</returns>
-        /// <summary>
-        /// Creates monomial {@code coefficient * x^exponent}
-        /// </summary>
-        /// <param name="coefficient">monomial coefficient</param>
-        /// <param name="exponent">monomial exponent</param>
-        /// <returns>{@code coefficient * x^exponent}</returns>
-        /// <summary>
-        /// Creates zero polynomial
-        /// </summary>
-        /// <returns>zero polynomial</returns>
-        /// <summary>
-        /// Creates unit polynomial
-        /// </summary>
-        /// <returns>unit polynomial</returns>
-        /// <summary>
-        /// Returns constant with specified value
-        /// </summary>
-        /// <returns>constant with specified value</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// {@inheritDoc}. The ring of the result is {@link Rings#Z}
-        /// </summary>
-        /// <summary>
-        /// Returns Mignotte's bound (sqrt(n+1) * 2^n max |this|)
-        /// </summary>
-        /// <returns>Mignotte's bound</returns>
-        /// <summary>
-        /// Evaluates this poly at a given rational point {@code num/den}
-        /// </summary>
-        /// <param name="num">point numerator</param>
-        /// <param name="den">point denominator</param>
-        /// <returns>value at {@code num/den}</returns>
-        /// <exception cref="ArithmeticException">if the result is not integer</exception>
+
         public override BigInteger CoefficientRingPerfectPowerExponent()
         {
             return null;
         }
 
-        /// <summary>
-        /// main constructor
-        /// </summary>
-        /// <summary>
-        /// copy constructor
-        /// </summary>
-        /// <summary>
-        /// Parse string into polynomial
-        /// </summary>
-        /// <summary>
-        /// Creates Z[x] polynomial from the specified coefficients
-        /// </summary>
-        /// <param name="data">coefficients</param>
-        /// <returns>Z[x] polynomial</returns>
-        /// <summary>
-        /// Creates monomial {@code coefficient * x^exponent}
-        /// </summary>
-        /// <param name="coefficient">monomial coefficient</param>
-        /// <param name="exponent">monomial exponent</param>
-        /// <returns>{@code coefficient * x^exponent}</returns>
-        /// <summary>
-        /// Creates zero polynomial
-        /// </summary>
-        /// <returns>zero polynomial</returns>
-        /// <summary>
-        /// Creates unit polynomial
-        /// </summary>
-        /// <returns>unit polynomial</returns>
-        /// <summary>
-        /// Returns constant with specified value
-        /// </summary>
-        /// <returns>constant with specified value</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// {@inheritDoc}. The ring of the result is {@link Rings#Z}
-        /// </summary>
-        /// <summary>
-        /// Returns Mignotte's bound (sqrt(n+1) * 2^n max |this|)
-        /// </summary>
-        /// <returns>Mignotte's bound</returns>
-        /// <summary>
-        /// Evaluates this poly at a given rational point {@code num/den}
-        /// </summary>
-        /// <param name="num">point numerator</param>
-        /// <param name="den">point denominator</param>
-        /// <returns>value at {@code num/den}</returns>
-        /// <exception cref="ArithmeticException">if the result is not integer</exception>
+
         /// <summary>
         /// Returns the content of this poly (gcd of its coefficients)
         /// </summary>
@@ -1961,481 +292,37 @@ namespace Cc.Redberry.Rings.Poly.Univar
             return MachineArithmetic.Gcd(data, 0, degree + 1);
         }
 
-        /// <summary>
-        /// main constructor
-        /// </summary>
-        /// <summary>
-        /// copy constructor
-        /// </summary>
-        /// <summary>
-        /// Parse string into polynomial
-        /// </summary>
-        /// <summary>
-        /// Creates Z[x] polynomial from the specified coefficients
-        /// </summary>
-        /// <param name="data">coefficients</param>
-        /// <returns>Z[x] polynomial</returns>
-        /// <summary>
-        /// Creates monomial {@code coefficient * x^exponent}
-        /// </summary>
-        /// <param name="coefficient">monomial coefficient</param>
-        /// <param name="exponent">monomial exponent</param>
-        /// <returns>{@code coefficient * x^exponent}</returns>
-        /// <summary>
-        /// Creates zero polynomial
-        /// </summary>
-        /// <returns>zero polynomial</returns>
-        /// <summary>
-        /// Creates unit polynomial
-        /// </summary>
-        /// <returns>unit polynomial</returns>
-        /// <summary>
-        /// Returns constant with specified value
-        /// </summary>
-        /// <returns>constant with specified value</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// {@inheritDoc}. The ring of the result is {@link Rings#Z}
-        /// </summary>
-        /// <summary>
-        /// Returns Mignotte's bound (sqrt(n+1) * 2^n max |this|)
-        /// </summary>
-        /// <returns>Mignotte's bound</returns>
-        /// <summary>
-        /// Evaluates this poly at a given rational point {@code num/den}
-        /// </summary>
-        /// <param name="num">point numerator</param>
-        /// <param name="den">point denominator</param>
-        /// <returns>value at {@code num/den}</returns>
-        /// <exception cref="ArithmeticException">if the result is not integer</exception>
-        /// <summary>
-        /// Returns the content of this poly (gcd of its coefficients)
-        /// </summary>
-        /// <returns>polynomial content</returns>
+
         override long Add(long a, long b)
         {
             return MachineArithmetic.SafeAdd(a, b);
         }
 
-        /// <summary>
-        /// main constructor
-        /// </summary>
-        /// <summary>
-        /// copy constructor
-        /// </summary>
-        /// <summary>
-        /// Parse string into polynomial
-        /// </summary>
-        /// <summary>
-        /// Creates Z[x] polynomial from the specified coefficients
-        /// </summary>
-        /// <param name="data">coefficients</param>
-        /// <returns>Z[x] polynomial</returns>
-        /// <summary>
-        /// Creates monomial {@code coefficient * x^exponent}
-        /// </summary>
-        /// <param name="coefficient">monomial coefficient</param>
-        /// <param name="exponent">monomial exponent</param>
-        /// <returns>{@code coefficient * x^exponent}</returns>
-        /// <summary>
-        /// Creates zero polynomial
-        /// </summary>
-        /// <returns>zero polynomial</returns>
-        /// <summary>
-        /// Creates unit polynomial
-        /// </summary>
-        /// <returns>unit polynomial</returns>
-        /// <summary>
-        /// Returns constant with specified value
-        /// </summary>
-        /// <returns>constant with specified value</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// {@inheritDoc}. The ring of the result is {@link Rings#Z}
-        /// </summary>
-        /// <summary>
-        /// Returns Mignotte's bound (sqrt(n+1) * 2^n max |this|)
-        /// </summary>
-        /// <returns>Mignotte's bound</returns>
-        /// <summary>
-        /// Evaluates this poly at a given rational point {@code num/den}
-        /// </summary>
-        /// <param name="num">point numerator</param>
-        /// <param name="den">point denominator</param>
-        /// <returns>value at {@code num/den}</returns>
-        /// <exception cref="ArithmeticException">if the result is not integer</exception>
-        /// <summary>
-        /// Returns the content of this poly (gcd of its coefficients)
-        /// </summary>
-        /// <returns>polynomial content</returns>
+
         override long Subtract(long a, long b)
         {
             return MachineArithmetic.SafeSubtract(a, b);
         }
 
-        /// <summary>
-        /// main constructor
-        /// </summary>
-        /// <summary>
-        /// copy constructor
-        /// </summary>
-        /// <summary>
-        /// Parse string into polynomial
-        /// </summary>
-        /// <summary>
-        /// Creates Z[x] polynomial from the specified coefficients
-        /// </summary>
-        /// <param name="data">coefficients</param>
-        /// <returns>Z[x] polynomial</returns>
-        /// <summary>
-        /// Creates monomial {@code coefficient * x^exponent}
-        /// </summary>
-        /// <param name="coefficient">monomial coefficient</param>
-        /// <param name="exponent">monomial exponent</param>
-        /// <returns>{@code coefficient * x^exponent}</returns>
-        /// <summary>
-        /// Creates zero polynomial
-        /// </summary>
-        /// <returns>zero polynomial</returns>
-        /// <summary>
-        /// Creates unit polynomial
-        /// </summary>
-        /// <returns>unit polynomial</returns>
-        /// <summary>
-        /// Returns constant with specified value
-        /// </summary>
-        /// <returns>constant with specified value</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// {@inheritDoc}. The ring of the result is {@link Rings#Z}
-        /// </summary>
-        /// <summary>
-        /// Returns Mignotte's bound (sqrt(n+1) * 2^n max |this|)
-        /// </summary>
-        /// <returns>Mignotte's bound</returns>
-        /// <summary>
-        /// Evaluates this poly at a given rational point {@code num/den}
-        /// </summary>
-        /// <param name="num">point numerator</param>
-        /// <param name="den">point denominator</param>
-        /// <returns>value at {@code num/den}</returns>
-        /// <exception cref="ArithmeticException">if the result is not integer</exception>
-        /// <summary>
-        /// Returns the content of this poly (gcd of its coefficients)
-        /// </summary>
-        /// <returns>polynomial content</returns>
+
         override long Multiply(long a, long b)
         {
             return MachineArithmetic.SafeMultiply(a, b);
         }
 
-        /// <summary>
-        /// main constructor
-        /// </summary>
-        /// <summary>
-        /// copy constructor
-        /// </summary>
-        /// <summary>
-        /// Parse string into polynomial
-        /// </summary>
-        /// <summary>
-        /// Creates Z[x] polynomial from the specified coefficients
-        /// </summary>
-        /// <param name="data">coefficients</param>
-        /// <returns>Z[x] polynomial</returns>
-        /// <summary>
-        /// Creates monomial {@code coefficient * x^exponent}
-        /// </summary>
-        /// <param name="coefficient">monomial coefficient</param>
-        /// <param name="exponent">monomial exponent</param>
-        /// <returns>{@code coefficient * x^exponent}</returns>
-        /// <summary>
-        /// Creates zero polynomial
-        /// </summary>
-        /// <returns>zero polynomial</returns>
-        /// <summary>
-        /// Creates unit polynomial
-        /// </summary>
-        /// <returns>unit polynomial</returns>
-        /// <summary>
-        /// Returns constant with specified value
-        /// </summary>
-        /// <returns>constant with specified value</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// {@inheritDoc}. The ring of the result is {@link Rings#Z}
-        /// </summary>
-        /// <summary>
-        /// Returns Mignotte's bound (sqrt(n+1) * 2^n max |this|)
-        /// </summary>
-        /// <returns>Mignotte's bound</returns>
-        /// <summary>
-        /// Evaluates this poly at a given rational point {@code num/den}
-        /// </summary>
-        /// <param name="num">point numerator</param>
-        /// <param name="den">point denominator</param>
-        /// <returns>value at {@code num/den}</returns>
-        /// <exception cref="ArithmeticException">if the result is not integer</exception>
-        /// <summary>
-        /// Returns the content of this poly (gcd of its coefficients)
-        /// </summary>
-        /// <returns>polynomial content</returns>
+
         override long Negate(long a)
         {
             return MachineArithmetic.SafeNegate(a);
         }
 
-        /// <summary>
-        /// main constructor
-        /// </summary>
-        /// <summary>
-        /// copy constructor
-        /// </summary>
-        /// <summary>
-        /// Parse string into polynomial
-        /// </summary>
-        /// <summary>
-        /// Creates Z[x] polynomial from the specified coefficients
-        /// </summary>
-        /// <param name="data">coefficients</param>
-        /// <returns>Z[x] polynomial</returns>
-        /// <summary>
-        /// Creates monomial {@code coefficient * x^exponent}
-        /// </summary>
-        /// <param name="coefficient">monomial coefficient</param>
-        /// <param name="exponent">monomial exponent</param>
-        /// <returns>{@code coefficient * x^exponent}</returns>
-        /// <summary>
-        /// Creates zero polynomial
-        /// </summary>
-        /// <returns>zero polynomial</returns>
-        /// <summary>
-        /// Creates unit polynomial
-        /// </summary>
-        /// <returns>unit polynomial</returns>
-        /// <summary>
-        /// Returns constant with specified value
-        /// </summary>
-        /// <returns>constant with specified value</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// {@inheritDoc}. The ring of the result is {@link Rings#Z}
-        /// </summary>
-        /// <summary>
-        /// Returns Mignotte's bound (sqrt(n+1) * 2^n max |this|)
-        /// </summary>
-        /// <returns>Mignotte's bound</returns>
-        /// <summary>
-        /// Evaluates this poly at a given rational point {@code num/den}
-        /// </summary>
-        /// <param name="num">point numerator</param>
-        /// <param name="den">point denominator</param>
-        /// <returns>value at {@code num/den}</returns>
-        /// <exception cref="ArithmeticException">if the result is not integer</exception>
-        /// <summary>
-        /// Returns the content of this poly (gcd of its coefficients)
-        /// </summary>
-        /// <returns>polynomial content</returns>
+
         override long ValueOf(long a)
         {
             return a;
         }
 
-        /// <summary>
-        /// main constructor
-        /// </summary>
-        /// <summary>
-        /// copy constructor
-        /// </summary>
-        /// <summary>
-        /// Parse string into polynomial
-        /// </summary>
-        /// <summary>
-        /// Creates Z[x] polynomial from the specified coefficients
-        /// </summary>
-        /// <param name="data">coefficients</param>
-        /// <returns>Z[x] polynomial</returns>
-        /// <summary>
-        /// Creates monomial {@code coefficient * x^exponent}
-        /// </summary>
-        /// <param name="coefficient">monomial coefficient</param>
-        /// <param name="exponent">monomial exponent</param>
-        /// <returns>{@code coefficient * x^exponent}</returns>
-        /// <summary>
-        /// Creates zero polynomial
-        /// </summary>
-        /// <returns>zero polynomial</returns>
-        /// <summary>
-        /// Creates unit polynomial
-        /// </summary>
-        /// <returns>unit polynomial</returns>
-        /// <summary>
-        /// Returns constant with specified value
-        /// </summary>
-        /// <returns>constant with specified value</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// {@inheritDoc}. The ring of the result is {@link Rings#Z}
-        /// </summary>
-        /// <summary>
-        /// Returns Mignotte's bound (sqrt(n+1) * 2^n max |this|)
-        /// </summary>
-        /// <returns>Mignotte's bound</returns>
-        /// <summary>
-        /// Evaluates this poly at a given rational point {@code num/den}
-        /// </summary>
-        /// <param name="num">point numerator</param>
-        /// <param name="den">point denominator</param>
-        /// <returns>value at {@code num/den}</returns>
-        /// <exception cref="ArithmeticException">if the result is not integer</exception>
-        /// <summary>
-        /// Returns the content of this poly (gcd of its coefficients)
-        /// </summary>
-        /// <returns>polynomial content</returns>
+
         public override UnivariatePolynomialZ64 Monic()
         {
             if (IsZero())
@@ -2443,81 +330,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
             return DivideOrNull(Lc());
         }
 
-        /// <summary>
-        /// main constructor
-        /// </summary>
-        /// <summary>
-        /// copy constructor
-        /// </summary>
-        /// <summary>
-        /// Parse string into polynomial
-        /// </summary>
-        /// <summary>
-        /// Creates Z[x] polynomial from the specified coefficients
-        /// </summary>
-        /// <param name="data">coefficients</param>
-        /// <returns>Z[x] polynomial</returns>
-        /// <summary>
-        /// Creates monomial {@code coefficient * x^exponent}
-        /// </summary>
-        /// <param name="coefficient">monomial coefficient</param>
-        /// <param name="exponent">monomial exponent</param>
-        /// <returns>{@code coefficient * x^exponent}</returns>
-        /// <summary>
-        /// Creates zero polynomial
-        /// </summary>
-        /// <returns>zero polynomial</returns>
-        /// <summary>
-        /// Creates unit polynomial
-        /// </summary>
-        /// <returns>unit polynomial</returns>
-        /// <summary>
-        /// Returns constant with specified value
-        /// </summary>
-        /// <returns>constant with specified value</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// {@inheritDoc}. The ring of the result is {@link Rings#Z}
-        /// </summary>
-        /// <summary>
-        /// Returns Mignotte's bound (sqrt(n+1) * 2^n max |this|)
-        /// </summary>
-        /// <returns>Mignotte's bound</returns>
-        /// <summary>
-        /// Evaluates this poly at a given rational point {@code num/den}
-        /// </summary>
-        /// <param name="num">point numerator</param>
-        /// <param name="den">point denominator</param>
-        /// <returns>value at {@code num/den}</returns>
-        /// <exception cref="ArithmeticException">if the result is not integer</exception>
-        /// <summary>
-        /// Returns the content of this poly (gcd of its coefficients)
-        /// </summary>
-        /// <returns>polynomial content</returns>
+
         public override UnivariatePolynomialZ64 Monic(long factor)
         {
             long lc = Lc();
@@ -2530,81 +343,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
             return r.Multiply(factor);
         }
 
-        /// <summary>
-        /// main constructor
-        /// </summary>
-        /// <summary>
-        /// copy constructor
-        /// </summary>
-        /// <summary>
-        /// Parse string into polynomial
-        /// </summary>
-        /// <summary>
-        /// Creates Z[x] polynomial from the specified coefficients
-        /// </summary>
-        /// <param name="data">coefficients</param>
-        /// <returns>Z[x] polynomial</returns>
-        /// <summary>
-        /// Creates monomial {@code coefficient * x^exponent}
-        /// </summary>
-        /// <param name="coefficient">monomial coefficient</param>
-        /// <param name="exponent">monomial exponent</param>
-        /// <returns>{@code coefficient * x^exponent}</returns>
-        /// <summary>
-        /// Creates zero polynomial
-        /// </summary>
-        /// <returns>zero polynomial</returns>
-        /// <summary>
-        /// Creates unit polynomial
-        /// </summary>
-        /// <returns>unit polynomial</returns>
-        /// <summary>
-        /// Returns constant with specified value
-        /// </summary>
-        /// <returns>constant with specified value</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// {@inheritDoc}. The ring of the result is {@link Rings#Z}
-        /// </summary>
-        /// <summary>
-        /// Returns Mignotte's bound (sqrt(n+1) * 2^n max |this|)
-        /// </summary>
-        /// <returns>Mignotte's bound</returns>
-        /// <summary>
-        /// Evaluates this poly at a given rational point {@code num/den}
-        /// </summary>
-        /// <param name="num">point numerator</param>
-        /// <param name="den">point denominator</param>
-        /// <returns>value at {@code num/den}</returns>
-        /// <exception cref="ArithmeticException">if the result is not integer</exception>
-        /// <summary>
-        /// Returns the content of this poly (gcd of its coefficients)
-        /// </summary>
-        /// <returns>polynomial content</returns>
+
         /// <summary>
         /// Divides this polynomial by a {@code factor} or returns {@code null} (causing loss of internal data) if some of
         /// the elements can't be exactly divided by the {@code factor}. NOTE: is {@code null} is returned, the content of
@@ -2630,262 +369,18 @@ namespace Cc.Redberry.Rings.Poly.Univar
             return this;
         }
 
-        /// <summary>
-        /// main constructor
-        /// </summary>
-        /// <summary>
-        /// copy constructor
-        /// </summary>
-        /// <summary>
-        /// Parse string into polynomial
-        /// </summary>
-        /// <summary>
-        /// Creates Z[x] polynomial from the specified coefficients
-        /// </summary>
-        /// <param name="data">coefficients</param>
-        /// <returns>Z[x] polynomial</returns>
-        /// <summary>
-        /// Creates monomial {@code coefficient * x^exponent}
-        /// </summary>
-        /// <param name="coefficient">monomial coefficient</param>
-        /// <param name="exponent">monomial exponent</param>
-        /// <returns>{@code coefficient * x^exponent}</returns>
-        /// <summary>
-        /// Creates zero polynomial
-        /// </summary>
-        /// <returns>zero polynomial</returns>
-        /// <summary>
-        /// Creates unit polynomial
-        /// </summary>
-        /// <returns>unit polynomial</returns>
-        /// <summary>
-        /// Returns constant with specified value
-        /// </summary>
-        /// <returns>constant with specified value</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// {@inheritDoc}. The ring of the result is {@link Rings#Z}
-        /// </summary>
-        /// <summary>
-        /// Returns Mignotte's bound (sqrt(n+1) * 2^n max |this|)
-        /// </summary>
-        /// <returns>Mignotte's bound</returns>
-        /// <summary>
-        /// Evaluates this poly at a given rational point {@code num/den}
-        /// </summary>
-        /// <param name="num">point numerator</param>
-        /// <param name="den">point denominator</param>
-        /// <returns>value at {@code num/den}</returns>
-        /// <exception cref="ArithmeticException">if the result is not integer</exception>
-        /// <summary>
-        /// Returns the content of this poly (gcd of its coefficients)
-        /// </summary>
-        /// <returns>polynomial content</returns>
-        /// <summary>
-        /// Divides this polynomial by a {@code factor} or returns {@code null} (causing loss of internal data) if some of
-        /// the elements can't be exactly divided by the {@code factor}. NOTE: is {@code null} is returned, the content of
-        /// {@code this} is destroyed.
-        /// </summary>
-        /// <param name="factor">the factor</param>
-        /// <returns>{@code this} divided by the {@code factor} or {@code null}</returns>
+
         public override UnivariatePolynomialZ64 DivideByLC(UnivariatePolynomialZ64 other)
         {
             return DivideOrNull(other.Lc());
         }
 
-        /// <summary>
-        /// main constructor
-        /// </summary>
-        /// <summary>
-        /// copy constructor
-        /// </summary>
-        /// <summary>
-        /// Parse string into polynomial
-        /// </summary>
-        /// <summary>
-        /// Creates Z[x] polynomial from the specified coefficients
-        /// </summary>
-        /// <param name="data">coefficients</param>
-        /// <returns>Z[x] polynomial</returns>
-        /// <summary>
-        /// Creates monomial {@code coefficient * x^exponent}
-        /// </summary>
-        /// <param name="coefficient">monomial coefficient</param>
-        /// <param name="exponent">monomial exponent</param>
-        /// <returns>{@code coefficient * x^exponent}</returns>
-        /// <summary>
-        /// Creates zero polynomial
-        /// </summary>
-        /// <returns>zero polynomial</returns>
-        /// <summary>
-        /// Creates unit polynomial
-        /// </summary>
-        /// <returns>unit polynomial</returns>
-        /// <summary>
-        /// Returns constant with specified value
-        /// </summary>
-        /// <returns>constant with specified value</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// {@inheritDoc}. The ring of the result is {@link Rings#Z}
-        /// </summary>
-        /// <summary>
-        /// Returns Mignotte's bound (sqrt(n+1) * 2^n max |this|)
-        /// </summary>
-        /// <returns>Mignotte's bound</returns>
-        /// <summary>
-        /// Evaluates this poly at a given rational point {@code num/den}
-        /// </summary>
-        /// <param name="num">point numerator</param>
-        /// <param name="den">point denominator</param>
-        /// <returns>value at {@code num/den}</returns>
-        /// <exception cref="ArithmeticException">if the result is not integer</exception>
-        /// <summary>
-        /// Returns the content of this poly (gcd of its coefficients)
-        /// </summary>
-        /// <returns>polynomial content</returns>
-        /// <summary>
-        /// Divides this polynomial by a {@code factor} or returns {@code null} (causing loss of internal data) if some of
-        /// the elements can't be exactly divided by the {@code factor}. NOTE: is {@code null} is returned, the content of
-        /// {@code this} is destroyed.
-        /// </summary>
-        /// <param name="factor">the factor</param>
-        /// <returns>{@code this} divided by the {@code factor} or {@code null}</returns>
+
         public override UnivariatePolynomialZ64 MultiplyByBigInteger(BigInteger factor)
         {
             return Multiply(factor.LongValueExact());
         }
 
-        /// <summary>
-        /// main constructor
-        /// </summary>
-        /// <summary>
-        /// copy constructor
-        /// </summary>
-        /// <summary>
-        /// Parse string into polynomial
-        /// </summary>
-        /// <summary>
-        /// Creates Z[x] polynomial from the specified coefficients
-        /// </summary>
-        /// <param name="data">coefficients</param>
-        /// <returns>Z[x] polynomial</returns>
-        /// <summary>
-        /// Creates monomial {@code coefficient * x^exponent}
-        /// </summary>
-        /// <param name="coefficient">monomial coefficient</param>
-        /// <param name="exponent">monomial exponent</param>
-        /// <returns>{@code coefficient * x^exponent}</returns>
-        /// <summary>
-        /// Creates zero polynomial
-        /// </summary>
-        /// <returns>zero polynomial</returns>
-        /// <summary>
-        /// Creates unit polynomial
-        /// </summary>
-        /// <returns>unit polynomial</returns>
-        /// <summary>
-        /// Returns constant with specified value
-        /// </summary>
-        /// <returns>constant with specified value</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// {@inheritDoc}. The ring of the result is {@link Rings#Z}
-        /// </summary>
-        /// <summary>
-        /// Returns Mignotte's bound (sqrt(n+1) * 2^n max |this|)
-        /// </summary>
-        /// <returns>Mignotte's bound</returns>
-        /// <summary>
-        /// Evaluates this poly at a given rational point {@code num/den}
-        /// </summary>
-        /// <param name="num">point numerator</param>
-        /// <param name="den">point denominator</param>
-        /// <returns>value at {@code num/den}</returns>
-        /// <exception cref="ArithmeticException">if the result is not integer</exception>
-        /// <summary>
-        /// Returns the content of this poly (gcd of its coefficients)
-        /// </summary>
-        /// <returns>polynomial content</returns>
-        /// <summary>
-        /// Divides this polynomial by a {@code factor} or returns {@code null} (causing loss of internal data) if some of
-        /// the elements can't be exactly divided by the {@code factor}. NOTE: is {@code null} is returned, the content of
-        /// {@code this} is destroyed.
-        /// </summary>
-        /// <param name="factor">the factor</param>
-        /// <returns>{@code this} divided by the {@code factor} or {@code null}</returns>
         /// <summary>
         /// internal API
         /// </summary>
@@ -2896,91 +391,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
             return this;
         }
 
-        /// <summary>
-        /// main constructor
-        /// </summary>
-        /// <summary>
-        /// copy constructor
-        /// </summary>
-        /// <summary>
-        /// Parse string into polynomial
-        /// </summary>
-        /// <summary>
-        /// Creates Z[x] polynomial from the specified coefficients
-        /// </summary>
-        /// <param name="data">coefficients</param>
-        /// <returns>Z[x] polynomial</returns>
-        /// <summary>
-        /// Creates monomial {@code coefficient * x^exponent}
-        /// </summary>
-        /// <param name="coefficient">monomial coefficient</param>
-        /// <param name="exponent">monomial exponent</param>
-        /// <returns>{@code coefficient * x^exponent}</returns>
-        /// <summary>
-        /// Creates zero polynomial
-        /// </summary>
-        /// <returns>zero polynomial</returns>
-        /// <summary>
-        /// Creates unit polynomial
-        /// </summary>
-        /// <returns>unit polynomial</returns>
-        /// <summary>
-        /// Returns constant with specified value
-        /// </summary>
-        /// <returns>constant with specified value</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// {@inheritDoc}. The ring of the result is {@link Rings#Z}
-        /// </summary>
-        /// <summary>
-        /// Returns Mignotte's bound (sqrt(n+1) * 2^n max |this|)
-        /// </summary>
-        /// <returns>Mignotte's bound</returns>
-        /// <summary>
-        /// Evaluates this poly at a given rational point {@code num/den}
-        /// </summary>
-        /// <param name="num">point numerator</param>
-        /// <param name="den">point denominator</param>
-        /// <returns>value at {@code num/den}</returns>
-        /// <exception cref="ArithmeticException">if the result is not integer</exception>
-        /// <summary>
-        /// Returns the content of this poly (gcd of its coefficients)
-        /// </summary>
-        /// <returns>polynomial content</returns>
-        /// <summary>
-        /// Divides this polynomial by a {@code factor} or returns {@code null} (causing loss of internal data) if some of
-        /// the elements can't be exactly divided by the {@code factor}. NOTE: is {@code null} is returned, the content of
-        /// {@code this} is destroyed.
-        /// </summary>
-        /// <param name="factor">the factor</param>
-        /// <returns>{@code this} divided by the {@code factor} or {@code null}</returns>
-        /// <summary>
-        /// internal API
-        /// </summary>
+
         public override UnivariatePolynomialZ64 Multiply(UnivariatePolynomialZ64 oth)
         {
             if (IsZero())
@@ -2994,13 +405,13 @@ namespace Cc.Redberry.Rings.Poly.Univar
             if (degree == 0)
             {
                 long factor = data[0];
-                data = oth.data.Clone();
+                data = (long[])oth.data.Clone();
                 degree = oth.degree;
                 return Multiply(factor);
             }
 
             double rBound = NormMax() * oth.NormMax() * Math.Max(degree + 1, oth.degree + 1);
-            if (rBound < Long.MAX_VALUE)
+            if (rBound < long.MaxValue)
 
                 // we can apply fast integer arithmetic
                 data = MultiplyUnsafe0(oth);
@@ -3011,95 +422,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
             return this;
         }
 
-        /// <summary>
-        /// main constructor
-        /// </summary>
-        /// <summary>
-        /// copy constructor
-        /// </summary>
-        /// <summary>
-        /// Parse string into polynomial
-        /// </summary>
-        /// <summary>
-        /// Creates Z[x] polynomial from the specified coefficients
-        /// </summary>
-        /// <param name="data">coefficients</param>
-        /// <returns>Z[x] polynomial</returns>
-        /// <summary>
-        /// Creates monomial {@code coefficient * x^exponent}
-        /// </summary>
-        /// <param name="coefficient">monomial coefficient</param>
-        /// <param name="exponent">monomial exponent</param>
-        /// <returns>{@code coefficient * x^exponent}</returns>
-        /// <summary>
-        /// Creates zero polynomial
-        /// </summary>
-        /// <returns>zero polynomial</returns>
-        /// <summary>
-        /// Creates unit polynomial
-        /// </summary>
-        /// <returns>unit polynomial</returns>
-        /// <summary>
-        /// Returns constant with specified value
-        /// </summary>
-        /// <returns>constant with specified value</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// {@inheritDoc}. The ring of the result is {@link Rings#Z}
-        /// </summary>
-        /// <summary>
-        /// Returns Mignotte's bound (sqrt(n+1) * 2^n max |this|)
-        /// </summary>
-        /// <returns>Mignotte's bound</returns>
-        /// <summary>
-        /// Evaluates this poly at a given rational point {@code num/den}
-        /// </summary>
-        /// <param name="num">point numerator</param>
-        /// <param name="den">point denominator</param>
-        /// <returns>value at {@code num/den}</returns>
-        /// <exception cref="ArithmeticException">if the result is not integer</exception>
-        /// <summary>
-        /// Returns the content of this poly (gcd of its coefficients)
-        /// </summary>
-        /// <returns>polynomial content</returns>
-        /// <summary>
-        /// Divides this polynomial by a {@code factor} or returns {@code null} (causing loss of internal data) if some of
-        /// the elements can't be exactly divided by the {@code factor}. NOTE: is {@code null} is returned, the content of
-        /// {@code this} is destroyed.
-        /// </summary>
-        /// <param name="factor">the factor</param>
-        /// <returns>{@code this} divided by the {@code factor} or {@code null}</returns>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        // we can apply fast integer arithmetic
-        /// <summary>
-        /// internal API
-        /// </summary>
+
         public UnivariatePolynomialZ64 MultiplyUnsafe(UnivariatePolynomialZ64 oth)
         {
             if (IsZero())
@@ -3113,7 +436,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
             if (degree == 0)
             {
                 long factor = data[0];
-                data = oth.data.Clone();
+                data = (long[])oth.data.Clone();
                 degree = oth.degree;
                 return MultiplyUnsafe(factor);
             }
@@ -3124,95 +447,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
             return this;
         }
 
-        /// <summary>
-        /// main constructor
-        /// </summary>
-        /// <summary>
-        /// copy constructor
-        /// </summary>
-        /// <summary>
-        /// Parse string into polynomial
-        /// </summary>
-        /// <summary>
-        /// Creates Z[x] polynomial from the specified coefficients
-        /// </summary>
-        /// <param name="data">coefficients</param>
-        /// <returns>Z[x] polynomial</returns>
-        /// <summary>
-        /// Creates monomial {@code coefficient * x^exponent}
-        /// </summary>
-        /// <param name="coefficient">monomial coefficient</param>
-        /// <param name="exponent">monomial exponent</param>
-        /// <returns>{@code coefficient * x^exponent}</returns>
-        /// <summary>
-        /// Creates zero polynomial
-        /// </summary>
-        /// <returns>zero polynomial</returns>
-        /// <summary>
-        /// Creates unit polynomial
-        /// </summary>
-        /// <returns>unit polynomial</returns>
-        /// <summary>
-        /// Returns constant with specified value
-        /// </summary>
-        /// <returns>constant with specified value</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// {@inheritDoc}. The ring of the result is {@link Rings#Z}
-        /// </summary>
-        /// <summary>
-        /// Returns Mignotte's bound (sqrt(n+1) * 2^n max |this|)
-        /// </summary>
-        /// <returns>Mignotte's bound</returns>
-        /// <summary>
-        /// Evaluates this poly at a given rational point {@code num/den}
-        /// </summary>
-        /// <param name="num">point numerator</param>
-        /// <param name="den">point denominator</param>
-        /// <returns>value at {@code num/den}</returns>
-        /// <exception cref="ArithmeticException">if the result is not integer</exception>
-        /// <summary>
-        /// Returns the content of this poly (gcd of its coefficients)
-        /// </summary>
-        /// <returns>polynomial content</returns>
-        /// <summary>
-        /// Divides this polynomial by a {@code factor} or returns {@code null} (causing loss of internal data) if some of
-        /// the elements can't be exactly divided by the {@code factor}. NOTE: is {@code null} is returned, the content of
-        /// {@code this} is destroyed.
-        /// </summary>
-        /// <param name="factor">the factor</param>
-        /// <returns>{@code this} divided by the {@code factor} or {@code null}</returns>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        // we can apply fast integer arithmetic
-        /// <summary>
-        /// internal API
-        /// </summary>
+
         public override UnivariatePolynomialZ64 Square()
         {
             if (IsZero())
@@ -3221,7 +456,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
                 return Multiply(data[0]);
             double norm1 = NormMax();
             double rBound = norm1 * norm1 * (degree + 1);
-            if (rBound < Long.MAX_VALUE)
+            if (rBound < long.MaxValue)
 
                 // we can apply fast integer arithmetic
                 data = SquareUnsafe0();
@@ -3232,96 +467,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
             return this;
         }
 
-        /// <summary>
-        /// main constructor
-        /// </summary>
-        /// <summary>
-        /// copy constructor
-        /// </summary>
-        /// <summary>
-        /// Parse string into polynomial
-        /// </summary>
-        /// <summary>
-        /// Creates Z[x] polynomial from the specified coefficients
-        /// </summary>
-        /// <param name="data">coefficients</param>
-        /// <returns>Z[x] polynomial</returns>
-        /// <summary>
-        /// Creates monomial {@code coefficient * x^exponent}
-        /// </summary>
-        /// <param name="coefficient">monomial coefficient</param>
-        /// <param name="exponent">monomial exponent</param>
-        /// <returns>{@code coefficient * x^exponent}</returns>
-        /// <summary>
-        /// Creates zero polynomial
-        /// </summary>
-        /// <returns>zero polynomial</returns>
-        /// <summary>
-        /// Creates unit polynomial
-        /// </summary>
-        /// <returns>unit polynomial</returns>
-        /// <summary>
-        /// Returns constant with specified value
-        /// </summary>
-        /// <returns>constant with specified value</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// {@inheritDoc}. The ring of the result is {@link Rings#Z}
-        /// </summary>
-        /// <summary>
-        /// Returns Mignotte's bound (sqrt(n+1) * 2^n max |this|)
-        /// </summary>
-        /// <returns>Mignotte's bound</returns>
-        /// <summary>
-        /// Evaluates this poly at a given rational point {@code num/den}
-        /// </summary>
-        /// <param name="num">point numerator</param>
-        /// <param name="den">point denominator</param>
-        /// <returns>value at {@code num/den}</returns>
-        /// <exception cref="ArithmeticException">if the result is not integer</exception>
-        /// <summary>
-        /// Returns the content of this poly (gcd of its coefficients)
-        /// </summary>
-        /// <returns>polynomial content</returns>
-        /// <summary>
-        /// Divides this polynomial by a {@code factor} or returns {@code null} (causing loss of internal data) if some of
-        /// the elements can't be exactly divided by the {@code factor}. NOTE: is {@code null} is returned, the content of
-        /// {@code this} is destroyed.
-        /// </summary>
-        /// <param name="factor">the factor</param>
-        /// <returns>{@code this} divided by the {@code factor} or {@code null}</returns>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        // we can apply fast integer arithmetic
-        /// <summary>
-        /// internal API
-        /// </summary>
-        // we can apply fast integer arithmetic
+
         public override UnivariatePolynomialZ64 Derivative()
         {
             if (IsConstant())
@@ -3332,476 +478,29 @@ namespace Cc.Redberry.Rings.Poly.Univar
             return CreateFromArray(newData);
         }
 
-        /// <summary>
-        /// main constructor
-        /// </summary>
-        /// <summary>
-        /// copy constructor
-        /// </summary>
-        /// <summary>
-        /// Parse string into polynomial
-        /// </summary>
-        /// <summary>
-        /// Creates Z[x] polynomial from the specified coefficients
-        /// </summary>
-        /// <param name="data">coefficients</param>
-        /// <returns>Z[x] polynomial</returns>
-        /// <summary>
-        /// Creates monomial {@code coefficient * x^exponent}
-        /// </summary>
-        /// <param name="coefficient">monomial coefficient</param>
-        /// <param name="exponent">monomial exponent</param>
-        /// <returns>{@code coefficient * x^exponent}</returns>
-        /// <summary>
-        /// Creates zero polynomial
-        /// </summary>
-        /// <returns>zero polynomial</returns>
-        /// <summary>
-        /// Creates unit polynomial
-        /// </summary>
-        /// <returns>unit polynomial</returns>
-        /// <summary>
-        /// Returns constant with specified value
-        /// </summary>
-        /// <returns>constant with specified value</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// {@inheritDoc}. The ring of the result is {@link Rings#Z}
-        /// </summary>
-        /// <summary>
-        /// Returns Mignotte's bound (sqrt(n+1) * 2^n max |this|)
-        /// </summary>
-        /// <returns>Mignotte's bound</returns>
-        /// <summary>
-        /// Evaluates this poly at a given rational point {@code num/den}
-        /// </summary>
-        /// <param name="num">point numerator</param>
-        /// <param name="den">point denominator</param>
-        /// <returns>value at {@code num/den}</returns>
-        /// <exception cref="ArithmeticException">if the result is not integer</exception>
-        /// <summary>
-        /// Returns the content of this poly (gcd of its coefficients)
-        /// </summary>
-        /// <returns>polynomial content</returns>
-        /// <summary>
-        /// Divides this polynomial by a {@code factor} or returns {@code null} (causing loss of internal data) if some of
-        /// the elements can't be exactly divided by the {@code factor}. NOTE: is {@code null} is returned, the content of
-        /// {@code this} is destroyed.
-        /// </summary>
-        /// <param name="factor">the factor</param>
-        /// <returns>{@code this} divided by the {@code factor} or {@code null}</returns>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        // we can apply fast integer arithmetic
-        /// <summary>
-        /// internal API
-        /// </summary>
-        // we can apply fast integer arithmetic
+
         public override UnivariatePolynomialZ64 Clone()
         {
-            return new UnivariatePolynomialZ64(data.Clone(), degree);
+            return new UnivariatePolynomialZ64((long[])data.Clone(), degree);
         }
 
-        /// <summary>
-        /// main constructor
-        /// </summary>
-        /// <summary>
-        /// copy constructor
-        /// </summary>
-        /// <summary>
-        /// Parse string into polynomial
-        /// </summary>
-        /// <summary>
-        /// Creates Z[x] polynomial from the specified coefficients
-        /// </summary>
-        /// <param name="data">coefficients</param>
-        /// <returns>Z[x] polynomial</returns>
-        /// <summary>
-        /// Creates monomial {@code coefficient * x^exponent}
-        /// </summary>
-        /// <param name="coefficient">monomial coefficient</param>
-        /// <param name="exponent">monomial exponent</param>
-        /// <returns>{@code coefficient * x^exponent}</returns>
-        /// <summary>
-        /// Creates zero polynomial
-        /// </summary>
-        /// <returns>zero polynomial</returns>
-        /// <summary>
-        /// Creates unit polynomial
-        /// </summary>
-        /// <returns>unit polynomial</returns>
-        /// <summary>
-        /// Returns constant with specified value
-        /// </summary>
-        /// <returns>constant with specified value</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// {@inheritDoc}. The ring of the result is {@link Rings#Z}
-        /// </summary>
-        /// <summary>
-        /// Returns Mignotte's bound (sqrt(n+1) * 2^n max |this|)
-        /// </summary>
-        /// <returns>Mignotte's bound</returns>
-        /// <summary>
-        /// Evaluates this poly at a given rational point {@code num/den}
-        /// </summary>
-        /// <param name="num">point numerator</param>
-        /// <param name="den">point denominator</param>
-        /// <returns>value at {@code num/den}</returns>
-        /// <exception cref="ArithmeticException">if the result is not integer</exception>
-        /// <summary>
-        /// Returns the content of this poly (gcd of its coefficients)
-        /// </summary>
-        /// <returns>polynomial content</returns>
-        /// <summary>
-        /// Divides this polynomial by a {@code factor} or returns {@code null} (causing loss of internal data) if some of
-        /// the elements can't be exactly divided by the {@code factor}. NOTE: is {@code null} is returned, the content of
-        /// {@code this} is destroyed.
-        /// </summary>
-        /// <param name="factor">the factor</param>
-        /// <returns>{@code this} divided by the {@code factor} or {@code null}</returns>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        // we can apply fast integer arithmetic
-        /// <summary>
-        /// internal API
-        /// </summary>
-        // we can apply fast integer arithmetic
         public override UnivariatePolynomialZ64 ParsePoly(string @string)
         {
             return Parse(@string);
         }
 
-        /// <summary>
-        /// main constructor
-        /// </summary>
-        /// <summary>
-        /// copy constructor
-        /// </summary>
-        /// <summary>
-        /// Parse string into polynomial
-        /// </summary>
-        /// <summary>
-        /// Creates Z[x] polynomial from the specified coefficients
-        /// </summary>
-        /// <param name="data">coefficients</param>
-        /// <returns>Z[x] polynomial</returns>
-        /// <summary>
-        /// Creates monomial {@code coefficient * x^exponent}
-        /// </summary>
-        /// <param name="coefficient">monomial coefficient</param>
-        /// <param name="exponent">monomial exponent</param>
-        /// <returns>{@code coefficient * x^exponent}</returns>
-        /// <summary>
-        /// Creates zero polynomial
-        /// </summary>
-        /// <returns>zero polynomial</returns>
-        /// <summary>
-        /// Creates unit polynomial
-        /// </summary>
-        /// <returns>unit polynomial</returns>
-        /// <summary>
-        /// Returns constant with specified value
-        /// </summary>
-        /// <returns>constant with specified value</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// {@inheritDoc}. The ring of the result is {@link Rings#Z}
-        /// </summary>
-        /// <summary>
-        /// Returns Mignotte's bound (sqrt(n+1) * 2^n max |this|)
-        /// </summary>
-        /// <returns>Mignotte's bound</returns>
-        /// <summary>
-        /// Evaluates this poly at a given rational point {@code num/den}
-        /// </summary>
-        /// <param name="num">point numerator</param>
-        /// <param name="den">point denominator</param>
-        /// <returns>value at {@code num/den}</returns>
-        /// <exception cref="ArithmeticException">if the result is not integer</exception>
-        /// <summary>
-        /// Returns the content of this poly (gcd of its coefficients)
-        /// </summary>
-        /// <returns>polynomial content</returns>
-        /// <summary>
-        /// Divides this polynomial by a {@code factor} or returns {@code null} (causing loss of internal data) if some of
-        /// the elements can't be exactly divided by the {@code factor}. NOTE: is {@code null} is returned, the content of
-        /// {@code this} is destroyed.
-        /// </summary>
-        /// <param name="factor">the factor</param>
-        /// <returns>{@code this} divided by the {@code factor} or {@code null}</returns>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        // we can apply fast integer arithmetic
-        /// <summary>
-        /// internal API
-        /// </summary>
-        // we can apply fast integer arithmetic
+
         public override string CoefficientRingToString(IStringifier<UnivariatePolynomialZ64> stringifier)
         {
             return "Z";
         }
 
-        /// <summary>
-        /// main constructor
-        /// </summary>
-        /// <summary>
-        /// copy constructor
-        /// </summary>
-        /// <summary>
-        /// Parse string into polynomial
-        /// </summary>
-        /// <summary>
-        /// Creates Z[x] polynomial from the specified coefficients
-        /// </summary>
-        /// <param name="data">coefficients</param>
-        /// <returns>Z[x] polynomial</returns>
-        /// <summary>
-        /// Creates monomial {@code coefficient * x^exponent}
-        /// </summary>
-        /// <param name="coefficient">monomial coefficient</param>
-        /// <param name="exponent">monomial exponent</param>
-        /// <returns>{@code coefficient * x^exponent}</returns>
-        /// <summary>
-        /// Creates zero polynomial
-        /// </summary>
-        /// <returns>zero polynomial</returns>
-        /// <summary>
-        /// Creates unit polynomial
-        /// </summary>
-        /// <returns>unit polynomial</returns>
-        /// <summary>
-        /// Returns constant with specified value
-        /// </summary>
-        /// <returns>constant with specified value</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// {@inheritDoc}. The ring of the result is {@link Rings#Z}
-        /// </summary>
-        /// <summary>
-        /// Returns Mignotte's bound (sqrt(n+1) * 2^n max |this|)
-        /// </summary>
-        /// <returns>Mignotte's bound</returns>
-        /// <summary>
-        /// Evaluates this poly at a given rational point {@code num/den}
-        /// </summary>
-        /// <param name="num">point numerator</param>
-        /// <param name="den">point denominator</param>
-        /// <returns>value at {@code num/den}</returns>
-        /// <exception cref="ArithmeticException">if the result is not integer</exception>
-        /// <summary>
-        /// Returns the content of this poly (gcd of its coefficients)
-        /// </summary>
-        /// <returns>polynomial content</returns>
-        /// <summary>
-        /// Divides this polynomial by a {@code factor} or returns {@code null} (causing loss of internal data) if some of
-        /// the elements can't be exactly divided by the {@code factor}. NOTE: is {@code null} is returned, the content of
-        /// {@code this} is destroyed.
-        /// </summary>
-        /// <param name="factor">the factor</param>
-        /// <returns>{@code this} divided by the {@code factor} or {@code null}</returns>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        // we can apply fast integer arithmetic
-        /// <summary>
-        /// internal API
-        /// </summary>
-        // we can apply fast integer arithmetic
         public override AMultivariatePolynomial Composition(AMultivariatePolynomial value)
         {
             throw new NotSupportedException();
         }
 
-        /// <summary>
-        /// main constructor
-        /// </summary>
-        /// <summary>
-        /// copy constructor
-        /// </summary>
-        /// <summary>
-        /// Parse string into polynomial
-        /// </summary>
-        /// <summary>
-        /// Creates Z[x] polynomial from the specified coefficients
-        /// </summary>
-        /// <param name="data">coefficients</param>
-        /// <returns>Z[x] polynomial</returns>
-        /// <summary>
-        /// Creates monomial {@code coefficient * x^exponent}
-        /// </summary>
-        /// <param name="coefficient">monomial coefficient</param>
-        /// <param name="exponent">monomial exponent</param>
-        /// <returns>{@code coefficient * x^exponent}</returns>
-        /// <summary>
-        /// Creates zero polynomial
-        /// </summary>
-        /// <returns>zero polynomial</returns>
-        /// <summary>
-        /// Creates unit polynomial
-        /// </summary>
-        /// <returns>unit polynomial</returns>
-        /// <summary>
-        /// Returns constant with specified value
-        /// </summary>
-        /// <returns>constant with specified value</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="modulus">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces this polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <param name="copy">whether to copy the internal data or reduce inplace (in which case the data of this will be lost)</param>
-        /// <returns>this modulo {@code modulus}</returns>
-        /// <summary>
-        /// Reduces (copied) polynomial modulo {@code modulus} and returns the result.
-        /// </summary>
-        /// <param name="ring">the modulus</param>
-        /// <returns>a copy of this modulo {@code modulus}</returns>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// {@inheritDoc}. The ring of the result is {@link Rings#Z}
-        /// </summary>
-        /// <summary>
-        /// Returns Mignotte's bound (sqrt(n+1) * 2^n max |this|)
-        /// </summary>
-        /// <returns>Mignotte's bound</returns>
-        /// <summary>
-        /// Evaluates this poly at a given rational point {@code num/den}
-        /// </summary>
-        /// <param name="num">point numerator</param>
-        /// <param name="den">point denominator</param>
-        /// <returns>value at {@code num/den}</returns>
-        /// <exception cref="ArithmeticException">if the result is not integer</exception>
-        /// <summary>
-        /// Returns the content of this poly (gcd of its coefficients)
-        /// </summary>
-        /// <returns>polynomial content</returns>
-        /// <summary>
-        /// Divides this polynomial by a {@code factor} or returns {@code null} (causing loss of internal data) if some of
-        /// the elements can't be exactly divided by the {@code factor}. NOTE: is {@code null} is returned, the content of
-        /// {@code this} is destroyed.
-        /// </summary>
-        /// <param name="factor">the factor</param>
-        /// <returns>{@code this} divided by the {@code factor} or {@code null}</returns>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        // we can apply fast integer arithmetic
-        /// <summary>
-        /// internal API
-        /// </summary>
-        // we can apply fast integer arithmetic
+
         public override AMultivariatePolynomial AsMultivariate(Comparator<DegreeVector> ordering)
         {
             throw new NotSupportedException();

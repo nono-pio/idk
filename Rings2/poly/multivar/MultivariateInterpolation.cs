@@ -1,18 +1,3 @@
-using Cc.Redberry.Rings;
-using Cc.Redberry.Rings.Poly;
-using Gnu.Trove.List.Array;
-using Java.Util;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using static Cc.Redberry.Rings.Poly.Multivar.RoundingMode;
-using static Cc.Redberry.Rings.Poly.Multivar.Associativity;
-using static Cc.Redberry.Rings.Poly.Multivar.Operator;
-using static Cc.Redberry.Rings.Poly.Multivar.TokenType;
-using static Cc.Redberry.Rings.Poly.Multivar.SystemInfo;
-
 namespace Cc.Redberry.Rings.Poly.Multivar
 {
     /// <summary>
@@ -25,7 +10,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         {
         }
 
-        private static void CheckInput(object[] points, object[] values)
+        private static void CheckInput<T>(T[] points, MultivariatePolynomial<T>[] values)
         {
             if (points.Length != values.Length)
                 throw new ArgumentException();
@@ -41,7 +26,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         public static MultivariatePolynomial<E> InterpolateNewton<E>(int variable, E[] points, MultivariatePolynomial<E>[] values)
         {
             CheckInput(points, values);
-            return new Interpolation(variable, values[0]).Update(points, values).GetInterpolatingPolynomial(); //        int length = points.length;
+            return new Interpolation<E>(variable, values[0]).Update(points, values).GetInterpolatingPolynomial(); //        int length = points.length;
             //
             //        // Newton's representation
             //        MultivariatePolynomial<E>[] mixedRadix = new MultivariatePolynomial[length];
@@ -80,7 +65,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             /// <summary>
             /// list of evaluation points
             /// </summary>
-            private readonly IList<E> points = new List();
+            private readonly List<E> points = new List<E>();
             /// <summary>
             /// variable
             /// </summary>
@@ -90,7 +75,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             /// <summary>
             /// list of values at points
             /// </summary>
-            private readonly IList<MultivariatePolynomial<E>> values = new List();
+            private readonly List<MultivariatePolynomial<E>> values = [];
             /// <summary>
             /// variable
             /// </summary>
@@ -103,7 +88,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             /// <summary>
             /// mixed radix form of interpolating polynomial
             /// </summary>
-            private readonly IList<MultivariatePolynomial<E>> mixedRadix = new List();
+            private readonly List<MultivariatePolynomial<E>> mixedRadix = [];
             /// <summary>
             /// variable
             /// </summary>
@@ -324,7 +309,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             /// <param name="value">polynomial value at {@code point}</param>
             public Interpolation<E> Update(E point, MultivariatePolynomial<E> value)
             {
-                if (points.IsEmpty())
+                if (points.Count == 0)
                 {
                     poly.Multiply(value);
                     points.Add(point);
@@ -580,7 +565,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             /// Returns the list of evaluation points used in interpolation
             /// </summary>
             /// <returns>list of evaluation points used in interpolation</returns>
-            public IList<E> GetPoints()
+            public List<E> GetPoints()
             {
                 return points;
             }
@@ -648,7 +633,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             /// Returns the list of polynomial values at interpolation points
             /// </summary>
             /// <returns>the list of polynomial values at interpolation points</returns>
-            public IList<MultivariatePolynomial<E>> GetValues()
+            public List<MultivariatePolynomial<E>> GetValues()
             {
                 return values;
             }
@@ -742,11 +727,11 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             /// <summary>
             /// list of values at points
             /// </summary>
-            private readonly IList<MultivariatePolynomialZp64> values = new List();
+            private readonly List<MultivariatePolynomialZp64> values = [];
             /// <summary>
             /// mixed radix form of interpolating polynomial
             /// </summary>
-            private readonly IList<MultivariatePolynomialZp64> mixedRadix = new List();
+            private readonly List<MultivariatePolynomialZp64> mixedRadix = [];
             /// <summary>
             /// total modulus (x_i - points[0])*(x_i - points[1])*...
             /// </summary>
@@ -875,7 +860,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             /// Returns the list of polynomial values at interpolation points
             /// </summary>
             /// <returns>the list of polynomial values at interpolation points</returns>
-            public IList<MultivariatePolynomialZp64> GetValues()
+            public List<MultivariatePolynomialZp64> GetValues()
             {
                 return values;
             }

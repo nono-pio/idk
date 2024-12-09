@@ -1,15 +1,7 @@
+
+
+using System.Numerics;
 using Cc.Redberry.Rings.Bigint;
-using Cc.Redberry.Rings.Poly;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using static Cc.Redberry.Rings.Poly.Univar.RoundingMode;
-using static Cc.Redberry.Rings.Poly.Univar.Associativity;
-using static Cc.Redberry.Rings.Poly.Univar.Operator;
-using static Cc.Redberry.Rings.Poly.Univar.TokenType;
-using static Cc.Redberry.Rings.Poly.Univar.SystemInfo;
 
 namespace Cc.Redberry.Rings.Poly.Univar
 {
@@ -31,7 +23,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <param name="copy">whether to clone {@code dividend}; if not, the result will be placed directly to {@code
         ///                    dividend} and the original {@code dividend} data will be lost</param>
         /// <returns>{@code dividend % polyModulus}</returns>
-        public static T PolyMod<T extends IUnivariatePolynomial<T>>(T dividend, T polyModulus, bool copy)
+        public static T PolyMod<T>(T dividend, T polyModulus, bool copy) where T : IUnivariatePolynomial<T>
         {
             return UnivariateDivision.Remainder(dividend, polyModulus, copy);
         }
@@ -47,7 +39,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         ///                    dividend} and the original {@code dividend} data will be lost</param>
         /// <returns>{@code dividend % polyModulus}</returns>
         /// <remarks>@seeUnivariateDivision#fastDivisionPreConditioning(IUnivariatePolynomial)</remarks>
-        public static T PolyMod<T extends IUnivariatePolynomial<T>>(T dividend, T polyModulus, UnivariateDivision.InverseModMonomial<T> invMod, bool copy)
+        public static T PolyMod<T>(T dividend, T polyModulus, UnivariateDivision.InverseModMonomial<T> invMod, bool copy)  where T : IUnivariatePolynomial<T>
         {
             return UnivariateDivision.RemainderFast(dividend, polyModulus, invMod, copy);
         }
@@ -61,7 +53,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <param name="copy">whether to clone {@code m1}; if not, the result will be placed directly to the data structure
         ///                    of the first multiplier {@code m1} and the original data of {@code m1} will be lost</param>
         /// <returns>{@code (m1 * m2) % polyModulus}</returns>
-        public static T PolyMultiplyMod<T extends IUnivariatePolynomial<T>>(T m1, T m2, T polyModulus, bool copy)
+        public static T PolyMultiplyMod<T>(T m1, T m2, T polyModulus, bool copy) where T : IUnivariatePolynomial<T>
         {
             return PolyMod((copy ? m1.Clone() : m1).Multiply(m2), polyModulus, false);
         }
@@ -78,7 +70,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         ///                    of the first multiplier {@code m1} and the original data of {@code m1} will be lost</param>
         /// <returns>{@code (m1 * m2) % polyModulus}</returns>
         /// <remarks>@seeUnivariateDivision#fastDivisionPreConditioning(IUnivariatePolynomial)</remarks>
-        public static T PolyMultiplyMod<T extends IUnivariatePolynomial<T>>(T m1, T m2, T polyModulus, UnivariateDivision.InverseModMonomial<T> invMod, bool copy)
+        public static T PolyMultiplyMod<T>(T m1, T m2, T polyModulus, UnivariateDivision.InverseModMonomial<T> invMod, bool copy) where T : IUnivariatePolynomial<T>
         {
             return PolyMod((copy ? m1.Clone() : m1).Multiply(m2), polyModulus, invMod, false);
         }
@@ -95,7 +87,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         ///                    of the first multiplier {@code m1} and the original data of {@code m1} will be lost</param>
         /// <returns>{@code (m1 + m2) % polyModulus}</returns>
         /// <remarks>@seeUnivariateDivision#fastDivisionPreConditioning(IUnivariatePolynomial)</remarks>
-        public static T PolyAddMod<T extends IUnivariatePolynomial<T>>(T m1, T m2, T polyModulus, UnivariateDivision.InverseModMonomial<T> invMod, bool copy)
+        public static T PolyAddMod<T>(T m1, T m2, T polyModulus, UnivariateDivision.InverseModMonomial<T> invMod, bool copy) where T : IUnivariatePolynomial<T>
         {
             return PolyMod((copy ? m1.Clone() : m1).Add(m2), polyModulus, invMod, false);
         }
@@ -109,7 +101,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <param name="copy">whether to clone {@code m1}; if not, the result will be placed directly to the data structure
         ///                    of the first multiplier {@code m1} and the original data of {@code m1} will be lost</param>
         /// <returns>{@code (m1 + m2) % polyModulus}</returns>
-        public static T PolyAddMod<T extends IUnivariatePolynomial<T>>(T m1, T m2, T polyModulus, bool copy)
+        public static T PolyAddMod<T>(T m1, T m2, T polyModulus, bool copy) where T : IUnivariatePolynomial<T>
         {
             return PolyMod((copy ? m1.Clone() : m1).Add(m2), polyModulus, false);
         }
@@ -126,7 +118,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         ///                    of the first multiplier {@code m1} and the original data of {@code m1} will be lost</param>
         /// <returns>{@code (m1 - m2) % polyModulus}</returns>
         /// <remarks>@seeUnivariateDivision#fastDivisionPreConditioning(IUnivariatePolynomial)</remarks>
-        public static T PolySubtractMod<T extends IUnivariatePolynomial<T>>(T m1, T m2, T polyModulus, UnivariateDivision.InverseModMonomial<T> invMod, bool copy)
+        public static T PolySubtractMod<T>(T m1, T m2, T polyModulus, UnivariateDivision.InverseModMonomial<T> invMod, bool copy) where T : IUnivariatePolynomial<T>
         {
             return PolyMod((copy ? m1.Clone() : m1).Subtract(m2), polyModulus, invMod, false);
         }
@@ -140,7 +132,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <param name="copy">whether to clone {@code m1}; if not, the result will be placed directly to the data structure
         ///                    of the first multiplier {@code m1} and the original data of {@code m1} will be lost</param>
         /// <returns>{@code (m1 - m2) % polyModulus}</returns>
-        public static T PolySubtractMod<T extends IUnivariatePolynomial<T>>(T m1, T m2, T polyModulus, bool copy)
+        public static T PolySubtractMod<T>(T m1, T m2, T polyModulus, bool copy) where T : IUnivariatePolynomial<T>
         {
             return PolyMod((copy ? m1.Clone() : m1).Subtract(m2), polyModulus, false);
         }
@@ -156,7 +148,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         ///                    of {@code m1} and the original data of {@code m1} will be lost</param>
         /// <returns>{@code (-m1) % polyModulus}</returns>
         /// <remarks>@seeUnivariateDivision#fastDivisionPreConditioning(IUnivariatePolynomial)</remarks>
-        public static T PolyNegateMod<T extends IUnivariatePolynomial<T>>(T m1, T polyModulus, UnivariateDivision.InverseModMonomial<T> invMod, bool copy)
+        public static T PolyNegateMod<T>(T m1, T polyModulus, UnivariateDivision.InverseModMonomial<T> invMod, bool copy) where T : IUnivariatePolynomial<T>
         {
 
             // fixme: better implementation possible ?
@@ -171,7 +163,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <param name="copy">whether to clone {@code m1}; if not, the result will be placed directly to the data structure
         ///                    of {@code m1} and the original data of {@code m1} will be lost</param>
         /// <returns>{@code (-m1) % polyModulus}</returns>
-        public static T PolyNegateMod<T extends IUnivariatePolynomial<T>>(T m1, T polyModulus, bool copy)
+        public static T PolyNegateMod<T>(T m1, T polyModulus, bool copy) where T : IUnivariatePolynomial<T>
         {
             return PolyMod((copy ? m1.Clone() : m1).Negate(), polyModulus, false);
         }
@@ -183,7 +175,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <param name="exponent">the non-negative exponent</param>
         /// <param name="copy">whether to clone {@code base}; if not the data of {@code base} will be lost</param>
         /// <returns>{@code base} in a power of {@code e}</returns>
-        public static T PolyPow<T extends IUnivariatePolynomial<T>>(T @base, long exponent, bool copy)
+        public static T PolyPow<T>(T @base, long exponent, bool copy) where T : IUnivariatePolynomial<T>
         {
             if (exponent < 0)
                 throw new ArgumentException();
@@ -208,7 +200,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <param name="polyModulus">the modulus</param>
         /// <param name="copy">whether to clone {@code base}; if not the data of {@code base} will be lost</param>
         /// <returns>{@code base} in a power of {@code e} modulo {@code polyModulus}</returns>
-        public static T PolyPowMod<T extends IUnivariatePolynomial<T>>(T @base, long exponent, T polyModulus, bool copy)
+        public static T PolyPowMod<T>(T @base, long exponent, T polyModulus, bool copy) where T : IUnivariatePolynomial<T>
         {
             return PolyPowMod(@base, exponent, polyModulus, UnivariateDivision.FastDivisionPreConditioning(polyModulus), copy);
         }
@@ -223,7 +215,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <param name="copy">whether to clone {@code base}; if not the data of {@code base} will be lost</param>
         /// <returns>{@code base} in a power of {@code e} modulo {@code polyModulus}</returns>
         /// <remarks>@seeUnivariateDivision#fastDivisionPreConditioning(IUnivariatePolynomial)</remarks>
-        public static T PolyPowMod<T extends IUnivariatePolynomial<T>>(T @base, long exponent, T polyModulus, UnivariateDivision.InverseModMonomial<T> invMod, bool copy)
+        public static T PolyPowMod<T>(T @base, long exponent, T polyModulus, UnivariateDivision.InverseModMonomial<T> invMod, bool copy) where T : IUnivariatePolynomial<T>
         {
             if (exponent < 0)
                 throw new ArgumentException();
@@ -252,11 +244,11 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <param name="copy">whether to clone {@code base}; if not the data of {@code base} will be lost</param>
         /// <returns>{@code base} in a power of {@code e} modulo {@code polyModulus}</returns>
         /// <remarks>@seeUnivariateDivision#fastDivisionPreConditioning(IUnivariatePolynomial)</remarks>
-        public static T PolyPowMod<T extends IUnivariatePolynomial<T>>(T @base, BigInteger exponent, T polyModulus, UnivariateDivision.InverseModMonomial<T> invMod, bool copy)
+        public static T PolyPowMod<T>(T @base, BigInteger exponent, T polyModulus, UnivariateDivision.InverseModMonomial<T> invMod, bool copy) where T : IUnivariatePolynomial<T>
         {
             if (exponent.Signum() < 0)
                 throw new ArgumentException();
-            if (exponent.IsZero())
+            if (exponent.IsZero)
                 return @base.CreateOne();
             T result = @base.CreateOne();
             T k2p = PolyMod(@base, polyModulus, invMod, copy); // this will copy the base
@@ -265,7 +257,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
                 if (exponent.TestBit(0))
                     result = PolyMod(result.Multiply(k2p), polyModulus, invMod, false);
                 exponent = exponent.ShiftRight(1);
-                if (exponent.IsZero())
+                if (exponent.IsZero)
                     return result;
                 k2p = PolyMod(k2p.Multiply(k2p), polyModulus, invMod, false);
             }
@@ -280,7 +272,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <param name="copy">whether to clone {@code base}; if not the data of {@code base} will be lost</param>
         /// <returns>{@code base} in a power of {@code e} modulo {@code polyModulus}</returns>
         /// <remarks>@seeUnivariateDivision#fastDivisionPreConditioning(IUnivariatePolynomial)</remarks>
-        public static T PolyPowMod<T extends IUnivariatePolynomial<T>>(T @base, BigInteger exponent, T polyModulus, bool copy)
+        public static T PolyPowMod<T>(T @base, BigInteger exponent, T polyModulus, bool copy) where T : IUnivariatePolynomial<T>
         {
             return PolyPowMod(@base, exponent, polyModulus, UnivariateDivision.FastDivisionPreConditioning(polyModulus), copy);
         }
@@ -296,7 +288,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <param name="polyModulus">the modulus</param>
         /// <param name="invMod">pre-conditioned modulus ({@link UnivariateDivision#fastDivisionPreConditioning(IUnivariatePolynomial)})</param>
         /// <returns>{@code x^exponent mod polyModulus}</returns>
-        public static T CreateMonomialMod<T extends IUnivariatePolynomial<T>>(long exponent, T polyModulus, UnivariateDivision.InverseModMonomial<T> invMod)
+        public static T CreateMonomialMod<T>(long exponent, T polyModulus, UnivariateDivision.InverseModMonomial<T> invMod) where T : IUnivariatePolynomial<T>
         {
             if (exponent < 0)
                 throw new ArgumentException("Negative exponent: " + exponent);
@@ -315,11 +307,11 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <param name="polyModulus">the modulus</param>
         /// <param name="invMod">pre-conditioned modulus ({@link UnivariateDivision#fastDivisionPreConditioning(IUnivariatePolynomial)})</param>
         /// <returns>{@code x^exponent mod polyModulus}</returns>
-        public static T CreateMonomialMod<T extends IUnivariatePolynomial<T>>(BigInteger exponent, T polyModulus, UnivariateDivision.InverseModMonomial<T> invMod)
+        public static T CreateMonomialMod<T>(BigInteger exponent, T polyModulus, UnivariateDivision.InverseModMonomial<T> invMod) where T : IUnivariatePolynomial<T>
         {
             if (exponent.Signum() < 0)
                 throw new ArgumentException("Negative exponent: " + exponent);
-            if (exponent.IsZero())
+            if (exponent.IsZero)
                 return polyModulus.CreateOne();
             if (exponent.IsLong())
                 return CreateMonomialMod(exponent.LongValueExact(), polyModulus, invMod);
@@ -330,7 +322,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <summary>
         /// plain create and reduce
         /// </summary>
-        static T SmallMonomial<T extends IUnivariatePolynomial<T>>(long exponent, T polyModulus, UnivariateDivision.InverseModMonomial<T> invMod)
+        static T SmallMonomial<T>(long exponent, T polyModulus, UnivariateDivision.InverseModMonomial<T> invMod) where T : IUnivariatePolynomial<T>
         {
             return UnivariatePolynomialArithmetic.PolyMod(polyModulus.CreateMonomial(MachineArithmetic.SafeToInt(exponent)), polyModulus, invMod, false);
         }
@@ -338,7 +330,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <summary>
         /// repeated squaring
         /// </summary>
-        static T LargeMonomial<T extends IUnivariatePolynomial<T>>(long exponent, T polyModulus, UnivariateDivision.InverseModMonomial<T> invMod)
+        static T LargeMonomial<T>(long exponent, T polyModulus, UnivariateDivision.InverseModMonomial<T> invMod) where T : IUnivariatePolynomial<T>
         {
             return PolyPowMod(polyModulus.CreateMonomial(1), exponent, polyModulus, invMod, false); //        T base = UnivariatePolynomialArithmetic.polyMod(
             //                polyModulus.monomial(MachineArithmetic.safeToInt(MONOMIAL_MOD_EXPONENT_THRESHOLD)),
@@ -360,7 +352,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <summary>
         /// repeated squaring
         /// </summary>
-        static T LargeMonomial<T extends IUnivariatePolynomial<T>>(BigInteger exponent, T polyModulus, UnivariateDivision.InverseModMonomial<T> invMod)
+        static T LargeMonomial<T>(BigInteger exponent, T polyModulus, UnivariateDivision.InverseModMonomial<T> invMod) where T : IUnivariatePolynomial<T>
         {
             return PolyPowMod(polyModulus.CreateMonomial(1), exponent, polyModulus, invMod, false); //        T base = UnivariatePolynomialArithmetic.polyMod(
             //                polyModulus.monomial(MachineArithmetic.safeToInt(MONOMIAL_MOD_EXPONENT_THRESHOLD)),

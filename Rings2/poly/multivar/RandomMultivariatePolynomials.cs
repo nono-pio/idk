@@ -1,19 +1,8 @@
-using Cc.Redberry.Rings;
+
+using System.Numerics;
+using System.Runtime.InteropServices.JavaScript;
 using Cc.Redberry.Rings.Bigint;
 using Cc.Redberry.Rings.Util;
-using Org.Apache.Commons.Math3.Random;
-using Java.Util;
-using Java.Util.Function;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using static Cc.Redberry.Rings.Poly.Multivar.RoundingMode;
-using static Cc.Redberry.Rings.Poly.Multivar.Associativity;
-using static Cc.Redberry.Rings.Poly.Multivar.Operator;
-using static Cc.Redberry.Rings.Poly.Multivar.TokenType;
-using static Cc.Redberry.Rings.Poly.Multivar.SystemInfo;
 
 namespace Cc.Redberry.Rings.Poly.Multivar
 {
@@ -37,20 +26,20 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         /// <param name="ordering">monomial order</param>
         /// <param name="rnd">random source</param>
         /// <returns>random Z[X] polynomial</returns>
-        public static MultivariatePolynomial<BigInteger> RandomPolynomial(int nVars, int degree, int size, BigInteger bound, Comparator<DegreeVector> ordering, RandomGenerator rnd)
+        public static MultivariatePolynomial<BigInteger> RandomPolynomial(int nVars, int degree, int size, BigInteger bound, IComparable<DegreeVector> ordering, Random rnd)
         {
             int nd = 3 * degree / 2;
-            Monomial<BigInteger>[] terms = new Monomial[size];
+            Monomial<BigInteger>[] terms = new Monomial<BigInteger>[size];
             for (int i = 0; i < size; i++)
             {
                 BigInteger cfx = RandomUtil.RandomInt(bound, rnd);
                 if (rnd.NextBoolean() && rnd.NextBoolean())
                     cfx = cfx.Negate();
                 int[] exponents = RandomUtil.RandomIntArray(nVars, 0, nd, rnd);
-                terms[i] = new Monomial(exponents, cfx);
+                terms[i] = new Monomial<BigInteger>(exponents, cfx);
             }
 
-            return MultivariatePolynomial.Create(nVars, Rings.Z, ordering, terms);
+            return MultivariatePolynomial<BigInteger>.Create(nVars, Rings.Z, ordering, terms);
         }
 
         /// <summary>
@@ -61,9 +50,9 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         /// <param name="size">number of elements in the result</param>
         /// <param name="rnd">random source</param>
         /// <returns>random polynomial</returns>
-        public static MultivariatePolynomial<BigInteger> RandomPolynomial(int nVars, int degree, int size, RandomGenerator rnd)
+        public static MultivariatePolynomial<BigInteger> RandomPolynomial(int nVars, int degree, int size, Random rnd)
         {
-            return RandomPolynomial(nVars, degree, size, BigInteger.TEN, MonomialOrder.DEFAULT, rnd);
+            return RandomPolynomial(nVars, degree, size, 10, MonomialOrder.DEFAULT, rnd);
         }
 
         /// <summary>
@@ -77,18 +66,18 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         /// <param name="method">method for generating random coefficients</param>
         /// <param name="rnd">random source</param>
         /// <returns>random polynomial</returns>
-        public static MultivariatePolynomial<E> RandomPolynomial<E>(int nVars, int degree, int size, Ring<E> ring, Comparator<DegreeVector> ordering, Function<RandomGenerator, E> method, RandomGenerator rnd)
+        public static MultivariatePolynomial<E> RandomPolynomial<E>(int nVars, int degree, int size, Ring<E> ring, IComparable<DegreeVector> ordering, Func<Random, E> method, Random rnd)
         {
             int nd = 3 * degree / 2;
-            Monomial<E>[] terms = new Monomial[size];
+            Monomial<E>[] terms = new Monomial<E>[size];
             for (int i = 0; i < size; i++)
             {
-                E cfx = method.Apply(rnd);
+                E cfx = method(rnd);
                 int[] exponents = RandomUtil.RandomIntArray(nVars, 0, nd, rnd);
-                terms[i] = new Monomial(exponents, cfx);
+                terms[i] = new Monomial<E>(exponents, cfx);
             }
 
-            return MultivariatePolynomial.Create(nVars, ring, ordering, terms);
+            return MultivariatePolynomial<E>.Create(nVars, ring, ordering, terms);
         }
 
         /// <summary>
@@ -103,17 +92,17 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         /// <param name="method">method for generating random coefficients</param>
         /// <param name="rnd">random source</param>
         /// <returns>random polynomial</returns>
-        public static MultivariatePolynomial<E> RandomPolynomial<E>(int nVars, int minDegree, int maxDegree, int size, Ring<E> ring, Comparator<DegreeVector> ordering, Function<RandomGenerator, E> method, RandomGenerator rnd)
+        public static MultivariatePolynomial<E> RandomPolynomial<E>(int nVars, int minDegree, int maxDegree, int size, Ring<E> ring, IComparable<DegreeVector> ordering, Func<Random, E> method, Random rnd)
         {
-            Monomial<E>[] terms = new Monomial[size];
+            Monomial<E>[] terms = new Monomial<E>[size];
             for (int i = 0; i < size; i++)
             {
-                E cfx = method.Apply(rnd);
+                E cfx = method(rnd);
                 int[] exponents = RandomUtil.RandomIntArray(nVars, minDegree, maxDegree, rnd);
-                terms[i] = new Monomial(exponents, cfx);
+                terms[i] = new Monomial<E>(exponents, cfx);
             }
 
-            return MultivariatePolynomial.Create(nVars, ring, ordering, terms);
+            return MultivariatePolynomial<E>.Create(nVars, ring, ordering, terms);
         }
 
         /// <summary>
@@ -126,7 +115,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         /// <param name="ordering">monomial order</param>
         /// <param name="rnd">random source</param>
         /// <returns>random polynomial</returns>
-        public static MultivariatePolynomial<E> RandomPolynomial<E>(int nVars, int degree, int size, Ring<E> ring, Comparator<DegreeVector> ordering, RandomGenerator rnd)
+        public static MultivariatePolynomial<E> RandomPolynomial<E>(int nVars, int degree, int size, Ring<E> ring, IComparable<DegreeVector> ordering, Random rnd)
         {
             return RandomPolynomial(nVars, degree, size, ring, ordering, ring.RandomElement(), rnd);
         }
@@ -140,7 +129,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         /// <param name="ring">the coefficient ring</param>
         /// <param name="rnd">random source</param>
         /// <returns>random polynomial</returns>
-        public static MultivariatePolynomialZp64 RandomPolynomial(int nVars, int degree, int size, IntegersZp64 ring, RandomGenerator rnd)
+        public static MultivariatePolynomialZp64 RandomPolynomial(int nVars, int degree, int size, IntegersZp64 ring, Random rnd)
         {
             return RandomPolynomial(nVars, degree, size, ring, MonomialOrder.DEFAULT, rnd);
         }
@@ -155,7 +144,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         /// <param name="ordering">monomial order</param>
         /// <param name="rnd">random source</param>
         /// <returns>random polynomial</returns>
-        public static MultivariatePolynomialZp64 RandomPolynomial(int nVars, int degree, int size, IntegersZp64 ring, Comparator<DegreeVector> ordering, RandomGenerator rnd)
+        public static MultivariatePolynomialZp64 RandomPolynomial(int nVars, int degree, int size, IntegersZp64 ring, IComparable<DegreeVector> ordering, Random rnd)
         {
             int nd = 3 * degree / 2;
             MonomialZp64[] terms = new MonomialZp64[size];
@@ -179,7 +168,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         /// <param name="ordering">monomial order</param>
         /// <param name="rnd">random source</param>
         /// <returns>random polynomial</returns>
-        public static MultivariatePolynomialZp64 RandomSharpPolynomial(int nVars, int degree, int size, IntegersZp64 ring, Comparator<DegreeVector> ordering, RandomGenerator rnd)
+        public static MultivariatePolynomialZp64 RandomSharpPolynomial(int nVars, int degree, int size, IntegersZp64 ring, IComparable<DegreeVector> ordering, Random rnd)
         {
             MonomialZp64[] terms = new MonomialZp64[size];
             for (int i = 0; i < size; i++)
@@ -202,17 +191,17 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         /// <param name="ordering">monomial order</param>
         /// <param name="rnd">random source</param>
         /// <returns>random polynomial</returns>
-        public static MultivariatePolynomial<E> RandomSharpPolynomial<E>(int nVars, int degree, int size, Ring<E> ring, Comparator<DegreeVector> ordering, Function<RandomGenerator, E> rndCoefficients, RandomGenerator rnd)
+        public static MultivariatePolynomial<E> RandomSharpPolynomial<E>(int nVars, int degree, int size, Ring<E> ring, IComparable<DegreeVector> ordering, Func<Random, E> rndCoefficients, Random rnd)
         {
-            Monomial<E>[] terms = new Monomial[size];
+            Monomial<E>[] terms = new Monomial<E>[size];
             for (int i = 0; i < size; i++)
             {
-                E cfx = rndCoefficients.Apply(rnd);
+                E cfx = rndCoefficients(rnd);
                 int[] exponents = RandomUtil.RandomSharpIntArray(nVars, degree, rnd);
-                terms[i] = new Monomial(exponents, cfx);
+                terms[i] = new Monomial<E>(exponents, cfx);
             }
 
-            return MultivariatePolynomial.Create(nVars, ring, ordering, terms);
+            return MultivariatePolynomial<E>.Create(nVars, ring, ordering, terms);
         }
 
         /// <summary>
@@ -223,7 +212,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         /// <param name="size">number of elements in the result</param>
         /// <param name="rnd">random source</param>
         /// <returns>random polynomial</returns>
-        public static Poly RandomPolynomial<Term extends AMonomial<Term>, Poly extends AMultivariatePolynomial<Term, Poly>>(Poly factory, int degree, int size, RandomGenerator rnd)
+        public static Poly RandomPolynomial<Term, Poly>(Poly factory, int degree, int size, Random rnd) where Term : AMonomial<Term> where Poly : AMultivariatePolynomial<Term, Poly>
         {
             if (factory is MultivariatePolynomialZp64)
                 return (Poly)RandomPolynomial(((MultivariatePolynomialZp64)factory).nVariables, degree, size, ((MultivariatePolynomialZp64)factory).ring, ((MultivariatePolynomialZp64)factory).ordering, rnd);

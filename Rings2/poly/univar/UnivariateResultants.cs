@@ -1,25 +1,8 @@
-using Cc.Redberry;
+using System.Numerics;
 using Cc.Redberry.Rings.Bigint;
 using Cc.Redberry.Rings;
 using Cc.Redberry.Rings.Poly.Multivar;
 using Cc.Redberry.Rings.Primes;
-using Gnu.Trove.List.Array;
-using Java.Util;
-using Java.Util.Function;
-using Cc.Redberry.Rings.Rings;
-using Cc.Redberry.Rings.Poly.Util;
-using Cc.Redberry.Rings.Poly.Univar.UnivariateGCD;
-using Cc.Redberry.Rings.Poly.Univar.UnivariatePolynomial;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using static Cc.Redberry.Rings.Poly.Univar.RoundingMode;
-using static Cc.Redberry.Rings.Poly.Univar.Associativity;
-using static Cc.Redberry.Rings.Poly.Univar.Operator;
-using static Cc.Redberry.Rings.Poly.Univar.TokenType;
-using static Cc.Redberry.Rings.Poly.Univar.SystemInfo;
 
 namespace Cc.Redberry.Rings.Poly.Univar
 {
@@ -68,7 +51,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <summary>
         /// Computes resultant of two polynomials and returns the result as a constant poly
         /// </summary>
-        public static Poly ResultantAsPoly<Poly extends IUnivariatePolynomial<Poly>>(Poly a, Poly b)
+        public static Poly ResultantAsPoly<Poly >(Poly a, Poly b) where Poly : IUnivariatePolynomial<Poly>
         {
             if (a is UnivariatePolynomialZp64)
                 return (Poly)((UnivariatePolynomialZp64)a).CreateConstant(Resultant((UnivariatePolynomialZp64)a, (UnivariatePolynomialZp64)b));
@@ -107,10 +90,10 @@ namespace Cc.Redberry.Rings.Poly.Univar
 
         private static Rational<E> ResultantInQ<E>(UnivariatePolynomial<Rational<E>> a, UnivariatePolynomial<Rational<E>> b)
         {
-            Util.Tuple2<UnivariatePolynomial<E>, E> aZ = Util.ToCommonDenominator(a), bZ = Util.ToCommonDenominator(b);
-            Ring<E> ring = aZ._1.ring;
-            E resultant = Resultant(aZ._1, bZ._1);
-            E den = ring.Multiply(ring.Pow(aZ._2, b.degree), ring.Pow(bZ._2, a.degree));
+            (UnivariatePolynomial<E>, E) aZ = Util.ToCommonDenominator(a), bZ = Util.ToCommonDenominator(b);
+            Ring<E> ring = aZ.Item1.ring;
+            E resultant = Resultant(aZ.Item1, bZ.Item1);
+            E den = ring.Multiply(ring.Pow(aZ.Item2, b.degree), ring.Pow(bZ.Item2 a.degree));
             return new Rational(ring, resultant, den);
         }
 
@@ -124,7 +107,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <summary>
         /// Computes sequence of scalar subresultants.
         /// </summary>
-        public static IList<E> Subresultants<E>(UnivariatePolynomial<E> a, UnivariatePolynomial<E> b)
+        public static List<E> Subresultants<E>(UnivariatePolynomial<E> a, UnivariatePolynomial<E> b)
         {
             if (a.IsOverField())
                 return ClassicalPRS(a, b).GetSubresultants();
@@ -132,12 +115,12 @@ namespace Cc.Redberry.Rings.Poly.Univar
                 return SubresultantPRS(a, b).GetSubresultants();
         }
 
-        static E PrimitiveResultant<E>(UnivariatePolynomial<E> a, UnivariatePolynomial<E> b, BiFunction<UnivariatePolynomial<E>, UnivariatePolynomial<E>, E> algorithm)
+        static E PrimitiveResultant<E>(UnivariatePolynomial<E> a, UnivariatePolynomial<E> b, Func<UnivariatePolynomial<E>, UnivariatePolynomial<E>, E> algorithm)
         {
             E ac = a.Content(), bc = b.Content();
             a = a.Clone().DivideExact(ac);
             b = b.Clone().DivideExact(bc);
-            E r = algorithm.Apply(a, b);
+            E r = algorithm(a, b);
             Ring<E> ring = a.ring;
             r = ring.Multiply(r, ring.Pow(ac, b.degree));
             r = ring.Multiply(r, ring.Pow(bc, a.degree));
@@ -149,14 +132,14 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// </summary>
         public static BigInteger ModularResultant(UnivariatePolynomial<BigInteger> a, UnivariatePolynomial<BigInteger> b)
         {
-            return PrimitiveResultant(a, b, UnivariateResultants.ModularResultant0());
+            return PrimitiveResultant(a, b, UnivariateResultants.ModularResultant0);
         }
 
         private static BigInteger ModularResultant0(UnivariatePolynomial<BigInteger> a, UnivariatePolynomial<BigInteger> b)
         {
 
             // bound on the value of resultant
-            BigInteger bound = UnivariatePolynomial.Norm2(a).Pow(b.degree).Multiply(UnivariatePolynomial.Norm2(b).Pow(a.degree)).ShiftLeft(1);
+            BigInteger bound = UnivariatePolynomial<BigInteger>.Norm2(a).Pow(b.degree).Multiply(UnivariatePolynomial<BigInteger>.Norm2(b).Pow(a.degree)).ShiftLeft(1);
 
             // aggregated CRT modulus
             BigInteger bModulus = null;
@@ -165,13 +148,13 @@ namespace Cc.Redberry.Rings.Poly.Univar
             while (true)
             {
                 long prime = primes.Take();
-                BigInteger bPrime = BigInteger.ValueOf(prime);
+                BigInteger bPrime = new BigInteger(prime);
                 IntegersZp zpRing = Rings.Zp(prime);
                 UnivariatePolynomialZp64 aMod = AsOverZp64(a.SetRing(zpRing)), bMod = AsOverZp64(b.SetRing(zpRing));
                 if (aMod.degree != a.degree || bMod.degree != b.degree)
                     continue; // unlucky prime
                 long resultantMod = ClassicalPRS(aMod, bMod).Resultant();
-                BigInteger bResultantMod = BigInteger.ValueOf(resultantMod);
+                BigInteger bResultantMod = new BigInteger(resultantMod);
                 if (bModulus == null)
                 {
                     bModulus = bPrime;
@@ -179,10 +162,10 @@ namespace Cc.Redberry.Rings.Poly.Univar
                     continue;
                 }
 
-                if (!resultant.IsZero() && resultantMod == 0)
+                if (!resultant.IsZero && resultantMod == 0)
                     continue; // unlucky prime
                 resultant = ChineseRemainders.ChineseRemainders(bModulus, bPrime, resultant, bResultantMod);
-                bModulus = bModulus.Multiply(BigInteger.ValueOf(prime));
+                bModulus = bModulus.Multiply(new BigInteger(prime));
                 if (bModulus.CompareTo(bound) > 0)
                     return Rings.Zp(bModulus).SymmetricForm(resultant);
             }
@@ -191,10 +174,10 @@ namespace Cc.Redberry.Rings.Poly.Univar
         private static UnivariatePolynomial<E> TrivialResultantInNumberField<E>(UnivariatePolynomial<UnivariatePolynomial<E>> a, UnivariatePolynomial<UnivariatePolynomial<E>> b)
         {
             AlgebraicNumberField<UnivariatePolynomial<E>> ring = (AlgebraicNumberField<UnivariatePolynomial<E>>)a.ring;
-            if (!a.Stream().AllMatch(ring.IsInTheBaseField()) || !b.Stream().AllMatch(ring.IsInTheBaseField()))
+            if (!a.Stream().AllMatch(ring.IsInTheBaseField) || !b.Stream().AllMatch(ring.IsInTheBaseField))
                 return null;
-            UnivariatePolynomial<E> ar = a.MapCoefficients(ring.GetMinimalPolynomial().ring, UnivariatePolynomial.Cc()), br = b.MapCoefficients(ring.GetMinimalPolynomial().ring, UnivariatePolynomial.Cc());
-            return UnivariatePolynomial.Constant(ring.GetMinimalPolynomial().ring, Resultant(ar, br));
+            UnivariatePolynomial<E> ar = a.MapCoefficients(ring.GetMinimalPolynomial().ring, p => p.Cc()), br = b.MapCoefficients(ring.GetMinimalPolynomial().ring, p => p.Cc());
+            return UnivariatePolynomial<E>.Constant(ring.GetMinimalPolynomial().ring, Resultant(ar, br));
         }
 
         /// <summary>
@@ -211,12 +194,12 @@ namespace Cc.Redberry.Rings.Poly.Univar
             b = b.Clone();
 
             // reduce problem to the case with integer monic minimal polynomial
-            if (minimalPoly.Stream().AllMatch(Rational.IsIntegral()))
+            if (minimalPoly.Stream().All(x => x.IsIntegral()))
             {
 
                 // minimal poly is already monic & integer
-                UnivariatePolynomial<BigInteger> minimalPolyZ = minimalPoly.MapCoefficients(Z, Rational.Numerator());
-                AlgebraicNumberField<UnivariatePolynomial<BigInteger>> numberFieldZ = new AlgebraicNumberField(minimalPolyZ);
+                UnivariatePolynomial<BigInteger> minimalPolyZ = minimalPoly.MapCoefficients(Z, r_ => r_.Numerator());
+                var numberFieldZ = new AlgebraicNumberField<UnivariatePolynomial<BigInteger>>(minimalPolyZ);
                 BigInteger aDen = RemoveDenominators(a), bDen = RemoveDenominators(b), den = aDen.Pow(b.degree).Multiply(bDen.Pow(a.degree));
                 return ModularResultantInRingOfIntegersOfNumberField(a.MapCoefficients(numberFieldZ, (cf) => cf.MapCoefficients(Z, Rational.Numerator())), b.MapCoefficients(numberFieldZ, (cf) => cf.MapCoefficients(Z, Rational.Numerator()))).MapCoefficients(Q, (cf) => Q.Mk(cf, den));
             }
@@ -233,7 +216,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
 
         public static BigInteger PolyPowNumFieldCfBound(BigInteger maxCf, BigInteger maxMinPolyCf, int minPolyDeg, int exponent)
         {
-            return BigInteger.ValueOf(minPolyDeg).Pow(exponent - 1).Multiply(maxCf.Pow(exponent)).Multiply(maxMinPolyCf.Increment().Pow((exponent - 1) * (minPolyDeg + 1)));
+            return new BigInteger(minPolyDeg).Pow(exponent - 1).Multiply(maxCf.Pow(exponent)).Multiply(maxMinPolyCf.Increment().Pow((exponent - 1) * (minPolyDeg + 1)));
         }
 
         /// <summary>
@@ -251,7 +234,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
                 return r;
             AlgebraicNumberField<UnivariatePolynomial<BigInteger>> numberField = (AlgebraicNumberField<UnivariatePolynomial<BigInteger>>)a.ring;
             UnivariatePolynomial<BigInteger> minimalPoly = numberField.GetMinimalPolynomial();
-            BigInteger aMax = a.Stream().FlatMap(UnivariatePolynomial.Stream()).Map(Rings.Z.Abs()).Max(Rings.Z).OrElse(BigInteger.ZERO), bMax = b.Stream().FlatMap(UnivariatePolynomial.Stream()).Map(Rings.Z.Abs()).Max(Rings.Z).OrElse(BigInteger.ZERO), mMax = minimalPoly.MaxAbsCoefficient();
+            BigInteger aMax = a.Stream().FlatMap(UnivariatePolynomial.Stream()).Map(Rings.Z.Abs()).Max(Rings.Z).OrElse(BigInteger.Zero), bMax = b.Stream().FlatMap(UnivariatePolynomial.Stream()).Map(Rings.Z.Abs()).Max(Rings.Z).OrElse(BigInteger.ZERO), mMax = minimalPoly.MaxAbsCoefficient();
 
             // bound on the value of resultant coefficients
             BigInteger bound = PolyPowNumFieldCfBound(aMax, mMax, minimalPoly.degree, b.degree).Multiply(PolyPowNumFieldCfBound(bMax, mMax, minimalPoly.degree, a.degree));
@@ -265,24 +248,24 @@ namespace Cc.Redberry.Rings.Poly.Univar
                 long prime = primes.Take();
                 IntegersZp64 zpRing = Rings.Zp64(prime);
                 UnivariatePolynomialZp64 minimalPolyMod = AsOverZp64(minimalPoly, zpRing);
-                FiniteField<UnivariatePolynomialZp64> numberFieldMod = new FiniteField(minimalPolyMod);
+                FiniteField<UnivariatePolynomialZp64> numberFieldMod = new FiniteField<UnivariatePolynomialZp64>(minimalPolyMod);
                 UnivariatePolynomial<UnivariatePolynomialZp64> aMod = a.MapCoefficients(numberFieldMod, (cf) => AsOverZp64(cf, zpRing)), bMod = b.MapCoefficients(numberFieldMod, (cf) => AsOverZp64(cf, zpRing));
                 if (aMod.degree != a.degree || bMod.degree != b.degree)
                     continue; // unlucky prime
                 UnivariatePolynomialZp64 resultantMod = ClassicalPRS(aMod, bMod).Resultant();
                 if (bModulus == null)
                 {
-                    bModulus = BigInteger.ValueOf(prime);
+                    bModulus = new BigInteger(prime);
                     resultant = resultantMod.ToBigPoly();
                     continue;
                 }
 
                 if (!resultant.IsZero() && resultantMod.IsZero())
                     continue; // unlucky prime
-                UnivariateGCD.UpdateCRT(ChineseRemainders.CreateMagic(Rings.Z, bModulus, BigInteger.ValueOf(prime)), resultant, resultantMod);
-                bModulus = bModulus.Multiply(BigInteger.ValueOf(prime));
+                UnivariateGCD.UpdateCRT(ChineseRemainders.CreateMagic(Rings.Z, bModulus, new BigInteger(prime)), resultant, resultantMod);
+                bModulus = bModulus.Multiply(new BigInteger(prime));
                 if (bModulus.CompareTo(bound) > 0)
-                    return UnivariatePolynomial.AsPolyZSymmetric(resultant.SetRingUnsafe(Rings.Zp(bModulus)));
+                    return UnivariatePolynomial<BigInteger>.AsPolyZSymmetric(resultant.SetRingUnsafe(Rings.Zp(bModulus)));
             }
         }
 
@@ -299,7 +282,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// </summary>
         public static PolynomialRemainderSequence<E> ClassicalPRS<E>(UnivariatePolynomial<E> a, UnivariatePolynomial<E> b)
         {
-            return new ClassicalPolynomialRemainderSequence(a, b).Run();
+            return new ClassicalPolynomialRemainderSequence<E>(a, b).Run();
         }
 
         /// <summary>
@@ -307,7 +290,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// </summary>
         public static PolynomialRemainderSequence<E> PseudoPRS<E>(UnivariatePolynomial<E> a, UnivariatePolynomial<E> b)
         {
-            return new PseudoPolynomialRemainderSequence(a, b).Run();
+            return new PseudoPolynomialRemainderSequence<E>(a, b).Run();
         }
 
         /// <summary>
@@ -315,7 +298,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// </summary>
         public static PolynomialRemainderSequence<E> PrimitivePRS<E>(UnivariatePolynomial<E> a, UnivariatePolynomial<E> b)
         {
-            return new PrimitivePolynomialRemainderSequence(a, b).Run();
+            return new PrimitivePolynomialRemainderSequence<E>(a, b).Run();
         }
 
         /// <summary>
@@ -323,7 +306,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// </summary>
         public static PolynomialRemainderSequence<E> ReducedPRS<E>(UnivariatePolynomial<E> a, UnivariatePolynomial<E> b)
         {
-            return new ReducedPolynomialRemainderSequence(a, b).Run();
+            return new ReducedPolynomialRemainderSequence<E>(a, b).Run();
         }
 
         /// <summary>
@@ -331,25 +314,25 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// </summary>
         public static PolynomialRemainderSequence<E> SubresultantPRS<E>(UnivariatePolynomial<E> a, UnivariatePolynomial<E> b)
         {
-            return new SubresultantPolynomialRemainderSequence(a, b).Run();
+            return new SubresultantPolynomialRemainderSequence<E>(a, b).Run();
         }
 
         /// <summary>
         /// Polynomial remainder sequence (PRS).
         /// </summary>
-        public class APolynomialRemainderSequence<Poly>
+        public class APolynomialRemainderSequence<Poly> where Poly : IUnivariatePolynomial<Poly>
         {
             /// <summary>
             /// Polynomial remainder sequence
             /// </summary>
-            public readonly IList<Poly> remainders = new List();
+            public readonly List<Poly> remainders = [];
             /// <summary>
             /// Polynomial remainder sequence
             /// </summary>
             /// <summary>
             /// Quotients arised in PRS
             /// </summary>
-            public readonly IList<Poly> quotients = new List();
+            public readonly List<Poly> quotients = [];
             /// <summary>
             /// Polynomial remainder sequence
             /// </summary>
@@ -450,46 +433,23 @@ namespace Cc.Redberry.Rings.Poly.Univar
             /// <summary>
             /// alpha coefficients
             /// </summary>
-            public readonly IList<E> alphas = new List();
-            /// <summary>
-            /// alpha coefficients
-            /// </summary>
+            public readonly List<E> alphas = [];
+          
             /// <summary>
             /// beta coefficients
             /// </summary>
-            public readonly IList<E> betas = new List();
-            /// <summary>
-            /// alpha coefficients
-            /// </summary>
-            /// <summary>
-            /// beta coefficients
-            /// </summary>
+            public readonly List<E> betas = [];
+         
             /// <summary>
             /// the ring
             /// </summary>
-            readonly Ring<E> ring;
-            /// <summary>
-            /// alpha coefficients
-            /// </summary>
-            /// <summary>
-            /// beta coefficients
-            /// </summary>
-            /// <summary>
-            /// the ring
-            /// </summary>
+            public readonly Ring<E> ring;
+  
             /// <summary>
             /// whether the first poly had smaller degree than the second
             /// </summary>
             readonly bool swap;
-            /// <summary>
-            /// alpha coefficients
-            /// </summary>
-            /// <summary>
-            /// beta coefficients
-            /// </summary>
-            /// <summary>
-            /// the ring
-            /// </summary>
+
             /// <summary>
             /// whether the first poly had smaller degree than the second
             /// </summary>
@@ -510,62 +470,17 @@ namespace Cc.Redberry.Rings.Poly.Univar
                 }
             }
 
-            /// <summary>
-            /// alpha coefficients
-            /// </summary>
-            /// <summary>
-            /// beta coefficients
-            /// </summary>
-            /// <summary>
-            /// the ring
-            /// </summary>
-            /// <summary>
-            /// whether the first poly had smaller degree than the second
-            /// </summary>
-            // both degrees are odd => odd permutation of Sylvester matrix
+       
             /// <summary>
             /// compute alpha based on obtained so far PRS
             /// </summary>
-            abstract E NextAlpha();
-            /// <summary>
-            /// alpha coefficients
-            /// </summary>
-            /// <summary>
-            /// beta coefficients
-            /// </summary>
-            /// <summary>
-            /// the ring
-            /// </summary>
-            /// <summary>
-            /// whether the first poly had smaller degree than the second
-            /// </summary>
-            // both degrees are odd => odd permutation of Sylvester matrix
-            /// <summary>
-            /// compute alpha based on obtained so far PRS
-            /// </summary>
+            public abstract E NextAlpha();
+         
             /// <summary>
             /// compute beta based on obtained so far PRS and newly computed remainder
             /// </summary>
-            abstract E NextBeta(UnivariatePolynomial<E> remainder);
-            /// <summary>
-            /// alpha coefficients
-            /// </summary>
-            /// <summary>
-            /// beta coefficients
-            /// </summary>
-            /// <summary>
-            /// the ring
-            /// </summary>
-            /// <summary>
-            /// whether the first poly had smaller degree than the second
-            /// </summary>
-            // both degrees are odd => odd permutation of Sylvester matrix
-            /// <summary>
-            /// compute alpha based on obtained so far PRS
-            /// </summary>
-            /// <summary>
-            /// compute beta based on obtained so far PRS and newly computed remainder
-            /// </summary>
+            public abstract E NextBeta(UnivariatePolynomial<E> remainder);
+       
             /// <summary>
             /// A single step of the Euclidean algorithm
             /// </summary>
@@ -592,33 +507,11 @@ namespace Cc.Redberry.Rings.Poly.Univar
                 return remainder;
             }
 
-            /// <summary>
-            /// alpha coefficients
-            /// </summary>
-            /// <summary>
-            /// beta coefficients
-            /// </summary>
-            /// <summary>
-            /// the ring
-            /// </summary>
-            /// <summary>
-            /// whether the first poly had smaller degree than the second
-            /// </summary>
-            // both degrees are odd => odd permutation of Sylvester matrix
-            /// <summary>
-            /// compute alpha based on obtained so far PRS
-            /// </summary>
-            /// <summary>
-            /// compute beta based on obtained so far PRS and newly computed remainder
-            /// </summary>
-            /// <summary>
-            /// A single step of the Euclidean algorithm
-            /// </summary>
-            // remainder is zero => termination of the algorithm
+         
             /// <summary>
             /// Run all steps.
             /// </summary>
-            PolynomialRemainderSequence<E> Run()
+            public PolynomialRemainderSequence<E> Run()
             {
                 if (LastRemainder().IsZero())
 
@@ -629,105 +522,20 @@ namespace Cc.Redberry.Rings.Poly.Univar
                 return this;
             }
 
-            /// <summary>
-            /// alpha coefficients
-            /// </summary>
-            /// <summary>
-            /// beta coefficients
-            /// </summary>
-            /// <summary>
-            /// the ring
-            /// </summary>
-            /// <summary>
-            /// whether the first poly had smaller degree than the second
-            /// </summary>
-            // both degrees are odd => odd permutation of Sylvester matrix
-            /// <summary>
-            /// compute alpha based on obtained so far PRS
-            /// </summary>
-            /// <summary>
-            /// compute beta based on obtained so far PRS and newly computed remainder
-            /// </summary>
-            /// <summary>
-            /// A single step of the Euclidean algorithm
-            /// </summary>
-            // remainder is zero => termination of the algorithm
-            /// <summary>
-            /// Run all steps.
-            /// </summary>
-            // on of the factors is zero
+      
             /// <summary>
             /// n_i - n_{i+1}
             /// </summary>
-            int DegreeDiff(int i)
+            public int DegreeDiff(int i)
             {
                 return remainders[i].degree - remainders[i + 1].degree;
             }
 
             /// <summary>
-            /// alpha coefficients
-            /// </summary>
-            /// <summary>
-            /// beta coefficients
-            /// </summary>
-            /// <summary>
-            /// the ring
-            /// </summary>
-            /// <summary>
-            /// whether the first poly had smaller degree than the second
-            /// </summary>
-            // both degrees are odd => odd permutation of Sylvester matrix
-            /// <summary>
-            /// compute alpha based on obtained so far PRS
-            /// </summary>
-            /// <summary>
-            /// compute beta based on obtained so far PRS and newly computed remainder
-            /// </summary>
-            /// <summary>
-            /// A single step of the Euclidean algorithm
-            /// </summary>
-            // remainder is zero => termination of the algorithm
-            /// <summary>
-            /// Run all steps.
-            /// </summary>
-            // on of the factors is zero
-            /// <summary>
-            /// n_i - n_{i+1}
-            /// </summary>
-            /// <summary>
             /// scalar subresultants
             /// </summary>
-            private readonly List<E> subresultants = new List();
-            /// <summary>
-            /// alpha coefficients
-            /// </summary>
-            /// <summary>
-            /// beta coefficients
-            /// </summary>
-            /// <summary>
-            /// the ring
-            /// </summary>
-            /// <summary>
-            /// whether the first poly had smaller degree than the second
-            /// </summary>
-            // both degrees are odd => odd permutation of Sylvester matrix
-            /// <summary>
-            /// compute alpha based on obtained so far PRS
-            /// </summary>
-            /// <summary>
-            /// compute beta based on obtained so far PRS and newly computed remainder
-            /// </summary>
-            /// <summary>
-            /// A single step of the Euclidean algorithm
-            /// </summary>
-            // remainder is zero => termination of the algorithm
-            /// <summary>
-            /// Run all steps.
-            /// </summary>
-            // on of the factors is zero
-            /// <summary>
-            /// n_i - n_{i+1}
-            /// </summary>
+            private readonly List<E> subresultants = [];
+            
             /// <summary>
             /// scalar subresultants
             /// </summary>
@@ -735,9 +543,9 @@ namespace Cc.Redberry.Rings.Poly.Univar
             {
                 lock (this)
                 {
-                    if (!subresultants.IsEmpty())
+                    if (subresultants.Count != 0)
                         return;
-                    IList<E> subresultants = NonZeroSubresultants();
+                    List<E> subresultants = NonZeroSubresultants();
                     if (swap)
                         subresultants.ReplaceAll(ring.Negate());
                     this.subresultants.EnsureCapacity(remainders[1].degree);
@@ -748,45 +556,13 @@ namespace Cc.Redberry.Rings.Poly.Univar
                 }
             }
 
-            /// <summary>
-            /// alpha coefficients
-            /// </summary>
-            /// <summary>
-            /// beta coefficients
-            /// </summary>
-            /// <summary>
-            /// the ring
-            /// </summary>
-            /// <summary>
-            /// whether the first poly had smaller degree than the second
-            /// </summary>
-            // both degrees are odd => odd permutation of Sylvester matrix
-            /// <summary>
-            /// compute alpha based on obtained so far PRS
-            /// </summary>
-            /// <summary>
-            /// compute beta based on obtained so far PRS and newly computed remainder
-            /// </summary>
-            /// <summary>
-            /// A single step of the Euclidean algorithm
-            /// </summary>
-            // remainder is zero => termination of the algorithm
-            /// <summary>
-            /// Run all steps.
-            /// </summary>
-            // on of the factors is zero
-            /// <summary>
-            /// n_i - n_{i+1}
-            /// </summary>
-            /// <summary>
-            /// scalar subresultants
-            /// </summary>
+         
             /// <summary>
             /// general setting for Fundamental Theorem of Resultant Theory
             /// </summary>
-            virtual IList<E> NonZeroSubresultants()
+            public virtual List<E> NonZeroSubresultants()
             {
-                IList<E> subresultants = new List();
+                List<E> subresultants = [];
 
                 // largest subresultant
                 E subresultant = ring.Pow(remainders[1].Lc(), DegreeDiff(0));
@@ -815,94 +591,15 @@ namespace Cc.Redberry.Rings.Poly.Univar
             }
 
             /// <summary>
-            /// alpha coefficients
-            /// </summary>
-            /// <summary>
-            /// beta coefficients
-            /// </summary>
-            /// <summary>
-            /// the ring
-            /// </summary>
-            /// <summary>
-            /// whether the first poly had smaller degree than the second
-            /// </summary>
-            // both degrees are odd => odd permutation of Sylvester matrix
-            /// <summary>
-            /// compute alpha based on obtained so far PRS
-            /// </summary>
-            /// <summary>
-            /// compute beta based on obtained so far PRS and newly computed remainder
-            /// </summary>
-            /// <summary>
-            /// A single step of the Euclidean algorithm
-            /// </summary>
-            // remainder is zero => termination of the algorithm
-            /// <summary>
-            /// Run all steps.
-            /// </summary>
-            // on of the factors is zero
-            /// <summary>
-            /// n_i - n_{i+1}
-            /// </summary>
-            /// <summary>
-            /// scalar subresultants
-            /// </summary>
-            /// <summary>
-            /// general setting for Fundamental Theorem of Resultant Theory
-            /// </summary>
-            // largest subresultant
-            // computing (i+1)-th degree subresultant
-            /// <summary>
             /// Gives a list of scalar subresultant where i-th list element is i-th subresultant.
             /// </summary>
-            public IList<E> GetSubresultants()
+            public List<E> GetSubresultants()
             {
-                if (subresultants.IsEmpty())
+                if (subresultants.Count == 0)
                     ComputeSubresultants();
                 return subresultants;
             }
 
-            /// <summary>
-            /// alpha coefficients
-            /// </summary>
-            /// <summary>
-            /// beta coefficients
-            /// </summary>
-            /// <summary>
-            /// the ring
-            /// </summary>
-            /// <summary>
-            /// whether the first poly had smaller degree than the second
-            /// </summary>
-            // both degrees are odd => odd permutation of Sylvester matrix
-            /// <summary>
-            /// compute alpha based on obtained so far PRS
-            /// </summary>
-            /// <summary>
-            /// compute beta based on obtained so far PRS and newly computed remainder
-            /// </summary>
-            /// <summary>
-            /// A single step of the Euclidean algorithm
-            /// </summary>
-            // remainder is zero => termination of the algorithm
-            /// <summary>
-            /// Run all steps.
-            /// </summary>
-            // on of the factors is zero
-            /// <summary>
-            /// n_i - n_{i+1}
-            /// </summary>
-            /// <summary>
-            /// scalar subresultants
-            /// </summary>
-            /// <summary>
-            /// general setting for Fundamental Theorem of Resultant Theory
-            /// </summary>
-            // largest subresultant
-            // computing (i+1)-th degree subresultant
-            /// <summary>
-            /// Gives a list of scalar subresultant where i-th list element is i-th subresultant.
-            /// </summary>
             /// <summary>
             /// Resultant of initial polynomials
             /// </summary>
@@ -917,23 +614,23 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// </summary>
         private sealed class ClassicalPolynomialRemainderSequence<E> : PolynomialRemainderSequence<E>
         {
-            ClassicalPolynomialRemainderSequence(UnivariatePolynomial<E> a, UnivariatePolynomial<E> b) : base(a, b)
+            public ClassicalPolynomialRemainderSequence(UnivariatePolynomial<E> a, UnivariatePolynomial<E> b) : base(a, b)
             {
             }
 
-            override E NextAlpha()
+            public override E NextAlpha()
             {
                 return ring.GetOne();
             }
 
-            override E NextBeta(UnivariatePolynomial<E> remainder)
+            public override E NextBeta(UnivariatePolynomial<E> remainder)
             {
                 return ring.GetOne();
             }
 
-            override IList<E> NonZeroSubresultants()
+            public override List<E> NonZeroSubresultants()
             {
-                IList<E> subresultants = new List();
+                List<E> subresultants = [];
 
                 // largest subresultant
                 E subresultant = ring.Pow(remainders[1].Lc(), DegreeDiff(0));
@@ -956,11 +653,11 @@ namespace Cc.Redberry.Rings.Poly.Univar
 
         private class PseudoPolynomialRemainderSequence<E> : PolynomialRemainderSequence<E>
         {
-            PseudoPolynomialRemainderSequence(UnivariatePolynomial<E> a, UnivariatePolynomial<E> b) : base(a, b)
+            public PseudoPolynomialRemainderSequence(UnivariatePolynomial<E> a, UnivariatePolynomial<E> b) : base(a, b)
             {
             }
 
-            override E NextAlpha()
+            public override E NextAlpha()
             {
                 int i = remainders.Count;
                 E lc = remainders[i - 1].Lc();
@@ -968,7 +665,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
                 return ring.Pow(lc, deg + 1);
             }
 
-            override E NextBeta(UnivariatePolynomial<E> remainder)
+            public override E NextBeta(UnivariatePolynomial<E> remainder)
             {
                 return ring.GetOne();
             }
@@ -979,18 +676,18 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// </summary>
         private sealed class ReducedPolynomialRemainderSequence<E> : PseudoPolynomialRemainderSequence<E>
         {
-            ReducedPolynomialRemainderSequence(UnivariatePolynomial<E> a, UnivariatePolynomial<E> b) : base(a, b)
+            public ReducedPolynomialRemainderSequence(UnivariatePolynomial<E> a, UnivariatePolynomial<E> b) : base(a, b)
             {
             }
 
-            override E NextBeta(UnivariatePolynomial<E> remainder)
+            public override E NextBeta(UnivariatePolynomial<E> remainder)
             {
-                return alphas.IsEmpty() ? ring.GetOne() : alphas[alphas.Count - 1];
+                return alphas.Count == 0 ? ring.GetOne() : alphas[alphas.Count - 1];
             }
 
-            override IList<E> NonZeroSubresultants()
+            public override List<E> NonZeroSubresultants()
             {
-                IList<E> subresultants = new List();
+                List<E> subresultants = [];
 
                 // largest subresultant
                 E subresultant = ring.Pow(remainders[1].Lc(), DegreeDiff(0));
@@ -1018,11 +715,11 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// </summary>
         private sealed class PrimitivePolynomialRemainderSequence<E> : PseudoPolynomialRemainderSequence<E>
         {
-            PrimitivePolynomialRemainderSequence(UnivariatePolynomial<E> a, UnivariatePolynomial<E> b) : base(a, b)
+            public PrimitivePolynomialRemainderSequence(UnivariatePolynomial<E> a, UnivariatePolynomial<E> b) : base(a, b)
             {
             }
 
-            override E NextBeta(UnivariatePolynomial<E> remainder)
+            public override E NextBeta(UnivariatePolynomial<E> remainder)
             {
                 return remainder.Content();
             }
@@ -1033,12 +730,13 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// </summary>
         private sealed class SubresultantPolynomialRemainderSequence<E> : PseudoPolynomialRemainderSequence<E>
         {
-            readonly IList<E> psis = new List();
-            SubresultantPolynomialRemainderSequence(UnivariatePolynomial<E> a, UnivariatePolynomial<E> b) : base(a, b)
+            readonly List<E> psis = [];
+
+            public SubresultantPolynomialRemainderSequence(UnivariatePolynomial<E> a, UnivariatePolynomial<E> b) : base(a, b)
             {
             }
 
-            override E NextBeta(UnivariatePolynomial<E> remainder)
+            public override E NextBeta(UnivariatePolynomial<E> remainder)
             {
                 int i = remainders.Count;
                 UnivariatePolynomial<E> prem = remainders[i - 2];
@@ -1069,9 +767,9 @@ namespace Cc.Redberry.Rings.Poly.Univar
                 return e;
             }
 
-            override IList<E> NonZeroSubresultants()
+            public override List<E> NonZeroSubresultants()
             {
-                IList<E> subresultants = new List();
+                List<E> subresultants = [];
 
                 // largest subresultant
                 E subresultant = ring.Pow(remainders[1].Lc(), DegreeDiff(0));
@@ -1112,19 +810,13 @@ namespace Cc.Redberry.Rings.Poly.Univar
             /// </summary>
             readonly IntegersZp64 ring;
             /// <summary>
-            /// the ring
-            /// </summary>
-            /// <summary>
             /// whether the first poly had smaller degree than the second
             /// </summary>
             readonly bool swap;
             /// <summary>
-            /// the ring
-            /// </summary>
-            /// <summary>
             /// whether the first poly had smaller degree than the second
             /// </summary>
-            PolynomialRemainderSequenceZp64(UnivariatePolynomialZp64 a, UnivariatePolynomialZp64 b) : base(a, b)
+            public PolynomialRemainderSequenceZp64(UnivariatePolynomialZp64 a, UnivariatePolynomialZp64 b) : base(a, b)
             {
                 this.ring = a.ring;
                 if (a.degree >= b.degree)
@@ -1141,13 +833,6 @@ namespace Cc.Redberry.Rings.Poly.Univar
                 }
             }
 
-            /// <summary>
-            /// the ring
-            /// </summary>
-            /// <summary>
-            /// whether the first poly had smaller degree than the second
-            /// </summary>
-            // both degrees are odd => odd permutation of Sylvester matrix
             /// <summary>
             /// A single step of the Euclidean algorithm
             /// </summary>
@@ -1168,41 +853,18 @@ namespace Cc.Redberry.Rings.Poly.Univar
                 return remainder;
             }
 
-            /// <summary>
-            /// the ring
-            /// </summary>
-            /// <summary>
-            /// whether the first poly had smaller degree than the second
-            /// </summary>
-            // both degrees are odd => odd permutation of Sylvester matrix
-            /// <summary>
-            /// A single step of the Euclidean algorithm
-            /// </summary>
-            // remainder is zero => termination of the algorithm
+          
             /// <summary>
             /// Run all steps.
             /// </summary>
-            private PolynomialRemainderSequenceZp64 Run()
+            public PolynomialRemainderSequenceZp64 Run()
             {
                 while (!Step().IsZero())
                     ;
                 return this;
             }
 
-            /// <summary>
-            /// the ring
-            /// </summary>
-            /// <summary>
-            /// whether the first poly had smaller degree than the second
-            /// </summary>
-            // both degrees are odd => odd permutation of Sylvester matrix
-            /// <summary>
-            /// A single step of the Euclidean algorithm
-            /// </summary>
-            // remainder is zero => termination of the algorithm
-            /// <summary>
-            /// Run all steps.
-            /// </summary>
+           
             /// <summary>
             /// n_i - n_{i+1}
             /// </summary>
@@ -1211,44 +873,12 @@ namespace Cc.Redberry.Rings.Poly.Univar
                 return remainders[i].degree - remainders[i + 1].degree;
             }
 
-            /// <summary>
-            /// the ring
-            /// </summary>
-            /// <summary>
-            /// whether the first poly had smaller degree than the second
-            /// </summary>
-            // both degrees are odd => odd permutation of Sylvester matrix
-            /// <summary>
-            /// A single step of the Euclidean algorithm
-            /// </summary>
-            // remainder is zero => termination of the algorithm
-            /// <summary>
-            /// Run all steps.
-            /// </summary>
-            /// <summary>
-            /// n_i - n_{i+1}
-            /// </summary>
+           
             /// <summary>
             /// scalar subresultants
             /// </summary>
             private readonly TLongArrayList subresultants = new TLongArrayList();
-            /// <summary>
-            /// the ring
-            /// </summary>
-            /// <summary>
-            /// whether the first poly had smaller degree than the second
-            /// </summary>
-            // both degrees are odd => odd permutation of Sylvester matrix
-            /// <summary>
-            /// A single step of the Euclidean algorithm
-            /// </summary>
-            // remainder is zero => termination of the algorithm
-            /// <summary>
-            /// Run all steps.
-            /// </summary>
-            /// <summary>
-            /// n_i - n_{i+1}
-            /// </summary>
+           
             /// <summary>
             /// scalar subresultants
             /// </summary>
@@ -1270,26 +900,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
                 }
             }
 
-            /// <summary>
-            /// the ring
-            /// </summary>
-            /// <summary>
-            /// whether the first poly had smaller degree than the second
-            /// </summary>
-            // both degrees are odd => odd permutation of Sylvester matrix
-            /// <summary>
-            /// A single step of the Euclidean algorithm
-            /// </summary>
-            // remainder is zero => termination of the algorithm
-            /// <summary>
-            /// Run all steps.
-            /// </summary>
-            /// <summary>
-            /// n_i - n_{i+1}
-            /// </summary>
-            /// <summary>
-            /// scalar subresultants
-            /// </summary>
+          
             /// <summary>
             /// general setting for Fundamental Theorem of Resultant Theory
             /// </summary>
@@ -1315,31 +926,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
                 return subresultants;
             }
 
-            /// <summary>
-            /// the ring
-            /// </summary>
-            /// <summary>
-            /// whether the first poly had smaller degree than the second
-            /// </summary>
-            // both degrees are odd => odd permutation of Sylvester matrix
-            /// <summary>
-            /// A single step of the Euclidean algorithm
-            /// </summary>
-            // remainder is zero => termination of the algorithm
-            /// <summary>
-            /// Run all steps.
-            /// </summary>
-            /// <summary>
-            /// n_i - n_{i+1}
-            /// </summary>
-            /// <summary>
-            /// scalar subresultants
-            /// </summary>
-            /// <summary>
-            /// general setting for Fundamental Theorem of Resultant Theory
-            /// </summary>
-            // largest subresultant
-            // computing (i+1)-th degree subresultant
+          
             /// <summary>
             /// Gives a list of scalar subresultant where i-th list element is i-th subresultant.
             /// </summary>
@@ -1350,34 +937,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
                 return subresultants;
             }
 
-            /// <summary>
-            /// the ring
-            /// </summary>
-            /// <summary>
-            /// whether the first poly had smaller degree than the second
-            /// </summary>
-            // both degrees are odd => odd permutation of Sylvester matrix
-            /// <summary>
-            /// A single step of the Euclidean algorithm
-            /// </summary>
-            // remainder is zero => termination of the algorithm
-            /// <summary>
-            /// Run all steps.
-            /// </summary>
-            /// <summary>
-            /// n_i - n_{i+1}
-            /// </summary>
-            /// <summary>
-            /// scalar subresultants
-            /// </summary>
-            /// <summary>
-            /// general setting for Fundamental Theorem of Resultant Theory
-            /// </summary>
-            // largest subresultant
-            // computing (i+1)-th degree subresultant
-            /// <summary>
-            /// Gives a list of scalar subresultant where i-th list element is i-th subresultant.
-            /// </summary>
+           
             /// <summary>
             /// Resultant of initial polynomials
             /// </summary>

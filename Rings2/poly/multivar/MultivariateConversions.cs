@@ -1,18 +1,5 @@
-using Cc.Redberry.Rings;
-using Cc.Redberry.Rings.Poly;
 using Cc.Redberry.Rings.Poly.Univar;
 using Cc.Redberry.Rings.Util;
-using Java.Util;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using static Cc.Redberry.Rings.Poly.Multivar.RoundingMode;
-using static Cc.Redberry.Rings.Poly.Multivar.Associativity;
-using static Cc.Redberry.Rings.Poly.Multivar.Operator;
-using static Cc.Redberry.Rings.Poly.Multivar.TokenType;
-using static Cc.Redberry.Rings.Poly.Multivar.SystemInfo;
 
 namespace Cc.Redberry.Rings.Poly.Multivar
 {
@@ -31,7 +18,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         /// <summary>
         /// Given poly in R[x1,x2,...,xN] converts to poly in R[variables][other_variables]
         /// </summary>
-        public static MultivariatePolynomial<Poly> Split<Poly extends AMultivariatePolynomial<?, Poly>>(Poly poly, params int[] variables)
+        public static MultivariatePolynomial<Poly> Split<Term, Poly>(Poly poly, params int[] variables) where Term : AMonomial<Term> where Poly : AMultivariatePolynomial<Term, Poly>
         {
             return poly.AsOverMultivariateEliminate(variables);
         }
@@ -39,10 +26,10 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         /// <summary>
         /// Given poly in R[variables][other_variables] converts it to poly in R[x1,x2,...,xN]
         /// </summary>
-        public static Poly Merge<Poly extends AMultivariatePolynomial<?, Poly>>(MultivariatePolynomial<Poly> poly, params int[] variables)
+        public static Poly Merge<Term, Poly>(MultivariatePolynomial<Poly> poly, params int[] variables) where Term : AMonomial<Term> where Poly : AMultivariatePolynomial<Term, Poly>
         {
-            variables = variables.Clone();
-            Arrays.Sort(variables);
+            variables = (int[]) variables.Clone();
+            Array.Sort(variables);
             int[] mainVariables = ArraysUtil.IntSetDifference(ArraysUtil.Sequence(0, poly.nVariables + variables.Length), variables);
             if (poly.Cc() is MultivariatePolynomial)
                 return (Poly)MultivariatePolynomial.AsNormalMultivariate((MultivariatePolynomial)poly, variables, mainVariables);

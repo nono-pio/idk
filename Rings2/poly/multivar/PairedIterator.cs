@@ -1,14 +1,4 @@
-using Java.Util;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using static Cc.Redberry.Rings.Poly.Multivar.RoundingMode;
-using static Cc.Redberry.Rings.Poly.Multivar.Associativity;
-using static Cc.Redberry.Rings.Poly.Multivar.Operator;
-using static Cc.Redberry.Rings.Poly.Multivar.TokenType;
-using static Cc.Redberry.Rings.Poly.Multivar.SystemInfo;
+
 
 namespace Cc.Redberry.Rings.Poly.Multivar
 {
@@ -19,9 +9,9 @@ namespace Cc.Redberry.Rings.Poly.Multivar
     {
         readonly Term1 zeroTerm1;
         readonly Term2 zeroTerm2;
-        readonly Comparator<DegreeVector> ordering;
-        readonly IEnumerator<Term1> aIterator;
-        readonly IEnumerator<Term2> bIterator;
+        readonly IComparer<DegreeVector> ordering;
+        readonly IEnumerable<Term1> aIterator;
+        readonly IEnumerable<Term2> bIterator;
         public PairedIterator(Poly1 a, Poly2 b)
         {
             this.zeroTerm1 = a.monomialAlgebra.GetZeroTerm(a.nVariables);

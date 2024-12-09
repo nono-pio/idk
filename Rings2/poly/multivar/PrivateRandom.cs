@@ -1,14 +1,3 @@
-using Org.Apache.Commons.Math3.Random;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using static Cc.Redberry.Rings.Poly.Multivar.RoundingMode;
-using static Cc.Redberry.Rings.Poly.Multivar.Associativity;
-using static Cc.Redberry.Rings.Poly.Multivar.Operator;
-using static Cc.Redberry.Rings.Poly.Multivar.TokenType;
-using static Cc.Redberry.Rings.Poly.Multivar.SystemInfo;
 
 namespace Cc.Redberry.Rings.Poly.Multivar
 {
@@ -24,13 +13,13 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         /// <summary>
         /// thread local instance of random
         /// </summary>
-        private static readonly ThreadLocal<RandomGenerator> ThreadLocalRandom = ThreadLocal.WithInitial(() => new Well1024a(0x7f67fcad528cfae9));
+        private static readonly ThreadLocal<Random> ThreadLocalRandom = new ThreadLocal<Random>(() => new Random(0x7f67fcad));
         /// <summary>
         /// Returns random generator associated with current thread
         /// </summary>
-        static RandomGenerator GetRandom()
+        static Random GetRandom()
         {
-            return ThreadLocalRandom.Get();
+            return ThreadLocalRandom.Value;
         }
     }
 }

@@ -1,14 +1,4 @@
 using Cc.Redberry.Rings.Util;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using static Cc.Redberry.Rings.Poly.Multivar.RoundingMode;
-using static Cc.Redberry.Rings.Poly.Multivar.Associativity;
-using static Cc.Redberry.Rings.Poly.Multivar.Operator;
-using static Cc.Redberry.Rings.Poly.Multivar.TokenType;
-using static Cc.Redberry.Rings.Poly.Multivar.SystemInfo;
 
 namespace Cc.Redberry.Rings.Poly.Multivar
 {
@@ -975,7 +965,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         public Term ToZero()
         {
             if (IsZeroVector())
-                return (Term)this;
+                return this as Term;
             return SetDegreeVector(new DegreeVector(new int[NVariables()], 0));
         }
 

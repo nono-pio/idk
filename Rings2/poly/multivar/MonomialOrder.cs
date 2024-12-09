@@ -1,15 +1,4 @@
-using Java.Io;
-using Java.Util;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using static Cc.Redberry.Rings.Poly.Multivar.RoundingMode;
-using static Cc.Redberry.Rings.Poly.Multivar.Associativity;
-using static Cc.Redberry.Rings.Poly.Multivar.Operator;
-using static Cc.Redberry.Rings.Poly.Multivar.TokenType;
-using static Cc.Redberry.Rings.Poly.Multivar.SystemInfo;
+
 
 namespace Cc.Redberry.Rings.Poly.Multivar
 {
@@ -27,7 +16,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         /// Lexicographic monomial order.
         /// </summary>
         public static readonly Comparator<DegreeVector> LEX = Lex.instance;
-        private sealed class Lex : Comparator<DegreeVector>, Serializable
+        private sealed class Lex : Comparator<DegreeVector>
         {
             private static readonly Lex instance = new Lex();
             private Lex()
@@ -38,7 +27,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             {
                 for (int i = 0; i < a.exponents.Length; ++i)
                 {
-                    int c = Integer.Compare(a.exponents[i], b.exponents[i]);
+                    int c = a.exponents[i].CompareTo(b.exponents[i]);
                     if (c != 0)
                         return c;
                 }
@@ -56,16 +45,16 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         /// Graded lexicographic monomial order.
         /// </summary>
         public static readonly Comparator<DegreeVector> GRLEX = Grlex.instance;
-        private sealed class Grlex : Comparator<DegreeVector>, Serializable
+        private sealed class Grlex : Comparator<DegreeVector>
         {
-            private static readonly Grlex instance = new Grlex();
+            public static readonly Grlex instance = new Grlex();
             private Grlex()
             {
             }
 
             public int Compare(DegreeVector a, DegreeVector b)
             {
-                int c = Integer.Compare(a.totalDegree, b.totalDegree);
+                int c = a.totalDegree.CompareTo(b.totalDegree);
                 return c != 0 ? c : LEX.Compare(a, b);
             }
 
@@ -79,9 +68,9 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         /// Antilexicographic monomial order.
         /// </summary>
         public static readonly Comparator<DegreeVector> ALEX = Alex.instance;
-        private sealed class Alex : Comparator<DegreeVector>, Serializable
+        private sealed class Alex : Comparator<DegreeVector>
         {
-            private static readonly Alex instance = new Alex();
+            public static readonly Alex instance = new Alex();
             private Alex()
             {
             }
@@ -101,21 +90,21 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         /// Graded reverse lexicographic monomial order
         /// </summary>
         public static readonly Comparator<DegreeVector> GREVLEX = Grevlex.instance;
-        private sealed class Grevlex : Comparator<DegreeVector>, Serializable
+        private sealed class Grevlex : Comparator<DegreeVector>
         {
-            private static readonly Grevlex instance = new Grevlex();
+            public static readonly Grevlex instance = new Grevlex();
             private Grevlex()
             {
             }
 
             public int Compare(DegreeVector a, DegreeVector b)
             {
-                int c = Integer.Compare(a.totalDegree, b.totalDegree);
+                int c = a.totalDegree.CompareTo(b.totalDegree);
                 if (c != 0)
                     return c;
-                for (int i = a.exponents.length - 1; i >= 0; --i)
+                for (int i = a.exponents.Length - 1; i >= 0; --i)
                 {
-                    c = Integer.Compare(b.exponents[i], a.exponents[i]);
+                    c = b.exponents[i].CompareTo( a.exponents[i]);
                     if (c != 0)
                         return c;
                 }
@@ -135,7 +124,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         public static readonly Comparator<DegreeVector> DEFAULT = Parse(System.GetProperty("defaultMonomialOrder", "grevlex").ToLowerCase());
         static Comparator<DegreeVector> Parse(string @string)
         {
-            switch (@string.ToLowerCase())
+            switch (@string.ToLower())
             {
                 case "lex":
                     return LEX;
@@ -175,11 +164,12 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             return monomialOrder == GREVLEX || monomialOrder == GRLEX || monomialOrder is GrevLexWithPermutation;
         }
 
-        sealed class ProductOrder : Comparator<DegreeVector>, Serializable
+        sealed class ProductOrder : Comparator<DegreeVector>
         {
             readonly Comparator<DegreeVector>[] orderings;
             readonly int[] nVariables;
-            ProductOrder(Comparator<DegreeVector>[] orderings, int[] nVariables)
+
+            public ProductOrder(Comparator<DegreeVector>[] orderings, int[] nVariables)
             {
                 this.orderings = orderings;
                 this.nVariables = nVariables;
@@ -212,22 +202,22 @@ namespace Cc.Redberry.Rings.Poly.Multivar
                 ProductOrder that = (ProductOrder)o;
 
                 // Probably incorrect - comparing Object[] arrays with Arrays.equals
-                if (!Arrays.Equals(orderings, that.orderings))
+                if (!orderings.SequenceEqual(that.orderings))
                     return false;
-                return Arrays.Equals(nVariables, that.nVariables);
+                return nVariables.SequenceEqual(that.nVariables);
             }
 
             // for each block
             // Probably incorrect - comparing Object[] arrays with Arrays.equals
             public int GetHashCode()
             {
-                int result = Arrays.GetHashCode(orderings);
-                result = 31 * result + Arrays.GetHashCode(nVariables);
+                int result = orderings.GetHashCode();
+                result = 31 * result + nVariables.GetHashCode();
                 return result;
             }
         }
 
-        public sealed class GrevLexWithPermutation : Comparator<DegreeVector>, Serializable
+        public sealed class GrevLexWithPermutation : Comparator<DegreeVector>
         {
             readonly int[] permutation;
             GrevLexWithPermutation(int[] permutation)
@@ -237,12 +227,12 @@ namespace Cc.Redberry.Rings.Poly.Multivar
 
             public int Compare(DegreeVector a, DegreeVector b)
             {
-                int c = Integer.Compare(a.totalDegree, b.totalDegree);
+                int c = a.totalDegree.CompareTo(b.totalDegree);
                 if (c != 0)
                     return c;
-                for (int i = a.exponents.length - 1; i >= 0; --i)
+                for (int i = a.exponents.Length - 1; i >= 0; --i)
                 {
-                    c = Integer.Compare(b.exponents[permutation[i]], a.exponents[permutation[i]]);
+                    c = b.exponents[permutation[i]].CompareTo(a.exponents[permutation[i]]);
                     if (c != 0)
                         return c;
                 }
@@ -257,12 +247,12 @@ namespace Cc.Redberry.Rings.Poly.Multivar
                 if (o == null || GetType() != o.GetType())
                     return false;
                 GrevLexWithPermutation that = (GrevLexWithPermutation)o;
-                return Arrays.Equals(permutation, that.permutation);
+                return permutation.SequenceEqual(that.permutation);
             }
 
             public int GetHashCode()
             {
-                return Arrays.GetHashCode(permutation);
+                return permutation.GetHashCode();
             }
         }
 
@@ -278,7 +268,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
 
             public int Compare(DegreeVector o1, DegreeVector o2)
             {
-                int c = Integer.Compare(o1.exponents[variable], o2.exponents[variable]);
+                int c = o1.exponents[variable].CompareTo(o2.exponents[variable]);
                 if (c != 0)
                     return c;
                 return baseOrder.Compare(o1, o2);

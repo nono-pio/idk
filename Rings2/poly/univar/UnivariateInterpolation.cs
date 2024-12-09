@@ -1,16 +1,4 @@
-using Cc.Redberry.Rings;
-using Gnu.Trove.List.Array;
-using Java.Util;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using static Cc.Redberry.Rings.Poly.Univar.RoundingMode;
-using static Cc.Redberry.Rings.Poly.Univar.Associativity;
-using static Cc.Redberry.Rings.Poly.Univar.Operator;
-using static Cc.Redberry.Rings.Poly.Univar.TokenType;
-using static Cc.Redberry.Rings.Poly.Univar.SystemInfo;
+
 
 namespace Cc.Redberry.Rings.Poly.Univar
 {
@@ -24,7 +12,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         {
         }
 
-        private static void CheckInput(long[] points, long[] values)
+        private static void CheckInput<T>(T[] points, T[] values)
         {
             if (points.Length != values.Length)
                 throw new ArgumentException();
@@ -73,10 +61,10 @@ namespace Cc.Redberry.Rings.Poly.Univar
         {
             CheckInput(points, values);
             int length = points.Length;
-            UnivariatePolynomial<E> result = UnivariatePolynomial.Zero(ring);
+            UnivariatePolynomial<E> result = UnivariatePolynomial<E>.Zero(ring);
             for (int i = 0; i < length; ++i)
             {
-                UnivariatePolynomial<E> interpolant = UnivariatePolynomial.Constant(ring, values[i]);
+                UnivariatePolynomial<E> interpolant = UnivariatePolynomial<E>.Constant(ring, values[i]);
                 for (int j = 0; j < length; ++j)
                 {
                     if (j == i)
@@ -135,7 +123,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         public static UnivariatePolynomial<E> InterpolateNewton<E>(Ring<E> ring, E[] points, E[] values)
         {
             CheckInput(points, values);
-            return new Interpolation(ring).Update(points, values).GetInterpolatingPolynomial();
+            return new Interpolation<E>(ring).Update(points, values).GetInterpolatingPolynomial();
         }
 
         /// <summary>
@@ -268,14 +256,14 @@ namespace Cc.Redberry.Rings.Poly.Univar
             /// <summary>
             /// list of evaluation points
             /// </summary>
-            private readonly List<E> points = new List();
+            private readonly List<E> points = new List<E>();
             /// <summary>
             /// list of evaluation points
             /// </summary>
             /// <summary>
             /// list of values at points
             /// </summary>
-            private readonly List<E> values = new List();
+            private readonly List<E> values = new List<E>();
             /// <summary>
             /// list of evaluation points
             /// </summary>
@@ -285,7 +273,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
             /// <summary>
             /// mixed radix form of interpolating polynomial
             /// </summary>
-            private readonly List<E> mixedRadix = new List();
+            private readonly List<E> mixedRadix = new List<E>();
             /// <summary>
             /// list of evaluation points
             /// </summary>
@@ -337,8 +325,8 @@ namespace Cc.Redberry.Rings.Poly.Univar
             public Interpolation(Ring<E> ring)
             {
                 this.ring = ring;
-                this.lins = UnivariatePolynomial.One(ring);
-                this.poly = UnivariatePolynomial.One(ring);
+                this.lins = UnivariatePolynomial<E>.One(ring);
+                this.poly = UnivariatePolynomial<E>.One(ring);
             }
 
             /// <summary>
@@ -367,7 +355,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
             /// <param name="value">polynomial value at {@code point}</param>
             public Interpolation<E> Update(E point, E value)
             {
-                if (points.IsEmpty())
+                if (points.Count == 0)
                 {
                     points.Add(point);
                     values.Add(value);

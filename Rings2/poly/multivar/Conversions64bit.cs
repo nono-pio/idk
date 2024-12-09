@@ -1,17 +1,6 @@
-using Cc.Redberry.Rings.Bigint;
-using Cc.Redberry.Rings.Poly;
-using Java.Util;
-using Java.Util.Stream;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using static Cc.Redberry.Rings.Poly.Multivar.RoundingMode;
-using static Cc.Redberry.Rings.Poly.Multivar.Associativity;
-using static Cc.Redberry.Rings.Poly.Multivar.Operator;
-using static Cc.Redberry.Rings.Poly.Multivar.TokenType;
-using static Cc.Redberry.Rings.Poly.Multivar.SystemInfo;
+
+
+using System.Numerics;
 
 namespace Cc.Redberry.Rings.Poly.Multivar
 {
@@ -28,34 +17,34 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         /// whether to switch to 64 bit integer arithmetic when possible (false in tests)
         /// </summary>
         static bool SWITCH_TO_64bit = true;
-        static bool CanConvertToZp64(AMultivariatePolynomial poly)
+        static bool CanConvertToZp64<Term, Poly>(AMultivariatePolynomial<Term, Poly> poly) where Term : AMonomial<Term> where Poly : AMultivariatePolynomial<Term, Poly>
         {
             return SWITCH_TO_64bit && Util.CanConvertToZp64(poly);
         }
 
-        static MultivariatePolynomialZp64 AsOverZp64<Term extends AMonomial<Term>, Poly extends AMultivariatePolynomial<Term, Poly>>(Poly poly)
+        static MultivariatePolynomialZp64 AsOverZp64<Term, Poly>(Poly poly) where Term : AMonomial<Term> where Poly : AMultivariatePolynomial<Term, Poly>
         {
-            return MultivariatePolynomial.AsOverZp64((MultivariatePolynomial<BigInteger>)poly);
+            return MultivariatePolynomialZp64.AsOverZp64((MultivariatePolynomial<BigInteger>)poly);
         }
 
-        static IList<MultivariatePolynomialZp64> AsOverZp64<Term extends AMonomial<Term>, Poly extends AMultivariatePolynomial<Term, Poly>>(IList<Poly> list)
+        static List<MultivariatePolynomialZp64> AsOverZp64<Term, Poly>(List<Poly> list)  where Term : AMonomial<Term> where Poly : AMultivariatePolynomial<Term, Poly>
         {
-            return list.Stream().Map(Conversions64bit.AsOverZp64()).Collect(Collectors.ToList());
+            return list.Select(AsOverZp64).ToList();
         }
 
-        static Poly ConvertFromZp64<Term extends AMonomial<Term>, Poly extends AMultivariatePolynomial<Term, Poly>>(MultivariatePolynomialZp64 p)
+        static Poly ConvertFromZp64<Term, Poly>(MultivariatePolynomialZp64 p) where Term : AMonomial<Term> where Poly : AMultivariatePolynomial<Term, Poly>
         {
             return (Poly)p.ToBigPoly();
         }
 
-        static IList<Poly> ConvertFromZp64<Term extends AMonomial<Term>, Poly extends AMultivariatePolynomial<Term, Poly>>(IList<MultivariatePolynomialZp64> list)
+        static List<Poly> ConvertFromZp64<Term, Poly>(List<MultivariatePolynomialZp64> list) where Term : AMonomial<Term> where Poly : AMultivariatePolynomial<Term, Poly>
         {
-            return (IList<Poly>)list.Stream().Map(MultivariatePolynomialZp64.ToBigPoly()).Collect(Collectors.ToList());
+            return (List<Poly>)list.Select(m => m.ToBigPoly()).ToList();
         }
 
-        static Poly[] ConvertFromZp64<Term extends AMonomial<Term>, Poly extends AMultivariatePolynomial<Term, Poly>>(Poly factory, MultivariatePolynomialZp64[] p)
+        static Poly[] ConvertFromZp64<Term, Poly>(Poly factory, MultivariatePolynomialZp64[] p) where Term : AMonomial<Term> where Poly : AMultivariatePolynomial<Term, Poly>
         {
-            Poly[] r = factory.CreateArray(p.Length);
+            Poly[] r = new Poly[p.Length];
             for (int i = 0; i < p.Length; i++)
                 r[i] = ConvertFromZp64(p[i]);
             return r;

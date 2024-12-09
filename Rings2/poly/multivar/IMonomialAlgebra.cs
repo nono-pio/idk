@@ -1,16 +1,6 @@
-using Cc.Redberry.Rings;
-using Cc.Redberry.Rings.Bigint;
-using Java.Io;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using static Cc.Redberry.Rings.Poly.Multivar.RoundingMode;
-using static Cc.Redberry.Rings.Poly.Multivar.Associativity;
-using static Cc.Redberry.Rings.Poly.Multivar.Operator;
-using static Cc.Redberry.Rings.Poly.Multivar.TokenType;
-using static Cc.Redberry.Rings.Poly.Multivar.SystemInfo;
+
+
+using System.Numerics;
 
 namespace Cc.Redberry.Rings.Poly.Multivar
 {
@@ -24,32 +14,18 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         /// Multiplies two terms
         /// </summary>
         Term Multiply(Term a, Term b);
-        /// <summary>
-        /// Multiplies two terms
-        /// </summary>
+
         /// <summary>
         /// Multiplies term by a number
         /// </summary>
         Term Multiply(Term a, BigInteger b);
-        /// <summary>
-        /// Multiplies two terms
-        /// </summary>
-        /// <summary>
-        /// Multiplies term by a number
-        /// </summary>
+
+
         /// <summary>
         /// Gives quotient {@code dividend / divider } or null if exact division is not possible
         /// </summary>
         Term DivideOrNull(Term dividend, Term divider);
-        /// <summary>
-        /// Multiplies two terms
-        /// </summary>
-        /// <summary>
-        /// Multiplies term by a number
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code dividend / divider } or null if exact division is not possible
-        /// </summary>
+
         /// <summary>
         /// Gives quotient {@code dividend / divider } or throws {@code ArithmeticException} if exact division is not
         /// possible
@@ -62,19 +38,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             return r;
         }
 
-        /// <summary>
-        /// Multiplies two terms
-        /// </summary>
-        /// <summary>
-        /// Multiplies term by a number
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code dividend / divider } or null if exact division is not possible
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code dividend / divider } or throws {@code ArithmeticException} if exact division is not
-        /// possible
-        /// </summary>
+     
         /// <summary>
         /// Gives quotient {@code dividend / divider } or throws {@code ArithmeticException} if exact division is not
         /// possible
@@ -84,23 +48,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             return DivideExact(Create(dividend), divider);
         }
 
-        /// <summary>
-        /// Multiplies two terms
-        /// </summary>
-        /// <summary>
-        /// Multiplies term by a number
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code dividend / divider } or null if exact division is not possible
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code dividend / divider } or throws {@code ArithmeticException} if exact division is not
-        /// possible
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code dividend / divider } or throws {@code ArithmeticException} if exact division is not
-        /// possible
-        /// </summary>
+       
         /// <summary>
         /// Raise term in a power of {@code exponent}
         /// </summary>
@@ -108,26 +56,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         /// <param name="exponent">the exponent</param>
         /// <returns>{@code term^exponent}</returns>
         Term Pow(Term term, int exponent);
-        /// <summary>
-        /// Multiplies two terms
-        /// </summary>
-        /// <summary>
-        /// Multiplies term by a number
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code dividend / divider } or null if exact division is not possible
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code dividend / divider } or throws {@code ArithmeticException} if exact division is not
-        /// possible
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code dividend / divider } or throws {@code ArithmeticException} if exact division is not
-        /// possible
-        /// </summary>
-        /// <summary>
-        /// Raise term in a power of {@code exponent}
-        /// </summary>
+      
         /// <param name="term">the term</param>
         /// <param name="exponent">the exponent</param>
         /// <returns>{@code term^exponent}</returns>
@@ -135,140 +64,24 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         /// Negates term
         /// </summary>
         Term Negate(Term term);
-        /// <summary>
-        /// Multiplies two terms
-        /// </summary>
-        /// <summary>
-        /// Multiplies term by a number
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code dividend / divider } or null if exact division is not possible
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code dividend / divider } or throws {@code ArithmeticException} if exact division is not
-        /// possible
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code dividend / divider } or throws {@code ArithmeticException} if exact division is not
-        /// possible
-        /// </summary>
-        /// <summary>
-        /// Raise term in a power of {@code exponent}
-        /// </summary>
-        /// <param name="term">the term</param>
-        /// <param name="exponent">the exponent</param>
-        /// <returns>{@code term^exponent}</returns>
-        /// <summary>
-        /// Negates term
-        /// </summary>
+       
         /// <summary>
         /// Whether term is zero
         /// </summary>
         bool IsZero(Term term);
-        /// <summary>
-        /// Multiplies two terms
-        /// </summary>
-        /// <summary>
-        /// Multiplies term by a number
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code dividend / divider } or null if exact division is not possible
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code dividend / divider } or throws {@code ArithmeticException} if exact division is not
-        /// possible
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code dividend / divider } or throws {@code ArithmeticException} if exact division is not
-        /// possible
-        /// </summary>
-        /// <summary>
-        /// Raise term in a power of {@code exponent}
-        /// </summary>
-        /// <param name="term">the term</param>
-        /// <param name="exponent">the exponent</param>
-        /// <returns>{@code term^exponent}</returns>
-        /// <summary>
-        /// Negates term
-        /// </summary>
-        /// <summary>
-        /// Whether term is zero
-        /// </summary>
+        
         /// <summary>
         /// Whether term is one
         /// </summary>
         bool IsOne(Term term);
-        /// <summary>
-        /// Multiplies two terms
-        /// </summary>
-        /// <summary>
-        /// Multiplies term by a number
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code dividend / divider } or null if exact division is not possible
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code dividend / divider } or throws {@code ArithmeticException} if exact division is not
-        /// possible
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code dividend / divider } or throws {@code ArithmeticException} if exact division is not
-        /// possible
-        /// </summary>
-        /// <summary>
-        /// Raise term in a power of {@code exponent}
-        /// </summary>
-        /// <param name="term">the term</param>
-        /// <param name="exponent">the exponent</param>
-        /// <returns>{@code term^exponent}</returns>
-        /// <summary>
-        /// Negates term
-        /// </summary>
-        /// <summary>
-        /// Whether term is zero
-        /// </summary>
-        /// <summary>
-        /// Whether term is one
-        /// </summary>
+        
+
         /// <summary>
         /// Whether term is unit
         /// </summary>
         bool IsUnit(Term term);
-        /// <summary>
-        /// Multiplies two terms
-        /// </summary>
-        /// <summary>
-        /// Multiplies term by a number
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code dividend / divider } or null if exact division is not possible
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code dividend / divider } or throws {@code ArithmeticException} if exact division is not
-        /// possible
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code dividend / divider } or throws {@code ArithmeticException} if exact division is not
-        /// possible
-        /// </summary>
-        /// <summary>
-        /// Raise term in a power of {@code exponent}
-        /// </summary>
-        /// <param name="term">the term</param>
-        /// <param name="exponent">the exponent</param>
-        /// <returns>{@code term^exponent}</returns>
-        /// <summary>
-        /// Negates term
-        /// </summary>
-        /// <summary>
-        /// Whether term is zero
-        /// </summary>
-        /// <summary>
-        /// Whether term is one
-        /// </summary>
-        /// <summary>
-        /// Whether term is unit
-        /// </summary>
+        
+
         /// <summary>
         /// Whether term is constant
         /// </summary>
@@ -277,422 +90,46 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             return term.IsZeroVector();
         }
 
-        /// <summary>
-        /// Multiplies two terms
-        /// </summary>
-        /// <summary>
-        /// Multiplies term by a number
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code dividend / divider } or null if exact division is not possible
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code dividend / divider } or throws {@code ArithmeticException} if exact division is not
-        /// possible
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code dividend / divider } or throws {@code ArithmeticException} if exact division is not
-        /// possible
-        /// </summary>
-        /// <summary>
-        /// Raise term in a power of {@code exponent}
-        /// </summary>
-        /// <param name="term">the term</param>
-        /// <param name="exponent">the exponent</param>
-        /// <returns>{@code term^exponent}</returns>
-        /// <summary>
-        /// Negates term
-        /// </summary>
-        /// <summary>
-        /// Whether term is zero
-        /// </summary>
-        /// <summary>
-        /// Whether term is one
-        /// </summary>
-        /// <summary>
-        /// Whether term is unit
-        /// </summary>
-        /// <summary>
-        /// Whether term is constant
-        /// </summary>
+        
+     
         /// <summary>
         /// Whether term has unit coefficient
         /// </summary>
         bool IsPureDegreeVector(Term term);
-        /// <summary>
-        /// Multiplies two terms
-        /// </summary>
-        /// <summary>
-        /// Multiplies term by a number
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code dividend / divider } or null if exact division is not possible
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code dividend / divider } or throws {@code ArithmeticException} if exact division is not
-        /// possible
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code dividend / divider } or throws {@code ArithmeticException} if exact division is not
-        /// possible
-        /// </summary>
-        /// <summary>
-        /// Raise term in a power of {@code exponent}
-        /// </summary>
-        /// <param name="term">the term</param>
-        /// <param name="exponent">the exponent</param>
-        /// <returns>{@code term^exponent}</returns>
-        /// <summary>
-        /// Negates term
-        /// </summary>
-        /// <summary>
-        /// Whether term is zero
-        /// </summary>
-        /// <summary>
-        /// Whether term is one
-        /// </summary>
-        /// <summary>
-        /// Whether term is unit
-        /// </summary>
-        /// <summary>
-        /// Whether term is constant
-        /// </summary>
-        /// <summary>
-        /// Whether term has unit coefficient
-        /// </summary>
+        
+       
         /// <summary>
         /// creates term with specified exponents and unit coefficient
         /// </summary>
         Term Create(int[] exponents);
-        /// <summary>
-        /// Multiplies two terms
-        /// </summary>
-        /// <summary>
-        /// Multiplies term by a number
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code dividend / divider } or null if exact division is not possible
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code dividend / divider } or throws {@code ArithmeticException} if exact division is not
-        /// possible
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code dividend / divider } or throws {@code ArithmeticException} if exact division is not
-        /// possible
-        /// </summary>
-        /// <summary>
-        /// Raise term in a power of {@code exponent}
-        /// </summary>
-        /// <param name="term">the term</param>
-        /// <param name="exponent">the exponent</param>
-        /// <returns>{@code term^exponent}</returns>
-        /// <summary>
-        /// Negates term
-        /// </summary>
-        /// <summary>
-        /// Whether term is zero
-        /// </summary>
-        /// <summary>
-        /// Whether term is one
-        /// </summary>
-        /// <summary>
-        /// Whether term is unit
-        /// </summary>
-        /// <summary>
-        /// Whether term is constant
-        /// </summary>
-        /// <summary>
-        /// Whether term has unit coefficient
-        /// </summary>
-        /// <summary>
-        /// creates term with specified exponents and unit coefficient
-        /// </summary>
+    
+       
         /// <summary>
         /// creates term with specified exponents and unit coefficient
         /// </summary>
         Term Create(DegreeVector degreeVector);
-        /// <summary>
-        /// Multiplies two terms
-        /// </summary>
-        /// <summary>
-        /// Multiplies term by a number
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code dividend / divider } or null if exact division is not possible
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code dividend / divider } or throws {@code ArithmeticException} if exact division is not
-        /// possible
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code dividend / divider } or throws {@code ArithmeticException} if exact division is not
-        /// possible
-        /// </summary>
-        /// <summary>
-        /// Raise term in a power of {@code exponent}
-        /// </summary>
-        /// <param name="term">the term</param>
-        /// <param name="exponent">the exponent</param>
-        /// <returns>{@code term^exponent}</returns>
-        /// <summary>
-        /// Negates term
-        /// </summary>
-        /// <summary>
-        /// Whether term is zero
-        /// </summary>
-        /// <summary>
-        /// Whether term is one
-        /// </summary>
-        /// <summary>
-        /// Whether term is unit
-        /// </summary>
-        /// <summary>
-        /// Whether term is constant
-        /// </summary>
-        /// <summary>
-        /// Whether term has unit coefficient
-        /// </summary>
-        /// <summary>
-        /// creates term with specified exponents and unit coefficient
-        /// </summary>
-        /// <summary>
-        /// creates term with specified exponents and unit coefficient
-        /// </summary>
-        /// <summary>
-        /// creates generic array of specified length
-        /// </summary>
-        Term[] CreateArray(int length);
-        /// <summary>
-        /// Multiplies two terms
-        /// </summary>
-        /// <summary>
-        /// Multiplies term by a number
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code dividend / divider } or null if exact division is not possible
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code dividend / divider } or throws {@code ArithmeticException} if exact division is not
-        /// possible
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code dividend / divider } or throws {@code ArithmeticException} if exact division is not
-        /// possible
-        /// </summary>
-        /// <summary>
-        /// Raise term in a power of {@code exponent}
-        /// </summary>
-        /// <param name="term">the term</param>
-        /// <param name="exponent">the exponent</param>
-        /// <returns>{@code term^exponent}</returns>
-        /// <summary>
-        /// Negates term
-        /// </summary>
-        /// <summary>
-        /// Whether term is zero
-        /// </summary>
-        /// <summary>
-        /// Whether term is one
-        /// </summary>
-        /// <summary>
-        /// Whether term is unit
-        /// </summary>
-        /// <summary>
-        /// Whether term is constant
-        /// </summary>
-        /// <summary>
-        /// Whether term has unit coefficient
-        /// </summary>
-        /// <summary>
-        /// creates term with specified exponents and unit coefficient
-        /// </summary>
-        /// <summary>
-        /// creates term with specified exponents and unit coefficient
-        /// </summary>
-        /// <summary>
-        /// creates generic array of specified length
-        /// </summary>
+        
+       
         /// <summary>
         /// creates a unit term
         /// </summary>
         Term GetUnitTerm(int nVariables);
-        /// <summary>
-        /// Multiplies two terms
-        /// </summary>
-        /// <summary>
-        /// Multiplies term by a number
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code dividend / divider } or null if exact division is not possible
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code dividend / divider } or throws {@code ArithmeticException} if exact division is not
-        /// possible
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code dividend / divider } or throws {@code ArithmeticException} if exact division is not
-        /// possible
-        /// </summary>
-        /// <summary>
-        /// Raise term in a power of {@code exponent}
-        /// </summary>
-        /// <param name="term">the term</param>
-        /// <param name="exponent">the exponent</param>
-        /// <returns>{@code term^exponent}</returns>
-        /// <summary>
-        /// Negates term
-        /// </summary>
-        /// <summary>
-        /// Whether term is zero
-        /// </summary>
-        /// <summary>
-        /// Whether term is one
-        /// </summary>
-        /// <summary>
-        /// Whether term is unit
-        /// </summary>
-        /// <summary>
-        /// Whether term is constant
-        /// </summary>
-        /// <summary>
-        /// Whether term has unit coefficient
-        /// </summary>
-        /// <summary>
-        /// creates term with specified exponents and unit coefficient
-        /// </summary>
-        /// <summary>
-        /// creates term with specified exponents and unit coefficient
-        /// </summary>
-        /// <summary>
-        /// creates generic array of specified length
-        /// </summary>
-        /// <summary>
-        /// creates a unit term
-        /// </summary>
+        
+      
+
         /// <summary>
         /// creates a zero term
         /// </summary>
         Term GetZeroTerm(int nVariables);
-        /// <summary>
-        /// Multiplies two terms
-        /// </summary>
-        /// <summary>
-        /// Multiplies term by a number
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code dividend / divider } or null if exact division is not possible
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code dividend / divider } or throws {@code ArithmeticException} if exact division is not
-        /// possible
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code dividend / divider } or throws {@code ArithmeticException} if exact division is not
-        /// possible
-        /// </summary>
-        /// <summary>
-        /// Raise term in a power of {@code exponent}
-        /// </summary>
-        /// <param name="term">the term</param>
-        /// <param name="exponent">the exponent</param>
-        /// <returns>{@code term^exponent}</returns>
-        /// <summary>
-        /// Negates term
-        /// </summary>
-        /// <summary>
-        /// Whether term is zero
-        /// </summary>
-        /// <summary>
-        /// Whether term is one
-        /// </summary>
-        /// <summary>
-        /// Whether term is unit
-        /// </summary>
-        /// <summary>
-        /// Whether term is constant
-        /// </summary>
-        /// <summary>
-        /// Whether term has unit coefficient
-        /// </summary>
-        /// <summary>
-        /// creates term with specified exponents and unit coefficient
-        /// </summary>
-        /// <summary>
-        /// creates term with specified exponents and unit coefficient
-        /// </summary>
-        /// <summary>
-        /// creates generic array of specified length
-        /// </summary>
-        /// <summary>
-        /// creates a unit term
-        /// </summary>
-        /// <summary>
-        /// creates a zero term
-        /// </summary>
+        
+       
         /// <summary>
         /// whether two terms have the same coefficients
         /// </summary>
         bool HaveSameCoefficients(Term a, Term b);
-        /// <summary>
-        /// Multiplies two terms
-        /// </summary>
-        /// <summary>
-        /// Multiplies term by a number
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code dividend / divider } or null if exact division is not possible
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code dividend / divider } or throws {@code ArithmeticException} if exact division is not
-        /// possible
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code dividend / divider } or throws {@code ArithmeticException} if exact division is not
-        /// possible
-        /// </summary>
-        /// <summary>
-        /// Raise term in a power of {@code exponent}
-        /// </summary>
-        /// <param name="term">the term</param>
-        /// <param name="exponent">the exponent</param>
-        /// <returns>{@code term^exponent}</returns>
-        /// <summary>
-        /// Negates term
-        /// </summary>
-        /// <summary>
-        /// Whether term is zero
-        /// </summary>
-        /// <summary>
-        /// Whether term is one
-        /// </summary>
-        /// <summary>
-        /// Whether term is unit
-        /// </summary>
-        /// <summary>
-        /// Whether term is constant
-        /// </summary>
-        /// <summary>
-        /// Whether term has unit coefficient
-        /// </summary>
-        /// <summary>
-        /// creates term with specified exponents and unit coefficient
-        /// </summary>
-        /// <summary>
-        /// creates term with specified exponents and unit coefficient
-        /// </summary>
-        /// <summary>
-        /// creates generic array of specified length
-        /// </summary>
-        /// <summary>
-        /// creates a unit term
-        /// </summary>
-        /// <summary>
-        /// creates a zero term
-        /// </summary>
-        /// <summary>
-        /// whether two terms have the same coefficients
-        /// </summary>
+        
+       
+
         /// <summary>
         /// Term algebra for terms over Zp
         /// </summary>
@@ -729,7 +166,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
                     return term;
                 if (exponent == 0)
                     return GetUnitTerm(term.NVariables());
-                if (term.totalDegree > Integer.MAX_VALUE / exponent)
+                if (term.totalDegree > int.MaxValue / exponent)
                     throw new ArithmeticException("overflow");
                 int[] exps = new int[term.exponents.Length];
                 for (int i = 0; i < exps.Length; ++i)
@@ -772,10 +209,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
                 return new MonomialZp64(degreeVector, 1);
             }
 
-            public virtual MonomialZp64[] CreateArray(int length)
-            {
-                return new MonomialZp64[length];
-            }
+
 
             public virtual MonomialZp64 GetUnitTerm(int nVariables)
             {
@@ -793,68 +227,8 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             }
         }
 
-        /// <summary>
-        /// Multiplies two terms
-        /// </summary>
-        /// <summary>
-        /// Multiplies term by a number
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code dividend / divider } or null if exact division is not possible
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code dividend / divider } or throws {@code ArithmeticException} if exact division is not
-        /// possible
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code dividend / divider } or throws {@code ArithmeticException} if exact division is not
-        /// possible
-        /// </summary>
-        /// <summary>
-        /// Raise term in a power of {@code exponent}
-        /// </summary>
-        /// <param name="term">the term</param>
-        /// <param name="exponent">the exponent</param>
-        /// <returns>{@code term^exponent}</returns>
-        /// <summary>
-        /// Negates term
-        /// </summary>
-        /// <summary>
-        /// Whether term is zero
-        /// </summary>
-        /// <summary>
-        /// Whether term is one
-        /// </summary>
-        /// <summary>
-        /// Whether term is unit
-        /// </summary>
-        /// <summary>
-        /// Whether term is constant
-        /// </summary>
-        /// <summary>
-        /// Whether term has unit coefficient
-        /// </summary>
-        /// <summary>
-        /// creates term with specified exponents and unit coefficient
-        /// </summary>
-        /// <summary>
-        /// creates term with specified exponents and unit coefficient
-        /// </summary>
-        /// <summary>
-        /// creates generic array of specified length
-        /// </summary>
-        /// <summary>
-        /// creates a unit term
-        /// </summary>
-        /// <summary>
-        /// creates a zero term
-        /// </summary>
-        /// <summary>
-        /// whether two terms have the same coefficients
-        /// </summary>
-        /// <summary>
-        /// Term algebra for terms over Zp
-        /// </summary>
+        
+
         /// <summary>
         /// Generic term algebra
         /// </summary>
@@ -869,12 +243,12 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             public virtual Monomial<E> Multiply(Monomial<E> a, Monomial<E> b)
             {
                 DegreeVector dv = a.DvMultiply(b);
-                return new Monomial(dv, ring.Multiply(a.coefficient, b.coefficient));
+                return new Monomial<E>(dv, ring.Multiply(a.coefficient, b.coefficient));
             }
 
             public virtual Monomial<E> Multiply(Monomial<E> a, BigInteger b)
             {
-                return new Monomial(a.exponents, ring.Multiply(a.coefficient, ring.ValueOfBigInteger(b)));
+                return new Monomial<E>(a.exponents, ring.Multiply(a.coefficient, ring.ValueOfBigInteger(b)));
             }
 
             public virtual Monomial<E> DivideOrNull(Monomial<E> dividend, Monomial<E> divider)
@@ -885,7 +259,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
                 E div = ring.DivideOrNull(dividend.coefficient, divider.coefficient);
                 if (div == null)
                     return null;
-                return new Monomial(dv, div);
+                return new Monomial<E>(dv, div);
             }
 
             public virtual Monomial<E> Pow(Monomial<E> term, int exponent)
@@ -894,12 +268,12 @@ namespace Cc.Redberry.Rings.Poly.Multivar
                     return term;
                 if (exponent == 0)
                     return GetUnitTerm(term.NVariables());
-                if (term.totalDegree > Integer.MAX_VALUE / exponent)
+                if (term.totalDegree > int.MaxValue / exponent)
                     throw new ArithmeticException("overflow");
                 int[] exps = new int[term.exponents.Length];
                 for (int i = 0; i < exps.Length; ++i)
                     exps[i] = term.exponents[i] * exponent;
-                return new Monomial(exps, term.totalDegree * exponent, ring.Pow(term.coefficient, exponent));
+                return new Monomial<E>(exps, term.totalDegree * exponent, ring.Pow(term.coefficient, exponent));
             }
 
             public virtual Monomial<E> Negate(Monomial<E> term)
@@ -929,27 +303,24 @@ namespace Cc.Redberry.Rings.Poly.Multivar
 
             public virtual Monomial<E> Create(int[] exponents)
             {
-                return new Monomial(exponents, ring.GetOne());
+                return new Monomial<E>(exponents, ring.GetOne());
             }
 
             public virtual Monomial<E> Create(DegreeVector degreeVector)
             {
-                return new Monomial(degreeVector, ring.GetOne());
+                return new Monomial<E>(degreeVector, ring.GetOne());
             }
 
-            public virtual Monomial<E>[] CreateArray(int length)
-            {
-                return new Monomial[length];
-            }
+
 
             public virtual Monomial<E> GetUnitTerm(int nVariables)
             {
-                return new Monomial(nVariables, ring.GetOne());
+                return new Monomial<E>(nVariables, ring.GetOne());
             }
 
             public virtual Monomial<E> GetZeroTerm(int nVariables)
             {
-                return new Monomial(nVariables, ring.GetZero());
+                return new Monomial<E>(nVariables, ring.GetZero());
             }
 
             public virtual bool HaveSameCoefficients(Monomial<E> a, Monomial<E> b)

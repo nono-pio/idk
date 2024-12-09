@@ -27,12 +27,12 @@ namespace Cc.Redberry.Rings.Poly.Univar
             return UnivariatePolynomial<T>.AsOverZp64((UnivariatePolynomial<BigInteger>) poly);
         }
 
-        static T Convert<T>(UnivariatePolynomialZp64 p) where T : IUnivariatePolynomial<T>
+        public static T Convert<T>(UnivariatePolynomialZp64 p) where T : IUnivariatePolynomial<T>
         {
             return (T)p.ToBigPoly();
         }
 
-        static T[] Convert<T>(T factory, UnivariatePolynomialZp64[] p) where T : IUnivariatePolynomial<T>
+        public static T[] Convert<T>(T factory, UnivariatePolynomialZp64[] p) where T : IUnivariatePolynomial<T>
         {
             T[] r = factory.CreateArray(p.Length);
             for (int i = 0; i < p.Length; i++)

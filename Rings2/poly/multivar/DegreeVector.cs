@@ -1,17 +1,5 @@
 using Cc.Redberry.Rings.Io;
 using Cc.Redberry.Rings.Util;
-using Java.Util;
-using Java.Util.Stream;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using static Cc.Redberry.Rings.Poly.Multivar.RoundingMode;
-using static Cc.Redberry.Rings.Poly.Multivar.Associativity;
-using static Cc.Redberry.Rings.Poly.Multivar.Operator;
-using static Cc.Redberry.Rings.Poly.Multivar.TokenType;
-using static Cc.Redberry.Rings.Poly.Multivar.SystemInfo;
 
 namespace Cc.Redberry.Rings.Poly.Multivar
 {
@@ -24,26 +12,19 @@ namespace Cc.Redberry.Rings.Poly.Multivar
     /// @seeAMonomial
     /// @since1.0
     /// </remarks>
-    public class DegreeVector : Serializable
+    public class DegreeVector
     {
         private static readonly long serialVersionUID = 1;
         /// <summary>
         /// exponents
         /// </summary>
         public readonly int[] exponents;
-        /// <summary>
-        /// exponents
-        /// </summary>
+
         /// <summary>
         /// Sum of all exponents (total degree)
         /// </summary>
         public readonly int totalDegree;
-        /// <summary>
-        /// exponents
-        /// </summary>
-        /// <summary>
-        /// Sum of all exponents (total degree)
-        /// </summary>
+
         /// <summary>
         /// </summary>
         /// <param name="exponents">exponents</param>
@@ -54,17 +35,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             this.totalDegree = totalDegree; // assert ArraysUtil.sum(exponents) == totalDegree;
         }
 
-        /// <summary>
-        /// exponents
-        /// </summary>
-        /// <summary>
-        /// Sum of all exponents (total degree)
-        /// </summary>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="totalDegree">total degree (sum of exponents)</param>
-        // assert ArraysUtil.sum(exponents) == totalDegree;
+     
         /// <summary>
         /// </summary>
         /// <param name="exponents">exponents</param>
@@ -72,20 +43,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         {
         }
 
-        /// <summary>
-        /// exponents
-        /// </summary>
-        /// <summary>
-        /// Sum of all exponents (total degree)
-        /// </summary>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="totalDegree">total degree (sum of exponents)</param>
-        // assert ArraysUtil.sum(exponents) == totalDegree;
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
+      
         /// <summary>
         /// Returns number of variables
         /// </summary>
@@ -94,23 +52,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             return exponents.Length;
         }
 
-        /// <summary>
-        /// exponents
-        /// </summary>
-        /// <summary>
-        /// Sum of all exponents (total degree)
-        /// </summary>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="totalDegree">total degree (sum of exponents)</param>
-        // assert ArraysUtil.sum(exponents) == totalDegree;
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <summary>
-        /// Returns number of variables
-        /// </summary>
+       
         /// <summary>
         /// Returns whether all exponents are zero
         /// </summary>
@@ -120,23 +62,6 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         }
 
         /// <summary>
-        /// exponents
-        /// </summary>
-        /// <summary>
-        /// Sum of all exponents (total degree)
-        /// </summary>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="totalDegree">total degree (sum of exponents)</param>
-        // assert ArraysUtil.sum(exponents) == totalDegree;
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <summary>
-        /// Returns number of variables
-        /// </summary>
-        /// <summary>
         /// Returns whether all exponents are zero
         /// </summary>
         public virtual DegreeVector Dv()
@@ -144,26 +69,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             return this;
         }
 
-        /// <summary>
-        /// exponents
-        /// </summary>
-        /// <summary>
-        /// Sum of all exponents (total degree)
-        /// </summary>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="totalDegree">total degree (sum of exponents)</param>
-        // assert ArraysUtil.sum(exponents) == totalDegree;
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <summary>
-        /// Returns number of variables
-        /// </summary>
-        /// <summary>
-        /// Returns whether all exponents are zero
-        /// </summary>
+       
         /// <summary>
         /// Returns the total degree in specified variables
         /// </summary>
@@ -175,29 +81,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             return d;
         }
 
-        /// <summary>
-        /// exponents
-        /// </summary>
-        /// <summary>
-        /// Sum of all exponents (total degree)
-        /// </summary>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="totalDegree">total degree (sum of exponents)</param>
-        // assert ArraysUtil.sum(exponents) == totalDegree;
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <summary>
-        /// Returns number of variables
-        /// </summary>
-        /// <summary>
-        /// Returns whether all exponents are zero
-        /// </summary>
-        /// <summary>
-        /// Returns the total degree in specified variables
-        /// </summary>
+      
         /// <summary>
         /// Multiplies this by oth
         /// </summary>
@@ -211,32 +95,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             return new DegreeVector(res, totalDegree + oth.totalDegree);
         }
 
-        /// <summary>
-        /// exponents
-        /// </summary>
-        /// <summary>
-        /// Sum of all exponents (total degree)
-        /// </summary>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="totalDegree">total degree (sum of exponents)</param>
-        // assert ArraysUtil.sum(exponents) == totalDegree;
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <summary>
-        /// Returns number of variables
-        /// </summary>
-        /// <summary>
-        /// Returns whether all exponents are zero
-        /// </summary>
-        /// <summary>
-        /// Returns the total degree in specified variables
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
+        
         /// <summary>
         /// Multiplies this by oth
         /// </summary>
@@ -255,81 +114,20 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             return new DegreeVector(res, deg);
         }
 
-        /// <summary>
-        /// exponents
-        /// </summary>
-        /// <summary>
-        /// Sum of all exponents (total degree)
-        /// </summary>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="totalDegree">total degree (sum of exponents)</param>
-        // assert ArraysUtil.sum(exponents) == totalDegree;
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <summary>
-        /// Returns number of variables
-        /// </summary>
-        /// <summary>
-        /// Returns whether all exponents are zero
-        /// </summary>
-        /// <summary>
-        /// Returns the total degree in specified variables
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        // avoid copying
+       
         /// <summary>
         /// Multiplies this by variable^exponent
         /// </summary>
         public DegreeVector DvMultiply(int variable, int exponent)
         {
-            int[] res = exponents.Clone();
+            int[] res = (int[])exponents.Clone();
             res[variable] += exponent;
             if (res[variable] < 0)
                 return null;
             return new DegreeVector(res, totalDegree + exponent);
         }
 
-        /// <summary>
-        /// exponents
-        /// </summary>
-        /// <summary>
-        /// Sum of all exponents (total degree)
-        /// </summary>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="totalDegree">total degree (sum of exponents)</param>
-        // assert ArraysUtil.sum(exponents) == totalDegree;
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <summary>
-        /// Returns number of variables
-        /// </summary>
-        /// <summary>
-        /// Returns whether all exponents are zero
-        /// </summary>
-        /// <summary>
-        /// Returns the total degree in specified variables
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Multiplies this by variable^exponent
-        /// </summary>
+       
         /// <summary>
         /// Divides this by variable^exponent
         /// </summary>
@@ -338,42 +136,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             return DvMultiply(variable, -exponent);
         }
 
-        /// <summary>
-        /// exponents
-        /// </summary>
-        /// <summary>
-        /// Sum of all exponents (total degree)
-        /// </summary>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="totalDegree">total degree (sum of exponents)</param>
-        // assert ArraysUtil.sum(exponents) == totalDegree;
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <summary>
-        /// Returns number of variables
-        /// </summary>
-        /// <summary>
-        /// Returns whether all exponents are zero
-        /// </summary>
-        /// <summary>
-        /// Returns the total degree in specified variables
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Multiplies this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Divides this by variable^exponent
-        /// </summary>
+       
         /// <summary>
         /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
         /// </summary>
@@ -392,45 +155,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             return new DegreeVector(res, totalDegree - divider.totalDegree);
         }
 
-        /// <summary>
-        /// exponents
-        /// </summary>
-        /// <summary>
-        /// Sum of all exponents (total degree)
-        /// </summary>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="totalDegree">total degree (sum of exponents)</param>
-        // assert ArraysUtil.sum(exponents) == totalDegree;
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <summary>
-        /// Returns number of variables
-        /// </summary>
-        /// <summary>
-        /// Returns whether all exponents are zero
-        /// </summary>
-        /// <summary>
-        /// Returns the total degree in specified variables
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Multiplies this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Divides this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
+     
         /// <summary>
         /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
         /// </summary>
@@ -451,49 +176,8 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             return new DegreeVector(res, deg);
         }
 
-        /// <summary>
-        /// exponents
-        /// </summary>
-        /// <summary>
-        /// Sum of all exponents (total degree)
-        /// </summary>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="totalDegree">total degree (sum of exponents)</param>
-        // assert ArraysUtil.sum(exponents) == totalDegree;
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <summary>
-        /// Returns number of variables
-        /// </summary>
-        /// <summary>
-        /// Returns whether all exponents are zero
-        /// </summary>
-        /// <summary>
-        /// Returns the total degree in specified variables
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Multiplies this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Divides this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        // avoid copying
+     
+
         /// <summary>
         /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
         /// a^2*b^3 / a^3*b^5)
@@ -506,53 +190,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             return quot;
         }
 
-        /// <summary>
-        /// exponents
-        /// </summary>
-        /// <summary>
-        /// Sum of all exponents (total degree)
-        /// </summary>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="totalDegree">total degree (sum of exponents)</param>
-        // assert ArraysUtil.sum(exponents) == totalDegree;
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <summary>
-        /// Returns number of variables
-        /// </summary>
-        /// <summary>
-        /// Returns whether all exponents are zero
-        /// </summary>
-        /// <summary>
-        /// Returns the total degree in specified variables
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Multiplies this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Divides this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
-        /// a^2*b^3 / a^3*b^5)
-        /// </summary>
+
         /// <summary>
         /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
         /// a^2*b^3 / a^3*b^5)
@@ -565,57 +203,8 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             return quot;
         }
 
-        /// <summary>
-        /// exponents
-        /// </summary>
-        /// <summary>
-        /// Sum of all exponents (total degree)
-        /// </summary>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="totalDegree">total degree (sum of exponents)</param>
-        // assert ArraysUtil.sum(exponents) == totalDegree;
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <summary>
-        /// Returns number of variables
-        /// </summary>
-        /// <summary>
-        /// Returns whether all exponents are zero
-        /// </summary>
-        /// <summary>
-        /// Returns the total degree in specified variables
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Multiplies this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Divides this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
-        /// a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
-        /// a^2*b^3 / a^3*b^5)
-        /// </summary>
+     
+      
         /// <summary>
         /// Tests whether this can be divided by {@code oth} degree vector
         /// </summary>
@@ -627,60 +216,8 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             return true;
         }
 
-        /// <summary>
-        /// exponents
-        /// </summary>
-        /// <summary>
-        /// Sum of all exponents (total degree)
-        /// </summary>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="totalDegree">total degree (sum of exponents)</param>
-        // assert ArraysUtil.sum(exponents) == totalDegree;
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <summary>
-        /// Returns number of variables
-        /// </summary>
-        /// <summary>
-        /// Returns whether all exponents are zero
-        /// </summary>
-        /// <summary>
-        /// Returns the total degree in specified variables
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Multiplies this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Divides this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
-        /// a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
-        /// a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Tests whether this can be divided by {@code oth} degree vector
-        /// </summary>
+     
+      
         /// <summary>
         /// Tests whether this can be divided by {@code oth} degree vector
         /// </summary>
@@ -689,63 +226,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             return DvDivisibleBy(oth.exponents);
         }
 
-        /// <summary>
-        /// exponents
-        /// </summary>
-        /// <summary>
-        /// Sum of all exponents (total degree)
-        /// </summary>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="totalDegree">total degree (sum of exponents)</param>
-        // assert ArraysUtil.sum(exponents) == totalDegree;
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <summary>
-        /// Returns number of variables
-        /// </summary>
-        /// <summary>
-        /// Returns whether all exponents are zero
-        /// </summary>
-        /// <summary>
-        /// Returns the total degree in specified variables
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Multiplies this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Divides this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
-        /// a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
-        /// a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Tests whether this can be divided by {@code oth} degree vector
-        /// </summary>
-        /// <summary>
-        /// Tests whether this can be divided by {@code oth} degree vector
-        /// </summary>
+    
         /// <summary>
         /// Joins new variable (with zero exponent) to degree vector
         /// </summary>
@@ -754,66 +235,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             return DvJoinNewVariables(1);
         }
 
-        /// <summary>
-        /// exponents
-        /// </summary>
-        /// <summary>
-        /// Sum of all exponents (total degree)
-        /// </summary>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="totalDegree">total degree (sum of exponents)</param>
-        // assert ArraysUtil.sum(exponents) == totalDegree;
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <summary>
-        /// Returns number of variables
-        /// </summary>
-        /// <summary>
-        /// Returns whether all exponents are zero
-        /// </summary>
-        /// <summary>
-        /// Returns the total degree in specified variables
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Multiplies this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Divides this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
-        /// a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
-        /// a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Tests whether this can be divided by {@code oth} degree vector
-        /// </summary>
-        /// <summary>
-        /// Tests whether this can be divided by {@code oth} degree vector
-        /// </summary>
-        /// <summary>
-        /// Joins new variable (with zero exponent) to degree vector
-        /// </summary>
+    
         /// <summary>
         /// Joins new variables (with zero exponents) to degree vector
         /// </summary>
@@ -822,69 +244,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             return new DegreeVector(Arrays.CopyOf(exponents, exponents.Length + n), totalDegree);
         }
 
-        /// <summary>
-        /// exponents
-        /// </summary>
-        /// <summary>
-        /// Sum of all exponents (total degree)
-        /// </summary>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="totalDegree">total degree (sum of exponents)</param>
-        // assert ArraysUtil.sum(exponents) == totalDegree;
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <summary>
-        /// Returns number of variables
-        /// </summary>
-        /// <summary>
-        /// Returns whether all exponents are zero
-        /// </summary>
-        /// <summary>
-        /// Returns the total degree in specified variables
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Multiplies this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Divides this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
-        /// a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
-        /// a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Tests whether this can be divided by {@code oth} degree vector
-        /// </summary>
-        /// <summary>
-        /// Tests whether this can be divided by {@code oth} degree vector
-        /// </summary>
-        /// <summary>
-        /// Joins new variable (with zero exponent) to degree vector
-        /// </summary>
-        /// <summary>
-        /// Joins new variables (with zero exponents) to degree vector
-        /// </summary>
+     
         /// <summary>
         /// internal API
         /// </summary>
@@ -897,72 +257,8 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             return new DegreeVector(res, totalDegree);
         }
 
-        /// <summary>
-        /// exponents
-        /// </summary>
-        /// <summary>
-        /// Sum of all exponents (total degree)
-        /// </summary>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="totalDegree">total degree (sum of exponents)</param>
-        // assert ArraysUtil.sum(exponents) == totalDegree;
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <summary>
-        /// Returns number of variables
-        /// </summary>
-        /// <summary>
-        /// Returns whether all exponents are zero
-        /// </summary>
-        /// <summary>
-        /// Returns the total degree in specified variables
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Multiplies this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Divides this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
-        /// a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
-        /// a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Tests whether this can be divided by {@code oth} degree vector
-        /// </summary>
-        /// <summary>
-        /// Tests whether this can be divided by {@code oth} degree vector
-        /// </summary>
-        /// <summary>
-        /// Joins new variable (with zero exponent) to degree vector
-        /// </summary>
-        /// <summary>
-        /// Joins new variables (with zero exponents) to degree vector
-        /// </summary>
-        /// <summary>
-        /// internal API
-        /// </summary>
+     
+      
         /// <summary>
         /// Sets the number of variables
         /// </summary>
@@ -976,75 +272,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
                 return new DegreeVector(Arrays.CopyOf(exponents, n));
         }
 
-        /// <summary>
-        /// exponents
-        /// </summary>
-        /// <summary>
-        /// Sum of all exponents (total degree)
-        /// </summary>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="totalDegree">total degree (sum of exponents)</param>
-        // assert ArraysUtil.sum(exponents) == totalDegree;
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <summary>
-        /// Returns number of variables
-        /// </summary>
-        /// <summary>
-        /// Returns whether all exponents are zero
-        /// </summary>
-        /// <summary>
-        /// Returns the total degree in specified variables
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Multiplies this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Divides this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
-        /// a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
-        /// a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Tests whether this can be divided by {@code oth} degree vector
-        /// </summary>
-        /// <summary>
-        /// Tests whether this can be divided by {@code oth} degree vector
-        /// </summary>
-        /// <summary>
-        /// Joins new variable (with zero exponent) to degree vector
-        /// </summary>
-        /// <summary>
-        /// Joins new variables (with zero exponents) to degree vector
-        /// </summary>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// Sets the number of variables
-        /// </summary>
+     
         /// <summary>
         /// Sets exponents of all variables except the specified variable to zero
         /// </summary>
@@ -1055,78 +283,8 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             return new DegreeVector(res, exponents[var]);
         }
 
-        /// <summary>
-        /// exponents
-        /// </summary>
-        /// <summary>
-        /// Sum of all exponents (total degree)
-        /// </summary>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="totalDegree">total degree (sum of exponents)</param>
-        // assert ArraysUtil.sum(exponents) == totalDegree;
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <summary>
-        /// Returns number of variables
-        /// </summary>
-        /// <summary>
-        /// Returns whether all exponents are zero
-        /// </summary>
-        /// <summary>
-        /// Returns the total degree in specified variables
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Multiplies this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Divides this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
-        /// a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
-        /// a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Tests whether this can be divided by {@code oth} degree vector
-        /// </summary>
-        /// <summary>
-        /// Tests whether this can be divided by {@code oth} degree vector
-        /// </summary>
-        /// <summary>
-        /// Joins new variable (with zero exponent) to degree vector
-        /// </summary>
-        /// <summary>
-        /// Joins new variables (with zero exponents) to degree vector
-        /// </summary>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// Sets the number of variables
-        /// </summary>
-        /// <summary>
-        /// Sets exponents of all variables except the specified variable to zero
-        /// </summary>
+     
+
         /// <summary>
         /// Set's exponents of all variables except specified variables to zero
         /// </summary>
@@ -1143,81 +301,8 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             return new DegreeVector(res, deg);
         }
 
-        /// <summary>
-        /// exponents
-        /// </summary>
-        /// <summary>
-        /// Sum of all exponents (total degree)
-        /// </summary>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="totalDegree">total degree (sum of exponents)</param>
-        // assert ArraysUtil.sum(exponents) == totalDegree;
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <summary>
-        /// Returns number of variables
-        /// </summary>
-        /// <summary>
-        /// Returns whether all exponents are zero
-        /// </summary>
-        /// <summary>
-        /// Returns the total degree in specified variables
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Multiplies this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Divides this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
-        /// a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
-        /// a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Tests whether this can be divided by {@code oth} degree vector
-        /// </summary>
-        /// <summary>
-        /// Tests whether this can be divided by {@code oth} degree vector
-        /// </summary>
-        /// <summary>
-        /// Joins new variable (with zero exponent) to degree vector
-        /// </summary>
-        /// <summary>
-        /// Joins new variables (with zero exponents) to degree vector
-        /// </summary>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// Sets the number of variables
-        /// </summary>
-        /// <summary>
-        /// Sets exponents of all variables except the specified variable to zero
-        /// </summary>
-        /// <summary>
-        /// Set's exponents of all variables except specified variables to zero
-        /// </summary>
+     
+    
         /// <summary>
         /// Picks only specified exponents
         /// </summary>
@@ -1235,84 +320,8 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             return new DegreeVector(res, deg);
         }
 
-        /// <summary>
-        /// exponents
-        /// </summary>
-        /// <summary>
-        /// Sum of all exponents (total degree)
-        /// </summary>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="totalDegree">total degree (sum of exponents)</param>
-        // assert ArraysUtil.sum(exponents) == totalDegree;
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <summary>
-        /// Returns number of variables
-        /// </summary>
-        /// <summary>
-        /// Returns whether all exponents are zero
-        /// </summary>
-        /// <summary>
-        /// Returns the total degree in specified variables
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Multiplies this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Divides this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
-        /// a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
-        /// a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Tests whether this can be divided by {@code oth} degree vector
-        /// </summary>
-        /// <summary>
-        /// Tests whether this can be divided by {@code oth} degree vector
-        /// </summary>
-        /// <summary>
-        /// Joins new variable (with zero exponent) to degree vector
-        /// </summary>
-        /// <summary>
-        /// Joins new variables (with zero exponents) to degree vector
-        /// </summary>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// Sets the number of variables
-        /// </summary>
-        /// <summary>
-        /// Sets exponents of all variables except the specified variable to zero
-        /// </summary>
-        /// <summary>
-        /// Set's exponents of all variables except specified variables to zero
-        /// </summary>
-        /// <summary>
-        /// Picks only specified exponents
-        /// </summary>
+     
+     
         /// <summary>
         /// Selects range from this
         /// </summary>
@@ -1328,191 +337,26 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             return new DegreeVector(Arrays.CopyOfRange(exponents, from, to));
         }
 
-        /// <summary>
-        /// exponents
-        /// </summary>
-        /// <summary>
-        /// Sum of all exponents (total degree)
-        /// </summary>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="totalDegree">total degree (sum of exponents)</param>
-        // assert ArraysUtil.sum(exponents) == totalDegree;
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <summary>
-        /// Returns number of variables
-        /// </summary>
-        /// <summary>
-        /// Returns whether all exponents are zero
-        /// </summary>
-        /// <summary>
-        /// Returns the total degree in specified variables
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Multiplies this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Divides this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
-        /// a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
-        /// a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Tests whether this can be divided by {@code oth} degree vector
-        /// </summary>
-        /// <summary>
-        /// Tests whether this can be divided by {@code oth} degree vector
-        /// </summary>
-        /// <summary>
-        /// Joins new variable (with zero exponent) to degree vector
-        /// </summary>
-        /// <summary>
-        /// Joins new variables (with zero exponents) to degree vector
-        /// </summary>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// Sets the number of variables
-        /// </summary>
-        /// <summary>
-        /// Sets exponents of all variables except the specified variable to zero
-        /// </summary>
-        /// <summary>
-        /// Set's exponents of all variables except specified variables to zero
-        /// </summary>
-        /// <summary>
-        /// Picks only specified exponents
-        /// </summary>
-        /// <summary>
-        /// Selects range from this
-        /// </summary>
-        /// <param name="from">from inclusive</param>
-        /// <param name="to">to exclusive</param>
+     
+       
         /// <summary>
         /// Set exponent of specified {@code var} to zero
         /// </summary>
         public DegreeVector DvSetZero(int var)
         {
-            int[] res = exponents.Clone();
+            int[] res = (int[])exponents.Clone();
             res[var] = 0;
             return new DegreeVector(res, totalDegree - exponents[var]);
         }
 
-        /// <summary>
-        /// exponents
-        /// </summary>
-        /// <summary>
-        /// Sum of all exponents (total degree)
-        /// </summary>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="totalDegree">total degree (sum of exponents)</param>
-        // assert ArraysUtil.sum(exponents) == totalDegree;
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <summary>
-        /// Returns number of variables
-        /// </summary>
-        /// <summary>
-        /// Returns whether all exponents are zero
-        /// </summary>
-        /// <summary>
-        /// Returns the total degree in specified variables
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Multiplies this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Divides this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
-        /// a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
-        /// a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Tests whether this can be divided by {@code oth} degree vector
-        /// </summary>
-        /// <summary>
-        /// Tests whether this can be divided by {@code oth} degree vector
-        /// </summary>
-        /// <summary>
-        /// Joins new variable (with zero exponent) to degree vector
-        /// </summary>
-        /// <summary>
-        /// Joins new variables (with zero exponents) to degree vector
-        /// </summary>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// Sets the number of variables
-        /// </summary>
-        /// <summary>
-        /// Sets exponents of all variables except the specified variable to zero
-        /// </summary>
-        /// <summary>
-        /// Set's exponents of all variables except specified variables to zero
-        /// </summary>
-        /// <summary>
-        /// Picks only specified exponents
-        /// </summary>
-        /// <summary>
-        /// Selects range from this
-        /// </summary>
-        /// <param name="from">from inclusive</param>
-        /// <param name="to">to exclusive</param>
-        /// <summary>
-        /// Set exponent of specified {@code var} to zero
-        /// </summary>
+     
+       
         /// <summary>
         /// Set exponents of specified variables to zero
         /// </summary>
         public DegreeVector DvSetZero(int[] variables)
         {
-            int[] res = exponents.Clone();
+            int[] res = (int[])exponents.Clone();
             int deg = totalDegree;
             foreach (int i in variables)
             {
@@ -1523,95 +367,8 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             return new DegreeVector(res, deg);
         }
 
-        /// <summary>
-        /// exponents
-        /// </summary>
-        /// <summary>
-        /// Sum of all exponents (total degree)
-        /// </summary>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="totalDegree">total degree (sum of exponents)</param>
-        // assert ArraysUtil.sum(exponents) == totalDegree;
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <summary>
-        /// Returns number of variables
-        /// </summary>
-        /// <summary>
-        /// Returns whether all exponents are zero
-        /// </summary>
-        /// <summary>
-        /// Returns the total degree in specified variables
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Multiplies this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Divides this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
-        /// a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
-        /// a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Tests whether this can be divided by {@code oth} degree vector
-        /// </summary>
-        /// <summary>
-        /// Tests whether this can be divided by {@code oth} degree vector
-        /// </summary>
-        /// <summary>
-        /// Joins new variable (with zero exponent) to degree vector
-        /// </summary>
-        /// <summary>
-        /// Joins new variables (with zero exponents) to degree vector
-        /// </summary>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// Sets the number of variables
-        /// </summary>
-        /// <summary>
-        /// Sets exponents of all variables except the specified variable to zero
-        /// </summary>
-        /// <summary>
-        /// Set's exponents of all variables except specified variables to zero
-        /// </summary>
-        /// <summary>
-        /// Picks only specified exponents
-        /// </summary>
-        /// <summary>
-        /// Selects range from this
-        /// </summary>
-        /// <param name="from">from inclusive</param>
-        /// <param name="to">to exclusive</param>
-        /// <summary>
-        /// Set exponent of specified {@code var} to zero
-        /// </summary>
-        /// <summary>
-        /// Set exponents of specified variables to zero
-        /// </summary>
+     
+        
         /// <summary>
         /// Drops specified variable (number of variables will be reduced)
         /// </summary>
@@ -1620,98 +377,8 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             return new DegreeVector(ArraysUtil.Remove(exponents, variable), totalDegree - exponents[variable]);
         }
 
-        /// <summary>
-        /// exponents
-        /// </summary>
-        /// <summary>
-        /// Sum of all exponents (total degree)
-        /// </summary>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="totalDegree">total degree (sum of exponents)</param>
-        // assert ArraysUtil.sum(exponents) == totalDegree;
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <summary>
-        /// Returns number of variables
-        /// </summary>
-        /// <summary>
-        /// Returns whether all exponents are zero
-        /// </summary>
-        /// <summary>
-        /// Returns the total degree in specified variables
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Multiplies this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Divides this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
-        /// a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
-        /// a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Tests whether this can be divided by {@code oth} degree vector
-        /// </summary>
-        /// <summary>
-        /// Tests whether this can be divided by {@code oth} degree vector
-        /// </summary>
-        /// <summary>
-        /// Joins new variable (with zero exponent) to degree vector
-        /// </summary>
-        /// <summary>
-        /// Joins new variables (with zero exponents) to degree vector
-        /// </summary>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// Sets the number of variables
-        /// </summary>
-        /// <summary>
-        /// Sets exponents of all variables except the specified variable to zero
-        /// </summary>
-        /// <summary>
-        /// Set's exponents of all variables except specified variables to zero
-        /// </summary>
-        /// <summary>
-        /// Picks only specified exponents
-        /// </summary>
-        /// <summary>
-        /// Selects range from this
-        /// </summary>
-        /// <param name="from">from inclusive</param>
-        /// <param name="to">to exclusive</param>
-        /// <summary>
-        /// Set exponent of specified {@code var} to zero
-        /// </summary>
-        /// <summary>
-        /// Set exponents of specified variables to zero
-        /// </summary>
-        /// <summary>
-        /// Drops specified variable (number of variables will be reduced)
-        /// </summary>
+     
+       
         /// <summary>
         /// Drops specified variables (number of variables will be reduced)
         /// </summary>
@@ -1720,101 +387,8 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             return new DegreeVector(ArraysUtil.Remove(exponents, variables));
         }
 
-        /// <summary>
-        /// exponents
-        /// </summary>
-        /// <summary>
-        /// Sum of all exponents (total degree)
-        /// </summary>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="totalDegree">total degree (sum of exponents)</param>
-        // assert ArraysUtil.sum(exponents) == totalDegree;
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <summary>
-        /// Returns number of variables
-        /// </summary>
-        /// <summary>
-        /// Returns whether all exponents are zero
-        /// </summary>
-        /// <summary>
-        /// Returns the total degree in specified variables
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Multiplies this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Divides this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
-        /// a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
-        /// a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Tests whether this can be divided by {@code oth} degree vector
-        /// </summary>
-        /// <summary>
-        /// Tests whether this can be divided by {@code oth} degree vector
-        /// </summary>
-        /// <summary>
-        /// Joins new variable (with zero exponent) to degree vector
-        /// </summary>
-        /// <summary>
-        /// Joins new variables (with zero exponents) to degree vector
-        /// </summary>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// Sets the number of variables
-        /// </summary>
-        /// <summary>
-        /// Sets exponents of all variables except the specified variable to zero
-        /// </summary>
-        /// <summary>
-        /// Set's exponents of all variables except specified variables to zero
-        /// </summary>
-        /// <summary>
-        /// Picks only specified exponents
-        /// </summary>
-        /// <summary>
-        /// Selects range from this
-        /// </summary>
-        /// <param name="from">from inclusive</param>
-        /// <param name="to">to exclusive</param>
-        /// <summary>
-        /// Set exponent of specified {@code var} to zero
-        /// </summary>
-        /// <summary>
-        /// Set exponents of specified variables to zero
-        /// </summary>
-        /// <summary>
-        /// Drops specified variable (number of variables will be reduced)
-        /// </summary>
-        /// <summary>
-        /// Drops specified variables (number of variables will be reduced)
-        /// </summary>
+     
+
         /// <summary>
         /// Inserts new variable
         /// </summary>
@@ -1823,104 +397,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             return new DegreeVector(ArraysUtil.Insert(exponents, variable, 0), totalDegree);
         }
 
-        /// <summary>
-        /// exponents
-        /// </summary>
-        /// <summary>
-        /// Sum of all exponents (total degree)
-        /// </summary>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="totalDegree">total degree (sum of exponents)</param>
-        // assert ArraysUtil.sum(exponents) == totalDegree;
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <summary>
-        /// Returns number of variables
-        /// </summary>
-        /// <summary>
-        /// Returns whether all exponents are zero
-        /// </summary>
-        /// <summary>
-        /// Returns the total degree in specified variables
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Multiplies this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Divides this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
-        /// a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
-        /// a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Tests whether this can be divided by {@code oth} degree vector
-        /// </summary>
-        /// <summary>
-        /// Tests whether this can be divided by {@code oth} degree vector
-        /// </summary>
-        /// <summary>
-        /// Joins new variable (with zero exponent) to degree vector
-        /// </summary>
-        /// <summary>
-        /// Joins new variables (with zero exponents) to degree vector
-        /// </summary>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// Sets the number of variables
-        /// </summary>
-        /// <summary>
-        /// Sets exponents of all variables except the specified variable to zero
-        /// </summary>
-        /// <summary>
-        /// Set's exponents of all variables except specified variables to zero
-        /// </summary>
-        /// <summary>
-        /// Picks only specified exponents
-        /// </summary>
-        /// <summary>
-        /// Selects range from this
-        /// </summary>
-        /// <param name="from">from inclusive</param>
-        /// <param name="to">to exclusive</param>
-        /// <summary>
-        /// Set exponent of specified {@code var} to zero
-        /// </summary>
-        /// <summary>
-        /// Set exponents of specified variables to zero
-        /// </summary>
-        /// <summary>
-        /// Drops specified variable (number of variables will be reduced)
-        /// </summary>
-        /// <summary>
-        /// Drops specified variables (number of variables will be reduced)
-        /// </summary>
-        /// <summary>
-        /// Inserts new variable
-        /// </summary>
+
         /// <summary>
         /// Inserts new variables
         /// </summary>
@@ -1929,107 +406,8 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             return new DegreeVector(ArraysUtil.Insert(exponents, variable, 0, count), totalDegree);
         }
 
-        /// <summary>
-        /// exponents
-        /// </summary>
-        /// <summary>
-        /// Sum of all exponents (total degree)
-        /// </summary>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="totalDegree">total degree (sum of exponents)</param>
-        // assert ArraysUtil.sum(exponents) == totalDegree;
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <summary>
-        /// Returns number of variables
-        /// </summary>
-        /// <summary>
-        /// Returns whether all exponents are zero
-        /// </summary>
-        /// <summary>
-        /// Returns the total degree in specified variables
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Multiplies this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Divides this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
-        /// a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
-        /// a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Tests whether this can be divided by {@code oth} degree vector
-        /// </summary>
-        /// <summary>
-        /// Tests whether this can be divided by {@code oth} degree vector
-        /// </summary>
-        /// <summary>
-        /// Joins new variable (with zero exponent) to degree vector
-        /// </summary>
-        /// <summary>
-        /// Joins new variables (with zero exponents) to degree vector
-        /// </summary>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// Sets the number of variables
-        /// </summary>
-        /// <summary>
-        /// Sets exponents of all variables except the specified variable to zero
-        /// </summary>
-        /// <summary>
-        /// Set's exponents of all variables except specified variables to zero
-        /// </summary>
-        /// <summary>
-        /// Picks only specified exponents
-        /// </summary>
-        /// <summary>
-        /// Selects range from this
-        /// </summary>
-        /// <param name="from">from inclusive</param>
-        /// <param name="to">to exclusive</param>
-        /// <summary>
-        /// Set exponent of specified {@code var} to zero
-        /// </summary>
-        /// <summary>
-        /// Set exponents of specified variables to zero
-        /// </summary>
-        /// <summary>
-        /// Drops specified variable (number of variables will be reduced)
-        /// </summary>
-        /// <summary>
-        /// Drops specified variables (number of variables will be reduced)
-        /// </summary>
-        /// <summary>
-        /// Inserts new variable
-        /// </summary>
-        /// <summary>
-        /// Inserts new variables
-        /// </summary>
+     
+
         /// <summary>
         /// Set's exponent of specified variable to specified value
         /// </summary>
@@ -2040,117 +418,14 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             if (exponents[variable] == exponent)
                 return this;
             int deg = totalDegree - exponents[variable] + exponent;
-            int[] res = exponents.Clone();
+            int[] res = (int[])exponents.Clone();
             res[variable] = exponent;
             return new DegreeVector(res, deg);
         }
 
-        /// <summary>
-        /// exponents
-        /// </summary>
-        /// <summary>
-        /// Sum of all exponents (total degree)
-        /// </summary>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="totalDegree">total degree (sum of exponents)</param>
-        // assert ArraysUtil.sum(exponents) == totalDegree;
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <summary>
-        /// Returns number of variables
-        /// </summary>
-        /// <summary>
-        /// Returns whether all exponents are zero
-        /// </summary>
-        /// <summary>
-        /// Returns the total degree in specified variables
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Multiplies this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Divides this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
-        /// a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
-        /// a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Tests whether this can be divided by {@code oth} degree vector
-        /// </summary>
-        /// <summary>
-        /// Tests whether this can be divided by {@code oth} degree vector
-        /// </summary>
-        /// <summary>
-        /// Joins new variable (with zero exponent) to degree vector
-        /// </summary>
-        /// <summary>
-        /// Joins new variables (with zero exponents) to degree vector
-        /// </summary>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// Sets the number of variables
-        /// </summary>
-        /// <summary>
-        /// Sets exponents of all variables except the specified variable to zero
-        /// </summary>
-        /// <summary>
-        /// Set's exponents of all variables except specified variables to zero
-        /// </summary>
-        /// <summary>
-        /// Picks only specified exponents
-        /// </summary>
-        /// <summary>
-        /// Selects range from this
-        /// </summary>
-        /// <param name="from">from inclusive</param>
-        /// <param name="to">to exclusive</param>
-        /// <summary>
-        /// Set exponent of specified {@code var} to zero
-        /// </summary>
-        /// <summary>
-        /// Set exponents of specified variables to zero
-        /// </summary>
-        /// <summary>
-        /// Drops specified variable (number of variables will be reduced)
-        /// </summary>
-        /// <summary>
-        /// Drops specified variables (number of variables will be reduced)
-        /// </summary>
-        /// <summary>
-        /// Inserts new variable
-        /// </summary>
-        /// <summary>
-        /// Inserts new variables
-        /// </summary>
-        /// <summary>
-        /// Set's exponent of specified variable to specified value
-        /// </summary>
-        /// <param name="variable">the variable</param>
-        /// <param name="exponent">new exponent</param>
+     
+       
+      
         /// <summary>
         /// Creates degree vector with old variables renamed to specified mapping variables
         /// </summary>
@@ -2164,112 +439,9 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             return new DegreeVector(newExponents, totalDegree);
         }
 
-        /// <summary>
-        /// exponents
-        /// </summary>
-        /// <summary>
-        /// Sum of all exponents (total degree)
-        /// </summary>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="totalDegree">total degree (sum of exponents)</param>
-        // assert ArraysUtil.sum(exponents) == totalDegree;
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <summary>
-        /// Returns number of variables
-        /// </summary>
-        /// <summary>
-        /// Returns whether all exponents are zero
-        /// </summary>
-        /// <summary>
-        /// Returns the total degree in specified variables
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Multiplies this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Divides this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
-        /// a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
-        /// a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Tests whether this can be divided by {@code oth} degree vector
-        /// </summary>
-        /// <summary>
-        /// Tests whether this can be divided by {@code oth} degree vector
-        /// </summary>
-        /// <summary>
-        /// Joins new variable (with zero exponent) to degree vector
-        /// </summary>
-        /// <summary>
-        /// Joins new variables (with zero exponents) to degree vector
-        /// </summary>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// Sets the number of variables
-        /// </summary>
-        /// <summary>
-        /// Sets exponents of all variables except the specified variable to zero
-        /// </summary>
-        /// <summary>
-        /// Set's exponents of all variables except specified variables to zero
-        /// </summary>
-        /// <summary>
-        /// Picks only specified exponents
-        /// </summary>
-        /// <summary>
-        /// Selects range from this
-        /// </summary>
-        /// <param name="from">from inclusive</param>
-        /// <param name="to">to exclusive</param>
-        /// <summary>
-        /// Set exponent of specified {@code var} to zero
-        /// </summary>
-        /// <summary>
-        /// Set exponents of specified variables to zero
-        /// </summary>
-        /// <summary>
-        /// Drops specified variable (number of variables will be reduced)
-        /// </summary>
-        /// <summary>
-        /// Drops specified variables (number of variables will be reduced)
-        /// </summary>
-        /// <summary>
-        /// Inserts new variable
-        /// </summary>
-        /// <summary>
-        /// Inserts new variables
-        /// </summary>
-        /// <summary>
-        /// Set's exponent of specified variable to specified value
-        /// </summary>
-        /// <param name="variable">the variable</param>
-        /// <param name="exponent">new exponent</param>
+     
+       
+    
         /// <summary>
         /// Creates degree vector with old variables renamed to specified mapping variables
         /// </summary>
@@ -2283,112 +455,8 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             return -1;
         }
 
-        /// <summary>
-        /// exponents
-        /// </summary>
-        /// <summary>
-        /// Sum of all exponents (total degree)
-        /// </summary>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="totalDegree">total degree (sum of exponents)</param>
-        // assert ArraysUtil.sum(exponents) == totalDegree;
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <summary>
-        /// Returns number of variables
-        /// </summary>
-        /// <summary>
-        /// Returns whether all exponents are zero
-        /// </summary>
-        /// <summary>
-        /// Returns the total degree in specified variables
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Multiplies this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Divides this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
-        /// a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
-        /// a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Tests whether this can be divided by {@code oth} degree vector
-        /// </summary>
-        /// <summary>
-        /// Tests whether this can be divided by {@code oth} degree vector
-        /// </summary>
-        /// <summary>
-        /// Joins new variable (with zero exponent) to degree vector
-        /// </summary>
-        /// <summary>
-        /// Joins new variables (with zero exponents) to degree vector
-        /// </summary>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// Sets the number of variables
-        /// </summary>
-        /// <summary>
-        /// Sets exponents of all variables except the specified variable to zero
-        /// </summary>
-        /// <summary>
-        /// Set's exponents of all variables except specified variables to zero
-        /// </summary>
-        /// <summary>
-        /// Picks only specified exponents
-        /// </summary>
-        /// <summary>
-        /// Selects range from this
-        /// </summary>
-        /// <param name="from">from inclusive</param>
-        /// <param name="to">to exclusive</param>
-        /// <summary>
-        /// Set exponent of specified {@code var} to zero
-        /// </summary>
-        /// <summary>
-        /// Set exponents of specified variables to zero
-        /// </summary>
-        /// <summary>
-        /// Drops specified variable (number of variables will be reduced)
-        /// </summary>
-        /// <summary>
-        /// Drops specified variables (number of variables will be reduced)
-        /// </summary>
-        /// <summary>
-        /// Inserts new variable
-        /// </summary>
-        /// <summary>
-        /// Inserts new variables
-        /// </summary>
-        /// <summary>
-        /// Set's exponent of specified variable to specified value
-        /// </summary>
-        /// <param name="variable">the variable</param>
-        /// <param name="exponent">new exponent</param>
+     
+       
         /// <summary>
         /// Creates degree vector with old variables renamed to specified mapping variables
         /// </summary>
@@ -2399,605 +467,51 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             return exp == 0 ? "" : var + (exp == 1 ? "" : "^" + exp);
         }
 
-        /// <summary>
-        /// exponents
-        /// </summary>
-        /// <summary>
-        /// Sum of all exponents (total degree)
-        /// </summary>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="totalDegree">total degree (sum of exponents)</param>
-        // assert ArraysUtil.sum(exponents) == totalDegree;
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <summary>
-        /// Returns number of variables
-        /// </summary>
-        /// <summary>
-        /// Returns whether all exponents are zero
-        /// </summary>
-        /// <summary>
-        /// Returns the total degree in specified variables
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Multiplies this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Divides this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
-        /// a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
-        /// a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Tests whether this can be divided by {@code oth} degree vector
-        /// </summary>
-        /// <summary>
-        /// Tests whether this can be divided by {@code oth} degree vector
-        /// </summary>
-        /// <summary>
-        /// Joins new variable (with zero exponent) to degree vector
-        /// </summary>
-        /// <summary>
-        /// Joins new variables (with zero exponents) to degree vector
-        /// </summary>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// Sets the number of variables
-        /// </summary>
-        /// <summary>
-        /// Sets exponents of all variables except the specified variable to zero
-        /// </summary>
-        /// <summary>
-        /// Set's exponents of all variables except specified variables to zero
-        /// </summary>
-        /// <summary>
-        /// Picks only specified exponents
-        /// </summary>
-        /// <summary>
-        /// Selects range from this
-        /// </summary>
-        /// <param name="from">from inclusive</param>
-        /// <param name="to">to exclusive</param>
-        /// <summary>
-        /// Set exponent of specified {@code var} to zero
-        /// </summary>
-        /// <summary>
-        /// Set exponents of specified variables to zero
-        /// </summary>
-        /// <summary>
-        /// Drops specified variable (number of variables will be reduced)
-        /// </summary>
-        /// <summary>
-        /// Drops specified variables (number of variables will be reduced)
-        /// </summary>
-        /// <summary>
-        /// Inserts new variable
-        /// </summary>
-        /// <summary>
-        /// Inserts new variables
-        /// </summary>
-        /// <summary>
-        /// Set's exponent of specified variable to specified value
-        /// </summary>
-        /// <param name="variable">the variable</param>
-        /// <param name="exponent">new exponent</param>
-        /// <summary>
-        /// Creates degree vector with old variables renamed to specified mapping variables
-        /// </summary>
-        /// <param name="nVariables">new total number of variables</param>
-        /// <param name="mapping">mapping from old variables to new variables</param>
+     
+       
         /// <summary>
         /// String representation of this monomial with specified string names for variables
         /// </summary>
         /// <param name="vars">string names of variables</param>
         public string ToString(string[] vars)
         {
-            IList<string> result = new List();
+            List<string> result = new List<string>();
             for (int i = 0; i < exponents.Length; i++)
                 result.Add(ToString0(vars[i], exponents[i]));
-            return result.Stream().Filter((s) => !s.IsEmpty()).Collect(Collectors.Joining("*"));
+            return string.Join('*', result.Where((s) => s.Length != 0));
         }
 
-        /// <summary>
-        /// exponents
-        /// </summary>
-        /// <summary>
-        /// Sum of all exponents (total degree)
-        /// </summary>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="totalDegree">total degree (sum of exponents)</param>
-        // assert ArraysUtil.sum(exponents) == totalDegree;
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <summary>
-        /// Returns number of variables
-        /// </summary>
-        /// <summary>
-        /// Returns whether all exponents are zero
-        /// </summary>
-        /// <summary>
-        /// Returns the total degree in specified variables
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Multiplies this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Divides this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
-        /// a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
-        /// a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Tests whether this can be divided by {@code oth} degree vector
-        /// </summary>
-        /// <summary>
-        /// Tests whether this can be divided by {@code oth} degree vector
-        /// </summary>
-        /// <summary>
-        /// Joins new variable (with zero exponent) to degree vector
-        /// </summary>
-        /// <summary>
-        /// Joins new variables (with zero exponents) to degree vector
-        /// </summary>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// Sets the number of variables
-        /// </summary>
-        /// <summary>
-        /// Sets exponents of all variables except the specified variable to zero
-        /// </summary>
-        /// <summary>
-        /// Set's exponents of all variables except specified variables to zero
-        /// </summary>
-        /// <summary>
-        /// Picks only specified exponents
-        /// </summary>
-        /// <summary>
-        /// Selects range from this
-        /// </summary>
-        /// <param name="from">from inclusive</param>
-        /// <param name="to">to exclusive</param>
-        /// <summary>
-        /// Set exponent of specified {@code var} to zero
-        /// </summary>
-        /// <summary>
-        /// Set exponents of specified variables to zero
-        /// </summary>
-        /// <summary>
-        /// Drops specified variable (number of variables will be reduced)
-        /// </summary>
-        /// <summary>
-        /// Drops specified variables (number of variables will be reduced)
-        /// </summary>
-        /// <summary>
-        /// Inserts new variable
-        /// </summary>
-        /// <summary>
-        /// Inserts new variables
-        /// </summary>
-        /// <summary>
-        /// Set's exponent of specified variable to specified value
-        /// </summary>
-        /// <param name="variable">the variable</param>
-        /// <param name="exponent">new exponent</param>
-        /// <summary>
-        /// Creates degree vector with old variables renamed to specified mapping variables
-        /// </summary>
-        /// <param name="nVariables">new total number of variables</param>
-        /// <param name="mapping">mapping from old variables to new variables</param>
+     
         /// <summary>
         /// String representation of this monomial with specified string names for variables
         /// </summary>
         /// <param name="vars">string names of variables</param>
         public virtual string ToString()
         {
-            return ToString(IStringifier.DefaultVars(exponents.Length));
+            return ToString(IStringifier<object>.DefaultVars(exponents.Length));
         }
 
-        /// <summary>
-        /// exponents
-        /// </summary>
-        /// <summary>
-        /// Sum of all exponents (total degree)
-        /// </summary>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="totalDegree">total degree (sum of exponents)</param>
-        // assert ArraysUtil.sum(exponents) == totalDegree;
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <summary>
-        /// Returns number of variables
-        /// </summary>
-        /// <summary>
-        /// Returns whether all exponents are zero
-        /// </summary>
-        /// <summary>
-        /// Returns the total degree in specified variables
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Multiplies this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Divides this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
-        /// a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
-        /// a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Tests whether this can be divided by {@code oth} degree vector
-        /// </summary>
-        /// <summary>
-        /// Tests whether this can be divided by {@code oth} degree vector
-        /// </summary>
-        /// <summary>
-        /// Joins new variable (with zero exponent) to degree vector
-        /// </summary>
-        /// <summary>
-        /// Joins new variables (with zero exponents) to degree vector
-        /// </summary>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// Sets the number of variables
-        /// </summary>
-        /// <summary>
-        /// Sets exponents of all variables except the specified variable to zero
-        /// </summary>
-        /// <summary>
-        /// Set's exponents of all variables except specified variables to zero
-        /// </summary>
-        /// <summary>
-        /// Picks only specified exponents
-        /// </summary>
-        /// <summary>
-        /// Selects range from this
-        /// </summary>
-        /// <param name="from">from inclusive</param>
-        /// <param name="to">to exclusive</param>
-        /// <summary>
-        /// Set exponent of specified {@code var} to zero
-        /// </summary>
-        /// <summary>
-        /// Set exponents of specified variables to zero
-        /// </summary>
-        /// <summary>
-        /// Drops specified variable (number of variables will be reduced)
-        /// </summary>
-        /// <summary>
-        /// Drops specified variables (number of variables will be reduced)
-        /// </summary>
-        /// <summary>
-        /// Inserts new variable
-        /// </summary>
-        /// <summary>
-        /// Inserts new variables
-        /// </summary>
-        /// <summary>
-        /// Set's exponent of specified variable to specified value
-        /// </summary>
-        /// <param name="variable">the variable</param>
-        /// <param name="exponent">new exponent</param>
-        /// <summary>
-        /// Creates degree vector with old variables renamed to specified mapping variables
-        /// </summary>
-        /// <param name="nVariables">new total number of variables</param>
-        /// <param name="mapping">mapping from old variables to new variables</param>
+     
         /// <summary>
         /// String representation of this monomial with specified string names for variables
         /// </summary>
         /// <param name="vars">string names of variables</param>
         public string ToStringArray()
         {
-            return Arrays.ToString(exponents);
+            return exponents.ToString();
         }
 
-        /// <summary>
-        /// exponents
-        /// </summary>
-        /// <summary>
-        /// Sum of all exponents (total degree)
-        /// </summary>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="totalDegree">total degree (sum of exponents)</param>
-        // assert ArraysUtil.sum(exponents) == totalDegree;
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <summary>
-        /// Returns number of variables
-        /// </summary>
-        /// <summary>
-        /// Returns whether all exponents are zero
-        /// </summary>
-        /// <summary>
-        /// Returns the total degree in specified variables
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Multiplies this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Divides this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
-        /// a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
-        /// a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Tests whether this can be divided by {@code oth} degree vector
-        /// </summary>
-        /// <summary>
-        /// Tests whether this can be divided by {@code oth} degree vector
-        /// </summary>
-        /// <summary>
-        /// Joins new variable (with zero exponent) to degree vector
-        /// </summary>
-        /// <summary>
-        /// Joins new variables (with zero exponents) to degree vector
-        /// </summary>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// Sets the number of variables
-        /// </summary>
-        /// <summary>
-        /// Sets exponents of all variables except the specified variable to zero
-        /// </summary>
-        /// <summary>
-        /// Set's exponents of all variables except specified variables to zero
-        /// </summary>
-        /// <summary>
-        /// Picks only specified exponents
-        /// </summary>
-        /// <summary>
-        /// Selects range from this
-        /// </summary>
-        /// <param name="from">from inclusive</param>
-        /// <param name="to">to exclusive</param>
-        /// <summary>
-        /// Set exponent of specified {@code var} to zero
-        /// </summary>
-        /// <summary>
-        /// Set exponents of specified variables to zero
-        /// </summary>
-        /// <summary>
-        /// Drops specified variable (number of variables will be reduced)
-        /// </summary>
-        /// <summary>
-        /// Drops specified variables (number of variables will be reduced)
-        /// </summary>
-        /// <summary>
-        /// Inserts new variable
-        /// </summary>
-        /// <summary>
-        /// Inserts new variables
-        /// </summary>
-        /// <summary>
-        /// Set's exponent of specified variable to specified value
-        /// </summary>
-        /// <param name="variable">the variable</param>
-        /// <param name="exponent">new exponent</param>
-        /// <summary>
-        /// Creates degree vector with old variables renamed to specified mapping variables
-        /// </summary>
-        /// <param name="nVariables">new total number of variables</param>
-        /// <param name="mapping">mapping from old variables to new variables</param>
+
         /// <summary>
         /// String representation of this monomial with specified string names for variables
         /// </summary>
         /// <param name="vars">string names of variables</param>
         public bool DvEquals(DegreeVector dVector)
         {
-            return totalDegree == dVector.totalDegree && Arrays.Equals(exponents, dVector.exponents);
+            return totalDegree == dVector.totalDegree && exponents.SequenceEqual(dVector.exponents);
         }
 
-        /// <summary>
-        /// exponents
-        /// </summary>
-        /// <summary>
-        /// Sum of all exponents (total degree)
-        /// </summary>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="totalDegree">total degree (sum of exponents)</param>
-        // assert ArraysUtil.sum(exponents) == totalDegree;
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <summary>
-        /// Returns number of variables
-        /// </summary>
-        /// <summary>
-        /// Returns whether all exponents are zero
-        /// </summary>
-        /// <summary>
-        /// Returns the total degree in specified variables
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Multiplies this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Divides this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
-        /// a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
-        /// a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Tests whether this can be divided by {@code oth} degree vector
-        /// </summary>
-        /// <summary>
-        /// Tests whether this can be divided by {@code oth} degree vector
-        /// </summary>
-        /// <summary>
-        /// Joins new variable (with zero exponent) to degree vector
-        /// </summary>
-        /// <summary>
-        /// Joins new variables (with zero exponents) to degree vector
-        /// </summary>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// Sets the number of variables
-        /// </summary>
-        /// <summary>
-        /// Sets exponents of all variables except the specified variable to zero
-        /// </summary>
-        /// <summary>
-        /// Set's exponents of all variables except specified variables to zero
-        /// </summary>
-        /// <summary>
-        /// Picks only specified exponents
-        /// </summary>
-        /// <summary>
-        /// Selects range from this
-        /// </summary>
-        /// <param name="from">from inclusive</param>
-        /// <param name="to">to exclusive</param>
-        /// <summary>
-        /// Set exponent of specified {@code var} to zero
-        /// </summary>
-        /// <summary>
-        /// Set exponents of specified variables to zero
-        /// </summary>
-        /// <summary>
-        /// Drops specified variable (number of variables will be reduced)
-        /// </summary>
-        /// <summary>
-        /// Drops specified variables (number of variables will be reduced)
-        /// </summary>
-        /// <summary>
-        /// Inserts new variable
-        /// </summary>
-        /// <summary>
-        /// Inserts new variables
-        /// </summary>
-        /// <summary>
-        /// Set's exponent of specified variable to specified value
-        /// </summary>
-        /// <param name="variable">the variable</param>
-        /// <param name="exponent">new exponent</param>
-        /// <summary>
-        /// Creates degree vector with old variables renamed to specified mapping variables
-        /// </summary>
-        /// <param name="nVariables">new total number of variables</param>
-        /// <param name="mapping">mapping from old variables to new variables</param>
-        /// <summary>
-        /// String representation of this monomial with specified string names for variables
-        /// </summary>
-        /// <param name="vars">string names of variables</param>
-        public virtual bool Equals(object o)
+        public override bool Equals(object? o)
         {
             if (this == o)
                 return true;
@@ -3007,124 +521,10 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             return DvEquals(dVector);
         }
 
-        /// <summary>
-        /// exponents
-        /// </summary>
-        /// <summary>
-        /// Sum of all exponents (total degree)
-        /// </summary>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="totalDegree">total degree (sum of exponents)</param>
-        // assert ArraysUtil.sum(exponents) == totalDegree;
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <summary>
-        /// Returns number of variables
-        /// </summary>
-        /// <summary>
-        /// Returns whether all exponents are zero
-        /// </summary>
-        /// <summary>
-        /// Returns the total degree in specified variables
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        /// <summary>
-        /// Multiplies this by oth
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Multiplies this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Divides this by variable^exponent
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or null if exact division is not possible (e.g. a^2*b^3 / a^3*b^5)
-        /// </summary>
-        // avoid copying
-        /// <summary>
-        /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
-        /// a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Gives quotient {@code this / oth } or throws {@code ArithmeticException} if exact division is not possible (e.g.
-        /// a^2*b^3 / a^3*b^5)
-        /// </summary>
-        /// <summary>
-        /// Tests whether this can be divided by {@code oth} degree vector
-        /// </summary>
-        /// <summary>
-        /// Tests whether this can be divided by {@code oth} degree vector
-        /// </summary>
-        /// <summary>
-        /// Joins new variable (with zero exponent) to degree vector
-        /// </summary>
-        /// <summary>
-        /// Joins new variables (with zero exponents) to degree vector
-        /// </summary>
-        /// <summary>
-        /// internal API
-        /// </summary>
-        /// <summary>
-        /// Sets the number of variables
-        /// </summary>
-        /// <summary>
-        /// Sets exponents of all variables except the specified variable to zero
-        /// </summary>
-        /// <summary>
-        /// Set's exponents of all variables except specified variables to zero
-        /// </summary>
-        /// <summary>
-        /// Picks only specified exponents
-        /// </summary>
-        /// <summary>
-        /// Selects range from this
-        /// </summary>
-        /// <param name="from">from inclusive</param>
-        /// <param name="to">to exclusive</param>
-        /// <summary>
-        /// Set exponent of specified {@code var} to zero
-        /// </summary>
-        /// <summary>
-        /// Set exponents of specified variables to zero
-        /// </summary>
-        /// <summary>
-        /// Drops specified variable (number of variables will be reduced)
-        /// </summary>
-        /// <summary>
-        /// Drops specified variables (number of variables will be reduced)
-        /// </summary>
-        /// <summary>
-        /// Inserts new variable
-        /// </summary>
-        /// <summary>
-        /// Inserts new variables
-        /// </summary>
-        /// <summary>
-        /// Set's exponent of specified variable to specified value
-        /// </summary>
-        /// <param name="variable">the variable</param>
-        /// <param name="exponent">new exponent</param>
-        /// <summary>
-        /// Creates degree vector with old variables renamed to specified mapping variables
-        /// </summary>
-        /// <param name="nVariables">new total number of variables</param>
-        /// <param name="mapping">mapping from old variables to new variables</param>
-        /// <summary>
-        /// String representation of this monomial with specified string names for variables
-        /// </summary>
-        /// <param name="vars">string names of variables</param>
-        public virtual int GetHashCode()
+     
+        public override int GetHashCode()
         {
-            return Arrays.GetHashCode(exponents);
+            return exponents.GetHashCode();
         }
     }
 }

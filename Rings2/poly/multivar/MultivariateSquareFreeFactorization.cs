@@ -1,20 +1,7 @@
-using Cc.Redberry.Rings;
+using System.Numerics;
 using Cc.Redberry.Rings.Bigint;
 using Cc.Redberry.Rings.Poly;
 using Cc.Redberry.Rings.Poly.Univar;
-using Java.Util;
-using Cc.Redberry.Rings.Poly.Multivar.Conversions64bit;
-using Cc.Redberry.Rings.Poly.Multivar.MultivariateDivision;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using static Cc.Redberry.Rings.Poly.Multivar.RoundingMode;
-using static Cc.Redberry.Rings.Poly.Multivar.Associativity;
-using static Cc.Redberry.Rings.Poly.Multivar.Operator;
-using static Cc.Redberry.Rings.Poly.Multivar.TokenType;
-using static Cc.Redberry.Rings.Poly.Multivar.SystemInfo;
 
 namespace Cc.Redberry.Rings.Poly.Multivar
 {
@@ -32,7 +19,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         /// </summary>
         /// <param name="poly">the polynomial</param>
         /// <returns>square-free decomposition</returns>
-        public static PolynomialFactorDecomposition<Poly> SquareFreeFactorization<Term extends AMonomial<Term>, Poly extends AMultivariatePolynomial<Term, Poly>>(Poly poly)
+        public static PolynomialFactorDecomposition<Poly> SquareFreeFactorization<Term, Poly>(Poly poly) where Term : AMonomial<Term> where Poly : AMultivariatePolynomial<Term, Poly>
         {
             if (poly.IsOverFiniteField())
                 return SquareFreeFactorizationBernardin(poly);
@@ -49,7 +36,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         /// </summary>
         /// <param name="poly">the polynomial</param>
         /// <returns>whether the given {@code poly} is square free</returns>
-        public static bool IsSquareFree<Term extends AMonomial<Term>, Poly extends AMultivariatePolynomial<Term, Poly>>(Poly poly)
+        public static bool IsSquareFree<Term, Poly>(Poly poly) where Term : AMonomial<Term> where Poly : AMultivariatePolynomial<Term, Poly>
         {
             return MultivariateGCD.PolynomialGCD(poly, poly.Derivative()).IsConstant();
         }
@@ -59,12 +46,13 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         /// </summary>
         /// <param name="poly">the polynomial</param>
         /// <returns>square free part</returns>
-        public static Poly SquareFreePart<Term extends AMonomial<Term>, Poly extends AMultivariatePolynomial<Term, Poly>>(Poly poly)
+        public static Poly SquareFreePart<Term, Poly>(Poly poly) where Term : AMonomial<Term> where Poly : AMultivariatePolynomial<Term, Poly>
         {
-            return SquareFreeFactorization(poly).factors.Stream().Filter((x) => !x.IsMonomial()).Reduce(poly.CreateOne(), Poly.Multiply());
+            return SquareFreeFactorization(poly).factors.Where((x) => !x.IsMonomial()).Aggregate(poly.CreateOne(),
+                (acc,  p)=> acc.Multiply(p));
         }
 
-        private static void AddMonomial<Term extends AMonomial<Term>, Poly extends AMultivariatePolynomial<Term, Poly>>(PolynomialFactorDecomposition<Poly> decomposition, Poly poly)
+        private static void AddMonomial<Term, Poly>(PolynomialFactorDecomposition<Poly> decomposition, Poly poly) where Term : AMonomial<Term> where Poly : AMultivariatePolynomial<Term, Poly>
         {
             decomposition.AddUnit(poly.LcAsPoly());
             poly = poly.Monic();
@@ -75,13 +63,13 @@ namespace Cc.Redberry.Rings.Poly.Multivar
                     decomposition.AddFactor(poly.Create(mAlgebra.GetUnitTerm(poly.nVariables)[i] = 1), term.exponents[i]);
         }
 
-        private static PolynomialFactorDecomposition<Poly> FactorUnivariate<Term extends AMonomial<Term>, Poly extends AMultivariatePolynomial<Term, Poly>>(Poly poly)
+        private static PolynomialFactorDecomposition<Poly> FactorUnivariate<Term, Poly>(Poly poly) where Term : AMonomial<Term> where Poly : AMultivariatePolynomial<Term, Poly>
         {
             int var = poly.UnivariateVariable();
-            return UnivariateSquareFreeFactorization.SquareFreeFactorization(poly.AsUnivariate()).MapTo((p) => AMultivariatePolynomial.AsMultivariate((IUnivariatePolynomial)p, poly.nVariables, var, poly.ordering));
+            return UnivariateSquareFreeFactorization.SquareFreeFactorization(poly.AsUnivariate()).MapTo((p) => AMultivariatePolynomial<Term, Poly>.AsMultivariate((IUnivariatePolynomial)p, poly.nVariables, var, poly.ordering));
         }
 
-        private static Poly[] ReduceContent<Term extends AMonomial<Term>, Poly extends AMultivariatePolynomial<Term, Poly>>(Poly poly)
+        private static Poly[] ReduceContent<Term, Poly>(Poly poly) where Term : AMonomial<Term> where Poly : AMultivariatePolynomial<Term, Poly>
         {
             Term monomialContent = poly.MonomialContent();
             poly = poly.DivideOrNull(monomialContent);
@@ -98,7 +86,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         /// </summary>
         /// <param name="poly">the polynomial</param>
         /// <returns>square-free decomposition</returns>
-        public static PolynomialFactorDecomposition<Poly> SquareFreeFactorizationYunZeroCharacteristics<Term extends AMonomial<Term>, Poly extends AMultivariatePolynomial<Term, Poly>>(Poly poly)
+        public static PolynomialFactorDecomposition<Poly> SquareFreeFactorizationYunZeroCharacteristics<Term, Poly>(Poly poly)  where Term : AMonomial<Term> where Poly : AMultivariatePolynomial<Term, Poly>
         {
             if (!poly.CoefficientRingCharacteristic().IsZero())
                 throw new ArgumentException("Characteristics 0 expected");
@@ -116,7 +104,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             return decomposition;
         }
 
-        private static void SquareFreeFactorizationYun0<Term extends AMonomial<Term>, Poly extends AMultivariatePolynomial<Term, Poly>>(Poly poly, PolynomialFactorDecomposition<Poly> factorization)
+        private static void SquareFreeFactorizationYun0<Term, Poly>(Poly poly, PolynomialFactorDecomposition<Poly> factorization) where Term : AMonomial<Term> where Poly : AMultivariatePolynomial<Term, Poly>
         {
             Poly[] derivative = poly.Derivative();
             Poly gcd = MultivariateGCD.PolynomialGCD(poly, derivative);
@@ -152,7 +140,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         /// </summary>
         /// <param name="poly">the polynomial</param>
         /// <returns>square-free decomposition</returns>
-        public static PolynomialFactorDecomposition<Poly> SquareFreeFactorizationMusserZeroCharacteristics<Term extends AMonomial<Term>, Poly extends AMultivariatePolynomial<Term, Poly>>(Poly poly)
+        public static PolynomialFactorDecomposition<Poly> SquareFreeFactorizationMusserZeroCharacteristics<Term, Poly>(Poly poly) where Term : AMonomial<Term> where Poly : AMultivariatePolynomial<Term, Poly>
         {
             if (!poly.CoefficientRingCharacteristic().IsZero())
                 throw new ArgumentException("Characteristics 0 expected");
@@ -166,7 +154,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             return decomposition;
         }
 
-        private static void SquareFreeFactorizationMusserZeroCharacteristics0<Term extends AMonomial<Term>, Poly extends AMultivariatePolynomial<Term, Poly>>(Poly poly, PolynomialFactorDecomposition<Poly> factorization)
+        private static void SquareFreeFactorizationMusserZeroCharacteristics0<Term, Poly>(Poly poly, PolynomialFactorDecomposition<Poly> factorization) where Term : AMonomial<Term> where Poly : AMultivariatePolynomial<Term, Poly>
         {
             Poly[] derivative = poly.Derivative();
             Poly gcd = MultivariateGCD.PolynomialGCD(poly, derivative);
@@ -198,7 +186,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         /// </summary>
         /// <param name="poly">the polynomial</param>
         /// <returns>square-free decomposition</returns>
-        public static PolynomialFactorDecomposition<Poly> SquareFreeFactorizationBernardin<Term extends AMonomial<Term>, Poly extends AMultivariatePolynomial<Term, Poly>>(Poly poly)
+        public static PolynomialFactorDecomposition<Poly> SquareFreeFactorizationBernardin<Term, Poly>(Poly poly) where Term : AMonomial<Term> where Poly : AMultivariatePolynomial<Term, Poly>
         {
             if (poly.CoefficientRingCharacteristic().IsZero())
                 throw new ArgumentException("Positive characteristic expected");
@@ -217,7 +205,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         /// <summary>
         /// {@code poly} will be destroyed
         /// </summary>
-        private static PolynomialFactorDecomposition<Poly> SquareFreeFactorizationBernardin0<Term extends AMonomial<Term>, Poly extends AMultivariatePolynomial<Term, Poly>>(Poly poly)
+        private static PolynomialFactorDecomposition<Poly> SquareFreeFactorizationBernardin0<Term, Poly>(Poly poly) where Term : AMonomial<Term> where Poly : AMultivariatePolynomial<Term, Poly>
         {
             poly.Monic();
             if (poly.IsConstant())
@@ -271,7 +259,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         /// <summary>
         /// p-th root of poly
         /// </summary>
-        private static Poly PRoot<Term extends AMonomial<Term>, Poly extends AMultivariatePolynomial<Term, Poly>>(Poly poly)
+        private static Poly PRoot<Term, Poly>(Poly poly) where Term : AMonomial<Term> where Poly : AMultivariatePolynomial<Term, Poly>
         {
             if (poly is MultivariatePolynomial)
                 return (Poly)PRoot((MultivariatePolynomial)poly);
@@ -298,16 +286,16 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             // p^(m -1) used for computing p-th root of elements
             BigInteger inverseFactor = ring.Cardinality().Divide(ring.Characteristic());
             int modulus = poly.CoefficientRingCharacteristic().IntValueExact();
-            MonomialSet<Monomial<E>> pRoot = new MonomialSet(poly.ordering);
+            MonomialSet<Monomial<E>> pRoot = new MonomialSet<Monomial<E>>(poly.ordering);
             foreach (Monomial<E> term in poly)
             {
-                int[] exponents = term.exponents.Clone();
+                int[] exponents = (int[])term.exponents.Clone();
                 for (int i = 0; i < exponents.Length; i++)
                 {
                     exponents[i] = exponents[i] / modulus;
                 }
 
-                poly.Add(pRoot, new Monomial(exponents, ring.Pow(term.coefficient, inverseFactor)));
+                poly.Add(pRoot, new Monomial<E>(exponents, ring.Pow(term.coefficient, inverseFactor)));
             }
 
             return poly.Create(pRoot);
@@ -316,10 +304,10 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         private static MultivariatePolynomialZp64 PRoot(MultivariatePolynomialZp64 poly)
         {
             int modulus = MachineArithmetic.SafeToInt(poly.ring.modulus);
-            MonomialSet<MonomialZp64> pRoot = new MonomialSet(poly.ordering);
+            MonomialSet<MonomialZp64> pRoot = new MonomialSet<MonomialZp64>(poly.ordering);
             foreach (MonomialZp64 term in poly)
             {
-                int[] exponents = term.exponents.Clone();
+                int[] exponents = (int[])term.exponents.Clone();
                 for (int i = 0; i < exponents.Length; i++)
                 {
                     exponents[i] = exponents[i] / modulus;

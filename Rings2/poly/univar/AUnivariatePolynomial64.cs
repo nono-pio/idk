@@ -23,7 +23,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
     /// <summary>
     /// Univariate polynomials over machine integers.
     /// </summary>
-    abstract class AUnivariatePolynomial64<lPoly> : IUnivariatePolynomial<lPoly>
+    public abstract class AUnivariatePolynomial64<lPoly> : IUnivariatePolynomial<lPoly>
     {
         private static readonly long serialVersionUID = 1;
         /// <summary>
@@ -6016,7 +6016,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <summary>
         /// convert this long[] data to BigInteger[]
         /// </summary>
-        BigInteger[] DataToBigIntegers()
+        public BigInteger[] DataToBigIntegers()
         {
             BigInteger[] bData = new BigInteger[degree + 1];
             for (int i = degree; i >= 0; --i)
@@ -8163,7 +8163,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <summary>
         /// switch algorithms
         /// </summary>
-        long[] MultiplyUnsafe0(lPoly oth)
+        public long[] MultiplyUnsafe0(lPoly oth)
         {
             if (1 * (degree + 1) * (degree + 1) <= MUL_CLASSICAL_THRESHOLD)
                 return MultiplyClassicalUnsafe(data, 0, degree + 1, oth.data, 0, oth.degree + 1);
@@ -8345,7 +8345,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <summary>
         /// switch algorithms
         /// </summary>
-        long[] MultiplySafe0(lPoly oth)
+        public long[] MultiplySafe0(lPoly oth)
         {
             if (1 * (degree + 1) * (degree + 1) <= MUL_CLASSICAL_THRESHOLD)
                 return MultiplyClassicalSafe(data, 0, degree + 1, oth.data, 0, oth.degree + 1);
@@ -8530,7 +8530,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <summary>
         /// switch algorithms
         /// </summary>
-        long[] SquareUnsafe0()
+        public long[] SquareUnsafe0()
         {
             if (1 * (degree + 1) * (degree + 1) <= MUL_CLASSICAL_THRESHOLD)
                 return SquareClassicalUnsafe(data, 0, degree + 1);
@@ -8718,7 +8718,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <summary>
         /// switch algorithms
         /// </summary>
-        long[] SquareSafe0()
+        public long[] SquareSafe0()
         {
             if (1 * (degree + 1) * (degree + 1) <= MUL_CLASSICAL_THRESHOLD)
                 return SquareClassicalSafe(data, 0, degree + 1);
@@ -8917,7 +8917,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <param name="bFrom">begin in b</param>
         /// <param name="bTo">end in b</param>
         /// <returns>the result</returns>
-        long[] MultiplyClassicalSafe(long[] a, int aFrom, int aTo, long[] b, int bFrom, int bTo)
+        public long[] MultiplyClassicalSafe(long[] a, int aFrom, int aTo, long[] b, int bFrom, int bTo)
         {
             long[] result = new long[aTo - aFrom + bTo - bFrom - 1];
             MultiplyClassicalSafe(result, a, aFrom, aTo, b, bFrom, bTo);
@@ -9125,7 +9125,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <param name="b">the second multiplier</param>
         /// <param name="bFrom">begin in b</param>
         /// <param name="bTo">end in b</param>
-        virtual void MultiplyClassicalSafe(long[] result, long[] a, int aFrom, int aTo, long[] b, int bFrom, int bTo)
+        public virtual void MultiplyClassicalSafe(long[] result, long[] a, int aFrom, int aTo, long[] b, int bFrom, int bTo)
         {
             if (aTo - aFrom > bTo - bFrom)
             {

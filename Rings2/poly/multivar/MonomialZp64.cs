@@ -1,14 +1,6 @@
-using Cc.Redberry.Rings.Bigint;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using static Cc.Redberry.Rings.Poly.Multivar.RoundingMode;
-using static Cc.Redberry.Rings.Poly.Multivar.Associativity;
-using static Cc.Redberry.Rings.Poly.Multivar.Operator;
-using static Cc.Redberry.Rings.Poly.Multivar.TokenType;
-using static Cc.Redberry.Rings.Poly.Multivar.SystemInfo;
+
+
+using System.Numerics;
 
 namespace Cc.Redberry.Rings.Poly.Multivar
 {
@@ -25,9 +17,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         /// the coefficient
         /// </summary>
         public readonly long coefficient;
-        /// <summary>
-        /// the coefficient
-        /// </summary>
+
         /// <summary>
         /// </summary>
         /// <param name="degreeVector">DegreeVector</param>
@@ -37,13 +27,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             this.coefficient = coefficient;
         }
 
-        /// <summary>
-        /// the coefficient
-        /// </summary>
-        /// <summary>
-        /// </summary>
-        /// <param name="degreeVector">DegreeVector</param>
-        /// <param name="coefficient">the coefficient</param>
+
         /// <summary>
         /// </summary>
         /// <param name="exponents">exponents</param>
@@ -54,18 +38,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             this.coefficient = coefficient;
         }
 
-        /// <summary>
-        /// the coefficient
-        /// </summary>
-        /// <summary>
-        /// </summary>
-        /// <param name="degreeVector">DegreeVector</param>
-        /// <param name="coefficient">the coefficient</param>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="totalDegree">total degree (sum of exponents)</param>
-        /// <param name="coefficient">the coefficient</param>
+
         /// <summary>
         /// </summary>
         /// <param name="exponents">exponents</param>
@@ -75,42 +48,12 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             this.coefficient = coefficient;
         }
 
-        /// <summary>
-        /// the coefficient
-        /// </summary>
-        /// <summary>
-        /// </summary>
-        /// <param name="degreeVector">DegreeVector</param>
-        /// <param name="coefficient">the coefficient</param>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="totalDegree">total degree (sum of exponents)</param>
-        /// <param name="coefficient">the coefficient</param>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="coefficient">the coefficient</param>
+       
         public MonomialZp64(int nVariables, long coefficient) : this(new int[nVariables], 0, coefficient)
         {
         }
 
-        /// <summary>
-        /// the coefficient
-        /// </summary>
-        /// <summary>
-        /// </summary>
-        /// <param name="degreeVector">DegreeVector</param>
-        /// <param name="coefficient">the coefficient</param>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="totalDegree">total degree (sum of exponents)</param>
-        /// <param name="coefficient">the coefficient</param>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="coefficient">the coefficient</param>
+        
         public override MonomialZp64 SetCoefficientFrom(MonomialZp64 oth)
         {
             if (coefficient == oth.coefficient)
@@ -118,22 +61,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             return new MonomialZp64(this, oth.coefficient);
         }
 
-        /// <summary>
-        /// the coefficient
-        /// </summary>
-        /// <summary>
-        /// </summary>
-        /// <param name="degreeVector">DegreeVector</param>
-        /// <param name="coefficient">the coefficient</param>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="totalDegree">total degree (sum of exponents)</param>
-        /// <param name="coefficient">the coefficient</param>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="coefficient">the coefficient</param>
+        
         public override MonomialZp64 SetDegreeVector(DegreeVector oth)
         {
             if (this == oth)
@@ -145,22 +73,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             return new MonomialZp64(oth, coefficient);
         }
 
-        /// <summary>
-        /// the coefficient
-        /// </summary>
-        /// <summary>
-        /// </summary>
-        /// <param name="degreeVector">DegreeVector</param>
-        /// <param name="coefficient">the coefficient</param>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="totalDegree">total degree (sum of exponents)</param>
-        /// <param name="coefficient">the coefficient</param>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="coefficient">the coefficient</param>
+        
         public override MonomialZp64 SetDegreeVector(int[] exponents, int totalDegree)
         {
             if (this.exponents == exponents)
@@ -168,43 +81,13 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             return new MonomialZp64(exponents, totalDegree, coefficient);
         }
 
-        /// <summary>
-        /// the coefficient
-        /// </summary>
-        /// <summary>
-        /// </summary>
-        /// <param name="degreeVector">DegreeVector</param>
-        /// <param name="coefficient">the coefficient</param>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="totalDegree">total degree (sum of exponents)</param>
-        /// <param name="coefficient">the coefficient</param>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="coefficient">the coefficient</param>
+        
         public override MonomialZp64 ForceSetDegreeVector(int[] exponents, int totalDegree)
         {
             return new MonomialZp64(exponents, totalDegree, coefficient);
         }
 
-        /// <summary>
-        /// the coefficient
-        /// </summary>
-        /// <summary>
-        /// </summary>
-        /// <param name="degreeVector">DegreeVector</param>
-        /// <param name="coefficient">the coefficient</param>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="totalDegree">total degree (sum of exponents)</param>
-        /// <param name="coefficient">the coefficient</param>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="coefficient">the coefficient</param>
+        
         public MonomialZp64 SetCoefficient(long c)
         {
             if (coefficient == c)
@@ -212,44 +95,14 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             return new MonomialZp64(exponents, totalDegree, c);
         }
 
-        /// <summary>
-        /// the coefficient
-        /// </summary>
-        /// <summary>
-        /// </summary>
-        /// <param name="degreeVector">DegreeVector</param>
-        /// <param name="coefficient">the coefficient</param>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="totalDegree">total degree (sum of exponents)</param>
-        /// <param name="coefficient">the coefficient</param>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="coefficient">the coefficient</param>
+        
         public Monomial<BigInteger> ToBigMonomial()
         {
-            return new Monomial(this, BigInteger.ValueOf(coefficient));
+            return new Monomial<BigInteger>(this, new BigInteger(coefficient));
         }
 
-        /// <summary>
-        /// the coefficient
-        /// </summary>
-        /// <summary>
-        /// </summary>
-        /// <param name="degreeVector">DegreeVector</param>
-        /// <param name="coefficient">the coefficient</param>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="totalDegree">total degree (sum of exponents)</param>
-        /// <param name="coefficient">the coefficient</param>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="coefficient">the coefficient</param>
-        public override bool Equals(object o)
+        
+        public override bool Equals(object? o)
         {
             if (this == o)
                 return true;
@@ -261,22 +114,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             return coefficient == that.coefficient;
         }
 
-        /// <summary>
-        /// the coefficient
-        /// </summary>
-        /// <summary>
-        /// </summary>
-        /// <param name="degreeVector">DegreeVector</param>
-        /// <param name="coefficient">the coefficient</param>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="totalDegree">total degree (sum of exponents)</param>
-        /// <param name="coefficient">the coefficient</param>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="coefficient">the coefficient</param>
+        
         public override int GetHashCode()
         {
             int result = base.GetHashCode();
@@ -284,27 +122,12 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             return result;
         }
 
-        /// <summary>
-        /// the coefficient
-        /// </summary>
-        /// <summary>
-        /// </summary>
-        /// <param name="degreeVector">DegreeVector</param>
-        /// <param name="coefficient">the coefficient</param>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="totalDegree">total degree (sum of exponents)</param>
-        /// <param name="coefficient">the coefficient</param>
-        /// <summary>
-        /// </summary>
-        /// <param name="exponents">exponents</param>
-        /// <param name="coefficient">the coefficient</param>
+        
         public override string ToString()
         {
             string dvString = base.ToString();
-            string cfString = Long.ToString(coefficient);
-            if (dvString.IsEmpty())
+            string cfString = coefficient.ToString();
+            if (dvString.Length == 0)
                 return cfString;
             if (coefficient == 1)
                 return dvString;

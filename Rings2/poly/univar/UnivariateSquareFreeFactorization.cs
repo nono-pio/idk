@@ -1,19 +1,6 @@
-using Cc.Redberry.Rings;
+using System.Numerics;
 using Cc.Redberry.Rings.Bigint;
-using Cc.Redberry.Rings.Poly;
 using Cc.Redberry.Rings.Poly.Multivar;
-using Java.Util;
-using Cc.Redberry.Rings.Poly.Univar.Conversions64bit;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using static Cc.Redberry.Rings.Poly.Univar.RoundingMode;
-using static Cc.Redberry.Rings.Poly.Univar.Associativity;
-using static Cc.Redberry.Rings.Poly.Univar.Operator;
-using static Cc.Redberry.Rings.Poly.Univar.TokenType;
-using static Cc.Redberry.Rings.Poly.Univar.SystemInfo;
 
 namespace Cc.Redberry.Rings.Poly.Univar
 {
@@ -32,7 +19,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// </summary>
         /// <param name="poly">the polynomial</param>
         /// <returns>{@code true} if {@code poly} is square-free and {@code false} otherwise</returns>
-        public static bool IsSquareFree<T extends IUnivariatePolynomial<T>>(T poly)
+        public static bool IsSquareFree<T>(T poly) where T : IUnivariatePolynomial<T>
         {
             return UnivariateGCD.PolynomialGCD(poly, poly.Derivative()).IsConstant();
         }
@@ -42,7 +29,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// </summary>
         /// <param name="poly">the polynomial</param>
         /// <returns>square-free decomposition</returns>
-        public static PolynomialFactorDecomposition<T> SquareFreeFactorization<T extends IUnivariatePolynomial<T>>(T poly)
+        public static PolynomialFactorDecomposition<T> SquareFreeFactorization<T>(T poly) where T : IUnivariatePolynomial<T>
         {
             if (poly.IsOverFiniteField())
                 return SquareFreeFactorizationMusser(poly);
@@ -50,7 +37,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
                 return (PolynomialFactorDecomposition<T>)UnivariateFactorization.FactorOverMultivariate((UnivariatePolynomial)poly, MultivariateSquareFreeFactorization.SquareFreeFactorization());
             else if (UnivariateFactorization.IsOverUnivariate(poly))
                 return (PolynomialFactorDecomposition<T>)UnivariateFactorization.FactorOverUnivariate((UnivariatePolynomial)poly, MultivariateSquareFreeFactorization.SquareFreeFactorization());
-            else if (poly.CoefficientRingCharacteristic().IsZero())
+            else if (poly.CoefficientRingCharacteristic().IsZero)
                 return SquareFreeFactorizationYunZeroCharacteristics(poly);
             else
                 return SquareFreeFactorizationMusser(poly);
@@ -61,9 +48,10 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// </summary>
         /// <param name="poly">the polynomial</param>
         /// <returns>square free part</returns>
-        public static T SquareFreePart<T extends IUnivariatePolynomial<T>>(T poly)
+        public static T SquareFreePart<T>(T poly) where T : IUnivariatePolynomial<T>
         {
-            return SquareFreeFactorization(poly).factors.Stream().Filter((x) => !x.IsMonomial()).Reduce(poly.CreateOne(), IUnivariatePolynomial<T>.Multiply());
+            return SquareFreeFactorization(poly).factors.Where((x) => !x.IsMonomial()).Aggregate(poly.CreateOne(),
+                (acc, p) => acc.Multiply(p));
         }
 
         /// <summary>
@@ -72,12 +60,12 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// </summary>
         /// <param name="poly">the polynomial</param>
         /// <returns>square-free decomposition</returns>
-        public static PolynomialFactorDecomposition<Poly> SquareFreeFactorizationYunZeroCharacteristics<Poly extends IUnivariatePolynomial<Poly>>(Poly poly)
+        public static PolynomialFactorDecomposition<Poly> SquareFreeFactorizationYunZeroCharacteristics<Poly>(Poly poly) where Poly : IUnivariatePolynomial<Poly>
         {
-            if (!poly.CoefficientRingCharacteristic().IsZero())
+            if (!poly.CoefficientRingCharacteristic().IsZero)
                 throw new ArgumentException("Characteristics 0 expected");
             if (poly.IsConstant())
-                return PolynomialFactorDecomposition.Of(poly);
+                return PolynomialFactorDecomposition<Poly>.Of(poly);
 
             // x^2 + x^3 -> x^2 (1 + x)
             int exponent = 0;
@@ -99,22 +87,22 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// </summary>
         /// <param name="poly">the polynomial</param>
         /// <returns>square-free decomposition</returns>
-        static PolynomialFactorDecomposition<Poly> SquareFreeFactorizationYun0<Poly extends IUnivariatePolynomial<Poly>>(Poly poly)
+        static PolynomialFactorDecomposition<Poly> SquareFreeFactorizationYun0<Poly>(Poly poly) where Poly : IUnivariatePolynomial<Poly>
         {
             if (poly.IsConstant())
-                return PolynomialFactorDecomposition.Of(poly);
+                return PolynomialFactorDecomposition<Poly>.Of(poly);
             Poly content = poly.ContentAsPoly();
             if (poly.SignumOfLC() < 0)
                 content = content.Negate();
             poly = poly.Clone().DivideByLC(content);
             if (poly.Degree() <= 1)
-                return PolynomialFactorDecomposition.Of(content, poly);
-            PolynomialFactorDecomposition<Poly> factorization = PolynomialFactorDecomposition.Of(content);
+                return PolynomialFactorDecomposition<Poly>.Of(content, poly);
+            PolynomialFactorDecomposition<Poly> factorization = PolynomialFactorDecomposition<Poly>.Of(content);
             SquareFreeFactorizationYun0(poly, factorization);
             return factorization;
         }
 
-        private static void SquareFreeFactorizationYun0<Poly extends IUnivariatePolynomial<Poly>>(Poly poly, PolynomialFactorDecomposition<Poly> factorization)
+        private static void SquareFreeFactorizationYun0<Poly>(Poly poly, PolynomialFactorDecomposition<Poly> factorization) where Poly : IUnivariatePolynomial<Poly>
         {
             Poly derivative = poly.Derivative(), gcd = UnivariateGCD.PolynomialGCD(poly, derivative);
             if (gcd.IsConstant())
@@ -143,24 +131,24 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// </summary>
         /// <param name="poly">the polynomial</param>
         /// <returns>square-free decomposition</returns>
-        public static PolynomialFactorDecomposition<Poly> SquareFreeFactorizationMusserZeroCharacteristics<Poly extends IUnivariatePolynomial<Poly>>(Poly poly)
+        public static PolynomialFactorDecomposition<Poly> SquareFreeFactorizationMusserZeroCharacteristics<Poly>(Poly poly)  where Poly : IUnivariatePolynomial<Poly>
         {
-            if (!poly.CoefficientRingCharacteristic().IsZero())
+            if (!poly.CoefficientRingCharacteristic().IsZero)
                 throw new ArgumentException("Characteristics 0 expected");
             if (poly.IsConstant())
-                return PolynomialFactorDecomposition.Of(poly);
+                return PolynomialFactorDecomposition<Poly>.Of(poly);
             Poly content = poly.ContentAsPoly();
             if (poly.SignumOfLC() < 0)
                 content = content.Negate();
             poly = poly.Clone().DivideByLC(content);
             if (poly.Degree() <= 1)
-                return PolynomialFactorDecomposition.Of(content, poly);
-            PolynomialFactorDecomposition<Poly> factorization = PolynomialFactorDecomposition.Of(content);
+                return PolynomialFactorDecomposition<Poly>.Of(content, poly);
+            PolynomialFactorDecomposition<Poly> factorization = PolynomialFactorDecomposition<Poly>.Of(content);
             SquareFreeFactorizationMusserZeroCharacteristics0(poly, factorization);
             return factorization;
         }
 
-        private static void SquareFreeFactorizationMusserZeroCharacteristics0<Poly extends IUnivariatePolynomial<Poly>>(Poly poly, PolynomialFactorDecomposition<Poly> factorization)
+        private static void SquareFreeFactorizationMusserZeroCharacteristics0<Poly>(Poly poly, PolynomialFactorDecomposition<Poly> factorization) where Poly : IUnivariatePolynomial<Poly>
         {
             Poly derivative = poly.Derivative(), gcd = UnivariateGCD.PolynomialGCD(poly, derivative);
             if (gcd.IsConstant())
@@ -191,19 +179,19 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// </summary>
         /// <param name="poly">the polynomial</param>
         /// <returns>square-free decomposition</returns>
-        public static PolynomialFactorDecomposition<Poly> SquareFreeFactorizationMusser<Poly extends IUnivariatePolynomial<Poly>>(Poly poly)
+        public static PolynomialFactorDecomposition<Poly> SquareFreeFactorizationMusser<Poly>(Poly poly) where Poly : IUnivariatePolynomial<Poly>
         {
             if (CanConvertToZp64(poly))
-                return SquareFreeFactorizationMusser(AsOverZp64(poly)).MapTo(Conversions64bit.Convert());
+                return SquareFreeFactorizationMusser(AsOverZp64(poly)).MapTo(Conversions64bit.Convert);
             poly = poly.Clone();
             Poly lc = poly.LcAsPoly();
 
             //make poly monic
             poly = poly.Monic();
             if (poly.IsConstant())
-                return PolynomialFactorDecomposition.Of(lc);
+                return PolynomialFactorDecomposition<Poly>.Of(lc);
             if (poly.Degree() <= 1)
-                return PolynomialFactorDecomposition.Of(lc, poly);
+                return PolynomialFactorDecomposition<Poly>.Of(lc, poly);
             PolynomialFactorDecomposition<Poly> factorization;
 
             // x^2 + x^3 -> x^2 (1 + x)
@@ -228,21 +216,21 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <summary>
         /// {@code poly} will be destroyed
         /// </summary>
-        private static PolynomialFactorDecomposition<Poly> SquareFreeFactorizationMusser0<Poly extends IUnivariatePolynomial<Poly>>(Poly poly)
+        private static PolynomialFactorDecomposition<Poly> SquareFreeFactorizationMusser0<Poly>(Poly poly) where Poly : IUnivariatePolynomial<Poly>
         {
             poly.Monic();
             if (poly.IsConstant())
-                return PolynomialFactorDecomposition.Of(poly);
+                return PolynomialFactorDecomposition<Poly>.Of(poly);
             if (poly.Degree() <= 1)
-                return PolynomialFactorDecomposition.Of(poly);
+                return PolynomialFactorDecomposition<Poly>.Of(poly);
             Poly derivative = poly.Derivative();
             if (!derivative.IsZero())
             {
                 Poly gcd = UnivariateGCD.PolynomialGCD(poly, derivative);
                 if (gcd.IsConstant())
-                    return PolynomialFactorDecomposition.Of(poly);
+                    return PolynomialFactorDecomposition<Poly>.Of(poly);
                 Poly quot = UnivariateDivision.DivideAndRemainder(poly, gcd, false)[0]; // can safely destroy poly (not used further)
-                PolynomialFactorDecomposition<Poly> result = PolynomialFactorDecomposition.Of(poly.CreateOne());
+                PolynomialFactorDecomposition<Poly> result = PolynomialFactorDecomposition<Poly>.Of(poly.CreateOne());
                 int i = 0;
 
                 //if (!quot.isConstant())
@@ -282,7 +270,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <summary>
         /// p-th root of poly
         /// </summary>
-        private static Poly PRoot<Poly extends IUnivariatePolynomial<Poly>>(Poly poly)
+        private static Poly PRoot<Poly>(Poly poly) where Poly : IUnivariatePolynomial<Poly>
         {
             if (poly is UnivariatePolynomialZp64)
                 return (Poly)PRoot((UnivariatePolynomialZp64)poly);
@@ -297,11 +285,11 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// </summary>
         private static UnivariatePolynomialZp64 PRoot(UnivariatePolynomialZp64 poly)
         {
-            if (poly.ring.modulus > Integer.MAX_VALUE)
+            if (poly.ring.modulus > int.MaxValue)
                 throw new ArgumentException("Too big modulus: " + poly.ring.modulus);
             int modulus = MachineArithmetic.SafeToInt(poly.ring.modulus);
             long[] rootData = new long[poly.degree / modulus + 1];
-            Arrays.Fill(rootData, 0);
+            Array.Fill(rootData, 0);
             for (int i = poly.degree; i >= 0; --i)
                 if (poly.data[i] != 0)
                 {

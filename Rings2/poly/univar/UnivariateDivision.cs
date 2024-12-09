@@ -816,7 +816,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <param name="copy">whether to clone {@code dividend}; if not, the remainder will be placed directly to {@code
         ///                 dividend} and {@code dividend} data will be lost</param>
         /// <returns>{quotient, remainder}</returns>
-        static UnivariatePolynomial<E> PseudoRemainderAdaptive<E>(UnivariatePolynomial<E> dividend, UnivariatePolynomial<E> divider, bool copy)
+        public static UnivariatePolynomial<E> PseudoRemainderAdaptive<E>(UnivariatePolynomial<E> dividend, UnivariatePolynomial<E> divider, bool copy)
         {
             CheckZeroDivider(divider);
             if (dividend.IsZero())

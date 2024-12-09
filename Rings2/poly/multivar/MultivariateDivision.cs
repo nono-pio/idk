@@ -1,15 +1,4 @@
-using Cc.Redberry.Rings;
-using Java.Util;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using static Cc.Redberry.Rings.Poly.Multivar.RoundingMode;
-using static Cc.Redberry.Rings.Poly.Multivar.Associativity;
-using static Cc.Redberry.Rings.Poly.Multivar.Operator;
-using static Cc.Redberry.Rings.Poly.Multivar.TokenType;
-using static Cc.Redberry.Rings.Poly.Multivar.SystemInfo;
+
 
 namespace Cc.Redberry.Rings.Poly.Multivar
 {
@@ -31,9 +20,9 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         /// <param name="dividend">the dividend</param>
         /// <param name="dividers">the dividers</param>
         /// <returns>array of quotients and remainder in the last position</returns>
-        public static Poly[] DivideAndRemainder<Term extends AMonomial<Term>, Poly extends AMultivariatePolynomial<Term, Poly>>(Poly dividend, params Poly[] dividers)
+        public static Poly[] DivideAndRemainder<Term, Poly>(Poly dividend, params Poly[] dividers) where Term : AMonomial<Term> where Poly : AMultivariatePolynomial<Term, Poly>
         {
-            Poly[] quotients = dividend.CreateArray(dividers.Length + 1);
+            Poly[] quotients = new Poly[dividers.Length + 1];
             int i = 0;
             int constDivider = -1;
             for (; i < dividers.Length; i++)
@@ -65,7 +54,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             IMonomialAlgebra<Term> mAlgebra = dividend.monomialAlgebra;
 
             // cache leading terms
-            Term[] dividersLTs = Arrays.Stream(dividers).Map(Poly.Lt()).ToArray(mAlgebra.CreateArray());
+            Term[] dividersLTs = dividers.Select(p => p.Lt()).ToArray();
             dividend = dividend.Clone();
             Poly remainder = quotients[quotients.Length - 1];
             while (!dividend.IsZero())
@@ -100,7 +89,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         /// <param name="dividend">the dividend</param>
         /// <param name="dividers">the dividers</param>
         /// <returns>the remainder</returns>
-        public static Poly Remainder<Term extends AMonomial<Term>, Poly extends AMultivariatePolynomial<Term, Poly>>(Poly dividend, params Poly[] dividers)
+        public static Poly Remainder<Term, Poly>(Poly dividend, params Poly[] dividers) where Term : AMonomial<Term> where Poly : AMultivariatePolynomial<Term, Poly>
         {
             int i = 0;
             int constDivider = -1;
@@ -124,7 +113,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             IMonomialAlgebra<Term> mAlgebra = dividend.monomialAlgebra;
 
             // cache leading terms
-            Term[] dividersLTs = Arrays.Stream(dividers).Map(Poly.Lt()).ToArray(mAlgebra.CreateArray());
+            Term[] dividersLTs = dividers.Select(p => p.Lt()).ToArray();
             dividend = dividend.Clone();
             Poly remainder = dividend.CreateZero();
             while (!dividend.IsZero())
@@ -156,7 +145,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         /// <param name="dividend">the dividend</param>
         /// <param name="dividers">the dividers</param>
         /// <returns>the "pseudo" remainder</returns>
-        public static Poly PseudoRemainder<Term extends AMonomial<Term>, Poly extends AMultivariatePolynomial<Term, Poly>>(Poly dividend, params Poly[] dividers)
+        public static Poly PseudoRemainder<Term, Poly>(Poly dividend, params Poly[] dividers) where Term : AMonomial<Term> where Poly : AMultivariatePolynomial<Term, Poly>
         {
             if (dividend.IsOverField())
                 return Remainder(dividend, dividers);
@@ -180,7 +169,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             Ring<E> ring = dividend.ring;
 
             // cache leading terms
-            Monomial<E>[] dividersLTs = Arrays.Stream(dividers).Map(MultivariatePolynomial<E>.Lt()).ToArray(Monomial[].New());
+            Monomial<E>[] dividersLTs = dividers.Select(m => m.Lt()).ToArray();
             dividend = dividend.Clone();
             MultivariatePolynomial<E> remainder = dividend.CreateZero();
             while (!dividend.IsZero())
@@ -197,7 +186,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
                     E cfDiv = ring.DivideOrNull(lt.coefficient, dividersLTs[i].coefficient);
                     if (cfDiv != null)
                     {
-                        ltDiv = new Monomial(dvDiv, cfDiv);
+                        ltDiv = new Monomial<E>(dvDiv, cfDiv);
                         break;
                     }
                     else if (iPseudoDiv == -1 || ring.Compare(dividersLTs[i].coefficient, dividersLTs[iPseudoDiv].coefficient) < 0)
@@ -224,7 +213,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
                 E factor = ring.DivideExact(dividersLTs[iPseudoDiv].coefficient, gcd);
                 dividend.Multiply(factor);
                 remainder.Multiply(factor);
-                dividend = dividend.Subtract(new Monomial(dvPseudoDiv, ring.DivideExact(lt.coefficient, gcd)), dividers[iPseudoDiv]);
+                dividend = dividend.Subtract(new Monomial<E>(dvPseudoDiv, ring.DivideExact(lt.coefficient, gcd)), dividers[iPseudoDiv]);
             }
 
             return remainder.PrimitivePartSameSign();
@@ -236,10 +225,9 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         /// <param name="dividend">the dividend</param>
         /// <param name="divider">the divider</param>
         /// <returns>array of quotient and remainder</returns>
-        public static Poly[] DivideAndRemainder<Term extends AMonomial<Term>, Poly extends AMultivariatePolynomial<Term, Poly>>(Poly dividend, Poly divider)
+        public static Poly[] DivideAndRemainder<Term, Poly>(Poly dividend, Poly divider) where Term : AMonomial<Term> where Poly : AMultivariatePolynomial<Term, Poly>
         {
-            Poly[] array = divider.CreateArray(1);
-            array[0] = divider;
+            Poly[] array = [divider];
             return DivideAndRemainder(dividend, array);
         }
 
@@ -249,9 +237,9 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         /// <param name="dividend">the dividend</param>
         /// <param name="dividers">the dividers</param>
         /// <returns>array of quotients and remainder at the last position</returns>
-        public static Poly Remainder<Term extends AMonomial<Term>, Poly extends AMultivariatePolynomial<Term, Poly>>(Poly dividend, Collection<Poly> dividers)
+        public static Poly Remainder<Term, Poly>(Poly dividend, IEnumerable<Poly> dividers)
         {
-            return Remainder(dividend, dividers.ToArray(dividend.CreateArray(dividers.Count)));
+            return Remainder(dividend, dividers.ToArray());
         }
 
         /// <summary>
@@ -260,10 +248,9 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         /// <param name="dividend">the dividend</param>
         /// <param name="divider">the divider</param>
         /// <returns>array of quotients and remainder at the last position</returns>
-        public static Poly Remainder<Term extends AMonomial<Term>, Poly extends AMultivariatePolynomial<Term, Poly>>(Poly dividend, Poly divider)
+        public static Poly Remainder<Term, Poly>(Poly dividend, Poly divider)
         {
-            Poly[] array = divider.CreateArray(1);
-            array[0] = divider;
+            Poly[] array = [divider];
             return Remainder(dividend, array);
         }
 
@@ -273,9 +260,9 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         /// <param name="dividend">the dividend</param>
         /// <param name="dividers">the dividers</param>
         /// <returns>array of quotients and remainder at the last position</returns>
-        public static Poly PseudoRemainder<Term extends AMonomial<Term>, Poly extends AMultivariatePolynomial<Term, Poly>>(Poly dividend, Collection<Poly> dividers)
+        public static Poly PseudoRemainder<Term, Poly>(Poly dividend, IEnumerable<Poly> dividers) where Term : AMonomial<Term> where Poly : AMultivariatePolynomial<Term, Poly>
         {
-            return PseudoRemainder(dividend, dividers.ToArray(dividend.CreateArray(dividers.Count)));
+            return PseudoRemainder(dividend, dividers.ToArray());
         }
 
         /// <summary>
@@ -284,10 +271,9 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         /// <param name="dividend">the dividend</param>
         /// <param name="divider">the divider</param>
         /// <returns>array of quotients and remainder at the last position</returns>
-        public static Poly PseudoRemainder<Term extends AMonomial<Term>, Poly extends AMultivariatePolynomial<Term, Poly>>(Poly dividend, Poly divider)
+        public static Poly PseudoRemainder<Term, Poly>(Poly dividend, Poly divider) where Term : AMonomial<Term> where Poly : AMultivariatePolynomial<Term, Poly>
         {
-            Poly[] array = divider.CreateArray(1);
-            array[0] = divider;
+            Poly[] array = [divider];
             return PseudoRemainder(dividend, array);
         }
 
@@ -298,7 +284,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         /// <param name="divider">the divider</param>
         /// <returns>{@code dividend / divider}</returns>
         /// <exception cref="ArithmeticException">if exact division is not possible</exception>
-        public static Poly DivideExact<Term extends AMonomial<Term>, Poly extends AMultivariatePolynomial<Term, Poly>>(Poly dividend, Poly divider)
+        public static Poly DivideExact<Term, Poly>(Poly dividend, Poly divider) where Term : AMonomial<Term> where Poly : AMultivariatePolynomial<Term, Poly>
         {
             Poly[] qd = DivideAndRemainder(dividend, divider);
             if (qd == null || !qd[1].IsZero())
@@ -312,7 +298,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         /// <param name="dividend">the dividend</param>
         /// <param name="divider">the divider</param>
         /// <returns>{@code dividend / divider} or null if exact division is not possible</returns>
-        public static Poly DivideOrNull<Term extends AMonomial<Term>, Poly extends AMultivariatePolynomial<Term, Poly>>(Poly dividend, Poly divider)
+        public static Poly DivideOrNull<Term, Poly>(Poly dividend, Poly divider) where Term : AMonomial<Term> where Poly : AMultivariatePolynomial<Term, Poly>
         {
             Poly[] qd = DivideAndRemainder(dividend, divider);
             if (qd == null || !qd[1].IsZero())
@@ -326,7 +312,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         /// <param name="dividend">the polynomial</param>
         /// <param name="divider">the divisor to check</param>
         /// <returns>whether {@code divisor} is a divisor of {@code poly}</returns>
-        public static bool DividesQ<Term extends AMonomial<Term>, Poly extends AMultivariatePolynomial<Term, Poly>>(Poly dividend, Poly divider)
+        public static bool DividesQ<Term, Poly>(Poly dividend, Poly divider) where Term : AMonomial<Term> where Poly : AMultivariatePolynomial<Term, Poly>
         {
             if (divider.IsOne())
                 return true;
@@ -355,7 +341,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         /// <param name="dividend">the dividend</param>
         /// <param name="divider">the divider</param>
         /// <returns>whether {@code divisor} is a divisor of {@code poly}</returns>
-        public static bool NontrivialQuotientQ<Term extends AMonomial<Term>, Poly extends AMultivariatePolynomial<Term, Poly>>(Poly dividend, Poly divider)
+        public static bool NontrivialQuotientQ<Term, Poly>(Poly dividend, Poly divider) where Term : AMonomial<Term> where Poly : AMultivariatePolynomial<Term, Poly>
         {
             Term lt = divider.Lt();
             foreach (Term term in dividend)
