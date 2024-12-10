@@ -175,7 +175,7 @@ namespace Cc.Redberry.Rings.Bigint
         /// </summary>
         /// <param name="n">the number</param>
         /// <returns>array {@code {a, b}} so that {@code n = a^b} or {@code null} is {@code n} is not a perfect power</returns>
-        public static BigInteger[] PerfectPowerDecomposition(BigInteger n)
+        public static BigInteger[]? PerfectPowerDecomposition(BigInteger n)
         {
             if (n.Signum() < 0)
             {

@@ -121,8 +121,8 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         /// <summary>
         /// Default monomial order (GREVLEX)
         /// </summary>
-        public static readonly Comparator<DegreeVector> DEFAULT = Parse(System.GetProperty("defaultMonomialOrder", "grevlex").ToLowerCase());
-        static Comparator<DegreeVector> Parse(string @string)
+        public static readonly IComparer<DegreeVector> DEFAULT = Parse(System.GetProperty("defaultMonomialOrder", "grevlex").ToLowerCase());
+        static IComparer<DegreeVector> Parse(string @string)
         {
             switch (@string.ToLower())
             {

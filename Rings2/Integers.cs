@@ -10,7 +10,7 @@ namespace Cc.Redberry.Rings
     /// <remarks>@since1.0</remarks>
     public sealed class Integers : AIntegers
     {
-        private static readonly long serialVersionUID = 1;
+        public static readonly long serialVersionUID = 1;
         /// <summary>
         /// The ring of integers (Z)
         /// </summary>
@@ -31,7 +31,7 @@ namespace Cc.Redberry.Rings
             return true;
         }
 
-        public override BigInteger Cardinality()
+        public override BigInteger? Cardinality()
         {
             return null;
         }
@@ -197,7 +197,7 @@ namespace Cc.Redberry.Rings
         }
 
         
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return this.GetType() == obj.GetType();
         }

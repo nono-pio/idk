@@ -22,12 +22,12 @@ namespace Cc.Redberry.Rings
             this.imageFunc = imageFunc;
         }
 
-        public virtual I Image(F el)
+        public I Image(F el)
         {
             return imageFunc(el);
         }
 
-        public virtual I[] Image(F[] el)
+        public I[] Image(F[] el)
         {
             I[] array = new I[el.Length];
             for (int i = 0; i < array.Length; i++)
@@ -35,14 +35,14 @@ namespace Cc.Redberry.Rings
             return array;
         }
 
-        public virtual F Inverse(I el)
+        public F Inverse(I el)
         {
             return inverseFunc(el);
         }
 
-        public virtual F[] Inverse(I[] el)
+        public F[] Inverse(I[] el)
         {
-            F[] array = ring.CreateArray(el.Length);
+            F[] array = new F[el.Length];
             for (int i = 0; i < array.Length; i++)
                 array[i] = Inverse(el[i]);
             return array;
@@ -58,7 +58,7 @@ namespace Cc.Redberry.Rings
             return ring.IsEuclideanRing();
         }
 
-        public virtual BigInteger Cardinality()
+        public virtual BigInteger? Cardinality()
         {
             return ring.Cardinality();
         }
@@ -73,12 +73,12 @@ namespace Cc.Redberry.Rings
             return ring.IsPerfectPower();
         }
 
-        public virtual BigInteger PerfectPowerBase()
+        public virtual BigInteger? PerfectPowerBase()
         {
             return ring.PerfectPowerBase();
         }
 
-        public virtual BigInteger PerfectPowerExponent()
+        public virtual BigInteger? PerfectPowerExponent()
         {
             return ring.PerfectPowerExponent();
         }
@@ -133,9 +133,10 @@ namespace Cc.Redberry.Rings
             return element;
         }
 
-        public virtual I[] DivideAndRemainder(I dividend, I divider)
+        public virtual I[]? DivideAndRemainder(I dividend, I divider)
         {
-            return Image(ring.DivideAndRemainder(Inverse(dividend), Inverse(divider)));
+            var qr = ring.DivideAndRemainder(Inverse(dividend), Inverse(divider));
+            return qr is null ? null : Image(qr);
         }
 
         public virtual I Quotient(I dividend, I divider)
@@ -222,8 +223,7 @@ namespace Cc.Redberry.Rings
 
         public virtual I Gcd(IEnumerable<I> elements)
         {
-            return Image(ring.Gcd(() =>
-                StreamSupport.Stream(elements.Spliterator(), false).Map(this.Inverse()).Iterator()));
+            return Image(ring.Gcd(elements.Select(Inverse)));
         }
 
         public virtual int Signum(I element)
@@ -233,12 +233,12 @@ namespace Cc.Redberry.Rings
 
         public virtual FactorDecomposition<I> FactorSquareFree(I element)
         {
-            return ring.FactorSquareFree(Inverse(element)).MapTo(this, this.Image);
+            return ring.FactorSquareFree(Inverse(element)).MapTo(this, Image);
         }
 
         public virtual FactorDecomposition<I> Factor(I element)
         {
-            return ring.Factor(Inverse(element)).MapTo(this, this.Image);
+            return ring.Factor(Inverse(element)).MapTo(this, Image);
         }
 
         public virtual I Parse(string @string)
@@ -271,7 +271,7 @@ namespace Cc.Redberry.Rings
             return Image(ring.RandomElement(rnd));
         }
 
-        public virtual int Compare(I o1, I o2)
+        public virtual int Compare(I? o1, I? o2)
         {
             return ring.Compare(Inverse(o1), Inverse(o2));
         }
@@ -282,7 +282,7 @@ namespace Cc.Redberry.Rings
                 return true;
             if (o == null || GetType() != o.GetType())
                 return false;
-            ImageRing<_, _> that = (ImageRing < ?,  ?>)o;
+            ImageRing<F, I> that = (ImageRing<F, I>)o;
             if (!ring.Equals(that.ring))
                 return false;
             if (!inverseFunc.Equals(that.inverseFunc))

@@ -47,11 +47,8 @@ namespace Cc.Redberry.Rings.Util
     /// @authorStanislav Poslavsky
     /// @seeArrays
     /// </remarks>
-    public sealed class ArraysUtil
+    public static class ArraysUtil
     {
-        private ArraysUtil()
-        {
-        }
 
         public static readonly Comparator<object> HASH_COMPARATOR = (o1, o2) => Integer.Compare(o1.GetHashCode(), o2.GetHashCode());
         /// <summary>
@@ -772,7 +769,12 @@ namespace Cc.Redberry.Rings.Util
         /// <param name="from">from array</param>
         /// <param name="to">to array</param>
         /// <returns>a bijective mapping from {@code from}-array to {@code to}-array and {@code null} if no mapping exist</returns>
-        public static int[] Bijection<T extends Comparable<? super T>>(T[] from, T[] to)
+        public static int[] Bijection<T
+
+        static extends Comparable<?
+        static super T>>
+
+        static (T[] from, T[] to)
         {
 
             //TODO refactor with sorting !!!!
@@ -1323,7 +1325,9 @@ namespace Cc.Redberry.Rings.Util
         /// <param name="target">the array to be sorted</param>
         /// <param name="coSort">the array which will be permuted in the same way as the target array during sorting procedure</param>
         /// <exception cref="IllegalArgumentException">if coSort length less then target length.</exception>
-        public static void InsertionSort<T extends Comparable<T>>(T[] target, object[] coSort)
+        public static void InsertionSort<T
+
+        static extends Comparable<T>>(T[] target, object[] coSort)
         {
             InsertionSort(target, 0, target.Length, coSort);
         }
@@ -1345,7 +1349,9 @@ namespace Cc.Redberry.Rings.Util
         /// <exception cref="IllegalArgumentException">if <tt>fromIndex &gt; toIndex</tt></exception>
         /// <exception cref="ArrayIndexOutOfBoundsException">if <tt>fromIndex &lt; 0</tt> or <tt>toIndex &gt; target.length</tt> or
         ///                                        <tt>toIndex &gt; coSort.length</tt></exception>
-        public static void InsertionSort<T extends Comparable<T>>(T[] target, int fromIndex, int toIndex, object[] coSort)
+        public static void InsertionSort<T
+
+        static extends Comparable<T>>(T[] target, int fromIndex, int toIndex, object[] coSort)
         {
             int i, j;
             T key;
@@ -1377,7 +1383,9 @@ namespace Cc.Redberry.Rings.Util
         /// <param name="target">the array to be sorted</param>
         /// <param name="coSort">the array which will be permuted in the same way as the target array during sorting procedure</param>
         /// <exception cref="IllegalArgumentException">if coSort length less then target length.</exception>
-        public static void InsertionSort<T extends Comparable<T>>(T[] target, int[] coSort)
+        public static void InsertionSort<T
+
+        static extends Comparable<T>>(T[] target, int[] coSort)
         {
             InsertionSort(target, 0, target.Length, coSort);
         }
@@ -1399,7 +1407,9 @@ namespace Cc.Redberry.Rings.Util
         /// <exception cref="IllegalArgumentException">if <tt>fromIndex &gt; toIndex</tt></exception>
         /// <exception cref="ArrayIndexOutOfBoundsException">if <tt>fromIndex &lt; 0</tt> or <tt>toIndex &gt; target.length</tt> or
         ///                                        <tt>toIndex &gt; coSort.length</tt></exception>
-        public static void InsertionSort<T extends Comparable<T>>(T[] target, int fromIndex, int toIndex, int[] coSort)
+        public static void InsertionSort<T
+
+        static extends Comparable<T>>(T[] target, int fromIndex, int toIndex, int[] coSort)
         {
             InsertionSort(target, fromIndex, toIndex, coSort, T.CompareTo());
         }
@@ -1664,11 +1674,9 @@ namespace Cc.Redberry.Rings.Util
         /// <summary>
         /// Swaps x[a] with x[b].
         /// </summary>
-        public static void Swap(int[] x, int a, int b)
+        public static void Swap<T>(T[] x, int a, int b)
         {
-            int t = x[a];
-            x[a] = x[b];
-            x[b] = t;
+            (x[a], x[b]) = (x[b], x[a]);
         }
 
         private static void Vecswap(int[] x, int a, int b, int n, int[] coSort)
@@ -1996,7 +2004,9 @@ namespace Cc.Redberry.Rings.Util
         /// <exception cref="IllegalArgumentException">if <tt>fromIndex &gt; toIndex</tt></exception>
         /// <exception cref="IllegalArgumentException">if coSort length less then target length.</exception>
         /// <exception cref="IllegalArgumentException">if target == coSort (as references).</exception>
-        public static void QuickSort<T extends Comparable<T>>(T[] target, object[] coSort)
+        public static void QuickSort<T
+
+        static extends Comparable<T>>(T[] target, object[] coSort)
         {
             QuickSort(target, 0, target.Length, coSort);
         }
@@ -2021,7 +2031,9 @@ namespace Cc.Redberry.Rings.Util
         /// <exception cref="ArrayIndexOutOfBoundsException">if <tt>fromIndex &lt; 0</tt> or <tt>toIndex &gt; target.length</tt> or
         ///                                        <tt>toIndex &gt; coSort.length</tt></exception>
         /// <exception cref="IllegalArgumentException">if target == coSort (as references).</exception>
-        public static void QuickSort<T extends Comparable<T>>(T[] target, int fromIndex, int toIndex, object[] coSort)
+        public static void QuickSort<T
+
+        static extends Comparable<T>>(T[] target, int fromIndex, int toIndex, object[] coSort)
         {
             if (target == coSort)
                 throw new ArgumentException();
@@ -2042,7 +2054,9 @@ namespace Cc.Redberry.Rings.Util
         /// <param name="length">the length of the sorting subarray.</param>
         /// <param name="coSort">the array which will be permuted in the same way as the target array, during sorting procedure</param>
         /// <exception cref="IllegalArgumentException">if target == coSort (as references).</exception>
-        public static void QuickSort1<T extends Comparable<T>>(T[] target, int fromIndex, int length, object[] coSort)
+        public static void QuickSort1<T
+
+        static extends Comparable<T>>(T[] target, int fromIndex, int length, object[] coSort)
         {
 
             // Insertion quickSort on smallest arrays
@@ -2142,7 +2156,9 @@ namespace Cc.Redberry.Rings.Util
         /// <exception cref="IllegalArgumentException">if <tt>fromIndex &gt; toIndex</tt></exception>
         /// <exception cref="IllegalArgumentException">if coSort length less then target length.</exception>
         /// <exception cref="IllegalArgumentException">if target == coSort (as references).</exception>
-        public static void QuickSort<T extends Comparable<T>>(T[] target, int[] coSort)
+        public static void QuickSort<T
+
+        static extends Comparable<T>>(T[] target, int[] coSort)
         {
             QuickSort(target, 0, target.Length, coSort);
         }
@@ -2167,7 +2183,9 @@ namespace Cc.Redberry.Rings.Util
         /// <exception cref="ArrayIndexOutOfBoundsException">if <tt>fromIndex &lt; 0</tt> or <tt>toIndex &gt; target.length</tt> or
         ///                                        <tt>toIndex &gt; coSort.length</tt></exception>
         /// <exception cref="IllegalArgumentException">if target == coSort (as references).</exception>
-        public static void QuickSort<T extends Comparable<T>>(T[] target, int fromIndex, int toIndex, int[] coSort)
+        public static void QuickSort<T
+
+        static extends Comparable<T>>(T[] target, int fromIndex, int toIndex, int[] coSort)
         {
             RangeCheck(target.Length, fromIndex, toIndex);
             RangeCheck(coSort.Length, fromIndex, toIndex);
@@ -2186,7 +2204,9 @@ namespace Cc.Redberry.Rings.Util
         /// <param name="length">the length of the sorting subarray.</param>
         /// <param name="coSort">the array which will be permuted in the same way as the target array, during sorting procedure</param>
         /// <exception cref="IllegalArgumentException">if target == coSort (as references).</exception>
-        public static void QuickSort1<T extends Comparable<T>>(T[] target, int fromIndex, int length, int[] coSort)
+        public static void QuickSort1<T
+
+        static extends Comparable<T>>(T[] target, int fromIndex, int length, int[] coSort)
         {
 
             // Insertion quickSort on smallest arrays
@@ -2280,7 +2300,9 @@ namespace Cc.Redberry.Rings.Util
             x[b] = t;
         }
 
-        private static int Med3<T extends Comparable<T>>(T[] x, int a, int b, int c)
+        private static int Med3<T
+
+        static extends Comparable<T>>(T[] x, int a, int b, int c)
         {
             return (x[a].CompareTo(x[b]) < 0 ? (x[b].CompareTo(x[c]) < 0 ? b : x[a].CompareTo(x[c]) < 0 ? c : a) : (x[b].CompareTo(x[c]) > 0 ? b : x[a].CompareTo(x[c]) > 0 ? c : a));
         }

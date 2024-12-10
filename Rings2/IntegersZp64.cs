@@ -227,7 +227,7 @@ namespace Cc.Redberry.Rings
         /// <returns>random element from this ring</returns>
         public long RandomElement()
         {
-            return RandomElement(new Well44497b(DateTime.Now.Nanosecond));
+            return RandomElement(new Random(DateTime.Now.Nanosecond));
         }
 
 
@@ -281,7 +281,7 @@ namespace Cc.Redberry.Rings
                 {
                     if (perfectPowerDecomposition[0] != -1)
                         return;
-                    long[]? ipp = MachineArithmetic.PerfectPowerDecomposition(modulus);
+                    var ipp = MachineArithmetic.PerfectPowerDecomposition(modulus);
                     if (ipp is null)
                     {
                         // not a perfect power

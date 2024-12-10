@@ -13,7 +13,7 @@ namespace Cc.Redberry.Rings
     /// <remarks>@since1.0</remarks>
     public abstract class AIntegers : ARing<BigInteger>
     {
-        private static readonly long serialVersionUID = 1;
+        public static readonly long serialVersionUID = 1;
         public override BigInteger GetZero()
         {
             return BigInteger.Zero;

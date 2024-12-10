@@ -1,5 +1,5 @@
+using System.Collections;
 using System.Numerics;
-using System.Runtime.InteropServices.JavaScript;
 using Cc.Redberry.Rings.Io;
 
 
@@ -89,7 +89,7 @@ namespace Cc.Redberry.Rings
         }
 
 
-        public BigInteger Cardinality()
+        public BigInteger? Cardinality()
         {
             return null;
         }
@@ -107,13 +107,13 @@ namespace Cc.Redberry.Rings
         }
 
 
-        public BigInteger PerfectPowerBase()
+        public BigInteger? PerfectPowerBase()
         {
             return null;
         }
 
 
-        public BigInteger PerfectPowerExponent()
+        public BigInteger? PerfectPowerExponent()
         {
             return null;
         }
@@ -173,20 +173,23 @@ namespace Cc.Redberry.Rings
         {
             if (element.IsZero())
                 return FactorDecomposition<Rational<E>>.Of(this, element);
-            FactorDecomposition<E> numFactors = element.numerator.Select(factor).Aggregate(
-                FactorDecomposition<E>.Empty(ring),
-                (f, newFac) => f.AddAll(newFac));
-            FactorDecomposition<Rational<E>> factors = FactorDecomposition<Rational<E>>.Empty(this);
+
+            var factors = FactorDecomposition<Rational<E>>.Empty(this);
+
+            var numFactors = element.numerator.Select(factor).Aggregate(
+                FactorDecomposition<E>.Empty(ring), (f, newFac) => f.AddAll(newFac));
             for (int i = 0; i < numFactors.Count; i++)
                 factors.AddNonUnitFactor(new Rational<E>(ring, numFactors[i]), numFactors.GetExponent(i));
             factors.AddFactor(new Rational<E>(ring, numFactors.unit), 1);
-            FactorDecomposition<E> denFactors = element.denominator.Select(factor).Aggregate(
+            
+            var denFactors = element.denominator.Select(factor).Aggregate(
                 FactorDecomposition<E>.Empty(ring),
                 (f, newFac) => f.AddAll(newFac));
             for (int i = 0; i < denFactors.Count; i++)
-                factors.AddNonUnitFactor(new Rational<E>(ring, ring.GetOne(), denFactors[i]),
+                factors.AddNonUnitFactor(new Rational<E>(ring, ring.GetOne(), denFactors[i]), 
                     denFactors.GetExponent(i));
             factors.AddFactor(new Rational<E>(ring, ring.GetOne(), denFactors.unit), 1);
+
             return factors;
         }
 
@@ -256,7 +259,7 @@ namespace Cc.Redberry.Rings
                 return new Rational<E>(ring, val.numerator.Map(ring.ValueOf), val.denominator.Map(ring.ValueOf));
         }
 
-        public int Compare(Rational<E> o1, Rational<E> o2)
+        public int Compare(Rational<E>? o1, Rational<E>? o2)
         {
             return o1.CompareTo(o2);
         }
@@ -296,13 +299,19 @@ namespace Cc.Redberry.Rings
         }
 
 
+        public IEnumerator<Rational<E>> GetEnumerator()
+        {
+            return Iterator();
+        }
+
         public override bool Equals(object? o)
         {
             if (this == o)
                 return true;
             if (o == null || GetType() != o.GetType())
                 return false;
-            Rationals<TWildcardTodo> rationals = (Rationals<TWildcardTodo>)o;
+            
+            var rationals = (Rationals<E>) o;
             return ring.Equals(rationals.ring);
         }
 
@@ -321,6 +330,11 @@ namespace Cc.Redberry.Rings
         public override string ToString()
         {
             return ToString(IStringifier<Rational<E>>.Dummy<Rational<E>>());
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }

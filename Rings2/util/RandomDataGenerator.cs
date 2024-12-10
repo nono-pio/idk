@@ -7,7 +7,7 @@ namespace Cc.Redberry.Rings.Util
     /// <remarks>@since1.0</remarks>
     public class RandomDataGenerator
     {
-        private static readonly long serialVersionUID = 1;
+        public static readonly long serialVersionUID = 1;
         
         private readonly Random rnd;
         public RandomDataGenerator(Random rand)

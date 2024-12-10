@@ -11,7 +11,7 @@ namespace Cc.Redberry.Rings
     /// <remarks>@since1.0</remarks>
     public sealed class IntegersZp : AIntegers
     {
-        private static readonly long serialVersionUID = 1;
+        public new static readonly long serialVersionUID = 1;
         /// <summary>
         /// The modulus.
         /// </summary>
@@ -48,7 +48,7 @@ namespace Cc.Redberry.Rings
         }
 
     
-        public override BigInteger Cardinality()
+        public override BigInteger? Cardinality()
         {
             return modulus;
         }
@@ -194,7 +194,7 @@ namespace Cc.Redberry.Rings
         /// <summary>
         /// ring for perfectPowerBase()
         /// </summary>
-        private IntegersZp? ppBaseDomain = null;
+        private IntegersZp? ppBaseDomain;
         
         /// <summary>
         /// Returns ring for {@link #perfectPowerBase()} or {@code this} if modulus is not a perfect power

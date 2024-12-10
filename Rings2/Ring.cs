@@ -32,7 +32,7 @@ namespace Cc.Redberry.Rings
         /// <returns>whether this ring is finite</returns>
         bool IsFinite()
         {
-            return Cardinality() != null;
+            return Cardinality() is not null;
         }
 
 
@@ -50,7 +50,7 @@ namespace Cc.Redberry.Rings
         /// Returns the number of elements in this ring (cardinality) or null if ring is infinite
         /// </summary>
         /// <returns>the number of elements in this ring (cardinality) or null if ring is infinite</returns>
-        BigInteger Cardinality();
+        BigInteger? Cardinality();
 
         /// <summary>
         /// Returns characteristic of this ring
@@ -70,14 +70,14 @@ namespace Cc.Redberry.Rings
         /// Returns {@code base} so that {@code cardinality == base^exponent} or null if cardinality is not finite
         /// </summary>
         /// <returns>{@code base} so that {@code cardinality == base^exponent} or null if cardinality is not finite</returns>
-        BigInteger PerfectPowerBase();
+        BigInteger? PerfectPowerBase();
 
 
         /// <summary>
         /// Returns {@code exponent} so that {@code cardinality == base^exponent} or null if cardinality is not finite
         /// </summary>
         /// <returns>{@code exponent} so that {@code cardinality == base^exponent} or null if cardinality is not finite</returns>
-        BigInteger PerfectPowerExponent();
+        BigInteger? PerfectPowerExponent();
 
 
         /// <summary>
@@ -96,8 +96,8 @@ namespace Cc.Redberry.Rings
         /// <returns>sum of the array</returns>
         E Add(params E[] elements)
         {
-            E r = elements[0];
-            for (int i = 1; i < elements.Length; i++)
+            var r = elements[0];
+            for (var i = 1; i < elements.Length; i++)
                 r = Add(r, elements[i]);
             return r;
         }
@@ -162,8 +162,8 @@ namespace Cc.Redberry.Rings
         /// <returns>product of the array</returns>
         E Multiply(params E[] elements)
         {
-            E r = elements[0];
-            for (int i = 1; i < elements.Length; i++)
+            var r = elements[0];
+            for (var i = 1; i < elements.Length; i++)
                 r = Multiply(r, elements[i]);
             return r;
         }
@@ -176,8 +176,8 @@ namespace Cc.Redberry.Rings
         /// <returns>product of the array</returns>
         E Multiply(IEnumerable<E> elements)
         {
-            E r = GetOne();
-            foreach (E e in elements)
+            var r = GetOne();
+            foreach (var e in elements)
                 r = MultiplyMutable(r, e);
             return r;
         }
@@ -246,11 +246,11 @@ namespace Cc.Redberry.Rings
         E Copy(E element);
 
         /// <summary>
-        /// Returns -1 if {@code element < 0}, 0 if {@code element == 0} and 1 if {@code element > 0}, where comparison is
+        /// Returns -1 if {@code element smaller than 0}, 0 if {@code element == 0} and 1 if {@code element > 0}, where comparison is
         /// specified by {@link #compare(Object, Object)}
         /// </summary>
         /// <param name="element">the element</param>
-        /// <returns>-1 if {@code element < 0}, 0 if {@code element == 0} and 1 otherwise</returns>
+        /// <returns>-1 if {@code element smaller than 0}, 0 if {@code element == 0} and 1 otherwise</returns>
         int Signum(E element)
         {
             return Compare(element, GetZero()).CompareTo(0);
@@ -290,7 +290,7 @@ namespace Cc.Redberry.Rings
         /// <param name="dividend">the dividend</param>
         /// <param name="divider">the divider</param>
         /// <returns>{@code {quotient, remainder}}</returns>
-        E[] DivideAndRemainder(E dividend, E divider);
+        E[]? DivideAndRemainder(E dividend, E divider);
 
 
         /// <summary>
@@ -301,7 +301,10 @@ namespace Cc.Redberry.Rings
         /// <returns>the quotient of {@code dividend / divider}</returns>
         E Quotient(E dividend, E divider)
         {
-            return DivideAndRemainder(dividend, divider)[0];
+            var qr = DivideAndRemainder(dividend, divider);
+            if (qr is null)
+                throw new ArithmeticException("Not divisible with remainder: (" + dividend + ") / (" + divider + ")");
+            return qr[0];
         }
 
         /// <summary>
@@ -312,7 +315,10 @@ namespace Cc.Redberry.Rings
         /// <returns>the remainder of {@code dividend / divider}</returns>
         public E Remainder(E dividend, E divider)
         {
-            return DivideAndRemainder(dividend, divider)[1];
+            var qr = DivideAndRemainder(dividend, divider);
+            if (qr is null)
+                throw new ArithmeticException("Not divisible with remainder: (" + dividend + ") / (" + divider + ")");
+            return qr[1];
         }
 
 
@@ -322,15 +328,13 @@ namespace Cc.Redberry.Rings
         /// <param name="dividend">the dividend</param>
         /// <param name="divider">the divider</param>
         /// <returns>{@code dividend / divider} or {@code null} if exact division is not possible</returns>
-        E DivideOrNull(E dividend, E divider)
+        Util.Nullable<E> DivideOrNull(E dividend, E divider)
         {
             if (IsOne(divider))
                 return dividend;
-            E[] qd = DivideAndRemainder(dividend, divider);
-            if (qd == null)
-                return null;
-            if (!IsZero(qd[1]))
-                return null;
+            var qd = DivideAndRemainder(dividend, divider);
+            if (qd is null || !IsZero(qd[1]))
+                return Util.Nullable<E>.Null;
             return qd[0];
         }
 
@@ -345,10 +349,10 @@ namespace Cc.Redberry.Rings
         /// <exception cref="ArithmeticException">if exact division is not possible</exception>
         E DivideExact(E dividend, E divider)
         {
-            E result = DivideOrNull(dividend, divider);
-            if (result == null)
+            var result = DivideOrNull(dividend, divider);
+            if (result.IsNull)
                 throw new ArithmeticException("not divisible: " + dividend + " / " + divider);
-            return result;
+            return result.Value;
         }
 
 
@@ -391,10 +395,10 @@ namespace Cc.Redberry.Rings
                 throw new NotSupportedException("GCD is not supported in this ring");
 
             // run Euclidean algorithm by default
-            E x = a, y = b, r;
+            E x = a, y = b;
             while (true)
             {
-                r = Remainder(x, y);
+                var r = Remainder(x, y);
                 if (r == null)
                     throw new ArithmeticException("Not divisible with remainder: (" + x + ") / (" + y + ")");
                 if (IsZero(r))
@@ -410,7 +414,7 @@ namespace Cc.Redberry.Rings
         /// <summary>
         /// Returns array of {@code [gcd(a,b), s, t]} such that {@code s * a + t * b = gcd(a, b)}
         /// </summary>
-        /// <exception cref="UnsupportedOperationException">if this is not the Euclidean ring and there is no special implementation
+        /// <exception cref="NotSupportedException">if this is not the Euclidean ring and there is no special implementation
         ///                                       provided by particular subtype</exception>
         E[] ExtendedGCD(E a, E b)
         {
@@ -426,14 +430,12 @@ namespace Cc.Redberry.Rings
             E s = GetZero(), old_s = GetOne();
             E t = GetOne(), old_t = GetZero();
             E r = b, old_r = a;
-            E q;
-            E tmp;
             while (!IsZero(r))
             {
-                q = Quotient(old_r, r);
+                var q = Quotient(old_r, r);
                 if (q == null)
                     throw new ArithmeticException("Not divisible with remainder: (" + old_r + ") / (" + r + ")");
-                tmp = old_r;
+                var tmp = old_r;
                 old_r = r;
                 r = Subtract(tmp, Multiply(q, r));
                 tmp = old_s;
@@ -458,25 +460,20 @@ namespace Cc.Redberry.Rings
         {
             E s = GetZero(), old_s = GetOne();
             E r = b, old_r = a;
-            E q;
-            E tmp;
             while (!IsZero(r))
             {
-                q = Quotient(old_r, r);
+                var q = Quotient(old_r, r);
                 if (q == null)
                     throw new ArithmeticException("Not divisible with remainder: (" + old_r + ") / (" + r + ")");
-                tmp = old_r;
+                var tmp = old_r;
                 old_r = r;
                 r = Subtract(tmp, Multiply(q, r));
                 tmp = old_s;
                 old_s = s;
                 s = Subtract(tmp, Multiply(q, s));
             }
-
-            E[] result = CreateArray(2);
-            result[0] = old_r;
-            result[1] = old_s;
-            return result;
+            
+            return [old_r, old_s];
         }
 
 
@@ -503,8 +500,8 @@ namespace Cc.Redberry.Rings
         {
             if (elements.Length == 1)
                 return elements[0];
-            E lcm = Lcm(elements[0], elements[1]);
-            for (int i = 2; i < elements.Length; ++i)
+            var lcm = Lcm(elements[0], elements[1]);
+            for (var i = 2; i < elements.Length; ++i)
                 lcm = Lcm(lcm, elements[i]);
             return lcm;
         }
@@ -517,7 +514,7 @@ namespace Cc.Redberry.Rings
         /// <returns>lcm</returns>
         E Lcm(IEnumerable<E> elements)
         {
-            return Lcm(StreamSupport.Stream(elements.Spliterator(), false).ToArray());
+            return Lcm(elements.ToArray());
         }
 
 
@@ -539,16 +536,19 @@ namespace Cc.Redberry.Rings
         /// <returns>gcd</returns>
         E Gcd(IEnumerable<E> elements)
         {
-            E gcd = null;
-            foreach (E e in elements)
+            var gcd = Util.Nullable<E>.Null;
+            foreach (var e in elements)
             {
-                if (gcd == null)
+                if (gcd.IsNull)
                     gcd = e;
                 else
-                    gcd = Gcd(gcd, e);
+                    gcd = Gcd(gcd.Value, e);
             }
+            
+            if (gcd.IsNull)
+                throw new ArithmeticException("GCD is not defined for empty list");
 
-            return gcd;
+            return gcd.Value;
         }
 
 
@@ -664,8 +664,8 @@ namespace Cc.Redberry.Rings
         /// <returns>array of ring elements</returns>
         E[] ValueOf(long[] elements)
         {
-            E[] array = CreateArray(elements.Length);
-            for (int i = 0; i < elements.Length; i++)
+            var array = new E[elements.Length];
+            for (var i = 0; i < elements.Length; i++)
                 array[i] = ValueOf(elements[i]);
             return array;
         }
@@ -686,42 +686,8 @@ namespace Cc.Redberry.Rings
         /// <param name="elements">the array</param>
         void SetToValueOf(E[] elements)
         {
-            for (int i = 0; i < elements.Length; i++)
+            for (var i = 0; i < elements.Length; i++)
                 elements[i] = ValueOf(elements[i]);
-        }
-
-
-        /// <summary>
-        /// Creates generic array of ring elements of specified length
-        /// </summary>
-        /// <param name="length">array length</param>
-        /// <returns>array of ring elements of specified {@code length}</returns>
-        E[] CreateArray(int length)
-        {
-            return new E[length];
-        }
-
-
-        /// <summary>
-        /// Creates 2d array of ring elements of specified length
-        /// </summary>
-        /// <param name="length">array length</param>
-        /// <returns>2d array of ring elements of specified {@code length}</returns>
-        E[,] CreateArray2d(int length)
-        {
-            return new E[length, 0];
-        }
-
-
-        /// <summary>
-        /// Creates 2d array of ring elements of specified shape
-        /// </summary>
-        /// <param name="m">result length</param>
-        /// <param name="n">length of each array in the result</param>
-        /// <returns>2d array E[m][n]</returns>
-        E[,] CreateArray2d(int m, int n)
-        {
-            return new E[m, n];
         }
 
         /// <summary>
@@ -731,7 +697,7 @@ namespace Cc.Redberry.Rings
         /// <returns>array filled with zero elements of specified {@code length}</returns>
         E[] CreateZeroesArray(int length)
         {
-            E[] array = new E[length];
+            var array = new E[length];
             FillZeros(array);
             return array;
         }
@@ -742,7 +708,7 @@ namespace Cc.Redberry.Rings
         /// </summary>
         void FillZeros(E[] array)
         {
-            for (int i = 0; i < array.Length; i++)
+            for (var i = 0; i < array.Length; i++)
 
                 // NOTE: getZero() is invoked each time in a loop in order to fill array with unique elements
                 array[i] = GetZero();
@@ -757,54 +723,12 @@ namespace Cc.Redberry.Rings
         /// <returns>2d array E[m][n] filled with zero elements</returns>
         E[,] CreateZeroesArray2d(int m, int n)
         {
-            E[,] arr = CreateArray2d(m, n);
-            for (int i = 0; i < arr.GetLength(0); i++)
-                for (int j = 0; j < arr.GetLength(1); j++)
+            var arr = new E[m, n];
+            for (var i = 0; i < arr.GetLength(0); i++)
+                for (var j = 0; j < arr.GetLength(1); j++)
                     arr[i, j] = GetZero();
             return arr;
         }
-
-
-        /// <summary>
-        /// Creates generic array of {@code {a, b}}
-        /// </summary>
-        /// <param name="a">the first element of array</param>
-        /// <param name="b">the second element of array</param>
-        /// <returns>array {@code {a,b}}</returns>
-        E[] CreateArray(E a, E b)
-        {
-            E[] array = CreateArray(2);
-            array[0] = a;
-            array[1] = b;
-            return array;
-        }
-
-
-        /// <summary>
-        /// Creates generic array of {@code {a, b, c}}
-        /// </summary>
-        E[] CreateArray(E a, E b, E c)
-        {
-            E[] array = CreateArray(3);
-            array[0] = a;
-            array[1] = b;
-            array[2] = c;
-            return array;
-        }
-
-
-        /// <summary>
-        /// Creates generic array with single element
-        /// </summary>
-        /// <param name="element">the element</param>
-        /// <returns>array with single specified element</returns>
-        E[] CreateArray(E element)
-        {
-            E[] array = CreateArray(1);
-            array[0] = element;
-            return array;
-        }
-
 
         /// <summary>
         /// Returns {@code base} in a power of {@code exponent} (non negative)
@@ -812,7 +736,7 @@ namespace Cc.Redberry.Rings
         /// <param name="base">base</param>
         /// <param name="exponent">exponent (non negative)</param>
         /// <returns>{@code base} in a power of {@code exponent}</returns>
-        public virtual E Pow(E @base, int exponent)
+        public E Pow(E @base, int exponent)
         {
             return Pow(@base, new BigInteger(exponent));
         }
@@ -842,8 +766,8 @@ namespace Cc.Redberry.Rings
                 return Pow(Reciprocal(@base), exponent.Negate());
             if (exponent.IsOne)
                 return @base;
-            E result = GetOne();
-            E k2p = Copy(@base); // <= copy the base (mutable operations are used below)
+            var result = GetOne();
+            var k2p = Copy(@base); // <= copy the base (mutable operations are used below)
             for (;;)
             {
                 if ((exponent.TestBit(0)))
@@ -863,8 +787,8 @@ namespace Cc.Redberry.Rings
         /// <returns>{@code valueOf(1) * valueOf(2) * .... * valueOf(num) }</returns>
         E Factorial(long num)
         {
-            E result = GetOne();
-            for (int i = 2; i <= num; ++i)
+            var result = GetOne();
+            for (var i = 2; i <= num; ++i)
                 result = MultiplyMutable(result, ValueOf(i));
             return result;
         }

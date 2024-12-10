@@ -1,14 +1,13 @@
 using Cc.Redberry.Rings.Io;
 using Cc.Redberry.Rings.Poly;
 using Cc.Redberry.Rings.Util;
-using System.Collections.ObjectModel;
 using System.Text;
 
 namespace Cc.Redberry.Rings
 {
     /// <summary>
     /// Factor decomposition of element. Unit coefficient of decomposition is stored in {@link #unit}, factors returned by
-    /// {@link #get(int)} are non-units. This class is mutable. <p> <p><i>Iterable</i> specification provides iterator over
+    /// {@link #get(int)} are non-units. This class is mutable. <i>Iterable</i> specification provides iterator over
     /// non-unit factors only; to iterate over all factors including the constant factor use {@link #iterableWithUnit()}
     /// </summary>
     /// <remarks>
@@ -48,7 +47,7 @@ namespace Cc.Redberry.Rings
                 throw new ArgumentException();
         }
 
-        public virtual IEnumerator<E> Iterator()
+        public IEnumerator<E> Iterator()
         {
             return factors.GetEnumerator();
         }
@@ -57,9 +56,9 @@ namespace Cc.Redberry.Rings
         /// Iterator over all factors including a unit one
         /// </summary>
         /// <returns>iterator over all factors including a unit one</returns>
-        public virtual IEnumerator<E> IterableWithUnit()
+        public IEnumerator<E> IterableWithUnit()
         {
-            List<E> it = new List<E>();
+            var it = new List<E>();
             if (!ring.IsOne(unit))
                 it.Add(unit);
             it.AddRange(factors);
@@ -69,6 +68,7 @@ namespace Cc.Redberry.Rings
         public virtual bool IsUnit(E element)
         {
             return ring.IsUnit(element);
+        }
 
         /// <summary>
         /// Returns i-th factor
@@ -77,6 +77,11 @@ namespace Cc.Redberry.Rings
         {
             return factors[i];
         }
+        
+        /// <summary>
+        /// Returns i-th factor
+        /// </summary>
+        public E this[int i] => factors[i];
 
         public virtual int GetExponent(int i)
         {
@@ -87,7 +92,12 @@ namespace Cc.Redberry.Rings
         /// <summary>
         /// Number of non-constant factors
         /// </summary>
-        public virtual int Size()
+        public int Count => factors.Count;
+        
+        /// <summary>
+        /// Number of non-constant factors
+        /// </summary>
+        public int Size()
         {
             return factors.Count;
         }
@@ -115,7 +125,7 @@ namespace Cc.Redberry.Rings
         /// </summary>
         public virtual void RaiseExponents(long val)
         {
-            for (int i = exponents.size() - 1; i >= 0; --i)
+            for (var i = exponents.size() - 1; i >= 0; --i)
                 exponents[i] = MachineArithmetic.SafeToInt(exponents[i] * val);
         }
 
@@ -193,8 +203,8 @@ namespace Cc.Redberry.Rings
         /// </summary>
         public virtual FactorDecomposition<E> ApplyExponents()
         {
-            List<E> newFactors = new List<E>();
-            for (int i = 0; i < Size(); i++)
+            var newFactors = new List<E>();
+            for (var i = 0; i < Size(); i++)
                 newFactors.Add(ring.Pow(factors[i], exponents[i]));
             return new FactorDecomposition<E>(ring, unit, newFactors, new TIntArrayList(ArraysUtil.ArrayOf(1, Size())));
         }
@@ -205,7 +215,7 @@ namespace Cc.Redberry.Rings
         /// </summary>
         public virtual FactorDecomposition<E> ApplyConstantFactor()
         {
-            List<E> newFactors = factors.Select(ring.Copy).ToList();
+            var newFactors = factors.Select(ring.Copy).ToList();
             if (newFactors.Count == 0)
                 newFactors.Add(ring.Copy(unit));
             else
@@ -246,7 +256,7 @@ namespace Cc.Redberry.Rings
         /// <summary>
         /// Stream of all factors
         /// </summary>
-        public virtual Stream<E> Stream()
+        public virtual IEnumerable<E> Stream()
         {
             return Stream.Concat(Stream.Of(unit), factors.Stream());
         }
@@ -255,9 +265,9 @@ namespace Cc.Redberry.Rings
         /// <summary>
         /// Stream of all factors except {@link #unit}
         /// </summary>
-        public virtual Stream<E> StreamWithoutUnit()
+        public virtual IEnumerable<E> StreamWithoutUnit()
         {
-            return factors.Stream();
+            return factors;
         }
 
        
@@ -275,9 +285,9 @@ namespace Cc.Redberry.Rings
         /// </summary>
         public virtual E[] ToArrayWithUnit()
         {
-            E[] array = factors.ToArray(ring.CreateArray(1 + Size()));
-            System.Arraycopy(array, 0, array, 1, Size());
+            var array = new E[Size() + 1];
             array[0] = unit;
+            factors.CopyTo(array, 1);
             return array;
         }
 
@@ -312,10 +322,10 @@ namespace Cc.Redberry.Rings
        
         private E Multiply0(bool ignoreExponents)
         {
-            E r = ring.Copy(unit);
-            for (int i = 0; i < factors.Count; i++)
+            var r = ring.Copy(unit);
+            for (var i = 0; i < factors.Count; i++)
             {
-                E tmp = ignoreExponents ? factors[i] : ring.Pow(factors[i], exponents[i]);
+                var tmp = ignoreExponents ? factors[i] : ring.Pow(factors[i], exponents[i]);
                 r = ring.MultiplyMutable(r, tmp);
             }
 
@@ -327,7 +337,7 @@ namespace Cc.Redberry.Rings
         /// </summary>
         public virtual FactorDecomposition<E> Canonical()
         {
-            var wr = factors.Select((e) => new wrapper<E>(ring, e)).ToArray();
+            var wr = factors.Select((e) => new wrapper(ring, e)).ToArray();
             int[] ex = exponents.ToArray();
             ArraysUtil.QuickSort(wr, ex);
             factors.Clear();
@@ -337,7 +347,7 @@ namespace Cc.Redberry.Rings
             return this;
         }
 
-        private sealed class wrapper<E> : IComparable<wrapper<E>>
+        private sealed class wrapper : IComparable<wrapper>
         {
             readonly Ring<E> ring;
             public readonly E el;
@@ -348,7 +358,7 @@ namespace Cc.Redberry.Rings
                 this.el = el;
             }
 
-            public int CompareTo(wrapper<E> o)
+            public int CompareTo(wrapper o)
             {
                 return ring.Compare(el, o.el);
             }
@@ -370,10 +380,10 @@ namespace Cc.Redberry.Rings
         {
             if (factors.Count == 0)
                 return "(" + stringifier.Stringify(unit) + ")";
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
             if (!ring.IsOne(unit))
                 sb.Append("(").Append(stringifier.Stringify(unit)).Append(")");
-            for (int i = 0; i < factors.Count; i++)
+            for (var i = 0; i < factors.Count; i++)
             {
                 if (sb.Length > 0)
                     sb.Append("*");
@@ -398,7 +408,7 @@ namespace Cc.Redberry.Rings
                 return true;
             if (o == null || GetType() != o.GetType())
                 return false;
-            FactorDecomposition<TWildcardTodo> factors1 = (FactorDecomposition<TWildcardTodo>)o;
+            var factors1 = (FactorDecomposition<E>)o;
             if (!unit.Equals(factors1.unit))
                 return false;
             if (!factors.Equals(factors1.factors))
@@ -409,7 +419,7 @@ namespace Cc.Redberry.Rings
         
         public override int GetHashCode()
         {
-            int result = 17;
+            var result = 17;
             result = 31 * result + unit.GetHashCode();
             result = 31 * result + factors.GetHashCode();
             result = 31 * result + exponents.GetHashCode();
@@ -454,8 +464,8 @@ namespace Cc.Redberry.Rings
         {
             if (factors.Count != exponents.Count)
                 throw new ArgumentException();
-            FactorDecomposition<E> r = Empty(ring).AddUnit(unit);
-            for (int i = 0; i < factors.Count; i++)
+            var r = Empty(ring).AddUnit(unit);
+            for (var i = 0; i < factors.Count; i++)
                 r.AddFactor(factors[i], exponents[i]);
             return r;
         }
@@ -480,7 +490,7 @@ namespace Cc.Redberry.Rings
         public static FactorDecomposition<E> Of<E>(Ring<E> ring, IEnumerable<E> factors)
         {
             TObjectIntHashMap<E> map = new TObjectIntHashMap();
-            foreach (E e in factors)
+            foreach (var e in factors)
                 map.AdjustOrPutValue(e, 1, 1);
             List<E> l = new List<E>();
             TIntArrayList ex = new TIntArrayList();

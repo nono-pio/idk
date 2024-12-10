@@ -113,7 +113,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         /// <summary>
         /// the actual data
         /// </summary>
-        readonly MonomialSet<Term> terms;
+        public readonly MonomialSet<Term> terms;
         /// <summary>
         /// The number of variables
         /// </summary>
@@ -3543,7 +3543,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         /// <summary>
         /// Returns whether this is a plain variable (with no coefficient)
         /// </summary>
-        Poly LoadFrom(MonomialSet<Term> map)
+        public Poly LoadFrom(MonomialSet<Term> map)
         {
             terms.Clear();
             terms.PutAll(map);
@@ -19820,7 +19820,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         /// <summary>
         /// check whether number of variables is the same
         /// </summary>
-        void CheckSameDomainWith(Term oth)
+        public void CheckSameDomainWith(Term oth)
         {
             if (nVariables != oth.exponents.Length)
                 throw new ArgumentException("Combining multivariate polynomials from different fields: this.nVariables = " + nVariables + " oth.nVariables = " + oth.NVariables());
@@ -42588,7 +42588,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         /// <summary>
         /// Collector which collects stream of element to a UnivariatePolynomial
         /// </summary>
-        static long[] KroneckerMap(int[] degrees)
+        public static long[] KroneckerMap(int[] degrees)
         {
             long[] result = new long[degrees.Length];
             result[0] = 1;
@@ -43182,6 +43182,6 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         /// <summary>
         /// when to switch to Kronecker's method
         /// </summary>
-        static int KRONECKER_THRESHOLD = 256;
+        public static int KRONECKER_THRESHOLD = 256;
     }
 }

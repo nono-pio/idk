@@ -47,4 +47,31 @@ public static class BigIntegerExtension
     {
         throw new NotImplementedException(); // TODO
     }
+    
+    public static T[] GetRow<T>(this T[,] array, int row)
+    {
+        var rowLength = array.GetLength(1);
+        var rowVector = new T[rowLength];
+        for (var i = 0; i < rowLength; i++)
+            rowVector[i] = array[row, i];
+        return rowVector;
+    }
+    
+    public static void SetRow<T>(this T[,] array, int row, T[] rowVector)
+    {
+        var rowLength = array.GetLength(1);
+        for (var i = 0; i < rowLength; i++)
+            array[row, i] = rowVector[i];
+    }
+    
+    public static T[,] AsArray2D<T>(this T[][] array)
+    {
+        var rows = array.Length;
+        var cols = array[0].Length;
+        var result = new T[rows, cols];
+        for (var i = 0; i < rows; i++)
+            for (var j = 0; j < cols; j++)
+                result[i, j] = array[i][j];
+        return result;
+    }
 }

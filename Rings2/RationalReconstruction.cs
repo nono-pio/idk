@@ -10,7 +10,6 @@ namespace Cc.Redberry.Rings
     /// <remarks>@since2.3</remarks>
     public sealed class RationalReconstruction
     {
-
         /// <summary>
         /// Performs a rational number reconstruction. If the answer is not unique, {@code null} is returned.
         /// </summary>
@@ -56,7 +55,8 @@ namespace Cc.Redberry.Rings
         /// <summary>
         /// Performs a rational number reconstruction. If the answer is not unique, {@code null} is returned.
         /// </summary>
-        public static BigInteger[]? Reconstruct(BigInteger n, BigInteger modulus, BigInteger numeratorBound, BigInteger denominatorBound)
+        public static BigInteger[]? Reconstruct(BigInteger n, BigInteger modulus, BigInteger numeratorBound,
+            BigInteger denominatorBound)
         {
             BigInteger[] v = new[]
             {
@@ -151,7 +151,9 @@ namespace Cc.Redberry.Rings
             do
             {
                 qNum = w[0].Multiply(v[0]).Add(w[1].Multiply(v[1]));
-                BigInteger q = qNum.Signum() == wqDen.Signum() ? qNum.Abs().Add(wqDen.Abs()).Decrement().Divide(wqDen.Abs()) : qNum.Divide(wqDen);
+                BigInteger q = qNum.Signum() == wqDen.Signum()
+                    ? qNum.Abs().Add(wqDen.Abs()).Decrement().Divide(wqDen.Abs())
+                    : qNum.Divide(wqDen);
                 BigInteger[] z = new[]
                 {
                     v[0].Subtract(q.Multiply(w[0])),
@@ -161,8 +163,8 @@ namespace Cc.Redberry.Rings
                 vqDen = wqDen;
                 w = z;
                 wqDen = z[0].Pow(2).Add(z[1].Pow(2));
-            }
-            while (wqDen.CompareTo(vqDen) < 0);
+            } while (wqDen.CompareTo(vqDen) < 0);
+
             if (vqDen.CompareTo(modulus) < 0)
             {
                 if (v[1].Signum() < 0)
@@ -184,14 +186,16 @@ namespace Cc.Redberry.Rings
         /// <param name="modulus">the modulus</param>
         /// <param name="numeratorBound">numerator bound</param>
         /// <param name="denominatorBound">denominator bound</param>
-        public static Poly[]? Reconstruct<Poly>(Poly n, Poly modulus, int numeratorBound, int denominatorBound) where Poly: IUnivariatePolynomial<Poly>
+        public static Poly[]? Reconstruct<Poly>(Poly n, Poly modulus, int numeratorBound, int denominatorBound)
+            where Poly : IUnivariatePolynomial<Poly>
         {
             Poly[] v = [modulus, n.CreateZero()];
             Poly[] w = [n, n.CreateOne()];
             while (w[0].Degree() > numeratorBound)
             {
                 Poly q = UnivariateDivision.Quotient(v[0], w[0], true);
-                Poly[] z = n.CreateArray(v[0].Clone().Subtract(q.Clone().Multiply(w[0])), v[1].Clone().Subtract(q.Clone().Multiply(w[1])));
+                Poly[] z = n.CreateArray(v[0].Clone().Subtract(q.Clone().Multiply(w[0])),
+                    v[1].Clone().Subtract(q.Clone().Multiply(w[1])));
                 v = w;
                 w = z;
             }

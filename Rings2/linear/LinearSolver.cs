@@ -1,4 +1,5 @@
 
+using Cc.Redberry.Rings.Bigint;
 using Cc.Redberry.Rings.Poly.Univar;
 using Cc.Redberry.Rings.Util;
 
@@ -10,38 +11,17 @@ namespace Cc.Redberry.Rings.Linear
     /// <remarks>@since1.0</remarks>
     public sealed class LinearSolver
     {
-        private LinearSolver()
-        {
-        }
 
         /// <summary>
         /// Transpose square matrix
         /// </summary>
-        public static void TransposeSquare(object[,] matrix)
+        public static void TransposeSquare<T>(T[,] matrix)
         {
-            for (int i = 0; i < matrix.Length; ++i)
+            for (var i = 0; i < matrix.Length; ++i)
             {
-                for (int j = 0; j < i; ++j)
+                for (var j = 0; j < i; ++j)
                 {
-                    object tmp = matrix[i,j];
-                    matrix[i,j] = matrix[j,i];
-                    matrix[j,i] = tmp;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Transpose square matrix
-        /// </summary>
-        public static void TransposeSquare(long[, ] matrix)
-        {
-            for (int i = 0; i < matrix.Length; ++i)
-            {
-                for (int j = 0; j < i; ++j)
-                {
-                    long tmp = matrix[i,j];
-                    matrix[i,j] = matrix[j,i];
-                    matrix[j,i] = tmp;
+                    (matrix[i,j], matrix[j,i]) = (matrix[j,i], matrix[i,j]);
                 }
             }
         }
@@ -88,28 +68,28 @@ namespace Cc.Redberry.Rings.Linear
         /// <param name="lhs">the lhs of the system</param>
         /// <param name="rhs">the rhs of the system</param>
         /// <param name="reduce">whether to calculate reduced row echelon form</param>
-        /// <param name="breakOnSystemInfo.UnderDetermined">whether to return immediately if it was detected that system is under determined</param>
+        /// <param name="breakOnUnderDetermined">whether to return immediately if it was detected that system is under determined</param>
         /// <returns>the number of free variables</returns>
-        public static int RowEchelonForm<E>(Ring<E> ring, E[, ] lhs, E[] rhs, bool reduce, bool breakOnUnderDetermined)
+        public static int RowEchelonForm<E>(Ring<E> ring, E[, ] lhs, E[]? rhs, bool reduce, bool breakOnUnderDetermined)
         {
             if (rhs != null && lhs.GetLength(0) != rhs.Length)
                 throw new ArgumentException("lhs.length != rhs.length");
             if (lhs.Length == 0)
                 return 0;
-            int nRows = lhs.GetLength(0);
-            int nColumns = lhs.GetLength(1);
+            var nRows = lhs.GetLength(0);
+            var nColumns = lhs.GetLength(1);
 
             //number of zero columns
-            int nZeroColumns = 0;
+            var nZeroColumns = 0;
             for (int iColumn = 0, to = Math.Min(nRows, nColumns); iColumn < to; ++iColumn)
             {
 
                 // find pivot row and swap
-                int row = iColumn - nZeroColumns;
-                int max = row;
+                var row = iColumn - nZeroColumns;
+                var max = row;
                 if (ring.IsZero(lhs[row,iColumn]))
                 {
-                    for (int iRow = row + 1; iRow < nRows; ++iRow)
+                    for (var iRow = row + 1; iRow < nRows; ++iRow)
                         if (!ring.IsZero(lhs[iRow,iColumn]))
                         {
                             max = iRow;
@@ -136,13 +116,13 @@ namespace Cc.Redberry.Rings.Linear
 
 
                 // pivot within A and b
-                for (int iRow = row + 1; iRow < nRows; ++iRow)
+                for (var iRow = row + 1; iRow < nRows; ++iRow)
                 {
-                    E alpha = ring.DivideExact(lhs[iRow,iColumn], lhs[row,iColumn]);
+                    var alpha = ring.DivideExact(lhs[iRow,iColumn], lhs[row,iColumn]);
                     if (rhs != null)
                         rhs[iRow] = ring.Subtract(rhs[iRow], ring.Multiply(alpha, rhs[row]));
                     if (!ring.IsZero(alpha))
-                        for (int iCol = iColumn; iCol < nColumns; ++iCol)
+                        for (var iCol = iColumn; iCol < nColumns; ++iCol)
                             lhs[iRow,iCol] = ring.Subtract(lhs[iRow,iCol], ring.Multiply(alpha, lhs[row,iCol]));
                 }
             }
@@ -158,18 +138,18 @@ namespace Cc.Redberry.Rings.Linear
         /// <param name="ring">the ring</param>
         /// <param name="lhs">the lhs of the system in the row echelon form</param>
         /// <param name="rhs">the rhs of the system</param>
-        public static void ReducedRowEchelonForm<E>(Ring<E> ring, E[, ] lhs, E[] rhs)
+        public static void ReducedRowEchelonForm<E>(Ring<E> ring, E[, ] lhs, E[]? rhs)
         {
-            int nRows = lhs.GetLength(0);
-            int nColumns = lhs.GetLength(1);
+            var nRows = lhs.GetLength(0);
+            var nColumns = lhs.GetLength(1);
 
             //number of zero columns
-            int nZeroColumns = 0;
+            var nZeroColumns = 0;
             for (int iColumn = 0, to = Math.Min(nRows, nColumns); iColumn < to; ++iColumn)
             {
 
                 // find pivot row and swap
-                int iRow = iColumn - nZeroColumns;
+                var iRow = iColumn - nZeroColumns;
                 if (ring.IsZero(lhs[iRow,iColumn]))
                 {
                     ++nZeroColumns;
@@ -179,22 +159,22 @@ namespace Cc.Redberry.Rings.Linear
 
 
                 // scale current row
-                E[] row = lhs[iRow];
-                E val = row[iColumn];
-                E valInv = ring.Reciprocal(val);
-                for (int i = iColumn; i < nColumns; i++)
+                E[] row = lhs.GetRow(iRow);
+                var val = row[iColumn];
+                var valInv = ring.Reciprocal(val);
+                for (var i = iColumn; i < nColumns; i++)
                     row[i] = ring.Multiply(valInv, row[i]);
                 if (rhs != null)
                     rhs[iRow] = ring.Multiply(valInv, rhs[iRow]);
 
                 // scale all rows before
-                for (int i = 0; i < iRow; i++)
+                for (var i = 0; i < iRow; i++)
                 {
-                    E[] pRow = lhs[i];
-                    E v = pRow[iColumn];
+                    E[] pRow = lhs.GetRow(i);
+                    var v = pRow[iColumn];
                     if (ring.IsZero(v))
                         continue;
-                    for (int j = iColumn; j < nColumns; ++j)
+                    for (var j = iColumn; j < nColumns; ++j)
                         pRow[j] = ring.Subtract(pRow[j], ring.Multiply(v, row[j]));
                     if (rhs != null)
                         rhs[i] = ring.Subtract(rhs[i], ring.Multiply(v, rhs[iColumn]));
@@ -212,11 +192,11 @@ namespace Cc.Redberry.Rings.Linear
         /// <exception cref="ArithmeticException">if the system is SystemInfo.Inconsistent or under-determined</exception>
         public static E[] Solve<E>(Ring<E> ring, E[, ] lhs, E[] rhs)
         {
-            int nUnknowns = lhs.GetLength(1);
+            var nUnknowns = lhs.GetLength(1);
             if (nUnknowns == 0)
-                return ring.CreateArray(0);
-            E[] result = ring.CreateArray(nUnknowns);
-            SystemInfo info = Solve(ring, lhs, rhs, result);
+                return [];
+            E[] result = new E[nUnknowns];
+            var info = Solve(ring, lhs, rhs, result);
             if (info != SystemInfo.Consistent)
                 throw new ArithmeticException("singular or under-determined matrix");
             return result;
@@ -263,7 +243,7 @@ namespace Cc.Redberry.Rings.Linear
         /// <param name="lhs">the lhs of the system (will be reduced to row echelon form)</param>
         /// <param name="rhs">the rhs of the system</param>
         /// <param name="result">where to place the result</param>
-        /// <param name="solveIfSystemInfo.UnderDetermined">give some solution even if the system is under determined</param>
+        /// <param name="solveIfUnderDetermined">give some solution even if the system is under determined</param>
         /// <returns>system information (SystemInfo.Inconsistent, under-determined or consistent)</returns>
         public static SystemInfo Solve<E>(Ring<E> ring, E[, ] lhs, E[] rhs, E[] result, bool solveIfUnderDetermined)
         {
@@ -284,7 +264,7 @@ namespace Cc.Redberry.Rings.Linear
                     ring.FillZeros(result);
                     if (ring.IsZero(rhs[0]))
                         return SystemInfo.Consistent;
-                    for (int i = 0; i < result.Length; ++i)
+                    for (var i = 0; i < result.Length; ++i)
                         if (!ring.IsZero(lhs[0,i]))
                         {
                             result[i] = ring.DivideExact(rhs[0], lhs[0,i]);
@@ -299,13 +279,13 @@ namespace Cc.Redberry.Rings.Linear
                 return SystemInfo.Inconsistent;
             }
 
-            int nUnderDetermined = RowEchelonForm(ring, lhs, rhs, false, !solveIfUnderDetermined);
+            var nUnderDetermined = RowEchelonForm(ring, lhs, rhs, false, !solveIfUnderDetermined);
             if (!solveIfUnderDetermined && nUnderDetermined > 0)
 
                 // under-determined system
                 return SystemInfo.UnderDetermined;
-            int nRows = rhs.Length;
-            int nColumns = lhs.GetLength(1);
+            var nRows = rhs.Length;
+            var nColumns = lhs.GetLength(1);
             if (!solveIfUnderDetermined && nColumns > nRows)
 
                 // under-determined system
@@ -314,13 +294,13 @@ namespace Cc.Redberry.Rings.Linear
 
                 // over-determined system
                 // check that all rhs are zero
-                for (int i = nColumns; i < nRows; ++i)
+                for (var i = nColumns; i < nRows; ++i)
                     if (!ring.IsZero(rhs[i]))
 
                         // SystemInfo.Inconsistent system
                         return SystemInfo.Inconsistent;
             if (nRows > nColumns)
-                for (int i = nColumns + 1; i < nRows; ++i)
+                for (var i = nColumns + 1; i < nRows; ++i)
                     if (!ring.IsZero(rhs[i]))
                         return SystemInfo.Inconsistent;
             ring.FillZeros(result);
@@ -328,10 +308,10 @@ namespace Cc.Redberry.Rings.Linear
             // back substitution in case of determined system
             if (nUnderDetermined == 0 && nColumns <= nRows)
             {
-                for (int i = nColumns - 1; i >= 0; i--)
+                for (var i = nColumns - 1; i >= 0; i--)
                 {
-                    E sum = ring.GetZero();
-                    for (int j = i + 1; j < nColumns; j++)
+                    var sum = ring.GetZero();
+                    for (var j = i + 1; j < nColumns; j++)
                         sum = ring.Add(sum, ring.Multiply(lhs[i,j], result[j]));
                     result[i] = ring.DivideExact(ring.Subtract(rhs[i], sum), lhs[i,i]);
                 }
@@ -344,8 +324,8 @@ namespace Cc.Redberry.Rings.Linear
             TIntList nzColumns = new TIntList(), nzRows = new TIntList();
 
             //number of zero columns
-            int nZeroColumns = 0;
-            int iRow = 0;
+            var nZeroColumns = 0;
+            var iRow = 0;
             for (int iColumn = 0, to = Math.Min(nRows, nColumns); iColumn < to; ++iColumn)
             {
 
@@ -362,21 +342,21 @@ namespace Cc.Redberry.Rings.Linear
 
 
                 // scale current row
-                E[] row = lhs[iRow];
-                E val = row[iColumn];
-                E valInv = ring.Reciprocal(val);
-                for (int i = iColumn; i < nColumns; i++)
+                E[] row = lhs.GetRow(iRow);
+                var val = row[iColumn];
+                var valInv = ring.Reciprocal(val);
+                for (var i = iColumn; i < nColumns; i++)
                     row[i] = ring.Multiply(valInv, row[i]);
                 rhs[iRow] = ring.Multiply(valInv, rhs[iRow]);
 
                 // scale all rows before
-                for (int i = 0; i < iRow; i++)
+                for (var i = 0; i < iRow; i++)
                 {
-                    E[] pRow = lhs[i];
-                    E v = pRow[iColumn];
+                    E[] pRow = lhs.GetRow(i);
+                    var v = pRow[iColumn];
                     if (ring.IsZero(v))
                         continue;
-                    for (int j = iColumn; j < nColumns; ++j)
+                    for (var j = iColumn; j < nColumns; ++j)
                         pRow[j] = ring.Subtract(pRow[j], ring.Multiply(v, row[j]));
                     rhs[i] = ring.Subtract(rhs[i], ring.Multiply(v, rhs[iRow]));
                 }
@@ -392,7 +372,7 @@ namespace Cc.Redberry.Rings.Linear
                 for (; iRow < nRows; ++iRow)
                     if (!ring.IsZero(rhs[iRow]))
                         return SystemInfo.Inconsistent;
-            for (int i = 0; i < nzColumns.Count; ++i)
+            for (var i = 0; i < nzColumns.Count; ++i)
                 result[nzColumns[i]] = rhs[nzRows[i]];
             return SystemInfo.Consistent;
         }
@@ -408,7 +388,7 @@ namespace Cc.Redberry.Rings.Linear
         /// <returns>system information (SystemInfo.Inconsistent, under-determined or consistent)</returns>
         public static SystemInfo Solve<E>(Ring<E> ring, List<E[]> lhs, List<E> rhs, E[] result)
         {
-            return Solve(ring, lhs.ToArray(), rhs.ToArray(), result);
+            return Solve(ring, lhs.ToArray().AsArray2D(), rhs.ToArray(), result);
         }
 
         /// <summary>
@@ -422,8 +402,8 @@ namespace Cc.Redberry.Rings.Linear
         /// <exception cref="ArithmeticException">if the system is SystemInfo.Inconsistent or under-determined</exception>
         public static E[] SolveVandermonde<E>(Ring<E> ring, E[] row, E[] rhs)
         {
-            E[] result = ring.CreateArray(rhs.Length);
-            SystemInfo info = SolveVandermonde(ring, row, rhs, result);
+            var result = new E[rhs.Length];
+            var info = SolveVandermonde(ring, row, rhs, result);
             if (info != SystemInfo.Consistent)
                 throw new ArithmeticException("singular or under-determined matrix");
             return result;
@@ -440,8 +420,8 @@ namespace Cc.Redberry.Rings.Linear
         /// <exception cref="ArithmeticException">if the system is SystemInfo.Inconsistent or under-determined</exception>
         public static E[] SolveVandermondeT<E>(Ring<E> ring, E[] row, E[] rhs)
         {
-            E[] result = ring.CreateArray(rhs.Length);
-            SystemInfo info = SolveVandermondeT(ring, row, rhs, result);
+            var result = new E[rhs.Length];
+            var info = SolveVandermondeT(ring, row, rhs, result);
             if (info != SystemInfo.Consistent)
                 throw new ArithmeticException("singular or under-determined matrix");
             return result;
@@ -468,26 +448,26 @@ namespace Cc.Redberry.Rings.Linear
                 return SystemInfo.Consistent;
             }
 
-            UnivariatePolynomial<E>[] lins = new UnivariatePolynomial<E>[row.Length];
+            var lins = new UnivariatePolynomial<E>[row.Length];
             UnivariatePolynomial<E> master = UnivariatePolynomial<E>.One(ring);
-            for (int i = 0; i < row.Length; ++i)
+            for (var i = 0; i < row.Length; ++i)
             {
                 lins[i] = master.CreateLinear(ring.Negate(row[i]), ring.GetOne());
                 master = master.Multiply(lins[i]);
             }
 
-            for (int i = 0; i < result.Length; i++)
+            for (var i = 0; i < result.Length; i++)
                 result[i] = ring.GetZero();
-            for (int i = 0; i < row.Length; i++)
+            for (var i = 0; i < row.Length; i++)
             {
                 UnivariatePolynomial<E> quot = UnivariateDivision.DivideAndRemainder(master, lins[i], true)[0];
-                E cf = quot.Evaluate(row[i]);
+                var cf = quot.Evaluate(row[i]);
                 if (ring.IsZero(cf))
                     return SystemInfo.UnderDetermined;
                 quot = quot.DivideOrNull(cf);
                 if (quot == null)
                     throw new ArgumentException();
-                for (int j = 0; j < row.Length; ++j)
+                for (var j = 0; j < row.Length; ++j)
                     result[j] = ring.Add(result[j], ring.Multiply(rhs[i], quot[j]));
             }
 
@@ -516,25 +496,25 @@ namespace Cc.Redberry.Rings.Linear
                 return SystemInfo.Consistent;
             }
 
-            UnivariatePolynomial<E>[] lins = new UnivariatePolynomial<E>[row.Length];
+            var lins = new UnivariatePolynomial<E>[row.Length];
             UnivariatePolynomial<E> master = UnivariatePolynomial<E>.One(ring);
-            for (int i = 0; i < row.Length; ++i)
+            for (var i = 0; i < row.Length; ++i)
             {
                 lins[i] = master.CreateLinear(ring.Negate(row[i]), ring.GetOne());
                 master = master.Multiply(lins[i]);
             }
 
-            for (int i = 0; i < row.Length; i++)
+            for (var i = 0; i < row.Length; i++)
             {
                 UnivariatePolynomial<E> quot = UnivariateDivision.DivideAndRemainder(master, lins[i], true)[0];
-                E cf = quot.Evaluate(row[i]);
+                var cf = quot.Evaluate(row[i]);
                 if (ring.IsZero(cf))
                     return SystemInfo.UnderDetermined;
                 quot = quot.DivideOrNull(cf);
                 if (quot == null)
                     throw new ArgumentException();
                 result[i] = ring.GetZero();
-                for (int j = 0; j < row.Length; ++j)
+                for (var j = 0; j < row.Length; ++j)
                     result[i] = ring.Add(result[i], ring.Multiply(rhs[j], quot[j]));
             }
 
@@ -584,7 +564,7 @@ namespace Cc.Redberry.Rings.Linear
         /// <param name="lhs">the lhs of the system</param>
         /// <param name="rhs">the rhs of the system (may be null)</param>
         /// <param name="reduce">whether to calculate reduced row echelon form</param>
-        /// <param name="breakOnSystemInfo.UnderDetermined">whether to return immediately if it was detected that system is under determined</param>
+        /// <param name="breakOnUnderDetermined">whether to return immediately if it was detected that system is under determined</param>
         /// <returns>the number of free variables</returns>
         public static int RowEchelonForm(IntegersZp64 ring, long[, ] lhs, long[] rhs, bool reduce, bool breakOnUnderDetermined)
         {
@@ -592,20 +572,20 @@ namespace Cc.Redberry.Rings.Linear
                 throw new ArgumentException("lhs.length != rhs.length");
             if (lhs.GetLength(0) == 0)
                 return 0;
-            int nRows = lhs.GetLength(0);
-            int nColumns = lhs.GetLength(1);
+            var nRows = lhs.GetLength(0);
+            var nColumns = lhs.GetLength(1);
 
             //number of zero columns
-            int nZeroColumns = 0;
+            var nZeroColumns = 0;
             for (int iColumn = 0, to = Math.Min(nRows, nColumns); iColumn < to; ++iColumn)
             {
 
                 // find pivot row and swap
-                int row = iColumn - nZeroColumns;
-                int nonZero = row;
+                var row = iColumn - nZeroColumns;
+                var nonZero = row;
                 if (lhs[row,iColumn] == 0)
                 {
-                    for (int iRow = row + 1; iRow < nRows; ++iRow)
+                    for (var iRow = row + 1; iRow < nRows; ++iRow)
                         if (lhs[iRow,iColumn] != 0)
                         {
                             nonZero = iRow;
@@ -632,13 +612,13 @@ namespace Cc.Redberry.Rings.Linear
 
 
                 // pivot within A and b
-                for (int iRow = row + 1; iRow < nRows; ++iRow)
+                for (var iRow = row + 1; iRow < nRows; ++iRow)
                 {
-                    long alpha = ring.Divide(lhs[iRow,iColumn], lhs[row,iColumn]);
+                    var alpha = ring.Divide(lhs[iRow,iColumn], lhs[row,iColumn]);
                     if (rhs != null)
                         rhs[iRow] = ring.Subtract(rhs[iRow], ring.Multiply(alpha, rhs[row]));
                     if (alpha != 0)
-                        for (int iCol = iColumn; iCol < nColumns; ++iCol)
+                        for (var iCol = iColumn; iCol < nColumns; ++iCol)
                             lhs[iRow,iCol] = ring.Subtract(lhs[iRow,iCol], ring.Multiply(alpha, lhs[row,iCol]));
                 }
             }
@@ -654,18 +634,18 @@ namespace Cc.Redberry.Rings.Linear
         /// <param name="ring">the ring</param>
         /// <param name="lhs">the lhs of the system in the row echelon form</param>
         /// <param name="rhs">the rhs of the system</param>
-        public static void ReducedRowEchelonForm(IntegersZp64 ring, long[, ] lhs, long[] rhs)
+        public static void ReducedRowEchelonForm(IntegersZp64 ring, long[, ] lhs, long[]? rhs)
         {
-            int nRows = lhs.GetLength(0);
-            int nColumns = lhs.GetLength(1);
+            var nRows = lhs.GetLength(0);
+            var nColumns = lhs.GetLength(1);
 
             //number of zero columns
-            int nZeroColumns = 0;
+            var nZeroColumns = 0;
             for (int iColumn = 0, to = Math.Min(nRows, nColumns); iColumn < to; ++iColumn)
             {
 
                 // find pivot row and swap
-                int iRow = iColumn - nZeroColumns;
+                var iRow = iColumn - nZeroColumns;
                 if (lhs[iRow,iColumn] == 0)
                 {
                     ++nZeroColumns;
@@ -675,22 +655,22 @@ namespace Cc.Redberry.Rings.Linear
 
 
                 // scale current row
-                long[] row = lhs[iRow];
-                long val = row[iColumn];
-                long valInv = ring.Reciprocal(val);
-                for (int i = iColumn; i < nColumns; i++)
+                var row = lhs.GetRow(iRow);
+                var val = row[iColumn];
+                var valInv = ring.Reciprocal(val);
+                for (var i = iColumn; i < nColumns; i++)
                     row[i] = ring.Multiply(valInv, row[i]);
                 if (rhs != null)
                     rhs[iRow] = ring.Multiply(valInv, rhs[iRow]);
 
                 // scale all rows before
-                for (int i = 0; i < iRow; i++)
+                for (var i = 0; i < iRow; i++)
                 {
-                    long[] pRow = lhs[i];
-                    long v = pRow[iColumn];
+                    var pRow = lhs.GetRow(i);
+                    var v = pRow[iColumn];
                     if (v == 0)
                         continue;
-                    for (int j = iColumn; j < nColumns; ++j)
+                    for (var j = iColumn; j < nColumns; ++j)
                         pRow[j] = ring.Subtract(pRow[j], ring.Multiply(v, row[j]));
                     if (rhs != null)
                         rhs[i] = ring.Subtract(rhs[i], ring.Multiply(v, rhs[iRow]));
@@ -708,11 +688,11 @@ namespace Cc.Redberry.Rings.Linear
         /// <exception cref="ArithmeticException">if the system is SystemInfo.Inconsistent or under-determined</exception>
         public static long[] Solve(IntegersZp64 ring, long[, ] lhs, long[] rhs)
         {
-            int nUnknowns = lhs.GetLength(1);
+            var nUnknowns = lhs.GetLength(1);
             if (nUnknowns == 0)
                 return new long[0];
-            long[] result = new long[nUnknowns];
-            SystemInfo info = Solve(ring, lhs, rhs, result);
+            var result = new long[nUnknowns];
+            var info = Solve(ring, lhs, rhs, result);
             if (info != SystemInfo.Consistent)
                 throw new ArithmeticException("singular or under-determined matrix");
             return result;
@@ -740,7 +720,7 @@ namespace Cc.Redberry.Rings.Linear
         /// <param name="lhs">the lhs of the system  (will be reduced to row echelon form)</param>
         /// <param name="rhs">the rhs of the system</param>
         /// <param name="result">where to place the result</param>
-        /// <param name="solveIfSystemInfo.UnderDetermined">give some solution even if the system is under determined</param>
+        /// <param name="solveIfUnderDetermined">give some solution even if the system is under determined</param>
         /// <returns>system information (SystemInfo.Inconsistent, under-determined or consistent)</returns>
         public static SystemInfo Solve(IntegersZp64 ring, long[, ] lhs, long[] rhs, long[] result, bool solveIfUnderDetermined)
         {
@@ -760,7 +740,7 @@ namespace Cc.Redberry.Rings.Linear
                 {
                     if (rhs[0] == 0)
                         return SystemInfo.Consistent;
-                    for (int i = 0; i < result.Length; ++i)
+                    for (var i = 0; i < result.Length; ++i)
                         if (lhs[0,i] != 0)
                         {
                             result[i] = ring.Divide(rhs[0], lhs[0,i]);
@@ -775,13 +755,13 @@ namespace Cc.Redberry.Rings.Linear
                 return SystemInfo.Inconsistent;
             }
 
-            int nUnderDetermined = RowEchelonForm(ring, lhs, rhs, false, !solveIfUnderDetermined);
+            var nUnderDetermined = RowEchelonForm(ring, lhs, rhs, false, !solveIfUnderDetermined);
             if (!solveIfUnderDetermined && nUnderDetermined > 0)
 
                 // under-determined system
                 return SystemInfo.UnderDetermined;
-            int nRows = rhs.Length;
-            int nColumns = lhs.GetLength(1);
+            var nRows = rhs.Length;
+            var nColumns = lhs.GetLength(1);
             if (!solveIfUnderDetermined && nColumns > nRows)
 
                 // under-determined system
@@ -790,23 +770,23 @@ namespace Cc.Redberry.Rings.Linear
 
                 // over-determined system
                 // check that all rhs are zero
-                for (int i = nColumns; i < nRows; ++i)
+                for (var i = nColumns; i < nRows; ++i)
                     if (rhs[i] != 0)
 
                         // SystemInfo.Inconsistent system
                         return SystemInfo.Inconsistent;
             if (nRows > nColumns)
-                for (int i = nColumns + 1; i < nRows; ++i)
+                for (var i = nColumns + 1; i < nRows; ++i)
                     if (rhs[i] != 0)
                         return SystemInfo.Inconsistent;
 
             // back substitution in case of determined system
             if (nUnderDetermined == 0 && nColumns <= nRows)
             {
-                for (int i = nColumns - 1; i >= 0; i--)
+                for (var i = nColumns - 1; i >= 0; i--)
                 {
                     long sum = 0;
-                    for (int j = i + 1; j < nColumns; j++)
+                    for (var j = i + 1; j < nColumns; j++)
                         sum = ring.Add(sum, ring.Multiply(lhs[i,j], result[j]));
                     result[i] = ring.Divide(ring.Subtract(rhs[i], sum), lhs[i,i]);
                 }
@@ -819,8 +799,8 @@ namespace Cc.Redberry.Rings.Linear
             TIntList nzColumns = new TIntList(), nzRows = new TIntList();
 
             //number of zero columns
-            int nZeroColumns = 0;
-            int iRow = 0;
+            var nZeroColumns = 0;
+            var iRow = 0;
             for (int iColumn = 0, to = Math.Min(nRows, nColumns); iColumn < to; ++iColumn)
             {
 
@@ -837,21 +817,21 @@ namespace Cc.Redberry.Rings.Linear
 
 
                 // scale current row
-                long[] row = lhs[iRow];
-                long val = row[iColumn];
-                long valInv = ring.Reciprocal(val);
-                for (int i = iColumn; i < nColumns; i++)
+                long[] row = lhs.GetRow(iRow);
+                var val = row[iColumn];
+                var valInv = ring.Reciprocal(val);
+                for (var i = iColumn; i < nColumns; i++)
                     row[i] = ring.Multiply(valInv, row[i]);
                 rhs[iRow] = ring.Multiply(valInv, rhs[iRow]);
 
                 // scale all rows before
-                for (int i = 0; i < iRow; i++)
+                for (var i = 0; i < iRow; i++)
                 {
-                    long[] pRow = lhs[i];
-                    long v = pRow[iColumn];
+                    long[] pRow = lhs.GetRow(i);
+                    var v = pRow[iColumn];
                     if (v == 0)
                         continue;
-                    for (int j = iColumn; j < nColumns; ++j)
+                    for (var j = iColumn; j < nColumns; ++j)
                         pRow[j] = ring.Subtract(pRow[j], ring.Multiply(v, row[j]));
                     rhs[i] = ring.Subtract(rhs[i], ring.Multiply(v, rhs[iRow]));
                 }
@@ -867,7 +847,7 @@ namespace Cc.Redberry.Rings.Linear
                 for (; iRow < nRows; ++iRow)
                     if (rhs[iRow] != 0)
                         return SystemInfo.Inconsistent;
-            for (int i = 0; i < nzColumns.Count; ++i)
+            for (var i = 0; i < nzColumns.Count; ++i)
                 result[nzColumns[i]] = rhs[nzRows[i]];
             return SystemInfo.Consistent;
         }
@@ -883,7 +863,7 @@ namespace Cc.Redberry.Rings.Linear
         /// <returns>system information (SystemInfo.Inconsistent, under-determined or consistent)</returns>
         public static SystemInfo Solve(IntegersZp64 ring, List<long[]> lhs, TLongList rhs, long[] result)
         {
-            return Solve(ring, lhs.ToArray(new long[lhs.Count]), rhs.ToArray(), result);
+            return Solve(ring, lhs.ToArray().AsArray2D(), rhs.ToArray(), result);
         }
 
         /// <summary>
@@ -897,8 +877,8 @@ namespace Cc.Redberry.Rings.Linear
         /// <exception cref="ArithmeticException">if the system is SystemInfo.Inconsistent or under-determined</exception>
         public static long[] SolveVandermonde(IntegersZp64 ring, long[] row, long[] rhs)
         {
-            long[] result = new long[rhs.Length];
-            SystemInfo info = SolveVandermonde(ring, row, rhs, result);
+            var result = new long[rhs.Length];
+            var info = SolveVandermonde(ring, row, rhs, result);
             if (info != SystemInfo.Consistent)
                 throw new ArithmeticException("singular or under-determined matrix");
             return result;
@@ -915,8 +895,8 @@ namespace Cc.Redberry.Rings.Linear
         /// <exception cref="ArithmeticException">if the system is SystemInfo.Inconsistent or under-determined</exception>
         public static long[] SolveVandermondeT(IntegersZp64 ring, long[] row, long[] rhs)
         {
-            long[] result = new long[rhs.Length];
-            SystemInfo info = SolveVandermondeT(ring, row, rhs, result);
+            var result = new long[rhs.Length];
+            var info = SolveVandermondeT(ring, row, rhs, result);
             if (info != SystemInfo.Consistent)
                 throw new ArithmeticException("singular or under-determined matrix");
             return result;
@@ -943,24 +923,24 @@ namespace Cc.Redberry.Rings.Linear
                 return SystemInfo.Consistent;
             }
 
-            UnivariatePolynomialZp64[] lins = new UnivariatePolynomialZp64[row.Length];
-            UnivariatePolynomialZp64 master = UnivariatePolynomialZp64.One(ring);
-            for (int i = 0; i < row.Length; ++i)
+            var lins = new UnivariatePolynomialZp64[row.Length];
+            var master = UnivariatePolynomialZp64.One(ring);
+            for (var i = 0; i < row.Length; ++i)
             {
                 lins[i] = master.CreateLinear(ring.Negate(row[i]), 1);
                 master = master.Multiply(lins[i]);
             }
 
-            for (int i = 0; i < result.Length; i++)
+            for (var i = 0; i < result.Length; i++)
                 result[i] = 0;
-            for (int i = 0; i < row.Length; i++)
+            for (var i = 0; i < row.Length; i++)
             {
-                UnivariatePolynomialZp64 quot = UnivariateDivision.DivideAndRemainder(master, lins[i], true)[0];
-                long cf = quot.Evaluate(row[i]);
+                var quot = UnivariateDivision.DivideAndRemainder(master, lins[i], true)[0];
+                var cf = quot.Evaluate(row[i]);
                 if (cf == 0)
                     return SystemInfo.UnderDetermined;
                 quot = quot.Divide(cf);
-                for (int j = 0; j < row.Length; ++j)
+                for (var j = 0; j < row.Length; ++j)
                     result[j] = ring.Add(result[j], ring.Multiply(rhs[i], quot[j]));
             }
 
@@ -989,25 +969,25 @@ namespace Cc.Redberry.Rings.Linear
                 return SystemInfo.Consistent;
             }
 
-            UnivariatePolynomialZp64[] lins = new UnivariatePolynomialZp64[row.Length];
-            UnivariatePolynomialZp64 master = UnivariatePolynomialZp64.One(ring);
-            for (int i = 0; i < row.Length; ++i)
+            var lins = new UnivariatePolynomialZp64[row.Length];
+            var master = UnivariatePolynomialZp64.One(ring);
+            for (var i = 0; i < row.Length; ++i)
             {
                 lins[i] = master.CreateLinear(ring.Negate(row[i]), 1);
                 master = master.Multiply(lins[i]);
             }
 
-            for (int i = 0; i < row.Length; i++)
+            for (var i = 0; i < row.Length; i++)
             {
-                UnivariatePolynomialZp64 quot = UnivariateDivision.DivideAndRemainder(master, lins[i], true)[0];
-                long cf = quot.Evaluate(row[i]);
+                var quot = UnivariateDivision.DivideAndRemainder(master, lins[i], true)[0];
+                var cf = quot.Evaluate(row[i]);
                 if (cf == 0)
                     return SystemInfo.UnderDetermined;
                 quot = quot.Divide(cf);
                 if (quot == null)
                     throw new ArgumentException();
                 result[i] = 0;
-                for (int j = 0; j < row.Length; ++j)
+                for (var j = 0; j < row.Length; ++j)
                     result[i] = ring.Add(result[i], ring.Multiply(rhs[j], quot[j]));
             }
 

@@ -15,7 +15,7 @@ namespace Cc.Redberry.Rings
     /// <remarks>@since1.0</remarks>
     public abstract class ARing<E> : Ring<E>
     {
-        private static readonly long serialVersionUID = 1;
+        public static readonly long serialVersionUID = 1;
         /// <summary>
         /// if modulus = a^b, a and b are stored in this array
         /// </summary>
@@ -35,15 +35,16 @@ namespace Cc.Redberry.Rings
                     if (initialized)
                         return;
                     initialized = true;
-                    if (Cardinality() == null)
+                    var cardinality = Cardinality();
+                    if (cardinality is null)
                     {
                         perfectPowerDecomposition[0] = null;
                         perfectPowerDecomposition[1] = null;
                         return;
                     }
 
-                    BigInteger[] ipp = BigIntegerUtil.PerfectPowerDecomposition(Cardinality());
-                    if (ipp == null)
+                    var ipp = BigIntegerUtil.PerfectPowerDecomposition(cardinality.Value);
+                    if (ipp is null)
                     {
 
                         // not a perfect power
@@ -61,7 +62,7 @@ namespace Cc.Redberry.Rings
         public abstract bool IsField();
         public abstract bool IsEuclideanRing();
 
-        public abstract BigInteger Cardinality();
+        public abstract BigInteger? Cardinality();
         public abstract BigInteger Characteristic();
 
         /// <summary>
@@ -72,15 +73,15 @@ namespace Cc.Redberry.Rings
         public virtual bool IsPerfectPower()
         {
             CheckPerfectPower();
-            return perfectPowerDecomposition[1] is not null && !perfectPowerDecomposition[1].Value.IsOne;
+            return perfectPowerDecomposition[1] is not null && !perfectPowerDecomposition[1]!.Value.IsOne;
         }
 
-        BigInteger Ring<E>.PerfectPowerBase()
+        BigInteger? Ring<E>.PerfectPowerBase()
         {
             return PerfectPowerBase();
         }
 
-        BigInteger Ring<E>.PerfectPowerExponent()
+        BigInteger? Ring<E>.PerfectPowerExponent()
         {
             return PerfectPowerExponent();
         }
@@ -106,10 +107,10 @@ namespace Cc.Redberry.Rings
         /// </summary>
         // lazy initialization
         // not a perfect power
-        public virtual BigInteger PerfectPowerBase()
+        public BigInteger? PerfectPowerBase()
         {
             CheckPerfectPower();
-            return perfectPowerDecomposition[0].Value;
+            return perfectPowerDecomposition[0];
         }
 
         /// <summary>
@@ -117,10 +118,10 @@ namespace Cc.Redberry.Rings
         /// </summary>
         // lazy initialization
         // not a perfect power
-        public virtual BigInteger PerfectPowerExponent()
+        public BigInteger? PerfectPowerExponent()
         {
             CheckPerfectPower();
-            return perfectPowerDecomposition[1].Value;
+            return perfectPowerDecomposition[1];
         }
 
         public abstract IEnumerator<E> Iterator();

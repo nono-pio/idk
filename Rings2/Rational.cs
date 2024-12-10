@@ -72,7 +72,7 @@ namespace Cc.Redberry.Rings
         }
 
 
-        Rational(Ring<E> ring, Operand numerator, Operand denominator)
+        public Rational(Ring<E> ring, Operand numerator, Operand denominator)
         {
             if (denominator.IsZero())
                 throw new ArithmeticException("division by zero");
@@ -89,7 +89,7 @@ namespace Cc.Redberry.Rings
         }
 
 
-        Rational(bool skipNormalize, Ring<E> ring, Operand numerator, Operand denominator)
+        public Rational(bool skipNormalize, Ring<E> ring, Operand numerator, Operand denominator)
         {
             if (denominator.IsZero())
                 throw new ArithmeticException("division by zero");
