@@ -1,18 +1,7 @@
+using System.Runtime.InteropServices.JavaScript;
 using Cc.Redberry.Rings;
 using Cc.Redberry.Rings.Poly;
-using Org.Apache.Commons.Math3.Random;
-using Java.Util;
-using Java.Util.Function;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using static Cc.Redberry.Rings.Poly.RoundingMode;
-using static Cc.Redberry.Rings.Poly.Associativity;
-using static Cc.Redberry.Rings.Poly.Operator;
-using static Cc.Redberry.Rings.Poly.TokenType;
-using static Cc.Redberry.Rings.Poly.SystemInfo;
+using Cc.Redberry.Rings.Poly.Multivar;
 
 namespace Cc.Redberry.Rings.Poly
 {
@@ -21,7 +10,7 @@ namespace Cc.Redberry.Rings.Poly
     /// </summary>
     /// <param name="<Poly>">type of multivariate polynomials</param>
     /// <remarks>@since1.0</remarks>
-    public sealed class MultivariateRing<Poly> : APolynomialRing<Poly>
+    public sealed class MultivariateRing<Poly> : APolynomialRing<Poly> where Poly : AMultivariatePolynomial<Term, Poly>
     {
         private static readonly long serialVersionUID = 1;
         /// <summary>
@@ -228,7 +217,7 @@ namespace Cc.Redberry.Rings.Poly
             {
                 MultivariatePolynomial f = (MultivariatePolynomial)this.factory;
                 Ring cfRing = f.ring;
-                Function<RandomGenerator, TWildcardTodo> method = cfRing.RandomElementTree();
+                JSType.Function<RandomGenerator, TWildcardTodo> method = cfRing.RandomElementTree();
                 return (Poly)RandomMultivariatePolynomials.RandomPolynomial(NVariables(), degree, size, cfRing, ((MultivariatePolynomial)factory).ordering, method, rnd);
             }
             else

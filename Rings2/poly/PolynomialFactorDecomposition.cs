@@ -55,7 +55,7 @@ namespace Cc.Redberry.Rings.Poly
             if (factors.Count == 0)
                 return this;
             ReduceUnitContent();
-            Poly[] fTmp = factors.ToArray(factors[0].CreateArray(factors.Count));
+            Poly[] fTmp = factors.ToArray();
             int[] eTmp = exponents.ToArray();
             for (int i = fTmp.Length - 1; i >= 0; --i)
             {
@@ -210,7 +210,7 @@ namespace Cc.Redberry.Rings.Poly
         /// </summary>
         public PolynomialFactorDecomposition<OthPoly> MapTo<OthPoly>(Func<Poly, OthPoly> mapper) where OthPoly : IPolynomial<OthPoly>
         {
-            return Of(mapper.Apply(unit), factors.Select(mapper).ToList(), exponents);
+            return PolynomialFactorDecomposition<OthPoly>.Of(mapper(unit), factors.Select(mapper).ToList(), exponents);
         }
 
         /// <summary>

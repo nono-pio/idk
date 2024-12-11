@@ -1,6 +1,7 @@
 
 
 using System.Numerics;
+using System.Reflection;
 using Cc.Redberry.Rings.Bigint;
 using Cc.Redberry.Rings.Poly.Multivar;
 using Cc.Redberry.Rings.Poly.Univar;
@@ -20,29 +21,42 @@ namespace Cc.Redberry.Rings.Poly
         /// </summary>
         /// <param name="poly">the polynomial</param>
         /// <returns>irreducible factor decomposition</returns>
-        public static PolynomialFactorDecomposition<Poly> Factor<Poly>(Poly poly) where Poly : IPolynomial<Poly>
+        public static PolynomialFactorDecomposition<Poly> Factor<Poly>(Poly poly)
+            where Poly : IUnivariatePolynomial<Poly>
         {
-            if (poly is IUnivariatePolynomial)
-                return (PolynomialFactorDecomposition<Poly>) UnivariateFactorization.Factor((IUnivariatePolynomial)poly);
-            else if (poly is AMultivariatePolynomial<,>)
-                return (PolynomialFactorDecomposition<Poly>)MultivariateFactorization.Factor((AMultivariatePolynomial)poly);
-            else
-                throw new Exception();
+            return UnivariateFactorization.Factor<Poly>(poly);
         }
+        
+        /// <summary>
+        /// Factor polynomial.
+        /// </summary>
+        /// <param name="poly">the polynomial</param>
+        /// <returns>irreducible factor decomposition</returns>
+        public static PolynomialFactorDecomposition<Poly> Factor<Term, Poly>(Poly poly)
+            where Term : AMonomial<Term> where Poly : AMultivariatePolynomial<Term, Poly>
+        {
+            return MultivariateFactorization.Factor(poly);
+        }
+        
 
         /// <summary>
         /// Square-free factorization of polynomial.
         /// </summary>
         /// <param name="poly">the polynomial</param>
         /// <returns>irreducible square-free factor decomposition</returns>
-        public static PolynomialFactorDecomposition<Poly> FactorSquareFree<Poly>(Poly poly) where Poly : IPolynomial<Poly>
+        public static PolynomialFactorDecomposition<Poly> FactorSquareFree<Poly>(Poly poly) where Poly : IUnivariatePolynomial<Poly>
         { 
-            if (poly is IUnivariatePolynomial)
-                return (PolynomialFactorDecomposition<Poly>)UnivariateSquareFreeFactorization.SquareFreeFactorization((IUnivariatePolynomial)poly);
-            else if (poly is AMultivariatePolynomial)
-                return (PolynomialFactorDecomposition<Poly>)MultivariateSquareFreeFactorization.SquareFreeFactorization((AMultivariatePolynomial)poly);
-            else
-                throw new Exception();
+            return UnivariateSquareFreeFactorization.SquareFreeFactorization(poly);
+        }
+        
+        /// <summary>
+        /// Square-free factorization of polynomial.
+        /// </summary>
+        /// <param name="poly">the polynomial</param>
+        /// <returns>irreducible square-free factor decomposition</returns>
+        public static PolynomialFactorDecomposition<Poly> FactorSquareFree<Term, Poly>(Poly poly) where Term : AMonomial<Term> where Poly : AMultivariatePolynomial<Term, Poly>
+        { 
+            return MultivariateSquareFreeFactorization.SquareFreeFactorization<Term, Poly>(poly);
         }
 
         /// <summary>
@@ -51,14 +65,19 @@ namespace Cc.Redberry.Rings.Poly
         /// <param name="a">the polynomial</param>
         /// <param name="b">the polynomial</param>
         /// <returns>the GCD</returns>
-        public static Poly PolynomialGCD<Poly>(Poly a, Poly b) where Poly : IPolynomial<Poly>
+        public static Poly PolynomialGCD<Poly>(Poly a, Poly b) where Poly : IUnivariatePolynomial<Poly>
         {
-            if (a is IUnivariatePolynomial)
-                return (Poly)UnivariateGCD.PolynomialGCD((IUnivariatePolynomial)a, (IUnivariatePolynomial)b);
-            else if (a is AMultivariatePolynomial)
-                return (Poly)MultivariateGCD.PolynomialGCD((AMultivariatePolynomial)a, (AMultivariatePolynomial)b);
-            else
-                throw new Exception();
+            return UnivariateGCD.PolynomialGCD(a, b);
+        }
+        /// <summary>
+        /// Compute GCD of two polynomials.
+        /// </summary>
+        /// <param name="a">the polynomial</param>
+        /// <param name="b">the polynomial</param>
+        /// <returns>the GCD</returns>
+        public static Poly PolynomialGCD<Term, Poly>(Poly a, Poly b) where Term : AMonomial<Term> where Poly : AMultivariatePolynomial<Term, Poly>
+        {
+            return MultivariateGCD.PolynomialGCD(a, b);
         }
 
         /// <summary>
@@ -66,15 +85,18 @@ namespace Cc.Redberry.Rings.Poly
         /// </summary>
         /// <param name="array">the polynomials</param>
         /// <returns>the GCD</returns>
-        public static Poly PolynomialGCD<Poly>(params Poly[] array) where Poly : IPolynomial<Poly>
+        public static Poly PolynomialGCD<Poly>(params Poly[] array) where Poly : IUnivariatePolynomial<Poly>
         {
-            Poly a = array[0];
-            if (a is IUnivariatePolynomial)
-                return (Poly)UnivariateGCD.PolynomialGCD((IUnivariatePolynomial[])array);
-            else if (a is AMultivariatePolynomial)
-                return (Poly)MultivariateGCD.PolynomialGCD((AMultivariatePolynomial[])array);
-            else
-                throw new Exception();
+            return UnivariateGCD.PolynomialGCD(array);
+        }
+        /// <summary>
+        /// Compute GCD of array of polynomials.
+        /// </summary>
+        /// <param name="array">the polynomials</param>
+        /// <returns>the GCD</returns>
+        public static Poly PolynomialGCD<Term, Poly>(params Poly[] array) where Term : AMonomial<Term> where Poly : AMultivariatePolynomial<Term, Poly>
+        {
+            return MultivariateGCD.PolynomialGCD(array);
         }
 
         /// <summary>
@@ -82,15 +104,18 @@ namespace Cc.Redberry.Rings.Poly
         /// </summary>
         /// <param name="array">the polynomials</param>
         /// <returns>the GCD</returns>
-        public static Poly PolynomialGCD<Poly>(Iterable<Poly> array) where Poly : IPolynomial<Poly>
+        public static Poly PolynomialGCD<Poly>(IEnumerable<Poly> array) where Poly : IUnivariatePolynomial<Poly>
         {
-            Poly a = array.Iterator().Next();
-            if (a is IUnivariatePolynomial)
-                return (Poly)UnivariateGCD.PolynomialGCD((Iterable)array);
-            else if (a is AMultivariatePolynomial)
-                return (Poly)MultivariateGCD.PolynomialGCD((Iterable)array);
-            else
-                throw new Exception();
+            return UnivariateGCD.PolynomialGCD(array);
+        }
+        /// <summary>
+        /// Compute GCD of collection of polynomials.
+        /// </summary>
+        /// <param name="array">the polynomials</param>
+        /// <returns>the GCD</returns>
+        public static Poly PolynomialGCD<Term, Poly>(IEnumerable<Poly> array) where Term : AMonomial<Term> where Poly : AMultivariatePolynomial<Term, Poly>
+        {
+            return MultivariateGCD.PolynomialGCD(array);
         }
 
         /// <summary>
@@ -114,14 +139,14 @@ namespace Cc.Redberry.Rings.Poly
         /// <param name="a">the dividend</param>
         /// <param name="b">the divider</param>
         /// <returns>{quotient, remainder}</returns>
-        public static Poly[] DivideAndRemainder<Poly >(Poly a, Poly b) where Poly : IPolynomial<Poly>
+        public static Poly[] DivideAndRemainder<Poly>(Poly a, Poly b) where Poly : IUnivariatePolynomial<Poly>
         {
-            if (a is IUnivariatePolynomial)
-                return (Poly[])UnivariateDivision.DivideAndRemainder((IUnivariatePolynomial)a, (IUnivariatePolynomial)b, true);
-            else if (a is AMultivariatePolynomial)
-                return (Poly[])MultivariateDivision.DivideAndRemainder((AMultivariatePolynomial)a, (AMultivariatePolynomial)b);
-            else
-                throw new Exception();
+            return UnivariateDivision.DivideAndRemainder(a, b, true);
+        }
+        public static Poly[] DivideAndRemainder<Term, Poly>(Poly a, Poly b) where Term : AMonomial<Term> where Poly : AMultivariatePolynomial<Term, Poly>
+        {
+            return MultivariateDivision.DivideAndRemainder<Term, Poly>(a, b);
+        
         }
 
         /// <summary>

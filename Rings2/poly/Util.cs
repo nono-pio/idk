@@ -39,17 +39,28 @@ namespace Cc.Redberry.Rings.Poly
         /// <summary>
         /// Test whether poly is over Zp with modulus less then 2^63
         /// </summary>
+        public static bool CanConvertToZp64<E>(UnivariatePolynomial<E> poly)
+        {
+            return poly.ring is IntegersZp zp && zp.modulus.BitLength() < MachineArithmetic.MAX_SUPPORTED_MODULUS_BITS;
+        }
+
+        /// <summary>
+        /// Test whether poly is over Zp with modulus less then 2^63
+        /// </summary>
+        public static bool CanConvertToZp64<E>(MultivariatePolynomial<E> poly)
+        {
+            return poly.ring is IntegersZp zp && zp.modulus.BitLength() < MachineArithmetic.MAX_SUPPORTED_MODULUS_BITS;
+        }
+
+        /// <summary>
+        /// Test whether poly is over Zp with modulus less then 2^63
+        /// </summary>
         public static bool CanConvertToZp64<Poly>(IPolynomial<Poly> poly) where Poly : IPolynomial<Poly>
         {
-            Ring ring;
-            if (poly is UnivariatePolynomial)
-                ring = ((UnivariatePolynomial)poly).ring;
-            else if (poly is MultivariatePolynomial)
-                ring = ((MultivariatePolynomial)poly).ring;
-            else
-                return false;
-            return ring is IntegersZp && ((IntegersZp)ring).modulus.BitLength() < MachineArithmetic.MAX_SUPPORTED_MODULUS_BITS;
+            // TODO : check if poly is univariate or multivariate (use func) else return false
+            throw new NotImplementedException();
         }
+        
 
         /// <summary>
         /// Whether coefficient domain is rationals
@@ -155,7 +166,7 @@ namespace Cc.Redberry.Rings.Poly
             for (int i = 0; i <= poly.Degree(); i++)
                 if (!poly.IsZeroAt(i))
                     denominator = integralRing.Lcm(denominator, poly[i].Denominator());
-            E[] data = integralRing.CreateArray(poly.Degree() + 1);
+            E[] data = new E[poly.Degree() + 1];
             for (int i = 0; i <= poly.Degree(); i++)
             {
                 Rational<E> cf = poly[i].Multiply(denominator);

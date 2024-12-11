@@ -1,26 +1,14 @@
-using Cc.Redberry.Rings;
-using Cc.Redberry.Rings.Bigint;
+
+using System.Numerics;
 using Cc.Redberry.Rings.Io;
 using Cc.Redberry.Rings.Poly.Multivar;
-using Org.Apache.Commons.Math3.Random;
-using Java.Util;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using static Cc.Redberry.Rings.Poly.RoundingMode;
-using static Cc.Redberry.Rings.Poly.Associativity;
-using static Cc.Redberry.Rings.Poly.Operator;
-using static Cc.Redberry.Rings.Poly.TokenType;
-using static Cc.Redberry.Rings.Poly.SystemInfo;
 
 namespace Cc.Redberry.Rings.Poly
 {
     /// <summary>
     /// Multivariate quotient ring
     /// </summary>
-    public class QuotientRing<Term, Poly> : ARing<Poly>, IPolynomialRing<Poly>
+    public class QuotientRing<Term, Poly> : ARing<Poly>, IPolynomialRing<Poly> where Poly : AMultivariatePolynomial<Term, Poly> where Term : AMonomial<Term>
     {
         private static readonly long serialVersionUID = 1;
         /// <summary>
@@ -139,9 +127,9 @@ namespace Cc.Redberry.Rings.Poly
         /// <summary>
         /// factory element
         /// </summary>
-        public override BigInteger Cardinality()
+        public override BigInteger? Cardinality()
         {
-            return factory.CoefficientRingCardinality().IsZero() ? BigInteger.ZERO : ideal.Dimension() != 0 ? null : BigInteger.ValueOf(ideal.Degree()).Multiply(factory.CoefficientRingCardinality());
+            return factory.CoefficientRingCardinality().IsZero() ? BigInteger.Zero : ideal.Dimension() != 0 ? null : new BigInteger(ideal.Degree()).Multiply(factory.CoefficientRingCardinality());
         }
 
         /// <summary>
@@ -268,9 +256,9 @@ namespace Cc.Redberry.Rings.Poly
         public override Poly[] DivideAndRemainder(Poly dividend, Poly divider)
         {
             if (baseRing.IsUnit(divider))
-                return CreateArray(Multiply(dividend, baseRing.Reciprocal(divider)), GetZero());
+                return [Multiply(dividend, baseRing.Reciprocal(divider)), GetZero()];
             if (IsField())
-                return CreateArray(Multiply(dividend, Reciprocal(divider)), GetZero());
+                return [Multiply(dividend, Reciprocal(divider)), GetZero()];
             throw new NotSupportedException("Algebraic structure of ring is unknown");
         }
 
@@ -438,7 +426,7 @@ namespace Cc.Redberry.Rings.Poly
         /// <summary>
         /// factory element
         /// </summary>
-        public override int Compare(Poly o1, Poly o2)
+        public override int Compare(Poly? o1, Poly? o2)
         {
             return baseRing.Compare(o1, o2);
         }
@@ -466,7 +454,7 @@ namespace Cc.Redberry.Rings.Poly
         /// <summary>
         /// factory element
         /// </summary>
-        public override Poly RandomElement(RandomGenerator rnd)
+        public override Poly RandomElement(Random rnd)
         {
             return ValueOf(baseRing.RandomElement(rnd));
         }
@@ -480,7 +468,7 @@ namespace Cc.Redberry.Rings.Poly
         /// <summary>
         /// factory element
         /// </summary>
-        public override Poly RandomElementTree(RandomGenerator rnd)
+        public override Poly RandomElementTree(Random rnd)
         {
             return ValueOf(baseRing.RandomElementTree(rnd));
         }
@@ -510,7 +498,7 @@ namespace Cc.Redberry.Rings.Poly
         /// </summary>
         public override string ToString()
         {
-            return ToString(IStringifier.Dummy());
+            return ToString(IStringifier<Poly>.Dummy<Poly>());
         }
     }
 }

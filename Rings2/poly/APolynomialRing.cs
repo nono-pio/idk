@@ -14,7 +14,7 @@ namespace Cc.Redberry.Rings.Poly
         /// <summary>
         /// the factory polynomial
         /// </summary>
-        readonly Poly factory;
+        public readonly Poly factory;
         /// <summary>
         /// the factory polynomial
         /// </summary>
