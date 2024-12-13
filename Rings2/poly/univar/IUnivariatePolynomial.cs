@@ -1,3 +1,4 @@
+using System.Reflection;
 using Cc.Redberry.Rings.Poly.Multivar;
 
 namespace Cc.Redberry.Rings.Poly.Univar
@@ -171,9 +172,9 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// Returns a set of exponents of non-zero terms
         /// </summary>
         /// <returns>a set of exponents of non-zero terms</returns>
-        TIntHashSet Exponents()
+        HashSet<int> Exponents()
         {
-            TIntHashSet degrees = new TIntHashSet();
+            HashSet<int> degrees = new HashSet<int>();
             for (int i = Degree(); i >= 0; --i)
                 if (!IsZeroAt(i))
                     degrees.Add(i);
@@ -1182,7 +1183,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// </summary>
         UnivariatePolynomial<E> MapCoefficientsAsPolys<E>(Ring<E> ring, Func<Poly, E> mapper)
         {
-            return StreamAsPolys().Select(mapper).Collect(new PolynomialCollector(ring));
+            return new UnivariatePolynomial<E>(ring, StreamAsPolys().Select(mapper).ToArray());
         }
 
         /// <summary>
@@ -1283,7 +1284,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// </summary>
         /// <param name="value">polynomial</param>
         /// <returns>composition {@code this(oth)}</returns>
-        AMultivariatePolynomial Composition(AMultivariatePolynomial value);
+        AMultivariatePolynomial<Term, MPoly> Composition<Term, MPoly>(AMultivariatePolynomial<Term, MPoly> value);
         /// <summary>
         /// Returns the degree of this polynomial
         /// </summary>
@@ -1385,7 +1386,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <summary>
         /// Convert to multivariate polynomial
         /// </summary>
-        AMultivariatePolynomial AsMultivariate(Comparator<DegreeVector> ordering);
+        AMultivariatePolynomial<Term, MPoly> AsMultivariate<Term, MPoly>(IComparer<DegreeVector> ordering);
         /// <summary>
         /// Returns the degree of this polynomial
         /// </summary>
@@ -1490,9 +1491,9 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <summary>
         /// Convert to multivariate polynomial
         /// </summary>
-        AMultivariatePolynomial AsMultivariate()
+        AMultivariatePolynomial<Term, MPoly> AsMultivariate<Term, MPoly>()
         {
-            return AsMultivariate(MonomialOrder.DEFAULT);
+            return AsMultivariate<Term, MPoly>(MonomialOrder.DEFAULT);
         }
 
         /// <summary>

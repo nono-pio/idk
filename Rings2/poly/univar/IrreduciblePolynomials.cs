@@ -1,6 +1,7 @@
 using System.Numerics;
 using Cc.Redberry.Rings.Primes;
 using Cc.Redberry.Rings.Util;
+using static Cc.Redberry.Rings.Poly.Univar.Conversions64bit;
 
 namespace Cc.Redberry.Rings.Poly.Univar
 {
@@ -58,7 +59,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
             Poly xq = UnivariatePolynomialArithmetic.CreateMonomialMod(poly.CoefficientRingCardinality(), poly, invMod);
 
             // cached powers x^(q^i) for different i
-            TIntObjectMap<Poly> cache = new TIntObjectHashMap();
+            Dictionary<int, Poly> cache = new Dictionary<int, Poly>();
             int degree = poly.Degree();
 
             // x^(q^n)
@@ -84,7 +85,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         }
 
         /* fives xq^exponent using repeated compositions */
-        static Poly Composition<Poly>(Poly xq, int exponent, Poly poly, UnivariateDivision.InverseModMonomial<Poly> invMod, TIntObjectMap<Poly> cache) where Poly : IUnivariatePolynomial<Poly>
+        static Poly Composition<Poly>(Poly xq, int exponent, Poly poly, UnivariateDivision.InverseModMonomial<Poly> invMod, Dictionary<int, Poly> cache) where Poly : IUnivariatePolynomial<Poly>
         {
             Poly cached = cache[exponent];
             if (cached != null)
@@ -95,15 +96,15 @@ namespace Cc.Redberry.Rings.Poly.Univar
             for (;;)
             {
                 if ((exponent & 1) != 0)
-                    cache.Put(rExp += kExp, result = ModularComposition.Composition(k2p, result, poly, invMod));
+                    cache.Add(rExp += kExp, result = ModularComposition.Composition(k2p, result, poly, invMod));
                 exponent = exponent >> 1;
                 if (exponent == 0)
                 {
-                    cache.Put(rExp, result);
+                    cache.Add(rExp, result);
                     return result;
                 }
 
-                cache.Put(kExp *= 2, k2p = ModularComposition.Composition(k2p, k2p, poly, invMod));
+                cache.Add(kExp *= 2, k2p = ModularComposition.Composition(k2p, k2p, poly, invMod));
             }
         }
 

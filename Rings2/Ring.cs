@@ -830,24 +830,10 @@ namespace Cc.Redberry.Rings
         {
             return RandomElement(rnd);
         }
-
-
-        /// <summary>
-        /// If this ring has a complicated nested structure, this method guaranties that the resulting random element will
-        /// reflect ring complicated structure, i.e. the result will be roughly as complicated as the ring is
-        /// </summary>
-        /// <returns>random element from this ring</returns>
         E RandomElementTree()
         {
             return RandomElementTree(Rings.privateRandom);
         }
-
-
-        /// <summary>
-        /// Returns a random non zero element from this ring
-        /// </summary>
-        /// <param name="rnd">the source of randomness</param>
-        /// <returns>random non zero element from this ring</returns>
         E RandomNonZeroElement(Random rnd)
         {
             E el;

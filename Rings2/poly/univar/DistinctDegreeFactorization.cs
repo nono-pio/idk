@@ -1,4 +1,6 @@
 using Cc.Redberry.Rings.Poly;
+using static Cc.Redberry.Rings.Poly.Univar.UnivariatePolynomialArithmetic;
+using static Cc.Redberry.Rings.Poly.Univar.ModularComposition;
 
 namespace Cc.Redberry.Rings.Poly.Univar
 {
@@ -24,26 +26,26 @@ namespace Cc.Redberry.Rings.Poly.Univar
         {
             if (poly.IsConstant())
                 return PolynomialFactorDecomposition<UnivariatePolynomialZp64>.Unit(poly);
-            long factor = poly.Lc();
-            UnivariatePolynomialZp64 @base = poly.Clone().Monic();
-            UnivariatePolynomialZp64 polyModulus = @base.Clone();
+            var factor = poly.Lc();
+            var @base = poly.Clone().Monic();
+            var polyModulus = @base.Clone();
             if (@base.degree <= 1)
                 return PolynomialFactorDecomposition<UnivariatePolynomialZp64>.Of(@base.CreateConstant(factor), @base);
             if (@base.IsMonomial())
                 return PolynomialFactorDecomposition<UnivariatePolynomialZp64>.Of(@base.CreateConstant(factor), @base);
-            UnivariateDivision.InverseModMonomial<UnivariatePolynomialZp64> invMod = UnivariateDivision.FastDivisionPreConditioning(polyModulus);
-            UnivariatePolynomialZp64 exponent = poly.CreateMonomial(1);
-            PolynomialFactorDecomposition<UnivariatePolynomialZp64> result = PolynomialFactorDecomposition<UnivariatePolynomialZp64>.Unit(poly.CreateOne());
-            int i = 0;
+            var invMod = UnivariateDivision.FastDivisionPreConditioning(polyModulus);
+            var exponent = poly.CreateMonomial(1);
+            var result = PolynomialFactorDecomposition<UnivariatePolynomialZp64>.Unit(poly.CreateOne());
+            var i = 0;
             while (!@base.IsConstant())
             {
                 ++i;
                 exponent = PolyPowMod(exponent, poly.ring.modulus, polyModulus, invMod, false);
-                UnivariatePolynomialZp64 tmpExponent = exponent.Clone();
+                var tmpExponent = exponent.Clone();
                 tmpExponent.EnsureCapacity(1);
                 tmpExponent.data[1] = @base.Subtract(tmpExponent.data[1], 1);
                 tmpExponent.FixDegree();
-                UnivariatePolynomialZp64 gcd = PolynomialGCD(tmpExponent, @base);
+                UnivariatePolynomialZp64 gcd = UnivariateGCD.PolynomialGCD(tmpExponent, @base);
                 if (!gcd.IsConstant())
                     result.AddFactor(gcd.Monic(), i);
                 @base = UnivariateDivision.Quotient(@base, gcd, false); //can safely destroy reused base
@@ -72,27 +74,27 @@ namespace Cc.Redberry.Rings.Poly.Univar
         {
             if (poly.IsConstant())
                 return PolynomialFactorDecomposition<UnivariatePolynomialZp64>.Unit(poly);
-            long factor = poly.Lc();
-            UnivariatePolynomialZp64 @base = poly.Clone().Monic();
-            UnivariatePolynomialZp64 polyModulus = @base.Clone();
+            var factor = poly.Lc();
+            var @base = poly.Clone().Monic();
+            var polyModulus = @base.Clone();
             if (@base.degree <= 1)
                 return PolynomialFactorDecomposition<UnivariatePolynomialZp64>.Of(@base.CreateConstant(factor), @base);
             if (@base.IsMonomial())
                 return PolynomialFactorDecomposition<UnivariatePolynomialZp64>.Of(@base.CreateConstant(factor), @base);
-            UnivariateDivision.InverseModMonomial<UnivariatePolynomialZp64> invMod = UnivariateDivision.FastDivisionPreConditioning(polyModulus);
-            UnivariatePolynomialZp64 exponent = poly.CreateMonomial(1);
-            PolynomialFactorDecomposition<UnivariatePolynomialZp64> result = PolynomialFactorDecomposition<UnivariatePolynomialZp64>.Unit(poly.CreateOne());
+            var invMod = UnivariateDivision.FastDivisionPreConditioning(polyModulus);
+            var exponent = poly.CreateMonomial(1);
+            var result = PolynomialFactorDecomposition<UnivariatePolynomialZp64>.Unit(poly.CreateOne());
             List<UnivariatePolynomialZp64> xPowers = XPowers(polyModulus, invMod);
-            int i = 0;
+            var i = 0;
             while (!@base.IsConstant())
             {
                 ++i;
                 exponent = PowModulusMod(exponent, polyModulus, invMod, xPowers);
-                UnivariatePolynomialZp64 tmpExponent = exponent.Clone();
+                var tmpExponent = exponent.Clone();
                 tmpExponent.EnsureCapacity(1);
                 tmpExponent.data[1] = poly.Subtract(tmpExponent.data[1], 1);
                 tmpExponent.FixDegree();
-                UnivariatePolynomialZp64 gcd = PolynomialGCD(tmpExponent, @base);
+                UnivariatePolynomialZp64 gcd = UnivariateGCD.PolynomialGCD(tmpExponent, @base);
                 if (!gcd.IsConstant())
                     result.AddFactor(gcd.Monic(), i);
                 @base = UnivariateDivision.Quotient(@base, gcd, false); //can safely destroy reused base
@@ -120,23 +122,23 @@ namespace Cc.Redberry.Rings.Poly.Univar
         where T : IUnivariatePolynomial<T>{
 
             //generate each I_j
-            T current = poly.Clone();
-            for (int j = 1; j <= steps.m; ++j)
+            var current = poly.Clone();
+            for (var j = 1; j <= steps.m; ++j)
             {
-                T iBase = poly.CreateOne();
-                for (int i = 0; i <= steps.l - 1; ++i)
+                var iBase = poly.CreateOne();
+                for (var i = 0; i <= steps.l - 1; ++i)
                 {
-                    T tmp = steps.GiantStep(j).Clone().Subtract(steps.babySteps[i]);
+                    var tmp = steps.GiantStep(j).Clone().Subtract(steps.babySteps[i]);
                     iBase = PolyMultiplyMod(iBase, tmp, poly, steps.invMod, false);
                 }
 
-                T gcd = UnivariateGCD.PolynomialGCD(current, iBase);
+                var gcd = UnivariateGCD.PolynomialGCD(current, iBase);
                 if (gcd.IsConstant())
                     continue;
                 current = UnivariateDivision.Quotient(current, gcd, false);
-                for (int i = steps.l - 1; i >= 0; --i)
+                for (var i = steps.l - 1; i >= 0; --i)
                 {
-                    T tmp = UnivariateGCD.PolynomialGCD(gcd, steps.GiantStep(j).Clone().Subtract(steps.babySteps[i]));
+                    var tmp = UnivariateGCD.PolynomialGCD(gcd, steps.GiantStep(j).Clone().Subtract(steps.babySteps[i]));
                     if (!tmp.IsConstant())
                         result.AddFactor(tmp.Clone().Monic(), steps.l * j - i);
                     gcd = UnivariateDivision.Quotient(gcd, tmp, false);
@@ -161,9 +163,9 @@ namespace Cc.Redberry.Rings.Poly.Univar
         public static PolynomialFactorDecomposition<Poly> DistinctDegreeFactorizationShoup<Poly>(Poly poly) where Poly : IUnivariatePolynomial<Poly>
         {
             Util.EnsureOverFiniteField(poly);
-            Poly factor = poly.LcAsPoly();
+            var factor = poly.LcAsPoly();
             poly = poly.Clone().Monic();
-            PolynomialFactorDecomposition<Poly> result = PolynomialFactorDecomposition<Poly>.Unit(factor);
+            var result = PolynomialFactorDecomposition<Poly>.Unit(factor);
             DistinctDegreeFactorizationShoup(poly, new BabyGiantSteps<Poly>(poly), result);
             return result;
         }
@@ -180,18 +182,18 @@ namespace Cc.Redberry.Rings.Poly.Univar
             public readonly UnivariateDivision.InverseModMonomial<Poly> invMod;
             public BabyGiantSteps(Poly poly)
             {
-                int n = poly.Degree();
+                var n = poly.Degree();
                 l = (int)Math.Ceiling(Math.Pow(1 * n, SHOUP_BETA));
-                m = (int)Math.Ceiling(1 * n / 2 / l);
+                m = (int)Math.Ceiling(1.0 * n / 2 / l);
                 invMod = UnivariateDivision.FastDivisionPreConditioning(poly);
                 List<Poly> xPowers = XPowers(poly, invMod);
 
                 //baby steps
                 babySteps = new List<Poly>();
                 babySteps.Add(poly.CreateMonomial(1)); // <- add x
-                Poly xPower = xPowers[1]; // x^p mod poly
+                var xPower = xPowers[1]; // x^p mod poly
                 babySteps.Add(xPower); // <- add x^p mod poly
-                for (int i = 0; i <= l - 2; ++i)
+                for (var i = 0; i <= l - 2; ++i)
                     babySteps.Add(xPower = PowModulusMod(xPower, poly, invMod, xPowers));
 
                 // <- xPower = x^(p^l) mod poly
@@ -283,8 +285,8 @@ namespace Cc.Redberry.Rings.Poly.Univar
         public static PolynomialFactorDecomposition<Poly> DistinctDegreeFactorization<Poly>(Poly poly) where Poly : IUnivariatePolynomial<Poly>
         {
             Util.EnsureOverFiniteField(poly);
-            if (poly is UnivariatePolynomialZp64)
-                return (PolynomialFactorDecomposition<Poly>) DistinctDegreeFactorization((UnivariatePolynomialZp64)poly);
+            if (poly is UnivariatePolynomialZp64 p)
+                return DistinctDegreeFactorization(p) as PolynomialFactorDecomposition<Poly>;
             else
                 return DistinctDegreeFactorizationShoup(poly);
         }
@@ -296,14 +298,14 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <returns>square-free and distinct-degree decomposition of {@code poly} modulo {@code modulus}</returns>
         static PolynomialFactorDecomposition<UnivariatePolynomialZp64> DistinctDegreeFactorizationComplete(UnivariatePolynomialZp64 poly)
         {
-            PolynomialFactorDecomposition<UnivariatePolynomialZp64> squareFree = UnivariateSquareFreeFactorization.SquareFreeFactorization(poly);
-            long overallFactor = squareFree.unit.Lc();
-            PolynomialFactorDecomposition<UnivariatePolynomialZp64> result = PolynomialFactorDecomposition<UnivariatePolynomialZp64>.Unit(poly.CreateOne());
-            for (int i = squareFree.size() - 1; i >= 0; --i)
+            var squareFree = UnivariateSquareFreeFactorization.SquareFreeFactorization(poly);
+            var overallFactor = squareFree.unit.Lc();
+            var result = PolynomialFactorDecomposition<UnivariatePolynomialZp64>.Unit(poly.CreateOne());
+            for (var i = squareFree.Size() - 1; i >= 0; --i)
             {
-                PolynomialFactorDecomposition<UnivariatePolynomialZp64> dd = DistinctDegreeFactorization(squareFree[i]);
-                int nFactors = dd.Count;
-                for (int j = nFactors - 1; j >= 0; --j)
+                var dd = DistinctDegreeFactorization(squareFree[i]);
+                var nFactors = dd.Count;
+                for (var j = nFactors - 1; j >= 0; --j)
                     result.AddFactor(dd[j], squareFree.GetExponent(i));
                 overallFactor = poly.Multiply(overallFactor, dd.unit.Lc());
             }

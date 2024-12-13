@@ -15,9 +15,9 @@
         <PackageReference Include="Sdcb.Arithmetic.Mpfr.runtime.win64" Version="4.2.0.2" />
     </ItemGroup>
 
+    <!-- Project references -->
     <ItemGroup>
-      <ProjectReference Include="..\PolynomialTheory\PolynomialTheory.csproj" />
+        <ProjectReference Include="..\Polynomials\Polynomials.csproj" />
     </ItemGroup>
-    
 
 </Project>

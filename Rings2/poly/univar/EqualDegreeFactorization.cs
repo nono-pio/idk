@@ -15,20 +15,19 @@ namespace Cc.Redberry.Rings.Poly.Univar
         {
         }
 
-        static T RandomMonicPoly<T>(T factory) where T : IUnivariatePolynomial<T>
+        static UnivariatePolynomialZp64 RandomMonicPoly(UnivariatePolynomialZp64 factory)
         {
             Random rnd = PrivateRandom.GetRandom();
             int degree = Math.Max(1, rnd.Next(2 * factory.Degree() + 1));
-            if (factory is UnivariatePolynomialZp64)
-            {
-                UnivariatePolynomialZp64 fm = (UnivariatePolynomialZp64)factory;
-                return (T)RandomUnivariatePolynomials.RandomMonicPoly(degree, fm.ring.modulus, rnd);
-            }
-            else
-            {
-                UnivariatePolynomial fm = (UnivariatePolynomial)factory;
-                return (T)RandomUnivariatePolynomials.RandomMonicPoly(degree, fm.ring, rnd);
-            }
+            return RandomUnivariatePolynomials.RandomMonicPoly(degree, factory.ring.modulus, rnd);
+        }
+
+
+        static UnivariatePolynomial<E> RandomMonicPoly<E>(UnivariatePolynomial<E> factory)
+        {
+            Random rnd = PrivateRandom.GetRandom();
+            int degree = Math.Max(1, rnd.Next(2 * factory.Degree() + 1));
+            return RandomUnivariatePolynomials.RandomMonicPoly(degree, factory.ring, rnd);
         }
 
         /// <summary>

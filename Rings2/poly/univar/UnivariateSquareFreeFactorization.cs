@@ -1,6 +1,7 @@
 using System.Numerics;
 using Cc.Redberry.Rings.Bigint;
 using Cc.Redberry.Rings.Poly.Multivar;
+using static Cc.Redberry.Rings.Poly.Univar.Conversions64bit;
 
 namespace Cc.Redberry.Rings.Poly.Univar
 {

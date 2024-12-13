@@ -1,6 +1,7 @@
 ﻿
 using System.Collections;
 using System.Diagnostics;
+using System.Numerics;
 using System.Runtime;
 using System.Text;
 using System.Text.Json.Serialization;
@@ -22,11 +23,10 @@ using ConsoleApp1.Core.Simplifiers;
 using ConsoleApp1.Core.Solvers;
 using ConsoleApp1.Core.TestDir;
 using ConsoleApp1.Parser;
-using PolynomialTheory;
+using Polynomials.Primes;
 using Sdcb.Arithmetic.Mpfr;
 using Boolean = ConsoleApp1.Core.Booleans.Boolean;
 using static ConsoleApp1.Core.Alphabet;
-using Rational = PolynomialTheory.Rational;
 
 static void print(object? x)
 {
@@ -79,8 +79,17 @@ static (int, int) sqrt(int n)
 // print(Risch.HermiteReduce(f, D, 1));
 
 // Poly reduce
-var D = new Risch.DiffField(1 + x * Tan(x) + Pow(Tan(x), 2), x);
-print(D.Dtemp);
+// var D = new Risch.DiffField(1 + x * Tan(x) + Pow(Tan(x), 2), x);
+// print(D.Dtemp);
+//
+// var f = D.ExprToRMPoly(D.f).ToUniPolynomialOfRational(1);
+// print(Risch.PolynomialReduce(f.Numerator, D, 1));
 
-var f = D.ExprToRMPoly(D.f).ToUniPolynomialOfRational(1);
-print(Risch.PolynomialReduce(f.Numerator, D, 1));
+var z = Polynomials.Integers.Z;
+print(z.FactorSquareFree(120));
+BigInteger n = int.MaxValue;
+for (int i1 = 0; i1 < 10; i1++)
+{
+    print(n);
+    n = BigPrimes.NextPrime(n+1);
+}

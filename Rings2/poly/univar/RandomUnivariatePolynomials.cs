@@ -130,7 +130,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <param name="ring">the ring</param>
         /// <param name="rnd">random source</param>
         /// <returns>random polynomial of specified {@code degree} with elements bounded by {@code bound} (by absolute value)</returns>
-        public static UnivariatePolynomial<E> RandomPoly<E>(int degree, Ring<E> ring, RandomGenerator rnd)
+        public static UnivariatePolynomial<E> RandomPoly<E>(int degree, Ring<E> ring, Random rnd)
         {
             return UnivariatePolynomial<E>.CreateUnsafe(ring, RandomArray(degree, ring, rnd));
         }
@@ -217,7 +217,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <returns>array of length {@code degree + 1} with elements from specified ring</returns>
         public static E[] RandomArray<E>(int degree, Ring<E> ring, Func<Random, E> method, Random rnd)
         {
-            E[] data = ring.CreateArray(degree + 1);
+            E[] data = new E[degree + 1];
             for (int i = 0; i <= degree; ++i)
                 data[i] = method(rnd);
             while (ring.IsZero(data[degree]))

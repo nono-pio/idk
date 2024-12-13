@@ -42,140 +42,41 @@ namespace Cc.Redberry.Rings.Poly.Univar
             /// </summary>
             /// <returns>initial Z[x] polynomial modulo lifted modulus</returns>
             PolyZp PolyMod();
-            /// <summary>
-            /// Returns initial Z[x] polynomial modulo lifted modulus
-            /// </summary>
-            /// <returns>initial Z[x] polynomial modulo lifted modulus</returns>
+
             /// <summary>
             /// Returns first factor lifted
             /// </summary>
             /// <returns>first factor lifted</returns>
             PolyZp AFactorMod();
-            /// <summary>
-            /// Returns initial Z[x] polynomial modulo lifted modulus
-            /// </summary>
-            /// <returns>initial Z[x] polynomial modulo lifted modulus</returns>
-            /// <summary>
-            /// Returns first factor lifted
-            /// </summary>
-            /// <returns>first factor lifted</returns>
+           
             /// <summary>
             /// Returns second factor lifted
             /// </summary>
             /// <returns>second factor lifted</returns>
             PolyZp BFactorMod();
-            /// <summary>
-            /// Returns initial Z[x] polynomial modulo lifted modulus
-            /// </summary>
-            /// <returns>initial Z[x] polynomial modulo lifted modulus</returns>
-            /// <summary>
-            /// Returns first factor lifted
-            /// </summary>
-            /// <returns>first factor lifted</returns>
-            /// <summary>
-            /// Returns second factor lifted
-            /// </summary>
-            /// <returns>second factor lifted</returns>
+           
             /// <summary>
             /// Returns first co-factor lifted
             /// </summary>
             /// <returns>first co-factor lifted</returns>
             PolyZp ACoFactorMod();
-            /// <summary>
-            /// Returns initial Z[x] polynomial modulo lifted modulus
-            /// </summary>
-            /// <returns>initial Z[x] polynomial modulo lifted modulus</returns>
-            /// <summary>
-            /// Returns first factor lifted
-            /// </summary>
-            /// <returns>first factor lifted</returns>
-            /// <summary>
-            /// Returns second factor lifted
-            /// </summary>
-            /// <returns>second factor lifted</returns>
-            /// <summary>
-            /// Returns first co-factor lifted
-            /// </summary>
-            /// <returns>first co-factor lifted</returns>
+           
             /// <summary>
             /// Returns second co-factor lifted
             /// </summary>
             /// <returns>second co-factor lifted</returns>
             PolyZp BCoFactorMod();
-            /// <summary>
-            /// Returns initial Z[x] polynomial modulo lifted modulus
-            /// </summary>
-            /// <returns>initial Z[x] polynomial modulo lifted modulus</returns>
-            /// <summary>
-            /// Returns first factor lifted
-            /// </summary>
-            /// <returns>first factor lifted</returns>
-            /// <summary>
-            /// Returns second factor lifted
-            /// </summary>
-            /// <returns>second factor lifted</returns>
-            /// <summary>
-            /// Returns first co-factor lifted
-            /// </summary>
-            /// <returns>first co-factor lifted</returns>
-            /// <summary>
-            /// Returns second co-factor lifted
-            /// </summary>
-            /// <returns>second co-factor lifted</returns>
+          
             /// <summary>
             /// Performs single lift step.
             /// </summary>
             void Lift();
-            /// <summary>
-            /// Returns initial Z[x] polynomial modulo lifted modulus
-            /// </summary>
-            /// <returns>initial Z[x] polynomial modulo lifted modulus</returns>
-            /// <summary>
-            /// Returns first factor lifted
-            /// </summary>
-            /// <returns>first factor lifted</returns>
-            /// <summary>
-            /// Returns second factor lifted
-            /// </summary>
-            /// <returns>second factor lifted</returns>
-            /// <summary>
-            /// Returns first co-factor lifted
-            /// </summary>
-            /// <returns>first co-factor lifted</returns>
-            /// <summary>
-            /// Returns second co-factor lifted
-            /// </summary>
-            /// <returns>second co-factor lifted</returns>
-            /// <summary>
-            /// Performs single lift step.
-            /// </summary>
+           
             /// <summary>
             /// Performs single lift step but don't lift co-factors (xgcd coefficients).
             /// </summary>
             void LiftLast();
-            /// <summary>
-            /// Returns initial Z[x] polynomial modulo lifted modulus
-            /// </summary>
-            /// <returns>initial Z[x] polynomial modulo lifted modulus</returns>
-            /// <summary>
-            /// Returns first factor lifted
-            /// </summary>
-            /// <returns>first factor lifted</returns>
-            /// <summary>
-            /// Returns second factor lifted
-            /// </summary>
-            /// <returns>second factor lifted</returns>
-            /// <summary>
-            /// Returns first co-factor lifted
-            /// </summary>
-            /// <returns>first co-factor lifted</returns>
-            /// <summary>
-            /// Returns second co-factor lifted
-            /// </summary>
-            /// <returns>second co-factor lifted</returns>
-            /// <summary>
-            /// Performs single lift step.
-            /// </summary>
+           
             /// <summary>
             /// Performs single lift step but don't lift co-factors (xgcd coefficients).
             /// </summary>
@@ -190,11 +91,6 @@ namespace Cc.Redberry.Rings.Poly.Univar
                 LiftLast();
             }
 
-   
-            /// <summary>
-            /// Lifts {@code nIterations} times.
-            /// </summary>
-            /// <param name="nIterations">number of lift iterations</param>
             void LiftWithCoFactors(int nIterations)
             {
                 for (int i = 0; i < nIterations; ++i)
@@ -617,25 +513,18 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <summary>
         /// data used in Hensel lifting *
         /// </summary>
-        public abstract class QuadraticLiftAbstract<PolyZp> : LiftableQuintet<PolyZp>
+        public abstract class QuadraticLiftAbstract<PolyZp> : LiftableQuintet<PolyZp> 
         {
             /// <summary>
             /// Two factors of the initial Z[x] poly *
             /// </summary>
             protected PolyZp aFactor, bFactor;
-            /// <summary>
-            /// Two factors of the initial Z[x] poly *
-            /// </summary>
+
             /// <summary>
             /// xgcd coefficients *
             /// </summary>
             protected PolyZp aCoFactor, bCoFactor;
-            /// <summary>
-            /// Two factors of the initial Z[x] poly *
-            /// </summary>
-            /// <summary>
-            /// xgcd coefficients *
-            /// </summary>
+  
             public QuadraticLiftAbstract(PolyZp aFactor, PolyZp bFactor, PolyZp aCoFactor, PolyZp bCoFactor)
             {
                 this.aFactor = aFactor;
@@ -644,87 +533,41 @@ namespace Cc.Redberry.Rings.Poly.Univar
                 this.bCoFactor = bCoFactor;
             }
 
-            /// <summary>
-            /// Two factors of the initial Z[x] poly *
-            /// </summary>
-            /// <summary>
-            /// xgcd coefficients *
-            /// </summary>
             public virtual PolyZp AFactorMod()
             {
                 return aFactor;
             }
 
-            /// <summary>
-            /// Two factors of the initial Z[x] poly *
-            /// </summary>
-            /// <summary>
-            /// xgcd coefficients *
-            /// </summary>
+
             public virtual PolyZp BFactorMod()
             {
                 return bFactor;
             }
 
-            /// <summary>
-            /// Two factors of the initial Z[x] poly *
-            /// </summary>
-            /// <summary>
-            /// xgcd coefficients *
-            /// </summary>
             public virtual PolyZp ACoFactorMod()
             {
                 return aCoFactor;
             }
 
-            /// <summary>
-            /// Two factors of the initial Z[x] poly *
-            /// </summary>
-            /// <summary>
-            /// xgcd coefficients *
-            /// </summary>
             public virtual PolyZp BCoFactorMod()
             {
                 return bCoFactor;
             }
 
-            /// <summary>
-            /// Two factors of the initial Z[x] poly *
-            /// </summary>
-            /// <summary>
-            /// xgcd coefficients *
-            /// </summary>
             public abstract void Prepare();
-            /// <summary>
-            /// Two factors of the initial Z[x] poly *
-            /// </summary>
-            /// <summary>
-            /// xgcd coefficients *
-            /// </summary>
+
             public void Lift()
             {
                 Prepare();
                 HenselStep0(PolyMod());
             }
 
-            /// <summary>
-            /// Two factors of the initial Z[x] poly *
-            /// </summary>
-            /// <summary>
-            /// xgcd coefficients *
-            /// </summary>
             public void LiftLast()
             {
                 Prepare();
                 HenselLastStep0(PolyMod());
             }
 
-            /// <summary>
-            /// Two factors of the initial Z[x] poly *
-            /// </summary>
-            /// <summary>
-            /// xgcd coefficients *
-            /// </summary>
             private void HenselStep0(PolyZp baseMod)
             {
                 PolyZp e = baseMod.Subtract(aFactor.Clone().Multiply(bFactor));

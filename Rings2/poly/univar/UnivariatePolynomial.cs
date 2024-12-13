@@ -30,7 +30,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// </summary>
         public int degree;
 
-        private UnivariatePolynomial(Ring<E> ring, E[] data, int degree)
+        public UnivariatePolynomial(Ring<E> ring, E[] data, int degree)
         {
             this.ring = ring;
             this.data = data;
@@ -41,7 +41,7 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// <summary>
         /// points to the last non zero element in the data array
         /// </summary>
-        private UnivariatePolynomial(Ring<E> ring, E[] data) : this(ring, data, data.Length - 1)
+        public UnivariatePolynomial(Ring<E> ring, E[] data) : this(ring, data, data.Length - 1)
         {
             FixDegree();
         }

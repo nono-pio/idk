@@ -17,26 +17,30 @@ namespace Cc.Redberry.Rings.Poly.Univar
         /// whether to switch to 64 bit integer arithmetic when possible (false in tests)
         /// </summary>
         static bool SWITCH_TO_64bit = true;
-        static bool CanConvertToZp64<E>(IUnivariatePolynomial<E> poly) where E : IUnivariatePolynomial<E>
+
+        public static bool CanConvertToZp64<E>(IUnivariatePolynomial<E> poly) where E : IUnivariatePolynomial<E>
         {
             return SWITCH_TO_64bit && Util.CanConvertToZp64(poly);
         }
 
-        static UnivariatePolynomialZp64 AsOverZp64<T>(T poly) where T : IUnivariatePolynomial<T>
+        public static UnivariatePolynomialZp64 AsOverZp64<E>(IUnivariatePolynomial<E> poly)where E : IUnivariatePolynomial<E>
         {
-            return UnivariatePolynomial<T>.AsOverZp64((UnivariatePolynomial<BigInteger>) poly);
+            if (poly is not UnivariatePolynomial<BigInteger> bigPoly)
+                throw new ArgumentException();
+            
+            return UnivariatePolynomial<BigInteger>.AsOverZp64(bigPoly);
         }
 
-        public static T Convert<T>(UnivariatePolynomialZp64 p) where T : IUnivariatePolynomial<T>
+        public static UnivariatePolynomial<BigInteger> Convert(UnivariatePolynomialZp64 p)
         {
-            return (T)p.ToBigPoly();
+            return p.ToBigPoly();
         }
 
-        public static T[] Convert<T>(T factory, UnivariatePolynomialZp64[] p) where T : IUnivariatePolynomial<T>
+        public static UnivariatePolynomial<BigInteger>[] Convert(UnivariatePolynomial<BigInteger> factory, UnivariatePolynomialZp64[] p)
         {
-            T[] r = factory.CreateArray(p.Length);
+            var r = new UnivariatePolynomial<BigInteger>[p.Length];
             for (int i = 0; i < p.Length; i++)
-                r[i] = Convert<T>(p[i]);
+                r[i] = Convert(p[i]);
             return r;
         }
     }
