@@ -53,13 +53,13 @@ public abstract class Ring<E> : IComparer<E>
     public abstract BigInteger? Cardinality();
     public abstract BigInteger Characteristic();
 
-    public bool IsPerfectPower()
+    public virtual bool IsPerfectPower()
     {
         var p = PerfectPowerDecomposition[1];
         return p is not null && !p.Value.IsOne;
     }
 
-    public BigInteger? PerfectPowerBase() => PerfectPowerDecomposition[0];
+    public virtual BigInteger? PerfectPowerBase() => PerfectPowerDecomposition[0];
     public BigInteger? PerfectPowerExponent() => PerfectPowerDecomposition[1];
 
     public abstract E Add(E a, E b);
@@ -85,9 +85,9 @@ public abstract class Ring<E> : IComparer<E>
     public abstract E Subtract(E a, E b);
     public abstract E Multiply(E a, E b);
 
-    public E Multiply(E a, long b)
+    public virtual E MultiplyLong(E a, long b)
     {
-        return Multiply(a, ValueOf(b));
+        return Multiply(a, ValueOfLong(b));
     }
 
     public E Multiply(params E[] elements)
@@ -238,7 +238,7 @@ public abstract class Ring<E> : IComparer<E>
         if (IsZero(b))
             return [a, GetOne(), GetOne()];
         if (IsField())
-            return [GetOne(), DivideExact(Reciprocal(a), ValueOf(2)), DivideExact(Reciprocal(b), ValueOf(2))];
+            return [GetOne(), DivideExact(Reciprocal(a), ValueOfLong(2)), DivideExact(Reciprocal(b), ValueOfLong(2))];
 
         E s = GetZero(), old_s = GetOne();
         E t = GetOne(), old_t = GetZero();
@@ -375,17 +375,17 @@ public abstract class Ring<E> : IComparer<E>
     }
 
 
-    public abstract E ValueOf(long val);
+    public abstract E ValueOfLong(long val);
 
 
     public abstract E ValueOfBigInteger(BigInteger val);
 
 
-    public E[] ValueOf(long[] elements)
+    public E[] ValueOfLong(long[] elements)
     {
         var array = new E[elements.Length];
         for (var i = 0; i < elements.Length; i++)
-            array[i] = ValueOf(elements[i]);
+            array[i] = ValueOfLong(elements[i]);
         return array;
     }
 
@@ -459,11 +459,11 @@ public abstract class Ring<E> : IComparer<E>
     }
 
 
-    public E Factorial(long num)
+    public virtual E Factorial(long num)
     {
         var result = GetOne();
         for (var i = 2; i <= num; ++i)
-            result = MultiplyMutable(result, ValueOf(i));
+            result = MultiplyMutable(result, ValueOfLong(i));
         return result;
     }
 
@@ -471,31 +471,31 @@ public abstract class Ring<E> : IComparer<E>
     public abstract IEnumerator<E> Iterator();
 
 
-    public E RandomElement()
+    public virtual E RandomElement()
     {
         return RandomElement(Rings.privateRandom);
     }
 
 
-    public E RandomElement(Random rnd)
+    public virtual E RandomElement(Random rnd)
     {
-        return ValueOf(rnd.NextInt64());
+        return ValueOfLong(rnd.NextInt64());
     }
 
 
-    public E RandomElementTree(Random rnd)
+    public virtual E RandomElementTree(Random rnd)
     {
         return RandomElement(rnd);
     }
 
 
-    public E RandomElementTree()
+    public virtual E RandomElementTree()
     {
         return RandomElementTree(Rings.privateRandom);
     }
 
 
-    public E RandomNonZeroElement(Random rnd)
+    public virtual E RandomNonZeroElement(Random rnd)
     {
         E el;
         do

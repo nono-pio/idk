@@ -26,5 +26,4 @@ public class Nullable<T>
     
     public static Nullable<T> Null => new Nullable<T>();
     public static implicit operator Nullable<T>(T value) => new Nullable<T>(value);
-    public static implicit operator T(Nullable<T> value) => value.IsNull ? throw new NullReferenceException(): value.Value;
 }

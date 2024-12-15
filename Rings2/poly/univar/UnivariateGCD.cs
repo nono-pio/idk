@@ -5,8 +5,7 @@ using Cc.Redberry.Rings.Poly.Multivar;
 using Cc.Redberry.Rings.Primes;
 using Cc.Redberry.Rings.Util;
 
-namespace Cc.Redberry.Rings.Poly.Univar
-{
+namespace Cc.Redberry.Rings.Poly.Univar;
     /// <summary>
     /// Univariate polynomial GCD.
     /// </summary>

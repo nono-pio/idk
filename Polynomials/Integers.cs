@@ -8,7 +8,7 @@ public class Integers : Ring<BigInteger>
 {
     public static readonly Integers Z = new Integers();
 
-    private Integers()
+    public Integers()
     {
     }
 
@@ -127,7 +127,7 @@ public class Integers : Ring<BigInteger>
     }
 
 
-    public override BigInteger ValueOf(long val)
+    public override BigInteger ValueOfLong(long val)
     {
         return new BigInteger(val);
     }

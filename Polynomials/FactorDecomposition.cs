@@ -10,7 +10,7 @@ public class FactorDecomposition<E>
     public E Unit;
     public List<E> Factors;
     public List<int> Exponents;
-    
+
     public FactorDecomposition(Ring<E> ring, E unit, List<E> factors, List<int> exponents)
     {
         Ring = ring;
@@ -22,7 +22,7 @@ public class FactorDecomposition<E>
         if (factors.Count != exponents.Count)
             throw new ArgumentException();
     }
-    
+
     public FactorDecomposition(Ring<E> ring, E unit)
     {
         Ring = ring;
@@ -32,10 +32,10 @@ public class FactorDecomposition<E>
         if (!ring.IsUnit(unit))
             throw new ArgumentException();
     }
-    
-    
+
+
     public bool IsTrivial() => Factors.Count == 1;
-    
+
     public virtual FactorDecomposition<E> SetUnit(E unit)
     {
         if (!IsUnit(unit))
@@ -43,18 +43,18 @@ public class FactorDecomposition<E>
         this.Unit = unit;
         return this;
     }
-    
+
     public virtual bool IsUnit(E element)
     {
         return Ring.IsUnit(element);
     }
-    
+
     public virtual void RaiseExponents(int val)
     {
         for (var i = Factors.Count - 1; i >= 0; --i)
             Exponents[i] *= val;
     }
-    
+
     public virtual FactorDecomposition<E> AddUnit(E unit)
     {
         if (!IsUnit(unit))
@@ -65,7 +65,6 @@ public class FactorDecomposition<E>
 
     public virtual FactorDecomposition<E> AddUnit(E unit, int exponent)
     {
-
         if (!IsUnit(unit))
             throw new ArgumentException();
         if (Ring.IsOne(unit))
@@ -73,7 +72,7 @@ public class FactorDecomposition<E>
         this.Unit = Ring.Multiply(this.Unit, Ring.Pow(unit, exponent));
         return this;
     }
-    
+
     public virtual FactorDecomposition<E> AddFactor(E factor, int exponent)
     {
         if (IsUnit(factor))
@@ -90,19 +89,19 @@ public class FactorDecomposition<E>
         Exponents.AddRange(other.Exponents);
         return this;
     }
-    
+
     public virtual FactorDecomposition<E> AddNonUnitFactor(E factor, int exponent)
     {
         Factors.Add(factor);
         Exponents.Add(exponent);
         return this;
     }
-    
+
     public virtual E MultiplyIgnoreExponents()
     {
         return Multiply0(true);
     }
-    
+
     private E Multiply0(bool ignoreExponents)
     {
         var r = Ring.Copy(Unit);
@@ -114,7 +113,7 @@ public class FactorDecomposition<E>
 
         return r;
     }
-    
+
     public virtual FactorDecomposition<E> Canonical()
     {
         var wr = Factors.ToArray();
@@ -128,7 +127,7 @@ public class FactorDecomposition<E>
     }
 
     public static FactorDecomposition<E> Empty(Ring<E> ring) => new FactorDecomposition<E>(ring, ring.GetOne());
-    
+
     public static FactorDecomposition<E> Of(Ring<E> ring, E unit, List<E> factors, List<int> exponents)
     {
         if (factors.Count != exponents.Count)
@@ -138,7 +137,7 @@ public class FactorDecomposition<E>
             r.AddFactor(factors[i], exponents[i]);
         return r;
     }
-    
+
     public static FactorDecomposition<E> Of(Ring<E> ring, IEnumerable<E> factors)
     {
         Dictionary<E, int> map = new Dictionary<E, int>();
@@ -147,6 +146,7 @@ public class FactorDecomposition<E>
             if (!map.TryAdd(e, 1))
                 map[e]++;
         }
+
         List<E> l = new List<E>();
         List<int> ex = new List<int>();
         map.ForEach(ab =>
@@ -156,12 +156,17 @@ public class FactorDecomposition<E>
         });
         return Of(ring, ring.GetOne(), l, ex);
     }
-    
+
+    public static FactorDecomposition<E> Of(Ring<E> ring, E factor)
+    {
+        return Of(ring, ring.GetOne(), [factor], [1]);
+    }
+
     public virtual FactorDecomposition<R> MapTo<R>(Ring<R> othRing, Func<E, R> mapper)
     {
         return FactorDecomposition<R>.Of(othRing, mapper(Unit), Factors.Select(mapper).ToList(), Exponents);
     }
-    
+
     public override string ToString()
     {
         var sb = new StringBuilder();
@@ -176,6 +181,7 @@ public class FactorDecomposition<E>
                 sb.Append(Exponents[i]);
             }
         }
+
         return sb.ToString();
     }
 }

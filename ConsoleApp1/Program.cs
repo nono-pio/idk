@@ -23,7 +23,10 @@ using ConsoleApp1.Core.Simplifiers;
 using ConsoleApp1.Core.Solvers;
 using ConsoleApp1.Core.TestDir;
 using ConsoleApp1.Parser;
+using Polynomials;
+using Polynomials.Poly.Univar;
 using Polynomials.Primes;
+using Polynomials.Utils;
 using Sdcb.Arithmetic.Mpfr;
 using Boolean = ConsoleApp1.Core.Booleans.Boolean;
 using static ConsoleApp1.Core.Alphabet;
@@ -85,11 +88,10 @@ static (int, int) sqrt(int n)
 // var f = D.ExprToRMPoly(D.f).ToUniPolynomialOfRational(1);
 // print(Risch.PolynomialReduce(f.Numerator, D, 1));
 
-var z = Polynomials.Integers.Z;
-print(z.FactorSquareFree(120));
-BigInteger n = int.MaxValue;
-for (int i1 = 0; i1 < 10; i1++)
-{
-    print(n);
-    n = BigPrimes.NextPrime(n+1);
-}
+var polyA = new UnivariatePolynomial<long>(Rings.Z64, [1, 2, 1]);
+var polyB = new UnivariatePolynomial<long>(Rings.Z64, [1, 3, 3, 1]);
+
+print(polyA);
+print(polyB);
+var gcd = UnivariateGCD.PolynomialGCD(polyA, polyB);
+print("Quotient: " + gcd);

@@ -99,6 +99,25 @@ public static class BigIntegerUtils
 
         return null;
     }
+    
+    public static BigInteger RandomBigIntMinMax(BigInteger min, BigInteger max, Random rnd)
+    {
+        if (min.CompareTo(max) > 0)
+            throw new Exception();
+        var delta = max - min;
+        return min + RandomBigIntBound(delta, rnd);
+    }
+    
+    public static BigInteger RandomBigIntBound(BigInteger bound, Random rnd)
+    {
+        BigInteger r;
+        do
+        {
+            r = RandomBigInt((int) bound.GetBitLength(), rnd);
+        }
+        while (r.CompareTo(bound) >= 0);
+        return r;
+    }
 
     public static BigInteger RandomBigInt(int bitLength, Random rnd)
     {
@@ -115,7 +134,7 @@ public static class BigIntegerUtils
         bytes[bytes.Length - 1] &= (byte)(0xFF >> extraBits);
 
         // Convertir en BigInteger
-        return new BigInteger(bytes);
+        return new BigInteger(bytes, isUnsigned: true);
     }
 
     /* Extension */
@@ -199,7 +218,7 @@ public static class BigIntegerUtils
             result = result - 1;
 
         // Looking for the next large prime
-        int searchLen = getPrimeSearchLen((int)result.GetBitLength());
+        int searchLen = GetPrimeSearchLen((int)result.GetBitLength());
 
         while (true) {
             BitSieve searchSieve = new BitSieve(result, searchLen);
@@ -211,7 +230,7 @@ public static class BigIntegerUtils
     }
     
     private static readonly int PRIME_SEARCH_BIT_LENGTH_LIMIT = 500000000;
-    private static int getPrimeSearchLen(int bitLength) {
+    private static int GetPrimeSearchLen(int bitLength) {
         if (bitLength > PRIME_SEARCH_BIT_LENGTH_LIMIT + 1) {
             throw new ArithmeticException("Prime search implementation restriction on bitLength");
         }
@@ -229,7 +248,7 @@ public static class BigIntegerUtils
         if (sizeInBits < 100) {
             rounds = 50;
             rounds = n < rounds ? n : rounds;
-            return passesMillerRabin(value, rounds, random);
+            return PassesMillerRabin(value, rounds, random);
         }
 
         if (sizeInBits < 256) {
@@ -245,14 +264,14 @@ public static class BigIntegerUtils
         }
         rounds = n < rounds ? n : rounds;
 
-        return passesMillerRabin(value, rounds, random) && passesLucasLehmer(value);
+        return PassesMillerRabin(value, rounds, random) && PassesLucasLehmer(value);
     }
     
-    private static bool passesMillerRabin(BigInteger value, int iterations, Random? rnd) {
+    private static bool PassesMillerRabin(BigInteger value, int iterations, Random? rnd) {
         // Find a and m such that m is odd and this == 1 + 2**a * m
         BigInteger thisMinusOne = value - 1;
         BigInteger m = thisMinusOne;
-        int a = getLowestSetBit(m);
+        int a = GetLowestSetBit(m);
         m = m >> a;
 
         // Do the tests
@@ -277,7 +296,7 @@ public static class BigIntegerUtils
         return true;
     }
     
-    public static int getLowestSetBit(BigInteger value)
+    public static int GetLowestSetBit(BigInteger value)
     {
 
         if (value.IsZero)
@@ -298,24 +317,24 @@ public static class BigIntegerUtils
         return lsb;
     }
     
-    private static bool passesLucasLehmer(BigInteger value) {
+    private static bool PassesLucasLehmer(BigInteger value) {
         BigInteger thisPlusOne = value + 1;
 
         // Step 1
         int d = 5;
-        while (jacobiSymbol(d, value) != -1) {
+        while (JacobiSymbol(d, value) != -1) {
             // 5, -7, 9, -11, ...
             d = (d < 0) ? Math.Abs(d) + 2 : -(d + 2);
         }
 
         // Step 2
-        BigInteger u = lucasLehmerSequence(d, thisPlusOne, value);
+        BigInteger u = LucasLehmerSequence(d, thisPlusOne, value);
 
         // Step 3
         return (u % value) == 0;
     }
     
-    private static int jacobiSymbol(int p, BigInteger n) {
+    private static int JacobiSymbol(int p, BigInteger n) {
         if (p == 0)
             return 0;
 
@@ -372,7 +391,7 @@ public static class BigIntegerUtils
         return 0;
     }
     
-    private static BigInteger lucasLehmerSequence(int z, BigInteger k, BigInteger n) {
+    private static BigInteger LucasLehmerSequence(int z, BigInteger k, BigInteger n) {
         BigInteger d = new BigInteger(z);
         BigInteger u = 1;
         BigInteger u2;
@@ -406,5 +425,58 @@ public static class BigIntegerUtils
             }
         }
         return u;
+    }
+    
+    public static BigInteger SqrtCeil(BigInteger val)
+    {
+        if (val.Sign < 0)
+            throw new ArgumentException("Negative argument.");
+        if (val.IsZero || val.IsOne)
+            return val;
+        BigInteger y;
+
+        // starting with y = x / 2 avoids magnitude issues with x squared
+        for (y = val>>1; y.CompareTo(val / y) > 0; y = ((val / y) + y)>>1)
+        {
+        }
+
+        if (val.CompareTo(y * y) == 0)
+            return y;
+        else
+            return y + 1;
+    }
+    
+    public static BigInteger ModInverse(BigInteger value, BigInteger mod)
+    {
+        if (mod <= 0)
+            throw new ArgumentException("Le modulo doit être strictement positif.", nameof(mod));
+
+        BigInteger originalMod = mod;
+        BigInteger x0 = 0, x1 = 1;
+
+        while (value > 1)
+        {
+            if (mod == 0)
+                throw new ArithmeticException("L'inverse modulaire n'existe pas.");
+
+            // Quotient
+            BigInteger q = value / mod;
+
+            // Reste
+            BigInteger temp = mod;
+            mod = value % mod;
+            value = temp;
+
+            // Mise à jour des coefficients
+            temp = x0;
+            x0 = x1 - q * x0;
+            x1 = temp;
+        }
+
+        // Assurez-vous que x1 est positif
+        if (x1 < 0)
+            x1 += originalMod;
+
+        return x1;
     }
 }
