@@ -34,7 +34,7 @@ public static class Conversions64bit
         UnivariatePolynomialZp64[] p)
     {
         var r = new UnivariatePolynomial<BigInteger>[p.Length];
-        for (int i = 0; i < p.Length; i++)
+        for (var i = 0; i < p.Length; i++)
             r[i] = Convert(p[i]);
         return r;
     }
@@ -43,7 +43,7 @@ public static class Conversions64bit
         UnivariatePolynomialZp64[] p)
     {
         var r = new UnivariatePolynomial<T>[p.Length];
-        for (int i = 0; i < p.Length; i++)
+        for (var i = 0; i < p.Length; i++)
             r[i] = Convert<T>(p[i]);
         return r;
     }

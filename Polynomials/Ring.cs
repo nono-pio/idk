@@ -263,7 +263,7 @@ public abstract class Ring<E> : IComparer<E>
     }
 
 
-    public E[] FirstBezoutCoefficient(E a, E b)
+    public virtual E[] FirstBezoutCoefficient(E a, E b)
     {
         E s = GetZero(), old_s = GetOne();
         E r = b, old_r = a;

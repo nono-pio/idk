@@ -1,4 +1,6 @@
-﻿namespace Polynomials.Poly;
+﻿using Polynomials.Poly.Univar;
+
+namespace Polynomials.Poly;
 
 public abstract class Polynomial<Poly> where Poly : Polynomial<Poly> 
 {
@@ -18,4 +20,6 @@ public abstract class Polynomial<Poly> where Poly : Polynomial<Poly>
     public abstract Poly CreateOne();
     public abstract Poly Square();
     public abstract Poly DivideExact(Poly other);
+
+    public abstract PolynomialRing<Poly> AsRing();
 }

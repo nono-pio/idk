@@ -19,7 +19,7 @@ public static class UnivariateResultants
     public static E Discriminant<E>(UnivariatePolynomial<E> a)
     {
         Ring<E> ring = a.ring;
-        E disc = ring.DivideExact(Resultant(a, a.Derivative()), a.Lc());
+        var disc = ring.DivideExact(Resultant(a, a.Derivative()), a.Lc());
         return ((a.degree * (a.degree - 1) / 2) % 2 == 1) ? ring.Negate(disc) : disc;
     }
 
@@ -39,7 +39,7 @@ public static class UnivariateResultants
         // if (Util.IsOverRationals(a))
         //     return (E)ResultantInQ((UnivariatePolynomial)a, (UnivariatePolynomial)b);
         if (a.IsOverZ())
-            return ModularResultant(a.AsZ(), b.AsZ()) as E;
+            return (E)(object)ModularResultant(a.AsZ(), b.AsZ());
         // if (Util.IsOverSimpleNumberField(a))
         //     return (E)ModularResultantInNumberField((UnivariatePolynomial)a, (UnivariatePolynomial)b);
         // if (Util.IsOverRingOfIntegersOfSimpleNumberField(a))
@@ -84,7 +84,7 @@ public static class UnivariateResultants
         E ac = a.Content(), bc = b.Content();
         a = a.Clone().DivideExact(ac);
         b = b.Clone().DivideExact(bc);
-        E r = algorithm(a, b);
+        var r = algorithm(a, b);
         Ring<E> ring = a.ring;
         r = ring.Multiply(r, ring.Pow(ac, b.degree));
         r = ring.Multiply(r, ring.Pow(bc, a.degree));
@@ -100,23 +100,23 @@ public static class UnivariateResultants
     private static BigInteger ModularResultant0(UnivariatePolynomial<BigInteger> a, UnivariatePolynomial<BigInteger> b)
     {
         // bound on the value of resultant
-        BigInteger bound = (BigInteger.Pow(UnivariatePolynomial<BigInteger>.Norm2(a), b.degree)
-            * BigInteger.Pow(UnivariatePolynomial<BigInteger>.Norm2(b), a.degree)) << 1;
+        var bound = (BigInteger.Pow(UnivariatePolynomial<BigInteger>.Norm2(a), b.degree)
+                     * BigInteger.Pow(UnivariatePolynomial<BigInteger>.Norm2(b), a.degree)) << 1;
 
         // aggregated CRT modulus
         BigInteger? bModulus = null;
         BigInteger? resultant = null;
-        PrimesIterator primes = new PrimesIterator(1 << 25);
+        var primes = new PrimesIterator(1 << 25);
         while (true)
         {
-            long prime = primes.Take();
-            BigInteger bPrime = new BigInteger(prime);
-            IntegersZp zpRing = Rings.Zp(prime);
+            var prime = primes.Take();
+            var bPrime = new BigInteger(prime);
+            var zpRing = Rings.Zp(prime);
             UnivariatePolynomialZp64 aMod = AsOverZp64(a.SetRing(zpRing)), bMod = AsOverZp64(b.SetRing(zpRing));
             if (aMod.degree != a.degree || bMod.degree != b.degree)
                 continue; // unlucky prime
-            long resultantMod = ClassicalPRS(aMod, bMod).Resultant();
-            BigInteger bResultantMod = new BigInteger(resultantMod);
+            var resultantMod = ClassicalPRS(aMod, bMod).Resultant();
+            var bResultantMod = new BigInteger(resultantMod);
             if (bModulus is null)
             {
                 bModulus = bPrime;
@@ -380,9 +380,9 @@ public static class UnivariateResultants
 
         private UnivariatePolynomial<E> Step()
         {
-            int i = remainders.Count;
+            var i = remainders.Count;
             UnivariatePolynomial<E> dividend = remainders[i - 2].Clone(), divider = remainders[i - 1];
-            E alpha = NextAlpha();
+            var alpha = NextAlpha();
             dividend = dividend.Multiply(alpha);
             UnivariatePolynomial<E>[] qd = UnivariateDivision.DivideAndRemainder(dividend, divider, false);
             if (qd == null)
@@ -392,7 +392,7 @@ public static class UnivariateResultants
 
                 // remainder is zero => termination of the algorithm
                 return remainder;
-            E beta = NextBeta(remainder);
+            var beta = NextBeta(remainder);
             remainder = remainder.DivideExact(beta);
             alphas.Add(alpha);
             betas.Add(beta);
@@ -431,12 +431,12 @@ public static class UnivariateResultants
                     return;
                 List<E> subresultants = NonZeroSubresultants();
                 if (swap)
-                    for (int i = 0; i < subresultants.Count; i++)
+                    for (var i = 0; i < subresultants.Count; i++)
                         subresultants[i] = ring.Negate(subresultants[i]);
                 this.subresultants.EnsureCapacity(remainders[1].degree);
-                for (int i = 0; i <= remainders[1].degree; ++i)
+                for (var i = 0; i <= remainders[1].degree; ++i)
                     this.subresultants.Add(ring.GetZero());
-                for (int i = 1; i < remainders.Count; i++)
+                for (var i = 1; i < remainders.Count; i++)
                     this.subresultants[remainders[i].degree] = subresultants[i - 1];
             }
         }
@@ -447,15 +447,15 @@ public static class UnivariateResultants
             List<E> subresultants = [];
 
             // largest subresultant
-            E subresultant = ring.Pow(remainders[1].Lc(), DegreeDiff(0));
+            var subresultant = ring.Pow(remainders[1].Lc(), DegreeDiff(0));
             subresultants.Add(subresultant);
-            for (int i = 1; i < (remainders.Count - 1); ++i)
+            for (var i = 1; i < (remainders.Count - 1); ++i)
             {
                 // computing (i+1)-th degree subresultant
-                int di = DegreeDiff(i);
-                E rho = ring.Pow(ring.Multiply(remainders[i + 1].Lc(), remainders[i].Lc()), di);
-                E den = ring.GetOne();
-                for (int j = 1; j <= i; ++j)
+                var di = DegreeDiff(i);
+                var rho = ring.Pow(ring.Multiply(remainders[i + 1].Lc(), remainders[i].Lc()), di);
+                var den = ring.GetOne();
+                for (var j = 1; j <= i; ++j)
                 {
                     rho = ring.Multiply(rho, ring.Pow(betas[j - 1], di));
                     den = ring.Multiply(den, ring.Pow(alphas[j - 1], di));
@@ -508,13 +508,13 @@ public static class UnivariateResultants
             List<E> subresultants = [];
 
             // largest subresultant
-            E subresultant = ring.Pow(remainders[1].Lc(), DegreeDiff(0));
+            var subresultant = ring.Pow(remainders[1].Lc(), DegreeDiff(0));
             subresultants.Add(subresultant);
-            for (int i = 1; i < (remainders.Count - 1); ++i)
+            for (var i = 1; i < (remainders.Count - 1); ++i)
             {
                 // computing (i+1)-th degree subresultant
-                int di = DegreeDiff(i);
-                E rho = ring.Pow(ring.Multiply(remainders[i + 1].Lc(), remainders[i].Lc()), di);
+                var di = DegreeDiff(i);
+                var rho = ring.Pow(ring.Multiply(remainders[i + 1].Lc(), remainders[i].Lc()), di);
                 if ((di % 2) == 1 && (remainders[0].degree - remainders[i + 1].degree + i + 1) % 2 == 1)
                     rho = ring.Negate(rho);
                 subresultant = ring.Multiply(subresultant, rho);
@@ -533,9 +533,9 @@ public static class UnivariateResultants
 
         public override E NextAlpha()
         {
-            int i = remainders.Count;
-            E lc = remainders[i - 1].Lc();
-            int deg = remainders[i - 2].degree - remainders[i - 1].degree;
+            var i = remainders.Count;
+            var lc = remainders[i - 1].Lc();
+            var deg = remainders[i - 2].degree - remainders[i - 1].degree;
             return ring.Pow(lc, deg + 1);
         }
 
@@ -562,14 +562,14 @@ public static class UnivariateResultants
             List<E> subresultants = [];
 
             // largest subresultant
-            E subresultant = ring.Pow(remainders[1].Lc(), DegreeDiff(0));
+            var subresultant = ring.Pow(remainders[1].Lc(), DegreeDiff(0));
             subresultants.Add(subresultant);
-            for (int i = 1; i < (remainders.Count - 1); ++i)
+            for (var i = 1; i < (remainders.Count - 1); ++i)
             {
                 // computing (i+1)-th degree subresultant
-                int di = DegreeDiff(i);
-                E rho = ring.Pow(remainders[i + 1].Lc(), di);
-                E den = ring.Pow(remainders[i].Lc(), DegreeDiff(i - 1) * di);
+                var di = DegreeDiff(i);
+                var rho = ring.Pow(remainders[i + 1].Lc(), di);
+                var den = ring.Pow(remainders[i].Lc(), DegreeDiff(i - 1) * di);
                 subresultant = ring.Multiply(subresultant, rho);
                 subresultant = ring.DivideExact(subresultant, den);
                 if ((di % 2) == 1 && (remainders[0].degree - remainders[i + 1].degree + i + 1) % 2 == 1)
@@ -606,17 +606,17 @@ public static class UnivariateResultants
 
         public override E NextBeta(UnivariatePolynomial<E> remainder)
         {
-            int i = remainders.Count;
+            var i = remainders.Count;
             UnivariatePolynomial<E> prem = remainders[i - 2];
-            E lc = i == 2 ? ring.GetOne() : prem.Lc();
+            var lc = i == 2 ? ring.GetOne() : prem.Lc();
             E psi;
             if (i == 2)
                 psi = ring.GetNegativeOne();
             else
             {
-                E prevPsi = psis[psis.Count - 1];
-                int deg = remainders[i - 3].degree - remainders[i - 2].degree;
-                E f = ring.Pow(ring.Negate(lc), deg);
+                var prevPsi = psis[psis.Count - 1];
+                var deg = remainders[i - 3].degree - remainders[i - 2].degree;
+                var f = ring.Pow(ring.Negate(lc), deg);
                 if (1 - deg < 0)
                     psi = ring.DivideExact(f, ring.Pow(prevPsi, deg - 1));
                 else
@@ -629,8 +629,8 @@ public static class UnivariateResultants
 
         private int Eij(int i, int j)
         {
-            int e = DegreeDiff(j - 1);
-            for (int k = j; k <= i; ++k)
+            var e = DegreeDiff(j - 1);
+            for (var k = j; k <= i; ++k)
                 e *= 1 - DegreeDiff(k);
             return e;
         }
@@ -640,17 +640,17 @@ public static class UnivariateResultants
             List<E> subresultants = [];
 
             // largest subresultant
-            E subresultant = ring.Pow(remainders[1].Lc(), DegreeDiff(0));
+            var subresultant = ring.Pow(remainders[1].Lc(), DegreeDiff(0));
             subresultants.Add(subresultant);
-            for (int i = 1; i < (remainders.Count - 1); ++i)
+            for (var i = 1; i < (remainders.Count - 1); ++i)
             {
                 // computing (i+1)-th degree subresultant
-                int di = DegreeDiff(i);
-                E rho = ring.Pow(remainders[i + 1].Lc(), di);
-                E den = ring.GetOne();
-                for (int k = 1; k <= i; ++k)
+                var di = DegreeDiff(i);
+                var rho = ring.Pow(remainders[i + 1].Lc(), di);
+                var den = ring.GetOne();
+                for (var k = 1; k <= i; ++k)
                 {
-                    int deg = -di * Eij(i - 1, k);
+                    var deg = -di * Eij(i - 1, k);
                     if (deg >= 0)
                         rho = ring.Multiply(rho, ring.Pow(remainders[k].Lc(), deg));
                     else
@@ -696,7 +696,7 @@ public static class UnivariateResultants
 
         private UnivariatePolynomialZp64 Step()
         {
-            int i = remainders.Count;
+            var i = remainders.Count;
             UnivariatePolynomialZp64 dividend = remainders[i - 2].Clone(), divider = remainders[i - 1];
             UnivariatePolynomialZp64[] qd = UnivariateDivision.DivideAndRemainder(dividend, divider, false);
             if (qd == null)
@@ -735,14 +735,14 @@ public static class UnivariateResultants
             {
                 if (this.subresultants.Count != 0)
                     return;
-                List<long> subresultants = NonZeroSubresultants();
+                var subresultants = NonZeroSubresultants();
                 if (swap)
-                    for (int i = 0; i < subresultants.Count; ++i)
+                    for (var i = 0; i < subresultants.Count; ++i)
                         subresultants[i] = ring.Negate(subresultants[i]);
                 this.subresultants.EnsureCapacity(remainders[1].degree);
-                for (int i = 0; i <= remainders[1].degree; ++i)
+                for (var i = 0; i <= remainders[1].degree; ++i)
                     this.subresultants.Add(0);
-                for (int i = 1; i < remainders.Count; i++)
+                for (var i = 1; i < remainders.Count; i++)
                     this.subresultants[remainders[i].degree] = subresultants[i - 1];
             }
         }
@@ -750,16 +750,16 @@ public static class UnivariateResultants
 
         List<long> NonZeroSubresultants()
         {
-            List<long> subresultants = new List<long>();
+            var subresultants = new List<long>();
 
             // largest subresultant
-            long subresultant = ring.PowMod(remainders[1].Lc(), DegreeDiff(0));
+            var subresultant = ring.PowMod(remainders[1].Lc(), DegreeDiff(0));
             subresultants.Add(subresultant);
-            for (int i = 1; i < (remainders.Count - 1); ++i)
+            for (var i = 1; i < (remainders.Count - 1); ++i)
             {
                 // computing (i+1)-th degree subresultant
-                int di = DegreeDiff(i);
-                long rho = ring.PowMod(ring.Multiply(remainders[i + 1].Lc(), remainders[i].Lc()), di);
+                var di = DegreeDiff(i);
+                var rho = ring.PowMod(ring.Multiply(remainders[i + 1].Lc(), remainders[i].Lc()), di);
                 if ((di % 2) == 1 && (remainders[0].degree - remainders[i + 1].degree + i + 1) % 2 == 1)
                     rho = ring.Negate(rho);
                 subresultant = ring.Multiply(subresultant, rho);

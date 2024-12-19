@@ -44,7 +44,7 @@ public static class UnivariateSquareFreeFactorization
             return PolynomialFactorDecomposition<UnivariatePolynomial<E>>.Of(poly);
 
         // x^2 + x^3 -> x^2 (1 + x)
-        int exponent = 0;
+        var exponent = 0;
         while (exponent <= poly.Degree() && poly.IsZeroAt(exponent))
         {
             ++exponent;
@@ -87,7 +87,7 @@ public static class UnivariateSquareFreeFactorization
 
         var quot = UnivariateDivision.DivideAndRemainder(poly, gcd, false)[0];
         var dQuot = UnivariateDivision.DivideAndRemainder(derivative, gcd, false)[0]; // safely destroy (cloned) derivative (not used further)
-        int i = 0;
+        var i = 0;
         while (!quot.IsConstant())
         {
             ++i;
@@ -132,7 +132,7 @@ public static class UnivariateSquareFreeFactorization
         }
 
         var quot = UnivariateDivision.DivideAndRemainder(poly, gcd, false)[0]; // safely destroy (cloned) poly
-        int i = 0;
+        var i = 0;
         while (true)
         {
             ++i;
@@ -166,7 +166,7 @@ public static class UnivariateSquareFreeFactorization
         PolynomialFactorDecomposition<UnivariatePolynomial<E>> factorization;
 
         // x^2 + x^3 -> x^2 (1 + x)
-        int exponent = 0;
+        var exponent = 0;
         while (exponent <= poly.Degree() && poly.IsZeroAt(exponent))
         {
             ++exponent;
@@ -201,7 +201,7 @@ public static class UnivariateSquareFreeFactorization
             var quot = UnivariateDivision.DivideAndRemainder(poly, gcd,
                 false)[0]; // can safely destroy poly (not used further)
             var result = PolynomialFactorDecomposition<UnivariatePolynomial<E>>.Of(poly.CreateOne());
-            int i = 0;
+            var i = 0;
 
             //if (!quot.isConstant())
             while (true)
@@ -248,9 +248,9 @@ public static class UnivariateSquareFreeFactorization
 
         // p^(m -1) used for computing p-th root of elements
         var inverseFactor = ring.Cardinality().Value / ring.Characteristic();
-        int modulus = (int)poly.CoefficientRingCharacteristic();
+        var modulus = (int)poly.CoefficientRingCharacteristic();
         E[] rootData = poly.ring.CreateZeroesArray(poly.degree / modulus + 1);
-        for (int i = poly.degree; i >= 0; --i)
+        for (var i = poly.degree; i >= 0; --i)
             if (!poly.ring.IsZero(poly.data[i]))
             {
                 rootData[i / modulus] = ring.Pow(poly.data[i], inverseFactor); // pRoot(poly.data[i], ring);

@@ -1,4 +1,5 @@
 ﻿using System.Numerics;
+using Polynomials.Poly;
 
 namespace Polynomials;
 
@@ -10,8 +11,8 @@ public static class Rings
     public static IntegersZp64 Zp64(long modulus) => new IntegersZp64(modulus);
     public static IntegersZp Zp(BigInteger modulus) => new IntegersZp(modulus);
 
-    public static Ring<Poly> PolynomialRing<Poly>(Poly unit)
+    public static Ring<Poly> PolynomialRing<Poly>(Poly unit) where Poly : Polynomial<Poly>
     {
-        throw new NotImplementedException();
+        return unit.AsRing();
     }
 }

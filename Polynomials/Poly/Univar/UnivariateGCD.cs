@@ -152,7 +152,7 @@ public static class UnivariateGCD
     public static UnivariatePolynomial<E> PolynomialGCD<E>(params UnivariatePolynomial<E>[] polynomials)
     {
         var gcd = polynomials[0];
-        for (int i = 1; i < polynomials.Length; i++)
+        for (var i = 1; i < polynomials.Length; i++)
             gcd = PolynomialGCD(gcd, polynomials[i]);
         return gcd;
     }
@@ -364,7 +364,7 @@ public static class UnivariateGCD
     private static UnivariatePolynomial<E>[,] HMatrixPlain<E>(UnivariatePolynomial<E> a, UnivariatePolynomial<E> b, int degreeToReduce, bool reduce)
     {
         var hMatrix = UnitMatrix(a);
-        int goal = a.Degree() - degreeToReduce;
+        var goal = a.Degree() - degreeToReduce;
         if (b.Degree() <= goal)
             return hMatrix;
         var tmpA = a;
@@ -401,14 +401,14 @@ public static class UnivariateGCD
     {
         if (b.IsZero() || b.Degree() <= a.Degree() - d)
             return UnitMatrix(a);
-        int n = a.Degree() - 2 * d + 2;
+        var n = a.Degree() - 2 * d + 2;
         if (n < 0)
             n = 0;
         var a1 = a.Clone().ShiftLeft(n);
         var b1 = b.Clone().ShiftLeft(n);
         if (d <= SWITCH_TO_HALF_GCD_H_MATRIX_DEGREE)
             return HMatrixPlain(a1, b1, d, false);
-        int dR = (d + 1) / 2;
+        var dR = (d + 1) / 2;
         if (dR < 1)
             dR = 1;
         if (dR >= d)
@@ -417,7 +417,7 @@ public static class UnivariateGCD
         var col = ColumnMultiply(hMatrixR, a1, b1);
         a1 = col[0];
         b1 = col[1];
-        int dL = b1.Degree() - a.Degree() + n + d;
+        var dL = b1.Degree() - a.Degree() + n + d;
         if (b1.IsZero() || dL <= 0)
             return hMatrixR;
         var qd = UnivariateDivision.DivideAndRemainder(a1, b1, false);
@@ -442,10 +442,10 @@ public static class UnivariateGCD
     {
         if (b.IsZero() || b.Degree() <= a.Degree() - d)
             return UnitMatrix(a);
-        int aDegree = a.Degree();
+        var aDegree = a.Degree();
         if (d <= SWITCH_TO_HALF_GCD_H_MATRIX_DEGREE)
             return HMatrixPlain(a, b, d, true);
-        int dL = (d + 1) / 2;
+        var dL = (d + 1) / 2;
         if (dL < 1)
             dL = 1;
         if (dL >= d)
@@ -454,7 +454,7 @@ public static class UnivariateGCD
         var col = ColumnMultiply(hMatrixR, a, b);
         a.SetAndDestroy(col[0]);
         b.SetAndDestroy(col[1]);
-        int dR = b.Degree() - aDegree + d;
+        var dR = b.Degree() - aDegree + d;
         if (b.IsZero() || dR <= 0)
             return hMatrixR;
         var qd = UnivariateDivision.DivideAndRemainder(a, b, true);
@@ -479,11 +479,11 @@ public static class UnivariateGCD
 
     static UnivariatePolynomial<E>[] ReduceHalfGCD<E>(UnivariatePolynomial<E> a, UnivariatePolynomial<E> b)
     {
-        int d = (a.Degree() + 1) / 2;
+        var d = (a.Degree() + 1) / 2;
         if (b.IsZero() || b.Degree() <= a.Degree() - d)
             return [a, b];
-        int aDegree = a.Degree();
-        int d1 = (d + 1) / 2;
+        var aDegree = a.Degree();
+        var d1 = (d + 1) / 2;
         if (d1 < 1)
             d1 = 1;
         if (d1 >= d)
@@ -492,7 +492,7 @@ public static class UnivariateGCD
         var col = ColumnMultiply(hMatrix, a, b);
         a = col[0];
         b = col[1];
-        int d2 = b.Degree() - aDegree + d;
+        var d2 = b.Degree() - aDegree + d;
         if (b.IsZero() || d2 <= 0)
             return [a, b];
         var remainder = UnivariateDivision.Remainder(a, b, true);
@@ -543,7 +543,7 @@ public static class UnivariateGCD
         if (a.degree < b.degree)
             return ModularGCD(b, a);
         long aContent = a.Content(), bContent = b.Content();
-        long contentGCD = MachineArithmetic.Gcd(aContent, bContent);
+        var contentGCD = MachineArithmetic.Gcd(aContent, bContent);
         if (a.IsConstant() || b.IsConstant())
             return a.CreateConstant(contentGCD);
         a = a.Clone().DivideOrNull(aContent) ?? throw new UnreachableException();
@@ -554,19 +554,19 @@ public static class UnivariateGCD
 
     private static UnivariatePolynomialZ64 ModularGCD0(UnivariatePolynomialZ64 a, UnivariatePolynomialZ64 b)
     {
-        long lcGCD = MachineArithmetic.Gcd(a.Lc(), b.Lc());
+        var lcGCD = MachineArithmetic.Gcd(a.Lc(), b.Lc());
         double bound = Math.Max(UnivariatePolynomialZ64.MignotteBound(a), UnivariatePolynomialZ64.MignotteBound(b)) * lcGCD;
         UnivariatePolynomialZ64? previousBase = null;
         UnivariatePolynomialZp64? @base = null;
         long basePrime = -1;
-        PrimesIterator primesLoop = new PrimesIterator(3);
+        var primesLoop = new PrimesIterator(3);
         while (true)
         {
-            long prime = primesLoop.Take();
+            var prime = primesLoop.Take();
             if (a.Lc() % prime == 0 || b.Lc() % prime == 0)
                 continue;
             UnivariatePolynomialZp64 aMod = a.Modulus(prime), bMod = b.Modulus(prime);
-            UnivariatePolynomialZp64 modularGCD = HalfGCD(aMod, bMod);
+            var modularGCD = HalfGCD(aMod, bMod);
 
             //clone if necessary
             if (modularGCD == aMod || modularGCD == bMod)
@@ -592,15 +592,15 @@ public static class UnivariateGCD
                 continue;
 
             //lifting
-            long newBasePrime = MachineArithmetic.SafeMultiply(basePrime, prime);
-            long monicFactor = modularGCD.ring.Multiply(MachineArithmetic.ModInverse(modularGCD.Lc(), prime),
+            var newBasePrime = MachineArithmetic.SafeMultiply(basePrime, prime);
+            var monicFactor = modularGCD.ring.Multiply(MachineArithmetic.ModInverse(modularGCD.Lc(), prime),
                 ((IntegersZp64) modularGCD.ring).Modulus(lcGCD));
-            ChineseRemainders.ChineseRemaindersMagicZp64 magic = ChineseRemainders.CreateMagic(basePrime, prime);
-            for (int i = 0; i <= @base.degree; ++i)
+            var magic = ChineseRemainders.CreateMagic(basePrime, prime);
+            for (var i = 0; i <= @base.degree; ++i)
             {
                 //this is monic modularGCD multiplied by lcGCD mod prime
                 //long oth = mod(safeMultiply(mod(safeMultiply(modularGCD.data[i], monicFactor), prime), lcMod), prime);
-                long oth = modularGCD.ring.Multiply(modularGCD.data[i], monicFactor);
+                var oth = modularGCD.ring.Multiply(modularGCD.data[i], monicFactor);
                 @base.data[i] = ChineseRemainders.ChineseRemainder(magic, @base.data[i], oth);
             }
 
@@ -608,7 +608,7 @@ public static class UnivariateGCD
             basePrime = newBasePrime;
 
             //either trigger Mignotte's bound or two trials didn't change the result, probably we are done
-            UnivariatePolynomialZ64 candidate = UnivariatePolynomial<long>.AsPolyZ64Symmetric(@base).PrimitivePart() ?? throw new Exception();
+            var candidate = UnivariatePolynomial<long>.AsPolyZ64Symmetric(@base).PrimitivePart() ?? throw new Exception();
             if ((double)basePrime >= 2 * bound || (previousBase != null && candidate.Equals(previousBase)))
             {
                 previousBase = candidate;
@@ -639,7 +639,7 @@ public static class UnivariateGCD
         if (a.degree < b.degree)
             return ModularGCD(b, a);
         BigInteger aContent = a.Content(), bContent = b.Content();
-        BigInteger contentGCD = BigInteger.GreatestCommonDivisor(aContent, bContent);
+        var contentGCD = BigInteger.GreatestCommonDivisor(aContent, bContent);
         if (a.IsConstant() || b.IsConstant())
             return a.CreateConstant(contentGCD);
         a = a.Clone().DivideOrNull(aContent) ?? throw new UnreachableException();
@@ -651,10 +651,10 @@ public static class UnivariateGCD
     private static UnivariatePolynomial<BigInteger> ModularGCD0(UnivariatePolynomial<BigInteger> a,
         UnivariatePolynomial<BigInteger> b)
     {
-        BigInteger lcGCD = BigInteger.GreatestCommonDivisor(a.Lc(), b.Lc());
-        BigInteger bound2 = (BigInteger
-            .Max(UnivariatePolynomial<BigInteger>.MignotteBound(a), UnivariatePolynomial<BigInteger>.MignotteBound(b))
-            * lcGCD) << 1;
+        var lcGCD = BigInteger.GreatestCommonDivisor(a.Lc(), b.Lc());
+        var bound2 = (BigInteger
+                          .Max(UnivariatePolynomial<BigInteger>.MignotteBound(a), UnivariatePolynomial<BigInteger>.MignotteBound(b))
+                      * lcGCD) << 1;
         if (bound2.IsLong() && a.MaxAbsCoefficient().IsLong() && b.MaxAbsCoefficient().IsLong())
             try
             {
@@ -669,14 +669,14 @@ public static class UnivariateGCD
         UnivariatePolynomialZ64? previousBase = null;
         UnivariatePolynomialZp64? @base = null;
         long basePrime = -1;
-        PrimesIterator primesLoop = new PrimesIterator(1031);
+        var primesLoop = new PrimesIterator(1031);
         while (true)
         {
-            long prime = primesLoop.Take();
-            BigInteger bPrime = new BigInteger(prime);
+            var prime = primesLoop.Take();
+            var bPrime = new BigInteger(prime);
             if ((a.Lc() % bPrime).IsZero || (b.Lc() % bPrime).IsZero)
                 continue;
-            IntegersZp bPrimeDomain = new IntegersZp(bPrime);
+            var bPrimeDomain = new IntegersZp(bPrime);
             UnivariatePolynomialZp64 aMod = AsOverZp64(a.SetRing(bPrimeDomain)),
                 bMod = AsOverZp64(b.SetRing(bPrimeDomain));
             var modularGCD = HalfGCD(aMod, bMod);
@@ -693,7 +693,7 @@ public static class UnivariateGCD
             if (@base == null || @base.degree > modularGCD.degree)
             {
                 //make base monic and multiply lcGCD
-                long lLcGCD = (long)(lcGCD % bPrime);
+                var lLcGCD = (long)(lcGCD % bPrime);
                 modularGCD.Monic(lLcGCD);
                 @base = (UnivariatePolynomialZp64?)modularGCD;
                 basePrime = prime;
@@ -709,15 +709,15 @@ public static class UnivariateGCD
                 break;
 
             //lifting
-            long newBasePrime = basePrime * prime;
-            long monicFactor = modularGCD.ring.Multiply(MachineArithmetic.ModInverse(modularGCD.Lc(), prime),
+            var newBasePrime = basePrime * prime;
+            var monicFactor = modularGCD.ring.Multiply(MachineArithmetic.ModInverse(modularGCD.Lc(), prime),
                 (long)(lcGCD % bPrime));
-            ChineseRemainders.ChineseRemaindersMagicZp64 magic = ChineseRemainders.CreateMagic(basePrime, prime);
-            for (int i = 0; i <= @base.degree; ++i)
+            var magic = ChineseRemainders.CreateMagic(basePrime, prime);
+            for (var i = 0; i <= @base.degree; ++i)
             {
                 //this is monic modularGCD multiplied by lcGCD mod prime
                 //long oth = mod(safeMultiply(mod(safeMultiply(modularGCD.data[i], monicFactor), prime), lcMod), prime);
-                long oth = modularGCD.ring.Multiply(modularGCD.data[i], monicFactor);
+                var oth = modularGCD.ring.Multiply(modularGCD.data[i], monicFactor);
                 @base.data[i] = ChineseRemainders.ChineseRemainder(magic, @base.data[i], oth);
             }
 
@@ -730,7 +730,7 @@ public static class UnivariateGCD
                 (previousBase != null && Equals(lCandidate, previousBase)))
             {
                 previousBase = lCandidate;
-                UnivariatePolynomial<BigInteger> candidate = lCandidate.ToBigPoly();
+                var candidate = lCandidate.ToBigPoly();
 
                 //first check b since b is less degree
                 var div = UnivariateDivision.DivideAndRemainder(b, candidate, true);
@@ -749,17 +749,17 @@ public static class UnivariateGCD
         //continue lifting with multi-precision integers
         UnivariatePolynomial<BigInteger>? bPreviousBase = null;
         var bBase = @base.ToBigPoly();
-        BigInteger bBasePrime = new BigInteger(basePrime);
+        var bBasePrime = new BigInteger(basePrime);
         while (true)
         {
-            long prime = primesLoop.Take();
-            BigInteger bPrime = new BigInteger(prime);
+            var prime = primesLoop.Take();
+            var bPrime = new BigInteger(prime);
             if ((a.Lc() % bPrime).IsZero || (b.Lc() % bPrime).IsZero)
                 continue;
-            IntegersZp bPrimeDomain = new IntegersZp(bPrime);
+            var bPrimeDomain = new IntegersZp(bPrime);
             UnivariatePolynomialZp64 aMod = AsOverZp64(a.SetRing(bPrimeDomain)),
                 bMod = AsOverZp64(b.SetRing(bPrimeDomain));
-            UnivariatePolynomialZp64 modularGCD = HalfGCD(aMod, bMod);
+            var modularGCD = HalfGCD(aMod, bMod);
 
             //clone if necessary
             if (modularGCD == aMod || modularGCD == bMod)
@@ -773,7 +773,7 @@ public static class UnivariateGCD
             if (bBase == null || bBase.degree > modularGCD.degree)
             {
                 //make base monic and multiply lcGCD
-                long lLcGCD = (long)(lcGCD % bPrime);
+                var lLcGCD = (long)(lcGCD % bPrime);
                 modularGCD.Monic(lLcGCD);
                 bBase = modularGCD.ToBigPoly();
                 bBasePrime = bPrime;
@@ -786,21 +786,21 @@ public static class UnivariateGCD
                 continue;
 
             //lifting
-            BigInteger newBasePrime = bBasePrime * bPrime;
-            long monicFactor = modularGCD.ring.Multiply(MachineArithmetic.ModInverse(modularGCD.Lc(), prime),
+            var newBasePrime = bBasePrime * bPrime;
+            var monicFactor = modularGCD.ring.Multiply(MachineArithmetic.ModInverse(modularGCD.Lc(), prime),
                 (long)(lcGCD % bPrime));
-            ChineseRemainders.ChineseRemaindersMagic<BigInteger> magic = ChineseRemainders.CreateMagic(Rings.Z, bBasePrime, bPrime);
-            for (int i = 0; i <= bBase.degree; ++i)
+            var magic = ChineseRemainders.CreateMagic(Rings.Z, bBasePrime, bPrime);
+            for (var i = 0; i <= bBase.degree; ++i)
             {
                 //this is monic modularGCD multiplied by lcGCD mod prime
                 //long oth = mod(safeMultiply(mod(safeMultiply(modularGCD.data[i], monicFactor), prime), lcMod), prime);
-                long oth = modularGCD.ring.Multiply(modularGCD.data[i], monicFactor);
+                var oth = modularGCD.ring.Multiply(modularGCD.data[i], monicFactor);
                 bBase.data[i] = ChineseRemainders.ChineseRemainder(Rings.Z, magic, bBase.data[i], new BigInteger(oth));
             }
 
             bBase = bBase.SetRingUnsafe(new IntegersZp(newBasePrime));
             bBasePrime = newBasePrime;
-            UnivariatePolynomial<BigInteger> candidate =
+            var candidate =
                 UnivariatePolynomial<BigInteger>.AsPolyZSymmetric(bBase).PrimitivePart() ?? throw new UnreachableException();
 
             //either trigger Mignotte's bound or two trials didn't change the result, probably we are done
@@ -1187,7 +1187,7 @@ public static class UnivariateGCD
         UnivariatePolynomial<E>[] xgcd)
     {
         Ring<E> ring = xgcd[0].ring;
-        foreach (E subs in (E[])[ring.GetZero(), ring.GetOne()])
+        foreach (var subs in (E[])[ring.GetZero(), ring.GetOne()])
         {
             E ea = a.Evaluate(subs),
                 es = xgcd[1].Evaluate(subs),
@@ -1315,7 +1315,7 @@ public static class UnivariateGCD
 
     static BigInteger IntegerPrimitivePart(UnivariatePolynomial<UnivariatePolynomial<BigInteger>> p)
     {
-        BigInteger gcd = Rings.Z.Gcd(p.Stream().SelectMany(cp => cp.Stream()).Order().ToList());
+        var gcd = Rings.Z.Gcd(p.Stream().SelectMany(cp => cp.Stream()).Order().ToList());
         p.Stream().ForEach((cf) => cf.DivideExact(gcd));
         return gcd;
     }

@@ -102,6 +102,12 @@ public class FactorDecomposition<E>
         return Multiply0(true);
     }
 
+    public E Multiply(bool ignoreExponents = false)
+    {
+        return Multiply0(ignoreExponents);
+    }
+
+
     private E Multiply0(bool ignoreExponents)
     {
         var r = Ring.Copy(Unit);
@@ -174,7 +180,11 @@ public class FactorDecomposition<E>
         for (int i = 0; i < Factors.Count; i++)
         {
             sb.Append(" * ");
-            sb.Append(Factors[i]);
+            var fac = Factors[i].ToString();
+            if (fac.Contains('+') || fac.Contains('-'))
+                sb.Append("(").Append(fac).Append(")");
+            else
+                sb.Append(Factors[i]);
             if (Exponents[i] > 1)
             {
                 sb.Append("^");

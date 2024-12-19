@@ -156,8 +156,7 @@ public sealed class PolynomialFactorDecomposition<Poly> : FactorDecomposition<Po
             new List<int>(Exponents));
     }
 
-
-    public static PolynomialFactorDecomposition<Poly> Unit(Poly unit)
+    public static PolynomialFactorDecomposition<Poly> FromUnit(Poly unit)
     {
         if (!unit.IsConstant())
             throw new ArgumentException();
@@ -206,4 +205,7 @@ public sealed class PolynomialFactorDecomposition<Poly> : FactorDecomposition<Po
         });
         return Of(polynomials[0].CreateOne(), l, _e);
     }
+
+    public int Count => Factors.Count;
+    public Poly this[int i] => Factors[i];
 }

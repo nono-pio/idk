@@ -75,8 +75,8 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
 
     public static UnivariatePolynomialZ64 AsOverZ64(UnivariatePolynomial<BigInteger> poly)
     {
-        long[] data = new long[poly.degree + 1];
-        for (int i = 0; i < data.Length; i++)
+        var data = new long[poly.degree + 1];
+        for (var i = 0; i < data.Length; i++)
             data[i] = (long)poly.data[i];
         return new UnivariatePolynomialZ64(Rings.Z64, data);
     }
@@ -86,8 +86,8 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
     {
         if (poly.ring is not IntegersZp zp)
             throw new ArgumentException("Not a modular ring: " + poly.ring);
-        long[] data = new long[poly.degree + 1];
-        for (int i = 0; i < data.Length; i++)
+        var data = new long[poly.degree + 1];
+        for (var i = 0; i < data.Length; i++)
             data[i] = ((long)poly.data[i]);
         return UnivariatePolynomialZp64.Create(Rings.Zp64((long)zp.modulus), data);
     }
@@ -95,9 +95,9 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
 
     public static UnivariatePolynomialZp64 AsOverZp64(UnivariatePolynomial<BigInteger> poly, IntegersZp64 ring)
     {
-        long modulus = ring.modulus;
-        long[] data = new long[poly.degree + 1];
-        for (int i = 0; i < data.Length; i++)
+        var modulus = ring.modulus;
+        var data = new long[poly.degree + 1];
+        for (var i = 0; i < data.Length; i++)
             data[i] = (long)(poly.data[i] % modulus);
         return UnivariatePolynomialZp64.Create(ring, data);
     }
@@ -125,15 +125,21 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
     //             poly.data[i].Denominator().Mod(modulus).LongValueExact());
     //     return UnivariatePolynomialZp64.Create(ring, data);
     // }
+    public UnivariatePolynomialZ64 AsPolyZ(bool copy)
+    {
+        if (this is UnivariatePolynomialZp64 zp && ring is IntegersZp64)
+            return new UnivariatePolynomialZ64(Rings.Z64, copy ? (long[])zp.data.Clone() : zp.data);
 
+        throw new Exception();
+    }
 
     public static UnivariatePolynomial<BigInteger> AsPolyZSymmetric(UnivariatePolynomial<BigInteger> poly)
     {
         if (!(poly.ring is IntegersZp))
             throw new ArgumentException("Not a modular ring: " + poly.ring);
-        IntegersZp ring = (IntegersZp)poly.ring;
-        BigInteger[] newData = new BigInteger[poly.degree + 1];
-        for (int i = poly.degree; i >= 0; --i)
+        var ring = (IntegersZp)poly.ring;
+        var newData = new BigInteger[poly.degree + 1];
+        for (var i = poly.degree; i >= 0; --i)
             newData[i] = ring.SymmetricForm(poly.data[i]);
         return UnivariatePolynomial<BigInteger>.CreateUnsafe(Rings.Z, newData);
     }
@@ -142,11 +148,57 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
     {
         if (!(poly.ring is IntegersZp64))
             throw new ArgumentException("Not a modular ring: " + poly.ring);
-        IntegersZp64 ring = (IntegersZp64)poly.ring;
-        long[] newData = new long[poly.degree + 1];
-        for (int i = poly.degree; i >= 0; --i)
+        var ring = (IntegersZp64)poly.ring;
+        var newData = new long[poly.degree + 1];
+        for (var i = poly.degree; i >= 0; --i)
             newData[i] = ring.SymmetricForm(poly.data[i]);
         return UnivariatePolynomial<long>.CreateUnsafe(Rings.Z64, newData);
+    }
+    
+    public UnivariatePolynomialZ64 MultiplyUnsafe(long factor)
+    {
+        var thisZ = this.AsZ64();
+        
+        for (var i = degree; i >= 0; --i)
+            thisZ.data[i] *= factor;
+        return thisZ;
+    }
+    
+    public bool IsZ64()
+    {
+        return ring is Integers64;
+    }
+    
+    public bool IsZp64()
+    {
+        return ring is IntegersZp64;
+    }
+    
+    public UnivariatePolynomialZ64 MultiplyUnsafe(UnivariatePolynomialZ64 oth)
+    {
+
+        var thisZ = this.AsZ64();
+        
+        if (IsZero())
+            return thisZ;
+        if (oth.IsZero())
+            return thisZ.ToZero();
+        if (thisZ == oth)
+            return thisZ.Square();
+        if (oth.degree == 0)
+            return thisZ.Multiply(oth.data[0]);
+        if (degree == 0)
+        {
+            var factor = thisZ.data[0];
+            thisZ.data = (long[])oth.data.Clone();
+            thisZ.degree = oth.degree;
+            return thisZ.MultiplyUnsafe(factor);
+        }
+
+        thisZ.data = thisZ.MultiplySafe0(oth);
+        thisZ.degree += oth.degree;
+        thisZ.FixDegree();
+        return thisZ;
     }
 
     public int Degree()
@@ -192,7 +244,7 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
     {
         if (IsZero())
             return -1;
-        int i = 0;
+        var i = 0;
         while (ring.IsZero(data[i]))
             ++i;
         return i;
@@ -232,6 +284,19 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
 
         throw new Exception();
     }
+    
+    public UnivariatePolynomialZp64 Modulus(long modulus, bool copy)
+    {
+        return Modulus(modulus);
+    }
+
+    public UnivariatePolynomialZp64 SetModulus(long newModulus)
+    {
+        var newData = (long[])data.Clone();
+        var newDomain = new IntegersZp64(newModulus);
+        newDomain.Modulus(newData);
+        return new UnivariatePolynomialZp64(newDomain, newData);
+    }
 
     public E Lc()
     {
@@ -266,7 +331,7 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
     {
         if (data.Length < desiredCapacity)
         {
-            int oldLength = data.Length;
+            var oldLength = data.Length;
             var newData = new E[desiredCapacity];
             Array.Copy(data, newData, oldLength);
             data = newData;
@@ -281,7 +346,7 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
             degree = desiredDegree;
         if (data.Length < (desiredDegree + 1))
         {
-            int oldLen = data.Length;
+            var oldLen = data.Length;
             var newData = new E[desiredDegree + 1];
             Array.Copy(data, newData, oldLen);
             data = newData;
@@ -292,7 +357,7 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
 
     public void FixDegree()
     {
-        int i = degree;
+        var i = degree;
         while (i >= 0 && ring.IsZero(data[i]))
             --i;
         if (i < 0)
@@ -422,7 +487,7 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
 
     public override bool IsMonomial()
     {
-        for (int i = degree - 1; i >= 0; --i)
+        for (var i = degree - 1; i >= 0; --i)
             if (!ring.IsZero(data[i]))
                 return false;
         return true;
@@ -449,7 +514,7 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
 
     public bool IsOverZ()
     {
-        return ring.Equals(Rings.Z);
+        return ring.Equals(Rings.Z) || ring.Equals(Rings.Z64);
     }
 
 
@@ -496,8 +561,8 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
 
     public static BigInteger Norm1(UnivariatePolynomial<BigInteger> poly)
     {
-        BigInteger norm = BigInteger.Zero;
-        for (int i = poly.degree; i >= 0; --i)
+        var norm = BigInteger.Zero;
+        for (var i = poly.degree; i >= 0; --i)
             norm = norm + (BigInteger.Abs(poly.data[i]));
         return norm;
     }
@@ -505,8 +570,8 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
 
     public static BigInteger Norm2(UnivariatePolynomial<BigInteger> poly)
     {
-        BigInteger norm = BigInteger.Zero;
-        for (int i = poly.degree; i >= 0; --i)
+        var norm = BigInteger.Zero;
+        for (var i = poly.degree; i >= 0; --i)
             norm += poly.data[i] * (poly.data[i]);
         return BigIntegerUtils.SqrtCeil(norm);
     }
@@ -514,7 +579,7 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
     public static long Norm2(UnivariatePolynomial<long> poly)
     {
         double norm = 0;
-        for (int i = poly.degree; i >= 0; --i)
+        for (var i = poly.degree; i >= 0; --i)
             norm += (double)poly.data[i] * (poly.data[i]);
         return (long)Math.Ceiling(Math.Sqrt(norm));
     }
@@ -523,9 +588,9 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
     public static double Norm2Double(UnivariatePolynomial<BigInteger> poly)
     {
         double norm = 0;
-        for (int i = poly.degree; i >= 0; --i)
+        for (var i = poly.degree; i >= 0; --i)
         {
-            double d = (double)poly.data[i];
+            var d = (double)poly.data[i];
             norm += d * d;
         }
 
@@ -535,8 +600,8 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
 
     public E MaxAbsCoefficient()
     {
-        E el = ring.Abs(data[0]);
-        for (int i = 1; i <= degree; i++)
+        var el = ring.Abs(data[0]);
+        for (var i = 1; i <= degree; i++)
             el = ring.Max(el, ring.Abs(data[i]));
         return el;
     }
@@ -550,7 +615,7 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
 
     private void FillZeroes(E[] data, int from, int to)
     {
-        for (int i = from; i < to; ++i)
+        for (var i = from; i < to; ++i)
             data[i] = ring.GetZero(); //invoke getZero() at each cycle
     }
 
@@ -598,7 +663,7 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
     {
         if (offset == 0)
             return this;
-        int degree = this.degree;
+        var degree = this.degree;
         EnsureCapacity(offset + degree);
         Array.Copy(data, 0, data, offset, degree + 1);
         FillZeroes(data, 0, offset);
@@ -644,7 +709,7 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
 
     public UnivariatePolynomial<E>? PrimitivePart()
     {
-        E content = Content();
+        var content = Content();
         if (SignumOfLC() < 0 && ring.Signum(content) > 0)
             content = ring.Negate(content);
         if (ring.IsMinusOne(content))
@@ -664,7 +729,7 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
             return this;
         if (ring.IsOne(content))
             return this;
-        for (int i = degree; i >= 0; --i)
+        for (var i = degree; i >= 0; --i)
         {
             var div = ring.DivideOrNull(data[i], content);
             if (div.IsNull)
@@ -687,8 +752,8 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
         if (ring.IsZero(point))
             return Cc();
         point = ring.ValueOf(point);
-        E res = ring.GetZero();
-        for (int i = degree; i >= 0; --i)
+        var res = ring.GetZero();
+        for (var i = degree; i >= 0; --i)
             res = ring.AddMutable(ring.MultiplyMutable(res, point), data[i]);
         return res;
     }
@@ -703,7 +768,7 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
         if (value.degree == 1 && value.IsMonomial() && ring.IsOne(value.Lc()))
             return Clone();
         UnivariatePolynomial<E> result = CreateZero();
-        for (int i = degree; i >= 0; --i)
+        for (var i = degree; i >= 0; --i)
             result = result.Multiply(value).Add(data[i]);
         return result;
     }
@@ -732,9 +797,9 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
             return this.Clone();
         if (ring.IsZero(scaling))
             return CcAsPoly();
-        E factor = ring.GetOne();
+        var factor = ring.GetOne();
         E[] result = new E[degree + 1];
-        for (int i = 0; i <= degree; ++i)
+        for (var i = 0; i <= degree; ++i)
         {
             result[i] = ring.Multiply(data[i], factor);
             factor = ring.Multiply(factor, scaling);
@@ -787,7 +852,7 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
             return Set(oth);
         AssertSameCoefficientRingWith(oth);
         EnsureCapacity(oth.degree);
-        for (int i = oth.degree; i >= 0; --i)
+        for (var i = oth.degree; i >= 0; --i)
             data[i] = ring.Add(data[i], oth.data[i]);
         FixDegree();
         return this;
@@ -815,7 +880,7 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
             return this;
         AssertSameCoefficientRingWith(oth);
         EnsureCapacity(oth.degree);
-        for (int i = oth.degree; i >= 0; --i)
+        for (var i = oth.degree; i >= 0; --i)
             data[i] = ring.Add(data[i], ring.Multiply(factor, oth.data[i]));
         FixDegree();
         return this;
@@ -831,7 +896,7 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
             return Set(oth).Negate();
         AssertSameCoefficientRingWith(oth);
         EnsureCapacity(oth.degree);
-        for (int i = oth.degree; i >= 0; --i)
+        for (var i = oth.degree; i >= 0; --i)
             data[i] = ring.Subtract(data[i], oth.data[i]);
         FixDegree();
         return this;
@@ -847,7 +912,7 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
         if (ring.IsZero(factor))
             return this;
         AssertSameCoefficientRingWith(oth);
-        for (int i = oth.degree + exponent; i >= exponent; --i)
+        for (var i = oth.degree + exponent; i >= exponent; --i)
             data[i] = ring.Subtract(data[i], ring.Multiply(factor, oth.data[i - exponent]));
         FixDegree();
         return this;
@@ -856,7 +921,7 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
 
     public override UnivariatePolynomial<E> Negate()
     {
-        for (int i = degree; i >= 0; --i)
+        for (var i = degree; i >= 0; --i)
             if (!ring.IsZero(data[i]))
                 data[i] = ring.Negate(data[i]);
         return this;
@@ -870,7 +935,7 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
             return this;
         if (ring.IsZero(factor))
             return ToZero();
-        for (int i = degree; i >= 0; --i)
+        for (var i = degree; i >= 0; --i)
             data[i] = ring.Multiply(data[i], factor);
         return this;
     }
@@ -905,7 +970,7 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
             return Negate();
         if (ring.IsField())
             return Multiply(ring.Reciprocal(factor));
-        for (int i = degree; i >= 0; --i)
+        for (var i = degree; i >= 0; --i)
         {
             var l = ring.DivideOrNull(data[i], factor);
             if (l.IsNull)
@@ -940,7 +1005,7 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
 
     public UnivariatePolynomial<E> Monic(E factor)
     {
-        E lc = Lc();
+        var lc = Lc();
         return Multiply(factor).DivideOrNull(lc);
     }
 
@@ -972,7 +1037,7 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
             return Multiply(oth.data[0]);
         if (degree == 0)
         {
-            E factor = data[0];
+            var factor = data[0];
             data = (E[])oth.data.Clone();
             degree = oth.degree;
             return Multiply(factor);
@@ -1028,7 +1093,7 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
         if (IsConstant())
             return CreateZero();
         E[] newData = new E[degree];
-        for (int i = degree; i > 0; --i)
+        for (var i = degree; i > 0; --i)
             newData[i - 1] = ring.Multiply(data[i], ring.ValueOfLong(i));
         return CreateFromArray(newData);
     }
@@ -1092,10 +1157,10 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
 
     public int CompareTo(UnivariatePolynomial<E>? o)
     {
-        int c = degree.CompareTo(o.degree);
+        var c = degree.CompareTo(o.degree);
         if (c != 0)
             return c;
-        for (int i = degree; i >= 0; --i)
+        for (var i = degree; i >= 0; --i)
         {
             c = ring.Compare(data[i], o.data[i]);
             if (c != 0)
@@ -1109,10 +1174,10 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
     {
         if (IsConstant())
             return Cc().ToString();
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i <= degree; i++)
+        var sb = new StringBuilder();
+        for (var i = 0; i <= degree; i++)
         {
-            E el = data[i];
+            var el = data[i];
             if (ring.IsZero(el))
                 continue;
             string cfString;
@@ -1120,7 +1185,7 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
                 cfString = el.ToString();
             else
                 cfString = "";
-            if (i != 0) // TODO Need parentheses
+            if (i != 0 && (cfString.Contains("+") || cfString.Contains("-"))) // TODO Need parentheses
                 cfString = "(" + cfString + ")";
             if (sb.Length != 0 && !cfString.StartsWith("-"))
                 sb.Append("+");
@@ -1147,7 +1212,7 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
         var oth = (UnivariatePolynomial<E>)obj;
         if (degree != oth.degree)
             return false;
-        for (int i = 0; i <= degree; ++i)
+        for (var i = 0; i <= degree; ++i)
             if (!(Equals(data[i], oth.data[i])))
                 return false;
         return true;
@@ -1158,8 +1223,8 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
 
     public override int GetHashCode()
     {
-        int result = 1;
-        for (int i = degree; i >= 0; --i)
+        var result = 1;
+        for (var i = degree; i >= 0; --i)
             result = 31 * result + data[i].GetHashCode();
         return result;
     }
@@ -1221,11 +1286,11 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
             return;
         }
 
-        for (int i = 0; i < aTo - aFrom; ++i)
+        for (var i = 0; i < aTo - aFrom; ++i)
         {
-            E c = a[aFrom + i];
+            var c = a[aFrom + i];
             if (!ring.IsZero(c))
-                for (int j = 0; j < bTo - bFrom; ++j)
+                for (var j = 0; j < bTo - bFrom; ++j)
                     result[i + j] = ring.AddMutable(result[i + j], ring.Multiply(c, b[bFrom + j]));
         }
     }
@@ -1241,7 +1306,7 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
         if (fTo - fFrom == 1)
         {
             E[] result1 = new E[gTo - gFrom];
-            for (int i = gFrom; i < gTo; ++i)
+            for (var i = gFrom; i < gTo; ++i)
                 result1[i - gFrom] = ring.Multiply(f[fFrom], g[i]);
             return result1;
         }
@@ -1253,7 +1318,7 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
             E[] result2 = new E[fTo - fFrom];
 
             //single element in b
-            for (int i = fFrom; i < fTo; ++i)
+            for (var i = fFrom; i < fTo; ++i)
                 result2[i - fFrom] = ring.Multiply(g[gFrom], f[i]);
             return result2;
         }
@@ -1280,7 +1345,7 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
             return MultiplyKaratsubaSafe(g, gFrom, gTo, f, fFrom, fTo);
 
         //we now split a and b into 2 parts:
-        int split = (fTo - fFrom + 1) / 2;
+        var split = (fTo - fFrom + 1) / 2;
 
         //if we can't split b
         if (gFrom + split >= gTo)
@@ -1291,7 +1356,7 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
             E[] result4 = new E[newLen];
             Array.Copy(f0g, result4, newLen);
             FillZeroes(result4, oldLen4, newLen);
-            for (int i = 0; i < f1g.Length; i++)
+            for (var i = 0; i < f1g.Length; i++)
                 result4[i + split] = ring.AddMutable(result4[i + split], f1g[i]);
             return result4;
         }
@@ -1304,19 +1369,19 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
         E[] f0_plus_f1 = new E[Math.Max(fMid - fFrom, fTo - fMid)];
         Array.Copy(f, fFrom, f0_plus_f1, 0, fMid - fFrom);
         FillZeroes(f0_plus_f1, fMid - fFrom, f0_plus_f1.Length);
-        for (int i = fMid; i < fTo; ++i)
+        for (var i = fMid; i < fTo; ++i)
             f0_plus_f1[i - fMid] = ring.Add(f0_plus_f1[i - fMid], f[i]);
 
         //g0 + g1
         E[] g0_plus_g1 = new E[Math.Max(gMid - gFrom, gTo - gMid)];
         Array.Copy(g, gFrom, g0_plus_g1, 0, gMid - gFrom);
         FillZeroes(g0_plus_g1, gMid - gFrom, g0_plus_g1.Length);
-        for (int i = gMid; i < gTo; ++i)
+        for (var i = gMid; i < gTo; ++i)
             g0_plus_g1[i - gMid] = ring.Add(g0_plus_g1[i - gMid], g[i]);
         E[] mid = MultiplyKaratsubaSafe(f0_plus_f1, 0, f0_plus_f1.Length, g0_plus_g1, 0, g0_plus_g1.Length);
         if (mid.Length < f0g0.Length)
         {
-            int oldLen5 = mid.Length;
+            var oldLen5 = mid.Length;
             var newMid = new E[f0g0.Length];
             Array.Copy(mid, newMid, oldLen5);
             FillZeroes(mid, oldLen5, mid.Length);
@@ -1324,7 +1389,7 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
 
         if (mid.Length < f1g1.Length)
         {
-            int oldLen6 = mid.Length;
+            var oldLen6 = mid.Length;
             var newMid = new E[f1g1.Length];
             Array.Copy(mid, newMid, oldLen6);
             FillZeroes(mid, oldLen6, mid.Length);
@@ -1332,17 +1397,17 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
 
 
         //subtract f0g0, f1g1
-        for (int i = 0; i < f0g0.Length; ++i)
+        for (var i = 0; i < f0g0.Length; ++i)
             mid[i] = ring.SubtractMutable(mid[i], f0g0[i]);
-        for (int i = 0; i < f1g1.Length; ++i)
+        for (var i = 0; i < f1g1.Length; ++i)
             mid[i] = ring.SubtractMutable(mid[i], f1g1[i]);
-        int oldLen = f0g0.Length;
+        var oldLen = f0g0.Length;
         var result = new E[(fTo - fFrom) + (gTo - gFrom) - 1];
         Array.Copy(f0g0, result, result.Length);
         FillZeroes(result, oldLen, result.Length);
-        for (int i = 0; i < mid.Length; ++i)
+        for (var i = 0; i < mid.Length; ++i)
             result[i + split] = ring.AddMutable(result[i + split], mid[i]);
-        for (int i = 0; i < f1g1.Length; ++i)
+        for (var i = 0; i < f1g1.Length; ++i)
             result[i + 2 * split] = ring.AddMutable(result[i + 2 * split], f1g1[i]);
         return result;
     }
@@ -1358,12 +1423,12 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
 
     void SquareClassicalSafe(E[] result, E[] data, int from, int to)
     {
-        int len = to - from;
-        for (int i = 0; i < len; ++i)
+        var len = to - from;
+        for (var i = 0; i < len; ++i)
         {
-            E c = data[from + i];
+            var c = data[from + i];
             if (!ring.IsZero(c))
-                for (int j = 0; j < len; ++j)
+                for (var j = 0; j < len; ++j)
                     result[i + j] = ring.AddMutable(result[i + j], ring.Multiply(c, data[from + j]));
         }
     }
@@ -1395,8 +1460,8 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
             return SquareClassicalSafe(f, fFrom, fTo);
 
         //we now split a and b into 2 parts:
-        int split = (fTo - fFrom + 1) / 2;
-        int fMid = fFrom + split;
+        var split = (fTo - fFrom + 1) / 2;
+        var fMid = fFrom + split;
         E[] f0g0 = SquareKaratsubaSafe(f, fFrom, fMid);
         E[] f1g1 = SquareKaratsubaSafe(f, fMid, fTo);
 
@@ -1404,12 +1469,12 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
         E[] f0_plus_f1 = new E[Math.Max(fMid - fFrom, fTo - fMid)];
         Array.Copy(f, fFrom, f0_plus_f1, 0, fMid - fFrom);
         FillZeroes(f0_plus_f1, fMid - fFrom, f0_plus_f1.Length);
-        for (int i = fMid; i < fTo; ++i)
+        for (var i = fMid; i < fTo; ++i)
             f0_plus_f1[i - fMid] = ring.Add(f0_plus_f1[i - fMid], f[i]);
         E[] mid = SquareKaratsubaSafe(f0_plus_f1, 0, f0_plus_f1.Length);
         if (mid.Length < f0g0.Length)
         {
-            int oldLen2 = mid.Length;
+            var oldLen2 = mid.Length;
             var newMid = new E[f0g0.Length];
             Array.Copy(mid, newMid, oldLen2);
             FillZeroes(mid, oldLen2, mid.Length);
@@ -1417,7 +1482,7 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
 
         if (mid.Length < f1g1.Length)
         {
-            int oldLen3 = mid.Length;
+            var oldLen3 = mid.Length;
             var newMid = new E[f1g1.Length];
             Array.Copy(mid, newMid, oldLen3);
             FillZeroes(mid, oldLen3, mid.Length);
@@ -1425,17 +1490,17 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
 
 
         //subtract f0g0, f1g1
-        for (int i = 0; i < f0g0.Length; ++i)
+        for (var i = 0; i < f0g0.Length; ++i)
             mid[i] = ring.SubtractMutable(mid[i], f0g0[i]);
-        for (int i = 0; i < f1g1.Length; ++i)
+        for (var i = 0; i < f1g1.Length; ++i)
             mid[i] = ring.SubtractMutable(mid[i], f1g1[i]);
-        int oldLen = f0g0.Length;
+        var oldLen = f0g0.Length;
         var result = new E[2 * (fTo - fFrom) - 1];
         Array.Copy(f0g0, result, result.Length);
         FillZeroes(result, oldLen, result.Length);
-        for (int i = 0; i < mid.Length; ++i)
+        for (var i = 0; i < mid.Length; ++i)
             result[i + split] = ring.AddMutable(result[i + split], mid[i]);
-        for (int i = 0; i < f1g1.Length; ++i)
+        for (var i = 0; i < f1g1.Length; ++i)
             result[i + 2 * split] = ring.AddMutable(result[i + 2 * split], f1g1[i]);
         return result;
     }
@@ -1452,22 +1517,22 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
 
     private static BigInteger[] SquareKronecker0(UnivariatePolynomial<BigInteger> poly)
     {
-        int len = poly.degree + 1;
+        var len = poly.degree + 1;
 
         // determine #bits needed per coefficient
-        int logMinDigits = 32 - int.LeadingZeroCount(len - 1);
-        int maxLength = 0;
-        foreach (BigInteger cf in poly.data)
+        var logMinDigits = 32 - int.LeadingZeroCount(len - 1);
+        var maxLength = 0;
+        foreach (var cf in poly.data)
             maxLength = Math.Max(maxLength, (int)cf.GetBitLength());
-        int k = logMinDigits + 2 * maxLength + 1; // in bits
+        var k = logMinDigits + 2 * maxLength + 1; // in bits
         k = (k + 31) / 32; // in ints
 
         // encode each polynomial into an int[]
-        int[] pInt = ToIntArray(poly, k);
-        int[] cInt = ToIntArray(BigInteger.Pow(ToBigInteger(pInt), 2));
+        var pInt = ToIntArray(poly, k);
+        var cInt = ToIntArray(BigInteger.Pow(ToBigInteger(pInt), 2));
 
         // decode poly coefficients from the product
-        BigInteger[] cPoly = new BigInteger[2 * len - 1];
+        var cPoly = new BigInteger[2 * len - 1];
         DecodePoly(k, cInt, cPoly);
         return cPoly;
     }
@@ -1475,13 +1540,13 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
 
     private static void DecodePoly(int k, int[] cInt, BigInteger[] cPoly)
     {
-        BigInteger _2k = BigInteger.One << (k * 32);
+        var _2k = BigInteger.One << (k * 32);
         Array.Fill(cPoly, BigInteger.Zero);
-        for (int i = 0; i < cPoly.Length; i++)
+        for (var i = 0; i < cPoly.Length; i++)
         {
-            int[] cfInt = new int[k];
+            var cfInt = new int[k];
             Array.Copy(cInt, i * k, cfInt, 0, k);
-            BigInteger cf = ToBigInteger(cfInt);
+            var cf = ToBigInteger(cfInt);
             if (cfInt[k - 1] < 0)
             {
                 // if coeff > 2^(k-1)
@@ -1489,7 +1554,7 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
 
                 // add 2^k to cInt which is the same as subtracting coeff
                 bool carry;
-                int cIdx = (i + 1) * k;
+                var cIdx = (i + 1) * k;
                 do
                 {
                     cInt[cIdx]++;
@@ -1515,34 +1580,34 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
     {
         if (poly2.degree > poly1.degree)
             return MultiplyKronecker0(poly2, poly1);
-        int len1 = poly1.degree + 1;
-        int len2 = poly2.degree + 1;
+        var len1 = poly1.degree + 1;
+        var len2 = poly2.degree + 1;
 
         // determine #bits needed per coefficient
-        int logMinDigits = 32 - int.LeadingZeroCount(len1 - 1);
-        int maxLengthA = 0;
-        foreach (BigInteger cf in poly1.data)
+        var logMinDigits = 32 - int.LeadingZeroCount(len1 - 1);
+        var maxLengthA = 0;
+        foreach (var cf in poly1.data)
             maxLengthA = Math.Max(maxLengthA, (int)cf.GetBitLength());
-        int maxLengthB = 0;
-        foreach (BigInteger cf in poly2.data)
+        var maxLengthB = 0;
+        foreach (var cf in poly2.data)
             maxLengthB = Math.Max(maxLengthB, (int)cf.GetBitLength());
-        int k = logMinDigits + maxLengthA + maxLengthB + 1; // in bits
+        var k = logMinDigits + maxLengthA + maxLengthB + 1; // in bits
         k = (k + 31) / 32; // in ints
 
         // encode each polynomial into an int[]
-        int[] aInt = ToIntArray(poly1, k);
-        int[] bInt = ToIntArray(poly2, k);
+        var aInt = ToIntArray(poly1, k);
+        var bInt = ToIntArray(poly2, k);
 
         // multiply
-        int[] cInt = ToIntArray(ToBigInteger(aInt) * ToBigInteger(bInt));
+        var cInt = ToIntArray(ToBigInteger(aInt) * ToBigInteger(bInt));
 
         // decode poly coefficients from the product
-        BigInteger[] cPoly = new BigInteger[len1 + len2 - 1];
+        var cPoly = new BigInteger[len1 + len2 - 1];
         DecodePoly(k, cInt, cPoly);
-        int aSign = poly1.Lc().Sign;
-        int bSign = poly2.Lc().Sign;
+        var aSign = poly1.Lc().Sign;
+        var bSign = poly2.Lc().Sign;
         if (aSign * bSign < 0)
-            for (int i = 0; i < cPoly.Length; i++)
+            for (var i = 0; i < cPoly.Length; i++)
                 cPoly[i] = -cPoly[i];
         return cPoly;
     }
@@ -1550,10 +1615,10 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
 
     private static BigInteger ToBigInteger(int[] a)
     {
-        byte[] b = new byte[a.Length * 4];
-        for (int i = 0; i < a.Length; i++)
+        var b = new byte[a.Length * 4];
+        for (var i = 0; i < a.Length; i++)
         {
-            int iRev = a.Length - 1 - i;
+            var iRev = a.Length - 1 - i;
             b[i * 4] = (byte)(a[iRev] >>> 24);
             b[i * 4 + 1] = (byte)((a[iRev] >>> 16) & 0xFF);
             b[i * 4 + 2] = (byte)((a[iRev] >>> 8) & 0xFF);
@@ -1566,9 +1631,9 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
 
     private static int[] ToIntArray(BigInteger a)
     {
-        byte[] aArr = a.ToByteArray();
-        int[] b = new int[(aArr.Length + 3) / 4];
-        for (int i = 0; i < aArr.Length; i++)
+        var aArr = a.ToByteArray();
+        var b = new int[(aArr.Length + 3) / 4];
+        for (var i = 0; i < aArr.Length; i++)
             b[i / 4] += (aArr[aArr.Length - 1 - i] & 0xFF) << ((i % 4) * 8);
         return b;
     }
@@ -1576,12 +1641,12 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
 
     private static int[] ToIntArray(UnivariatePolynomial<BigInteger> a, int k)
     {
-        int len = a.degree + 1;
-        int sign = a.Lc().Sign;
-        int[] aInt = new int[len * k];
-        for (int i = len - 1; i >= 0; i--)
+        var len = a.degree + 1;
+        var sign = a.Lc().Sign;
+        var aInt = new int[len * k];
+        for (var i = len - 1; i >= 0; i--)
         {
-            int[] cArr = ToIntArray(BigInteger.Abs(a.data[i]));
+            var cArr = ToIntArray(BigInteger.Abs(a.data[i]));
             if (a.data[i].Sign * sign < 0)
                 SubShifted(aInt, cArr, i * k);
             else
@@ -1594,12 +1659,12 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
 
     private static void AddShifted(int[] a, int[] b, int numElements)
     {
-        bool carry = false;
-        int i = 0;
+        var carry = false;
+        var i = 0;
         while (i < Math.Min(b.Length, a.Length - numElements))
         {
-            int ai = a[i + numElements];
-            int sum = ai + b[i];
+            var ai = a[i + numElements];
+            var sum = ai + b[i];
             if (carry)
                 sum++;
             carry = ((sum >>> 31) < (ai >>> 31) + (b[i] >>> 31)); // carry if signBit(sum) < signBit(a)+signBit(b)
@@ -1619,12 +1684,12 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
 
     private static void SubShifted(int[] a, int[] b, int numElements)
     {
-        bool carry = false;
-        int i = 0;
+        var carry = false;
+        var i = 0;
         while (i < Math.Min(b.Length, a.Length - numElements))
         {
-            int ai = a[i + numElements];
-            int diff = ai - b[i];
+            var ai = a[i + numElements];
+            var diff = ai - b[i];
             if (carry)
                 diff--;
             carry = ((diff >>> 31) >
@@ -1684,5 +1749,10 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
         if (typeof(T) != typeof(E))
             throw new Exception();
         return this as UnivariatePolynomial<T>;
+    }
+
+    public override PolynomialRing<UnivariatePolynomial<E>> AsRing()
+    {
+        return new UnivariateRing<E>(this);
     }
 }
