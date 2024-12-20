@@ -36,7 +36,6 @@ public abstract class Ring<E> : IComparer<E>
         }
     }
 
-
     public abstract bool IsField();
     public abstract bool IsEuclideanRing();
 
@@ -330,13 +329,13 @@ public abstract class Ring<E> : IComparer<E>
         return gcd.Value;
     }
 
-    public virtual  FactorDecomposition<E> FactorSquareFree(E element)
+    public virtual FactorDecomposition<E> FactorSquareFree(E element)
     {
         throw new NotSupportedException();
     }
 
 
-    public virtual  FactorDecomposition<E> Factor(E element)
+    public virtual FactorDecomposition<E> Factor(E element)
     {
         throw new NotSupportedException();
     }

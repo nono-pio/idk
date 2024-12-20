@@ -21,15 +21,16 @@ public static class UnivariateGCD
             return ModularGCD(a.AsZ64(), b.AsZ64()).AsT<E>();
         if (a.IsOverZ())
             return ModularGCD(a.AsZ(), b.AsZ()).AsT<E>();
-        // if (Util.IsOverRationals(a)) TODO
-        //     return (T)PolynomialGCDInQ((UnivariatePolynomial)a, (UnivariatePolynomial)b);
+        if (Util.IsOverRationals(a))
+            return (UnivariatePolynomial<E>)GenericHandler.InvokeForGeneric<E>(typeof(Rational<>),
+                nameof(PolynomialGCDInQ), typeof(UnivariateGCD), a, b); // PolynomialGCDInQ(a, b);
         // if (Util.IsOverRingOfIntegersOfSimpleNumberField(a)) TODO
         //     return (T)PolynomialGCDInRingOfIntegersOfNumberField((UnivariatePolynomial)a, (UnivariatePolynomial)b);
         // if (Util.IsOverSimpleNumberField(a)) TODO
         //     return (T)PolynomialGCDInNumberField((UnivariatePolynomial)a, (UnivariatePolynomial)b);
         if (a.IsOverField())
             return HalfGCD(a, b);
-        
+
         var r = TryNested(a, b);
         if (r != null)
             return r;
@@ -56,7 +57,7 @@ public static class UnivariateGCD
 
         return null;
     }
-    
+
     private static UnivariatePolynomial<E>? TrivialGCD<E>(UnivariatePolynomial<E> a, UnivariatePolynomial<E> b)
     {
         if (a.IsZero())
@@ -87,13 +88,13 @@ public static class UnivariateGCD
     //         AMultivariatePolynomial.AsMultivariate(b, 0, true)).AsUnivariateEliminate(0);
     // }
     //
-    // private static UnivariatePolynomial<Rational<E>> PolynomialGCDInQ<E>(UnivariatePolynomial<Rational<E>> a,
-    //     UnivariatePolynomial<Rational<E>> b)
-    // {
-    //     Tuple2<UnivariatePolynomial<E>, E> aRat = ToCommonDenominator(a);
-    //     Tuple2<UnivariatePolynomial<E>, E> bRat = ToCommonDenominator(b);
-    //     return Util.AsOverRationals(a.ring, PolynomialGCD(aRat._1, bRat._1)).Monic();
-    // }
+    private static UnivariatePolynomial<Rational<E>> PolynomialGCDInQ<E>(UnivariatePolynomial<Rational<E>> a,
+        UnivariatePolynomial<Rational<E>> b)
+    {
+        var aRat = Util.ToCommonDenominator(a);
+        var bRat = Util.ToCommonDenominator(b);
+        return Util.AsOverRationals(a.ring, PolynomialGCD(aRat.Item1, bRat.Item1)).Monic();
+    }
     //
     // private static UnivariatePolynomial<mPoly> PolynomialGCDInMultipleFieldExtension<Term extends AMonomial<Term>, mPoly
     //     extends AMultivariatePolynomial<Term, mPoly>, sPoly extends IUnivariatePolynomial<sPoly>>(
@@ -106,7 +107,8 @@ public static class UnivariateGCD
     // }
 
 
-    public static UnivariatePolynomial<E>[] PolynomialExtendedGCD<E>(UnivariatePolynomial<E> a, UnivariatePolynomial<E> b)
+    public static UnivariatePolynomial<E>[] PolynomialExtendedGCD<E>(UnivariatePolynomial<E> a,
+        UnivariatePolynomial<E> b)
     {
         // if (Util.IsOverQ(a)) TODO
         //     return ModularExtendedResultantGCDInQ(a, b);
@@ -119,7 +121,8 @@ public static class UnivariateGCD
     }
 
 
-    public static UnivariatePolynomial<E>[] PolynomialFirstBezoutCoefficient<E>(UnivariatePolynomial<E> a, UnivariatePolynomial<E> b)
+    public static UnivariatePolynomial<E>[] PolynomialFirstBezoutCoefficient<E>(UnivariatePolynomial<E> a,
+        UnivariatePolynomial<E> b)
     {
         if (a.IsOverFiniteField() && Math.Min(a.Degree(), b.Degree()) < 384)
 
@@ -167,7 +170,6 @@ public static class UnivariateGCD
     }
 
     /* ========================================== implementation ==================================================== */
-    
 
 
     public static UnivariatePolynomial<E> EuclidGCD<E>(UnivariatePolynomial<E> a, UnivariatePolynomial<E> b)
@@ -217,15 +219,15 @@ public static class UnivariateGCD
             var q = UnivariateDivision.Quotient(old_r, r, true);
             if (q is null)
                 throw new ArithmeticException("Not divisible with remainder: (" + old_r + ") / (" + r + ")");
-            
+
             var tmp = old_r;
             old_r = r;
             r = tmp.Clone().Subtract(q.Clone().Multiply(r));
-            
+
             tmp = old_s;
             old_s = s;
             s = tmp.Clone().Subtract(q.Clone().Multiply(s));
-            
+
             tmp = old_t;
             old_t = t;
             t = tmp.Clone().Subtract(q.Clone().Multiply(t));
@@ -248,7 +250,8 @@ public static class UnivariateGCD
     }
 
 
-    public static UnivariatePolynomial<E>[] EuclidFirstBezoutCoefficient<E>(UnivariatePolynomial<E> a, UnivariatePolynomial<E> b)
+    public static UnivariatePolynomial<E>[] EuclidFirstBezoutCoefficient<E>(UnivariatePolynomial<E> a,
+        UnivariatePolynomial<E> b)
     {
         a.AssertSameCoefficientRingWith(b);
         if (CanConvertToZp64(a))
@@ -260,11 +263,11 @@ public static class UnivariateGCD
             var q = UnivariateDivision.Quotient(old_r, r, true);
             if (q is null)
                 throw new ArithmeticException("Not divisible with remainder: (" + old_r + ") / (" + r + ")");
-            
+
             var tmp = old_r;
             old_r = r;
             r = tmp.Clone().Subtract(q.Clone().Multiply(r));
-            
+
             tmp = old_s;
             old_s = s;
             s = tmp.Clone().Subtract(q.Clone().Multiply(s));
@@ -336,7 +339,7 @@ public static class UnivariateGCD
             var qd = UnivariateDivision.DivideAndRemainder(a, b, true);
             if (qd == null)
                 throw new ArithmeticException("Not divisible with remainder: (" + a + ") / (" + b + ")");
-            
+
             quotient = qd[0];
             var remainder = qd[1];
             a = b;
@@ -361,7 +364,8 @@ public static class UnivariateGCD
     }
 
 
-    private static UnivariatePolynomial<E>[,] HMatrixPlain<E>(UnivariatePolynomial<E> a, UnivariatePolynomial<E> b, int degreeToReduce, bool reduce)
+    private static UnivariatePolynomial<E>[,] HMatrixPlain<E>(UnivariatePolynomial<E> a, UnivariatePolynomial<E> b,
+        int degreeToReduce, bool reduce)
     {
         var hMatrix = UnitMatrix(a);
         var goal = a.Degree() - degreeToReduce;
@@ -397,7 +401,8 @@ public static class UnivariateGCD
         return hMatrix;
     }
 
-    private static UnivariatePolynomial<E>[,] HMatrixHalfGCD<E>(UnivariatePolynomial<E> a, UnivariatePolynomial<E> b, int d)
+    private static UnivariatePolynomial<E>[,] HMatrixHalfGCD<E>(UnivariatePolynomial<E> a, UnivariatePolynomial<E> b,
+        int d)
     {
         if (b.IsZero() || b.Degree() <= a.Degree() - d)
             return UnitMatrix(a);
@@ -438,7 +443,8 @@ public static class UnivariateGCD
     }
 
 
-    static UnivariatePolynomial<E>[,] ReduceExtendedHalfGCD<E>(UnivariatePolynomial<E> a, UnivariatePolynomial<E> b, int d)
+    static UnivariatePolynomial<E>[,] ReduceExtendedHalfGCD<E>(UnivariatePolynomial<E> a, UnivariatePolynomial<E> b,
+        int d)
     {
         if (b.IsZero() || b.Degree() <= a.Degree() - d)
             return UnitMatrix(a);
@@ -503,7 +509,8 @@ public static class UnivariateGCD
         return ColumnMultiply(HMatrixHalfGCD(a, b, d2), a, b);
     }
 
-    private static UnivariatePolynomial<E>[,] MatrixMultiply<E>(UnivariatePolynomial<E>[,] matrix1, UnivariatePolynomial<E>[,] matrix2)
+    private static UnivariatePolynomial<E>[,] MatrixMultiply<E>(UnivariatePolynomial<E>[,] matrix1,
+        UnivariatePolynomial<E>[,] matrix2)
     {
         var r = new UnivariatePolynomial<E>[2, 2];
         r[0, 0] = matrix1[0, 0].Clone().Multiply(matrix2[0, 0]).Add(matrix1[0, 1].Clone().Multiply(matrix2[1, 0]));
@@ -513,7 +520,8 @@ public static class UnivariateGCD
         return r;
     }
 
-    private static UnivariatePolynomial<E>[] ColumnMultiply<E>(UnivariatePolynomial<E>[,] hMatrix, UnivariatePolynomial<E> row1, UnivariatePolynomial<E> row2)
+    private static UnivariatePolynomial<E>[] ColumnMultiply<E>(UnivariatePolynomial<E>[,] hMatrix,
+        UnivariatePolynomial<E> row1, UnivariatePolynomial<E> row2)
     {
         var resultColumn = new UnivariatePolynomial<E>[2];
         resultColumn[0] = hMatrix[0, 0].Clone().Multiply(row1).Add(hMatrix[0, 1].Clone().Multiply(row2));
@@ -536,7 +544,7 @@ public static class UnivariateGCD
     {
         if (!a.ring.Equals(Rings.Z64))
             throw new ArgumentException("Only polynomials over integers ring are allowed; " + a.ring);
-        
+
         var trivialGCD = TrivialGCD(a, b);
         if (trivialGCD != null)
             return (UnivariatePolynomialZ64)trivialGCD;
@@ -555,7 +563,8 @@ public static class UnivariateGCD
     private static UnivariatePolynomialZ64 ModularGCD0(UnivariatePolynomialZ64 a, UnivariatePolynomialZ64 b)
     {
         var lcGCD = MachineArithmetic.Gcd(a.Lc(), b.Lc());
-        double bound = Math.Max(UnivariatePolynomialZ64.MignotteBound(a), UnivariatePolynomialZ64.MignotteBound(b)) * lcGCD;
+        double bound = Math.Max(UnivariatePolynomialZ64.MignotteBound(a), UnivariatePolynomialZ64.MignotteBound(b)) *
+                       lcGCD;
         UnivariatePolynomialZ64? previousBase = null;
         UnivariatePolynomialZp64? @base = null;
         long basePrime = -1;
@@ -594,7 +603,7 @@ public static class UnivariateGCD
             //lifting
             var newBasePrime = MachineArithmetic.SafeMultiply(basePrime, prime);
             var monicFactor = modularGCD.ring.Multiply(MachineArithmetic.ModInverse(modularGCD.Lc(), prime),
-                ((IntegersZp64) modularGCD.ring).Modulus(lcGCD));
+                ((IntegersZp64)modularGCD.ring).Modulus(lcGCD));
             var magic = ChineseRemainders.CreateMagic(basePrime, prime);
             for (var i = 0; i <= @base.degree; ++i)
             {
@@ -608,7 +617,8 @@ public static class UnivariateGCD
             basePrime = newBasePrime;
 
             //either trigger Mignotte's bound or two trials didn't change the result, probably we are done
-            var candidate = UnivariatePolynomial<long>.AsPolyZ64Symmetric(@base).PrimitivePart() ?? throw new Exception();
+            var candidate = UnivariatePolynomial<long>.AsPolyZ64Symmetric(@base).PrimitivePart() ??
+                            throw new Exception();
             if ((double)basePrime >= 2 * bound || (previousBase != null && candidate.Equals(previousBase)))
             {
                 previousBase = candidate;
@@ -653,7 +663,8 @@ public static class UnivariateGCD
     {
         var lcGCD = BigInteger.GreatestCommonDivisor(a.Lc(), b.Lc());
         var bound2 = (BigInteger
-                          .Max(UnivariatePolynomial<BigInteger>.MignotteBound(a), UnivariatePolynomial<BigInteger>.MignotteBound(b))
+                          .Max(UnivariatePolynomial<BigInteger>.MignotteBound(a),
+                              UnivariatePolynomial<BigInteger>.MignotteBound(b))
                       * lcGCD) << 1;
         if (bound2.IsLong() && a.MaxAbsCoefficient().IsLong() && b.MaxAbsCoefficient().IsLong())
             try
@@ -725,7 +736,8 @@ public static class UnivariateGCD
             basePrime = newBasePrime;
 
             //either trigger Mignotte's bound or two trials didn't change the result, probably we are done
-            var lCandidate = UnivariatePolynomial<long>.AsPolyZ64Symmetric(@base).PrimitivePart() ?? throw new Exception();
+            var lCandidate = UnivariatePolynomial<long>.AsPolyZ64Symmetric(@base).PrimitivePart() ??
+                             throw new Exception();
             if (new BigInteger(basePrime).CompareTo(bound2) >= 0 ||
                 (previousBase != null && Equals(lCandidate, previousBase)))
             {
@@ -801,7 +813,8 @@ public static class UnivariateGCD
             bBase = bBase.SetRingUnsafe(new IntegersZp(newBasePrime));
             bBasePrime = newBasePrime;
             var candidate =
-                UnivariatePolynomial<BigInteger>.AsPolyZSymmetric(bBase).PrimitivePart() ?? throw new UnreachableException();
+                UnivariatePolynomial<BigInteger>.AsPolyZSymmetric(bBase).PrimitivePart() ??
+                throw new UnreachableException();
 
             //either trigger Mignotte's bound or two trials didn't change the result, probably we are done
             if (bBasePrime.CompareTo(bound2) >= 0 || (bPreviousBase != null && candidate.Equals(bPreviousBase)))
@@ -1187,7 +1200,7 @@ public static class UnivariateGCD
         UnivariatePolynomial<E>[] xgcd)
     {
         Ring<E> ring = xgcd[0].ring;
-        foreach (var subs in (E[])[ring.GetZero(), ring.GetOne()])
+        foreach (var subs in (E[]) [ring.GetZero(), ring.GetOne()])
         {
             E ea = a.Evaluate(subs),
                 es = xgcd[1].Evaluate(subs),
@@ -1259,7 +1272,7 @@ public static class UnivariateGCD
     //             .MapCoefficients(numberField, (cf) => cf.Scale(scaleReciprocal));
     //     }
     // }
-    
+
     // TODO
     // private static void PseudoMonicize(UnivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> a)
     // {

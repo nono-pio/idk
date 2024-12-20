@@ -88,11 +88,10 @@ static (int, int) sqrt(int n)
 // var f = D.ExprToRMPoly(D.f).ToUniPolynomialOfRational(1);
 // print(Risch.PolynomialReduce(f.Numerator, D, 1));
 
-var polyA = new UnivariatePolynomial<long>(Rings.Zp64(3), [2, 0, 2, 0, 2]);
-var polyB = new UnivariatePolynomial<long>(Rings.Zp64(3), [1, 3, 3, 1]);
+var polyA = new UnivariatePolynomial<Rational<BigInteger>>(Rings.Q, Rings.Q.FromArray([2, 0, 2, 0, 2]));
+var polyB = new UnivariatePolynomial<Rational<BigInteger>>(Rings.Q, Rings.Q.FromArray([1, 3, 3, 1]));
 
 print(polyA);
 print(polyB);
-var fac = UnivariateFactorization.Factor(polyA);
-print(fac);
-print(fac.Multiply(false));
+print(IrreduciblePolynomials.IrreducibleQ(polyA));
+print(IrreduciblePolynomials.IrreducibleQ(polyB));

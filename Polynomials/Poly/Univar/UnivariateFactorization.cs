@@ -15,8 +15,9 @@ public static class UnivariateFactorization
             return FactorInGF(poly);
         else if (poly.IsOverZ())
             return FactorInZ(poly);
-        // else if (Util.IsOverRationals(poly))
-        //     return FactorInQ((UnivariatePolynomial)poly);
+        else if (Util.IsOverRationals(poly))
+            return (PolynomialFactorDecomposition<UnivariatePolynomial<E>>)GenericHandler.InvokeForGeneric<E>(
+                typeof(Rational<>), nameof(FactorInQ), typeof(UnivariateFactorization), poly); //FactorInQ(poly);
         // else if (Util.IsOverSimpleNumberField(poly))
         //     return (PolynomialFactorDecomposition<Poly>)FactorInNumberField((UnivariatePolynomial)poly);
         // else if (Util.IsOverMultipleFieldExtension(poly))
@@ -60,15 +61,15 @@ public static class UnivariateFactorization
     // }
 
     //
-    // public static PolynomialFactorDecomposition<UnivariatePolynomial<Rational<E>>> FactorInQ<E>(
-    //     UnivariatePolynomial<Rational<E>> poly)
-    // {
-    //     (UnivariatePolynomial<E>, E) cmd = Util.ToCommonDenominator(poly);
-    //     UnivariatePolynomial<E> integral = cmd.Item1;
-    //     E denominator = cmd.Item2;
-    //     return Factor(integral).MapTo((p) => Util.AsOverRationals(poly.ring, p))
-    //         .AddUnit(poly.CreateConstant(new Rational<E>(integral.ring, integral.ring.GetOne(), denominator)));
-    // }
+    public static PolynomialFactorDecomposition<UnivariatePolynomial<Rational<E>>> FactorInQ<E>(
+        UnivariatePolynomial<Rational<E>> poly)
+    {
+        (UnivariatePolynomial<E>, E) cmd = Util.ToCommonDenominator(poly);
+        UnivariatePolynomial<E> integral = cmd.Item1;
+        E denominator = cmd.Item2;
+        return Factor(integral).MapTo((p) => Util.AsOverRationals(poly.ring, p))
+            .AddUnit(poly.CreateConstant(new Rational<E>(integral.ring, integral.ring.GetOne(), denominator)));
+    }
     //
     // private static PolynomialFactorDecomposition<UnivariatePolynomial<mPoly>>
     //     FactorInMultipleFieldExtension<Term extends AMonomial<Term>, mPoly
@@ -104,7 +105,8 @@ public static class UnivariateFactorization
     }
 
 
-    private static PolynomialFactorDecomposition<UnivariatePolynomial<E>>? EarlyFactorizationChecks<E>(UnivariatePolynomial<E> poly)
+    private static PolynomialFactorDecomposition<UnivariatePolynomial<E>>? EarlyFactorizationChecks<E>(
+        UnivariatePolynomial<E> poly)
     {
         if (poly.Degree() <= 1 || poly.IsMonomial())
             return PolynomialFactorDecomposition<UnivariatePolynomial<E>>.Of(poly.LcAsPoly(),
@@ -129,7 +131,8 @@ public static class UnivariateFactorization
     }
 
 
-    public static PolynomialFactorDecomposition<UnivariatePolynomial<E>> FactorSquareFreeInGF<E>(UnivariatePolynomial<E> poly)
+    public static PolynomialFactorDecomposition<UnivariatePolynomial<E>> FactorSquareFreeInGF<E>(
+        UnivariatePolynomial<E> poly)
     {
         Util.EnsureOverFiniteField(poly);
         if (CanConvertToZp64(poly))
@@ -139,7 +142,8 @@ public static class UnivariateFactorization
         return result;
     }
 
-    private static void FactorSquareFreeInGF<E>(UnivariatePolynomial<E> poly, int exponent, PolynomialFactorDecomposition<UnivariatePolynomial<E>> result)
+    private static void FactorSquareFreeInGF<E>(UnivariatePolynomial<E> poly, int exponent,
+        PolynomialFactorDecomposition<UnivariatePolynomial<E>> result)
     {
         //do distinct-degree factorization
         var ddf = DistinctDegreeFactorization.GetDistinctDegreeFactorization(poly);
@@ -160,7 +164,8 @@ public static class UnivariateFactorization
         }
     }
 
-    private static void FactorInGF<E>(UnivariatePolynomial<E> poly, PolynomialFactorDecomposition<UnivariatePolynomial<E>> result)
+    private static void FactorInGF<E>(UnivariatePolynomial<E> poly,
+        PolynomialFactorDecomposition<UnivariatePolynomial<E>> result)
     {
         var @base = FactorOutMonomial(poly);
         if (!@base.monomial.IsConstant())
@@ -179,7 +184,8 @@ public static class UnivariateFactorization
         }
     }
 
-    private static void AssertDistinctDegreeFactorization<E>(UnivariatePolynomial<E> poly, PolynomialFactorDecomposition<UnivariatePolynomial<E>> factorization)
+    private static void AssertDistinctDegreeFactorization<E>(UnivariatePolynomial<E> poly,
+        PolynomialFactorDecomposition<UnivariatePolynomial<E>> factorization)
     {
     }
 
@@ -296,14 +302,14 @@ public static class UnivariateFactorization
                     .PrimitivePart();
                 if (!(fRest.Lc() % factor.Lc()).IsZero || !(fRest.Cc() % factor.Cc()).IsZero)
                     continue;
-                var mRest = factory.CreateConstant(fRest.Lc()/factor.Lc());
+                var mRest = factory.CreateConstant(fRest.Lc() / factor.Lc());
                 var restIndexes = Utils.Utils.IntSetDifference(modIndexes, indexes);
                 foreach (var i in restIndexes)
                     mRest = mRest.Multiply(modularFactors[i]);
                 var rest = UnivariatePolynomial<BigInteger>.AsPolyZSymmetric(mRest)
                     .PrimitivePart();
                 if (!(factor.Lc() * rest.Lc()).Equals(fRest.Lc()) ||
-                    !(factor.Cc()*rest.Cc()).Equals(fRest.Cc()))
+                    !(factor.Cc() * rest.Cc()).Equals(fRest.Cc()))
                     continue;
                 if (rest.Clone().Multiply(factor).Equals(fRest))
                 {
@@ -338,7 +344,7 @@ public static class UnivariateFactorization
     {
         if (val < 0)
         {
-            var l = BigPrimes.NextPrime((long) val);
+            var l = BigPrimes.NextPrime((long)val);
             return (int)l;
         }
         else
@@ -485,7 +491,8 @@ public static class UnivariateFactorization
         return ReconstructFactorsZ(poly, modularFactors);
     }
 
-    public static PolynomialFactorDecomposition<UnivariatePolynomial<E>> FactorSquareFreeInZ<E>(UnivariatePolynomial<E> poly)
+    public static PolynomialFactorDecomposition<UnivariatePolynomial<E>> FactorSquareFreeInZ<E>(
+        UnivariatePolynomial<E> poly)
     {
         EnsureIntegersDomain(poly);
         if (poly.Degree() <= 1 || poly.IsMonomial())
@@ -503,19 +510,22 @@ public static class UnivariateFactorization
         return FactorSquareFreeInZ0(poly.Clone().DivideByLC(content)).SetUnit(content);
     }
 
-    private static PolynomialFactorDecomposition<UnivariatePolynomial<E>> FactorSquareFreeInZ0<E>(UnivariatePolynomial<E> poly)
+    private static PolynomialFactorDecomposition<UnivariatePolynomial<E>> FactorSquareFreeInZ0<E>(
+        UnivariatePolynomial<E> poly)
     {
         if (poly is UnivariatePolynomialZ64 pZ64)
             return FactorSquareFreeInZ0(pZ64) as PolynomialFactorDecomposition<UnivariatePolynomial<E>>;
-        else
-            return FactorSquareFreeInZ0(poly);
+        else if (poly is UnivariatePolynomial<BigInteger> pZ)
+            return FactorSquareFreeInZ0(pZ) as PolynomialFactorDecomposition<UnivariatePolynomial<E>>;
+
+        throw new NotImplementedException();
     }
 
     private static void EnsureIntegersDomain<E>(UnivariatePolynomial<E> poly)
     {
         if (poly.ring is Integers || poly.ring is Integers64)
             return;
-        
+
         throw new ArgumentException("Not an integers ring for factorization in Z[x]");
     }
 
@@ -540,12 +550,14 @@ public static class UnivariateFactorization
         return result.SetUnit(content);
     }
 
-    private static void FactorInZ<E>(UnivariatePolynomial<E> poly, PolynomialFactorDecomposition<UnivariatePolynomial<E>> result)
+    private static void FactorInZ<E>(UnivariatePolynomial<E> poly,
+        PolynomialFactorDecomposition<UnivariatePolynomial<E>> result)
     {
         FactorGeneric(poly, result, UnivariateFactorization.FactorSquareFreeInZ0);
     }
 
-    private static void FactorGeneric<E>(UnivariatePolynomial<E> poly, PolynomialFactorDecomposition<UnivariatePolynomial<E>> result,
+    private static void FactorGeneric<E>(UnivariatePolynomial<E> poly,
+        PolynomialFactorDecomposition<UnivariatePolynomial<E>> result,
         Func<UnivariatePolynomial<E>, PolynomialFactorDecomposition<UnivariatePolynomial<E>>> factorSquareFree)
     {
         var @base = FactorOutMonomial(poly);

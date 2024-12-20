@@ -46,11 +46,10 @@ public static class Util
     //     throw new NotImplementedException();
     // }
 
-    // TODO
-    // public static bool IsOverRationals<E>(UnivariatePolynomial<E> poly)
-    // {
-    //     return poly.ring is Rational;
-    // }
+    public static bool IsOverRationals<E>(UnivariatePolynomial<E> poly)
+    {
+        return poly.ring is IRationals;
+    }
 
     // TODO
     // public static bool IsOverSimpleFieldExtension<T>(T poly) where T : IPolynomial<T>
@@ -122,24 +121,24 @@ public static class Util
     // }
     //
     //
-    // public static (UnivariatePolynomial<E>, E) ToCommonDenominator<E>(UnivariatePolynomial<Rational<E>> poly)
-    // {
-    //     Ring<Rational<E>> field = poly.ring;
-    //     Ring<E> integralRing = field.GetOne().ring;
-    //     E denominator = integralRing.GetOne();
-    //     for (int i = 0; i <= poly.Degree(); i++)
-    //         if (!poly.IsZeroAt(i))
-    //             denominator = integralRing.Lcm(denominator, poly[i].Denominator());
-    //     E[] data = new E[poly.Degree() + 1];
-    //     for (int i = 0; i <= poly.Degree(); i++)
-    //     {
-    //         Rational<E> cf = poly[i].Multiply(denominator);
-    //         data[i] = cf.Numerator();
-    //     }
-    //
-    //     return (UnivariatePolynomial<E>.CreateUnsafe(integralRing, data), denominator);
-    // }
-    //
+    public static (UnivariatePolynomial<E>, E) ToCommonDenominator<E>(UnivariatePolynomial<Rational<E>> poly)
+    {
+        Ring<Rational<E>> field = poly.ring;
+        Ring<E> integralRing = field.GetOne().ring;
+        E denominator = integralRing.GetOne();
+        for (int i = 0; i <= poly.Degree(); i++)
+            if (!poly.IsZeroAt(i))
+                denominator = integralRing.Lcm(denominator, poly[i].Denominator());
+        E[] data = new E[poly.Degree() + 1];
+        for (int i = 0; i <= poly.Degree(); i++)
+        {
+            Rational<E> cf = poly[i].Multiply(denominator);
+            data[i] = cf.Numerator();
+        }
+    
+        return (UnivariatePolynomial<E>.CreateUnsafe(integralRing, data), denominator);
+    }
+    
     //
     // public static E CommonDenominator<E>(UnivariatePolynomial<Rational<E>> poly)
     // {
@@ -180,12 +179,12 @@ public static class Util
     //     return (integral, denominator);
     // }
     //
-    // public static UnivariatePolynomial<Rational<E>> AsOverRationals<E>(Ring<Rational<E>> field,
-    //     UnivariatePolynomial<E> poly)
-    // {
-    //     return poly.MapCoefficients(field, cf => new Rational<E>(poly.ring, cf));
-    // }
-    //
+    public static UnivariatePolynomial<Rational<E>> AsOverRationals<E>(Ring<Rational<E>> field,
+        UnivariatePolynomial<E> poly)
+    {
+        return poly.MapCoefficients(field, cf => new Rational<E>(poly.ring, cf));
+    }
+    
     // public static MultivariatePolynomial<Rational<E>> AsOverRationals<E>(Ring<Rational<E>> field,
     //     MultivariatePolynomial<E> poly)
     // {

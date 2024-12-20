@@ -1,5 +1,6 @@
 using System.Numerics;
 using Polynomials.Primes;
+using Polynomials.Utils;
 using UnivariatePolynomialZp64 = Polynomials.Poly.Univar.UnivariatePolynomial<long>;
 using static Polynomials.Poly.Univar.Conversions64bit;
 
@@ -29,15 +30,14 @@ public static class UnivariateResultants
         return a.CreateConstant(Resultant(a, b));
     }
 
-
     public static E Resultant<E>(UnivariatePolynomial<E> a, UnivariatePolynomial<E> b)
     {
         // if (Util.IsOverMultipleFieldExtension(a))
         //     return (E)ResultantInMultipleFieldExtension((UnivariatePolynomial)a, (UnivariatePolynomial)b);
         if (a.IsOverFiniteField())
             return ClassicalPRS(a, b).Resultant();
-        // if (Util.IsOverRationals(a))
-        //     return (E)ResultantInQ((UnivariatePolynomial)a, (UnivariatePolynomial)b);
+        if (Util.IsOverRationals(a))
+            return (E)GenericHandler.InvokeForGeneric<E>(typeof(Rational<>), nameof(ResultantInQ), typeof(UnivariateResultants), a, b);//ResultantInQ(a, b);
         if (a.IsOverZ())
             return (E)(object)ModularResultant(a.AsZ(), b.AsZ());
         // if (Util.IsOverSimpleNumberField(a))
@@ -48,15 +48,15 @@ public static class UnivariateResultants
             return PrimitiveResultant(a, b, (p, q) => SubresultantPRS(p, q).Resultant());
     }
 
-    // TODO
-    // private static Rational<E> ResultantInQ<E>(UnivariatePolynomial<Rational<E>> a, UnivariatePolynomial<Rational<E>> b)
-    // {
-    //     (UnivariatePolynomial<E>, E) aZ = Util.ToCommonDenominator(a), bZ = Util.ToCommonDenominator(b);
-    //     Ring<E> ring = aZ.Item1.ring;
-    //     E resultant = Resultant(aZ.Item1, bZ.Item1);
-    //     E den = ring.Multiply(ring.Pow(aZ.Item2, b.degree), ring.Pow(bZ.Item2 a.degree));
-    //     return new Rational(ring, resultant, den);
-    // }
+    private static Rational<E> ResultantInQ<E>(UnivariatePolynomial<Rational<E>> a, UnivariatePolynomial<Rational<E>> b)
+    {
+        var aZ = Util.ToCommonDenominator(a);
+        var bZ = Util.ToCommonDenominator(b);
+        Ring<E> ring = aZ.Item1.ring;
+        E resultant = Resultant(aZ.Item1, bZ.Item1);
+        E den = ring.Multiply(ring.Pow(aZ.Item2, b.degree), ring.Pow(bZ.Item2, a.degree));
+        return new Rational<E>(ring, resultant, den);
+    }
 
     // TODO
     // private static mPoly ResultantInMultipleFieldExtension<Term extends AMonomial<Term>, mPoly

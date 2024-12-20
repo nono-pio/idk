@@ -4,7 +4,12 @@ using System.Text;
 
 namespace Polynomials.Poly.Univar;
 
-public sealed class UnivariateRing<E> : PolynomialRing<UnivariatePolynomial<E>>
+public interface IUnivariateRing
+{
+    
+}
+
+public sealed class UnivariateRing<E> : PolynomialRing<UnivariatePolynomial<E>>, IUnivariateRing
 {
     public readonly UnivariatePolynomial<E> factory;
 

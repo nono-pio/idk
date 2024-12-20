@@ -6,7 +6,12 @@ using UnivariatePolynomialZp64 = Polynomials.Poly.Univar.UnivariatePolynomial<lo
 
 namespace Polynomials.Poly.Univar;
 
-public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>
+public interface IUnivariatePolynomial
+{
+    public int Degree();
+}
+
+public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>, IUnivariatePolynomial
 {
     public readonly Ring<E> ring;
 

@@ -21,6 +21,26 @@ public static class Utils
         return result;
     }
     
+    public static int[] GetSortedDistinct(int[] values)
+    {
+        if (values.Length == 0)
+            return values;
+        Array.Sort(values);
+        int shift = 0;
+        int i = 0;
+        while (i + shift + 1 < values.Length)
+            if (values[i + shift] == values[i + shift + 1])
+                ++shift;
+            else
+            {
+                values[i] = values[i + shift];
+                ++i;
+            }
+
+        values[i] = values[i + shift];
+        return values[..(i + 1)];// Array.CopyOf(values, i + 1);
+    }
+    
     public static int[] IntSetDifference(int[] main, int[] delete)
     {
         int bPointer = 0, aPointer = 0;
@@ -62,4 +82,12 @@ public static class Utils
     {
         return rnd.Next(2) == 1;
     }
+    
+    public static E Pop<E>(this List<E> list, int index)
+    {
+        var result = list[index];
+        list.RemoveAt(index);
+        return result;
+    }
+    
 }
