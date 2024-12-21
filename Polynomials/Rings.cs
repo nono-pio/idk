@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
 using Polynomials.Poly;
+using Polynomials.Poly.Univar;
 
 namespace Polynomials;
 
@@ -15,5 +16,10 @@ public static class Rings
     public static Ring<Poly> PolynomialRing<Poly>(Poly unit) where Poly : Polynomial<Poly>
     {
         return unit.AsRing();
+    }
+    
+    public static UnivariateRing<E> UnivariateRing<E>(UnivariatePolynomial<E> factory)
+    {
+        return new UnivariateRing<E>(factory);
     }
 }

@@ -2,7 +2,7 @@ using System.Collections.ObjectModel;
 
 namespace Polynomials.Poly.Multivar;
 
-interface MonomialSetView<E> : IEnumerable<Monomial<E>>
+interface MonomialSetView<E>
 {
     IEnumerable<Monomial<E>> AscendingIterator();
     IEnumerable<Monomial<E>> DescendingIterator();
@@ -12,14 +12,14 @@ interface MonomialSetView<E> : IEnumerable<Monomial<E>>
         return AscendingIterator();
     }
 
-    Monomial<E> First()
+    public Monomial<E> First()
     {
         return AscendingIterator().First();
     }
 
-    Monomial<E> Last()
+    public Monomial<E> Last()
     {
-        return DescendingIterator().Last();
+        return DescendingIterator().First();
     }
 
     Monomial<E> Lt()

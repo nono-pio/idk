@@ -90,4 +90,16 @@ public static class Utils
         return result;
     }
     
+    public static int[] Sequence(int size)
+    {
+        return Sequence(0, size);
+    }
+
+    public static int[] Sequence(int from, int to)
+    {
+        int[] ret = new int[to - from];
+        for (int i = ret.Length - 1; i >= 0; --i)
+            ret[i] = from + i;
+        return ret;
+    }
 }

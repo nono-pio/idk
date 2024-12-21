@@ -10,7 +10,7 @@ public sealed class MonomialSet<E> : SortedDictionary<DegreeVector, Monomial<E>>
     }
 
 
-    public MonomialSet(SortedDictionary<DegreeVector, Monomial<E>> m) : base(m)
+    public MonomialSet(SortedDictionary<DegreeVector, Monomial<E>> m) : base(m, m.Comparer)
     {
     }
 
@@ -62,6 +62,10 @@ public sealed class MonomialSet<E> : SortedDictionary<DegreeVector, Monomial<E>>
         return new MonomialSet<E>(this);
     }
 
+    public IEnumerable<KeyValuePair<DegreeVector, Monomial<E>>> EntryIterator()
+    {
+        return this;
+    }
 
     public new IEnumerator<Monomial<E>> GetEnumerator()
     {

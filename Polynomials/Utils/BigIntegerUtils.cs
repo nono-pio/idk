@@ -143,6 +143,7 @@ public static class BigIntegerUtils
     private static readonly BigInteger SMALL_PRIME_PRODUCT = new(3L * 5 * 7 * 11 * 13 * 17 * 19 * 23 * 29 * 31 * 37 * 41);
     
     public static bool IsLong(this BigInteger value) => value >= long.MinValue && value <= long.MaxValue;
+    public static bool IsInt(this BigInteger value) => value >= int.MinValue && value <= int.MaxValue;
 
     public static bool IsProbablePrime(this BigInteger value, int certainty)
     {
@@ -478,5 +479,15 @@ public static class BigIntegerUtils
             x1 += originalMod;
 
         return x1;
+    }
+    
+    public static BigInteger Binomial(int n, int k)
+    {
+        if (k > n - k)
+            k = n - k;
+        BigInteger b = BigInteger.One;
+        for (int i = 1, m = n; i <= k; i++, m--)
+            b = (b * m) / i;
+        return b;
     }
 }
