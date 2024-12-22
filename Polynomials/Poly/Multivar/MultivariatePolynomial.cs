@@ -76,7 +76,7 @@ public class MultivariatePolynomial<E> : Polynomial<MultivariatePolynomial<E>>, 
 
 
     /* private factory */
-    MultivariatePolynomial<E> Create(MonomialSet<E> terms)
+    public MultivariatePolynomial<E> Create(MonomialSet<E> terms)
     {
         return Create(nVariables, ordering, terms);
     }
@@ -273,7 +273,7 @@ public class MultivariatePolynomial<E> : Polynomial<MultivariatePolynomial<E>>, 
         return LoadFrom(oth.terms);
     }
 
-    void AssertSameCoefficientRingWith(MultivariatePolynomial<E> oth)
+    public void AssertSameCoefficientRingWith(MultivariatePolynomial<E> oth)
     {
         if (!SameCoefficientRingWith(oth))
             throw new ArgumentException();
@@ -370,7 +370,7 @@ public class MultivariatePolynomial<E> : Polynomial<MultivariatePolynomial<E>>, 
     }
 
 
-    MultivariatePolynomial<E> JoinNewVariables(int newNVariables, int[] mapping)
+    public MultivariatePolynomial<E> JoinNewVariables(int newNVariables, int[] mapping)
     {
         MonomialSet<E> newData = new MonomialSet<E>(ordering);
         foreach (var term in terms)
@@ -432,7 +432,7 @@ public class MultivariatePolynomial<E> : Polynomial<MultivariatePolynomial<E>>, 
     private int[]? cachedDegrees = null;
 
 
-    protected virtual int[] DegreesRef()
+    public virtual int[] DegreesRef()
     {
         if (cachedDegrees == null)
         {
@@ -670,25 +670,24 @@ public class MultivariatePolynomial<E> : Polynomial<MultivariatePolynomial<E>>, 
         return result;
     }
 
-    // TODO
-    // public UnivariatePolynomial<MultivariatePolynomial<E>> AsUnivariate(int variable)
-    // {
-    //     MultivariateRing<E> ring = new MultivariateRing(this);
-    //     MultivariatePolynomial<E>[] univarData = ring.CreateZeroesArray(Degree(variable) + 1);
-    //     foreach (var e in terms)
-    //         univarData[e.exponents[variable]].Add(e.Set(variable, 0));
-    //     return UnivariatePolynomial<MultivariatePolynomial<E>>.CreateUnsafe(ring, univarData);
-    // }
-    //
-    // TODO
-    // public UnivariatePolynomial<MultivariatePolynomial<E>> AsUnivariateEliminate(int variable)
-    // {
-    //     MultivariateRing<E> ring = new MultivariateRing(CreateZero().DropVariable(variable));
-    //     MultivariatePolynomial<E>[] univarData = ring.CreateZeroesArray(Degree(variable) + 1);
-    //     foreach (var e in terms)
-    //         univarData[e.exponents[variable]].Add(e.Without(variable));
-    //     return UnivariatePolynomial<MultivariatePolynomial<E>>.CreateUnsafe(ring, univarData);
-    // }
+    public UnivariatePolynomial<MultivariatePolynomial<E>> AsUnivariate(int variable)
+    {
+        MultivariateRing<E> ring = new MultivariateRing<E>(this);
+        MultivariatePolynomial<E>[] univarData = ring.CreateZeroesArray(Degree(variable) + 1);
+        foreach (var e in terms)
+            univarData[e.exponents[variable]].Add(e.Set(variable, 0));
+        return UnivariatePolynomial<MultivariatePolynomial<E>>.CreateUnsafe(ring, univarData);
+    }
+    
+
+    public UnivariatePolynomial<MultivariatePolynomial<E>> AsUnivariateEliminate(int variable)
+    {
+        MultivariateRing<E> ring = new MultivariateRing<E>(CreateZero().DropVariable(variable));
+        MultivariatePolynomial<E>[] univarData = ring.CreateZeroesArray(Degree(variable) + 1);
+        foreach (var e in terms)
+            univarData[e.exponents[variable]].Add(e.Without(variable));
+        return UnivariatePolynomial<MultivariatePolynomial<E>>.CreateUnsafe(ring, univarData);
+    }
 
 
     public static MultivariatePolynomial<E> AsMultivariate(
@@ -709,11 +708,10 @@ public class MultivariatePolynomial<E> : Polynomial<MultivariatePolynomial<E>>, 
         return result;
     }
 
-    // TODO
-    // public MultivariatePolynomial<MultivariatePolynomial<E>> AsOverMultivariateEliminate(params int[] variables)
-    // {
-    //     return AsOverMultivariateEliminate(variables, ordering);
-    // }
+    public MultivariatePolynomial<MultivariatePolynomial<E>> AsOverMultivariateEliminate(params int[] variables)
+    {
+        return AsOverMultivariateEliminate(variables, ordering);
+    }
 
 
     public static MultivariatePolynomial<E> AsMultivariate(
@@ -736,11 +734,10 @@ public class MultivariatePolynomial<E> : Polynomial<MultivariatePolynomial<E>>, 
         return AsMultivariate(ContentUnivariate(variable), nVariables, variable, ordering);
     }
 
-    // TODO
-    // public MultivariatePolynomial<E> ContentExcept(int variable)
-    // {
-    //     return AsUnivariate(variable).Content();
-    // }
+    public MultivariatePolynomial<E> ContentExcept(int variable)
+    {
+        return AsUnivariate(variable).Content();
+    }
 
 
     public MultivariatePolynomial<E> MultiplyByMonomial(int variable, int exponent)
@@ -820,7 +817,7 @@ public class MultivariatePolynomial<E> : Polynomial<MultivariatePolynomial<E>>, 
     }
 
 
-    Monomial<E> CommonContent(Monomial<E>? monomial)
+    public Monomial<E> CommonContent(Monomial<E>? monomial)
     {
         if (!CcAsPoly().IsZero())
             return monomialAlgebra.GetUnitTerm(nVariables);
@@ -845,7 +842,7 @@ public class MultivariatePolynomial<E> : Polynomial<MultivariatePolynomial<E>>, 
     }
 
 
-    static int SetMin(int[] dv, int[] exponents)
+    public static int SetMin(int[] dv, int[] exponents)
     {
         int sum = 0;
         for (int i = 0; i < exponents.Length; ++i)
@@ -1094,23 +1091,22 @@ public class MultivariatePolynomial<E> : Polynomial<MultivariatePolynomial<E>>, 
         return result;
     }
 
-    // TODO
-    // public MultivariatePolynomial<MultivariatePolynomial<E>> AsOverPoly(MultivariatePolynomial<E> factory)
-    // {
-    //     MonomialSet<MultivariatePolynomial<E>> newTerms = new MonomialSet<MultivariatePolynomial<E>>(ordering);
-    //     foreach (Monomial<E> term in terms)
-    //         newTerms.Add(new Monomial<MultivariatePolynomial<E>>(term, factory.CreateConstantFromTerm(term)));
-    //     return new MultivariatePolynomial<MultivariatePolynomial<E>>(nVariables, Rings.MultivariateRing(factory),
-    //         ordering, newTerms);
-    // // }
-    //
-    // public MultivariatePolynomial<E> Composition(params MultivariatePolynomial<E>[] values)
-    // {
-    //     if (values.Length != nVariables)
-    //         throw new ArgumentException();
-    //     MultivariatePolynomial<E> factory = values[0];
-    //     return AsOverPoly(factory).Evaluate(values);
-    // }
+    public MultivariatePolynomial<MultivariatePolynomial<E>> AsOverPoly(MultivariatePolynomial<E> factory)
+    {
+        MonomialSet<MultivariatePolynomial<E>> newTerms = new MonomialSet<MultivariatePolynomial<E>>(ordering);
+        foreach (Monomial<E> term in terms)
+            newTerms.Add(new Monomial<MultivariatePolynomial<E>>(term, factory.CreateConstantFromTerm(term)));
+        return new MultivariatePolynomial<MultivariatePolynomial<E>>(nVariables, Rings.MultivariateRing(factory),
+            ordering, newTerms);
+    }
+    
+    public MultivariatePolynomial<E> Composition(params MultivariatePolynomial<E>[] values)
+    {
+        if (values.Length != nVariables)
+            throw new ArgumentException();
+        MultivariatePolynomial<E> factory = values[0];
+        return AsOverPoly(factory).Evaluate(values);
+    }
 
 
     public UnivariatePolynomial<E> Composition(params UnivariatePolynomial<E>[] values)
@@ -1130,39 +1126,36 @@ public class MultivariatePolynomial<E> : Polynomial<MultivariatePolynomial<E>>, 
         return MapCoefficients(uRing, cf => factory.CreateConstant(cf)).Evaluate(values);
     }
 
-    // TODO 
-    // public MultivariatePolynomial<E> Composition(List<MultivariatePolynomial<E>> values)
-    // {
-    //     if (nVariables == 0)
-    //         return this;
-    //     return Composition(values.ToArray());
-    // }
+    public MultivariatePolynomial<E> Composition(List<MultivariatePolynomial<E>> values)
+    {
+        if (nVariables == 0)
+            return this;
+        return Composition(values.ToArray());
+    }
 
-    // TODO
-    // public MultivariatePolynomial<E> Composition(int variable, MultivariatePolynomial<E> value)
-    // {
-    //     AssertSameCoefficientRingWith(value);
-    //     return AsUnivariate(variable).Evaluate(value);
-    // }
+    public MultivariatePolynomial<E> Composition(int variable, MultivariatePolynomial<E> value)
+    {
+        AssertSameCoefficientRingWith(value);
+        return AsUnivariate(variable).Evaluate(value);
+    }
 
-    // TODO
-    // public MultivariatePolynomial<E> Composition(int[] variables, MultivariatePolynomial<E>[] values)
-    // {
-    //     if (variables.Length == 0)
-    //         throw new ArgumentException();
-    //     if (variables.Length != values.Length)
-    //         throw new ArgumentException();
-    //     AssertSameCoefficientRingWith(values[0]);
-    //     variables = (int[])variables.Clone();
-    //     values = (MultivariatePolynomial<E>[])values.Clone();
-    //     Array.Sort(variables, values);
-    //
-    //     // R[variables][other_variables] => R[other_variables][variables]
-    //     int[] mainVariables = Utils.Utils.IntSetDifference(Utils.Utils.Sequence(0, nVariables), variables);
-    //     MultivariatePolynomial<MultivariatePolynomial<E>> r = AsOverMultivariate(mainVariables)
-    //         .Evaluate(variables, values);
-    //     return r.Cc();
-    // }
+    public MultivariatePolynomial<E> Composition(int[] variables, MultivariatePolynomial<E>[] values)
+    {
+        if (variables.Length == 0)
+            throw new ArgumentException();
+        if (variables.Length != values.Length)
+            throw new ArgumentException();
+        AssertSameCoefficientRingWith(values[0]);
+        variables = (int[])variables.Clone();
+        values = (MultivariatePolynomial<E>[])values.Clone();
+        Array.Sort(variables, values);
+    
+        // R[variables][other_variables] => R[other_variables][variables]
+        int[] mainVariables = Utils.Utils.IntSetDifference(Utils.Utils.Sequence(0, nVariables), variables);
+        MultivariatePolynomial<MultivariatePolynomial<E>> r = AsOverMultivariate(mainVariables)
+            .Evaluate(variables, values);
+        return r.Cc();
+    }
 
 
     // R[variables][other_variables] => R[other_variables][variables]
@@ -1372,51 +1365,50 @@ public class MultivariatePolynomial<E> : Polynomial<MultivariatePolynomial<E>>, 
         return new MultivariatePolynomial<UnivariatePolynomial<E>>(nVariables - 1, pDomain, ordering, newData);
     }
 
-    // TODO
-    // public MultivariatePolynomial<MultivariatePolynomial<E>> AsOverMultivariate(params int[] variables)
-    // {
-    //     Ring<MultivariatePolynomial<E>> ring = new MultivariateRing(this);
-    //     MonomialSet<MultivariatePolynomial<E>> terms = new MonomialSet<MultivariatePolynomial<E>>(ordering);
-    //     foreach (Monomial<E> term in this.terms)
-    //     {
-    //         int[] coeffExponents = new int[nVariables];
-    //         foreach (int var in variables)
-    //             coeffExponents[var] = term.exponents[var];
-    //         Monomial<MultivariatePolynomial<E>> newTerm = new Monomial<MultivariatePolynomial<E>>(term.DvSetZero(variables),
-    //             Create(new Monomial<E>(coeffExponents, coeffExponents.Sum(), term.coefficient)));
-    //         MultivariatePolynomial<MultivariatePolynomial<E>>.Add(terms, newTerm, ring);
-    //     }
-    //
-    //     return new MultivariatePolynomial<MultivariatePolynomial<E>>(nVariables, ring, ordering, terms);
-    // }
+    public MultivariatePolynomial<MultivariatePolynomial<E>> AsOverMultivariate(params int[] variables)
+    {
+        Ring<MultivariatePolynomial<E>> ring = new MultivariateRing<E>(this);
+        MonomialSet<MultivariatePolynomial<E>> terms = new MonomialSet<MultivariatePolynomial<E>>(ordering);
+        foreach (Monomial<E> term in this.terms)
+        {
+            int[] coeffExponents = new int[nVariables];
+            foreach (int var in variables)
+                coeffExponents[var] = term.exponents[var];
+            Monomial<MultivariatePolynomial<E>> newTerm = new Monomial<MultivariatePolynomial<E>>(term.DvSetZero(variables),
+                Create(new Monomial<E>(coeffExponents, coeffExponents.Sum(), term.coefficient)));
+            MultivariatePolynomial<MultivariatePolynomial<E>>.Add(terms, newTerm, ring);
+        }
+    
+        return new MultivariatePolynomial<MultivariatePolynomial<E>>(nVariables, ring, ordering, terms);
+    }
 
-    // TODO
-    // public MultivariatePolynomial<MultivariatePolynomial<E>> AsOverMultivariateEliminate(int[] variables,
-    //     IComparer<DegreeVector> ordering)
-    // {
-    //     variables = (int[])variables.Clone();
-    //     Array.Sort(variables);
-    //     int[] restVariables = Utils.Utils.IntSetDifference(Utils.Utils.Sequence(nVariables), variables);
-    //     Ring<MultivariatePolynomial<E>> ring =
-    //         new MultivariateRing(Create(variables.Length, new MonomialSet<E>(ordering)));
-    //     MonomialSet<MultivariatePolynomial<E>> terms = new MonomialSet<MultivariatePolynomial<E>>(ordering);
-    //     foreach (Monomial<E> term in this.terms)
-    //     {
-    //         int i = 0;
-    //         int[] coeffExponents = new int[variables.Length];
-    //         foreach (int var in variables)
-    //             coeffExponents[i++] = term.exponents[var];
-    //         i = 0;
-    //         int[] termExponents = new int[restVariables.Length];
-    //         foreach (int var in restVariables)
-    //             termExponents[i++] = term.exponents[var];
-    //         Monomial<MultivariatePolynomial<E>> newTerm = new Monomial<MultivariatePolynomial<E>>(termExponents,
-    //             Create(variables.Length, this.ring, this.ordering, new Monomial<E>(coeffExponents, term.coefficient)));
-    //         MultivariatePolynomial<MultivariatePolynomial<E>>.Add(terms, newTerm, ring);
-    //     }
-    //
-    //     return new MultivariatePolynomial<MultivariatePolynomial<E>>(restVariables.Length, ring, ordering, terms);
-    // }
+
+    public MultivariatePolynomial<MultivariatePolynomial<E>> AsOverMultivariateEliminate(int[] variables,
+        IComparer<DegreeVector> ordering)
+    {
+        variables = (int[])variables.Clone();
+        Array.Sort(variables);
+        int[] restVariables = Utils.Utils.IntSetDifference(Utils.Utils.Sequence(nVariables), variables);
+        Ring<MultivariatePolynomial<E>> ring =
+            new MultivariateRing<E>(Create(variables.Length, new MonomialSet<E>(ordering)));
+        MonomialSet<MultivariatePolynomial<E>> terms = new MonomialSet<MultivariatePolynomial<E>>(ordering);
+        foreach (Monomial<E> term in this.terms)
+        {
+            int i = 0;
+            int[] coeffExponents = new int[variables.Length];
+            foreach (int var in variables)
+                coeffExponents[i++] = term.exponents[var];
+            i = 0;
+            int[] termExponents = new int[restVariables.Length];
+            foreach (int var in restVariables)
+                termExponents[i++] = term.exponents[var];
+            Monomial<MultivariatePolynomial<E>> newTerm = new Monomial<MultivariatePolynomial<E>>(termExponents,
+                Create(variables.Length, this.ring, this.ordering, new Monomial<E>(coeffExponents, term.coefficient)));
+            MultivariatePolynomial<MultivariatePolynomial<E>>.Add(terms, newTerm, ring);
+        }
+    
+        return new MultivariatePolynomial<MultivariatePolynomial<E>>(restVariables.Length, ring, ordering, terms);
+    }
 
 
     public static MultivariatePolynomial<E> AsNormalMultivariate(
@@ -1491,6 +1483,29 @@ public class MultivariatePolynomial<E> : Polynomial<MultivariatePolynomial<E>>, 
         foreach (Monomial<BigInteger> term in poly.terms)
             newTerms.Add(term.SetCoefficient(ring.SymmetricForm(term.coefficient)));
         return new MultivariatePolynomial<BigInteger>(poly.nVariables, Rings.Z, poly.ordering, newTerms);
+    }
+    
+    public static MultivariatePolynomial<BigInteger> AsPolyZSymmetric(MultivariatePolynomialZp64 poly)
+    {
+        MonomialSet<BigInteger> bTerms = new MonomialSet<BigInteger>(poly.ordering);
+        foreach (var t in poly.terms)
+            bTerms.Add(new Monomial<BigInteger>(t.exponents, t.totalDegree,
+                new BigInteger(((IntegersZp64)poly.ring).SymmetricForm(t.coefficient))));
+        return new MultivariatePolynomial<BigInteger>(poly.nVariables, Rings.Z, poly.ordering, bTerms);
+    }
+
+    public MultivariatePolynomial<BigInteger> ToBigPoly()
+    {
+        if (typeof(E) == typeof(BigInteger))
+            return this as MultivariatePolynomial<BigInteger>;
+
+        if (ring is IntegersZp64 zp64)
+            return AsZp64().MapCoefficients(zp64.AsGenericRing(), el => new BigInteger(el));
+        
+        if (ring is Integers64 z64)
+            return AsT<long>().MapCoefficients(Rings.Z, el => new BigInteger(el));
+
+        throw new Exception();
     }
 
 
@@ -2193,7 +2208,7 @@ public class MultivariatePolynomial<E> : Polynomial<MultivariatePolynomial<E>>, 
     }
 
 
-    MultivariatePolynomial<E> Evaluate(PrecomputedPowersHolder powers, int[] variables)
+    public MultivariatePolynomial<E> Evaluate(PrecomputedPowersHolder powers, int[] variables)
     {
         MonomialSet<E> newData = new MonomialSet<E>(ordering);
         foreach (Monomial<E> el in terms)
@@ -2271,7 +2286,7 @@ public class MultivariatePolynomial<E> : Polynomial<MultivariatePolynomial<E>>, 
     }
 
     private const int DEFAULT_POWERS_CACHE_SIZE = 64;
-    private const int MAX_POWERS_CACHE_SIZE = 1014;
+    public const int MAX_POWERS_CACHE_SIZE = 1014;
 
     public sealed class PrecomputedPowers
     {
@@ -2364,7 +2379,7 @@ public class MultivariatePolynomial<E> : Polynomial<MultivariatePolynomial<E>>, 
             this.powers = powers;
         }
 
-        void Set(int i, E point)
+        public void Set(int i, E point)
         {
             if (powers[i] == null || !powers[i].value.Equals(point))
                 powers[i] = new PrecomputedPowers(
@@ -2788,12 +2803,12 @@ public class MultivariatePolynomial<E> : Polynomial<MultivariatePolynomial<E>>, 
 
     public override MultivariatePolynomial<E> DivideExact(MultivariatePolynomial<E> other)
     {
-        throw new NotImplementedException(); // TODO
+        return MultivariateDivision.DivideExact(this, other);
     }
 
     public override PolynomialRing<MultivariatePolynomial<E>> AsRing()
     {
-        throw new NotImplementedException(); // TODO
+        return Rings.MultivariateRing(this);
     }
 
 
@@ -2997,5 +3012,29 @@ public class MultivariatePolynomial<E> : Polynomial<MultivariatePolynomial<E>>, 
         }
 
         return sb.ToString();
+    }
+    
+    public MultivariatePolynomial<BigInteger> AsZ()
+    {
+        if (ring is not Integers && ring is not IntegersZp)
+            throw new InvalidOperationException("Not a Zp64 ring");
+
+        return this as MultivariatePolynomial<BigInteger>;
+    }
+    
+    public MultivariatePolynomialZp64 AsZp64()
+    {
+        if (ring is not IntegersZp64 rZp64)
+            throw new InvalidOperationException("Not a Zp64 ring");
+
+        return this as MultivariatePolynomialZp64;
+    }
+    
+    public MultivariatePolynomial<T> AsT<T>()
+    {
+        if (typeof(E) != typeof(T))
+            throw new InvalidOperationException("Not a Zp64 ring");
+
+        return this as MultivariatePolynomial<T>;
     }
 }

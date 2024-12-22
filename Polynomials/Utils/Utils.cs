@@ -102,4 +102,55 @@ public static class Utils
             ret[i] = from + i;
         return ret;
     }
+    
+    public static int[] Max(int[] a, int[] b)
+    {
+        int[] r = new int[a.Length];
+        for (int i = 0; i < a.Length; i++)
+            r[i] = Math.Max(a[i], b[i]);
+        return r;
+    }
+    
+    public static T[] Swap<T>(T[] a, int i, int j)
+    {
+        var t = a[i];
+        a[i] = a[j];
+        a[j] = t;
+        return a;
+    }
+    
+    public static T[] AddAll<T>(T[] array1, params T[] array2)
+    {
+        T[] r = new T[array1.Length + array2.Length];
+        Array.Copy(array1, 0, r, 0, array1.Length);
+        Array.Copy(array2, 0, r, array1.Length, array2.Length);
+        return r;
+    }
+    
+    public static T[] Remove<T>(T[] array, int i)
+    {
+        if (i >= array.Length)
+            throw new IndexOutOfRangeException();
+        if (array.Length == 1)
+        {
+            return new T[0];
+        }
+        else if (array.Length == 2)
+            return new T[]
+            {
+                array[1 ^ i]
+            };
+        T[] newArray = new T[array.Length - 1];
+        Array.Copy(array, 0, newArray, 0, i);
+        if (i != array.Length - 1)
+            Array.Copy(array, i + 1, newArray, i, array.Length - i - 1);
+        return newArray;
+    }
+    public static int[] Negate(int[] arr)
+    {
+        for (int i = 0; i < arr.Length; i++)
+            arr[i] = -arr[i];
+        return arr;
+    }
+    
 }

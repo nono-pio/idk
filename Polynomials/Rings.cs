@@ -1,5 +1,6 @@
 ﻿using System.Numerics;
 using Polynomials.Poly;
+using Polynomials.Poly.Multivar;
 using Polynomials.Poly.Univar;
 
 namespace Polynomials;
@@ -21,5 +22,10 @@ public static class Rings
     public static UnivariateRing<E> UnivariateRing<E>(UnivariatePolynomial<E> factory)
     {
         return new UnivariateRing<E>(factory);
+    }
+    
+    public static MultivariateRing<E> MultivariateRing<E>(MultivariatePolynomial<E> factory)
+    {
+        return new MultivariateRing<E>(factory);
     }
 }
