@@ -1,4 +1,6 @@
 ﻿using System.Reflection;
+using Polynomials.Poly.Multivar;
+using Polynomials.Poly.Univar;
 
 namespace Polynomials.Utils;
 
@@ -35,5 +37,47 @@ public static class GenericHandler
         }
 
         throw new NotImplementedException($"No implementation found for type {typeof(T)} with generic base {genericDefinition}.");
+    }
+
+    /// Create a univariate polynomial of univariate polynomials of unknown type.
+    public static IUnivariatePolynomial CreateGenericUniPoly(IUnivariatePolynomial[] data)
+    {
+        var factory = data[0];
+        var innerType = factory.GetType().GetGenericArguments()[0];
+
+        var createMethod = typeof(GenericHandler).GetMethod(nameof(CreateUnivariatePolynomial))?.MakeGenericMethod(innerType);
+        
+        if (createMethod != null)
+        {
+            return (IUnivariatePolynomial)(createMethod.Invoke(null, new object[] { data }) ?? throw new Exception());
+        }
+
+        throw new Exception();
+    }
+    
+    /// Create a multivariate polynomial of multivariate polynomials of unknown type.
+    public static IMultivariatePolynomial CreateGenericMultiPoly(IMultivariatePolynomial[] data)
+    {
+        var factory = data[0];
+        var innerType = factory.GetType().GetGenericArguments()[0];
+
+        var createMethod = typeof(GenericHandler).GetMethod(nameof(CreateMultivariatePolynomial))?.MakeGenericMethod(innerType);
+        
+        if (createMethod != null)
+        {
+            return (IMultivariatePolynomial)(createMethod.Invoke(null, new object[] { data }) ?? throw new Exception());
+        }
+
+        throw new Exception();
+    }
+
+    private static UnivariatePolynomial<UnivariatePolynomial<T>> CreateUnivariatePolynomial<T>(UnivariatePolynomial<T>[] data)
+    {
+        return UnivariatePolynomial<UnivariatePolynomial<T>>.Create(Rings.UnivariateRing(data[0]), data);
+    }
+    
+    private static MultivariatePolynomial<MultivariatePolynomial<T>> CreateMultivariatePolynomial<T>(Monomial<MultivariatePolynomial<T>>[] data)
+    {
+        return MultivariatePolynomial<MultivariatePolynomial<T>>.Create(1, Rings.MultivariateRing(data[0].coefficient), MonomialOrder.GRLEX, data);
     }
 }

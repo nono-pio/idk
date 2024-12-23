@@ -1,4 +1,3 @@
-using System.Numerics;
 using Polynomials.Poly.Multivar;
 using Polynomials.Utils;
 
@@ -8,6 +7,13 @@ namespace Polynomials.Poly.Univar;
 public static class Util
 {
     public static void EnsureOverFiniteField<E>(params UnivariatePolynomial<E>[] polys)
+    {
+        foreach (var poly in polys)
+            if (!poly.IsOverFiniteField())
+                throw new ArgumentException("Polynomial over finite field is expected; " + poly.GetType());
+    }
+    
+    public static void EnsureOverFiniteField<E>(params MultivariatePolynomial<E>[] polys)
     {
         foreach (var poly in polys)
             if (!poly.IsOverFiniteField())

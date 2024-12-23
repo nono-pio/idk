@@ -1,5 +1,6 @@
 using System.Numerics;
 using System.Text;
+using Polynomials.Poly.Multivar;
 using Polynomials.Utils;
 using UnivariatePolynomialZ64 = Polynomials.Poly.Univar.UnivariatePolynomial<long>;
 using UnivariatePolynomialZp64 = Polynomials.Poly.Univar.UnivariatePolynomial<long>;
@@ -8,6 +9,7 @@ namespace Polynomials.Poly.Univar;
 
 public interface IUnivariatePolynomial
 {
+    public object GetAsObject(int i);
     public int Degree();
 }
 
@@ -119,17 +121,16 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>, IUni
         throw new Exception();
     }
 
-    // TODO
-    // public static UnivariatePolynomialZp64 AsOverZp64Q(UnivariatePolynomial<Rational<BigInteger>> poly,
-    //     IntegersZp64 ring)
-    // {
-    //     long modulus = ring.modulus;
-    //     long[] data = new long[poly.degree + 1];
-    //     for (int i = 0; i < data.Length; i++)
-    //         data[i] = ring.Divide(poly.data[i].Numerator().Mod(modulus).LongValueExact(),
-    //             poly.data[i].Denominator().Mod(modulus).LongValueExact());
-    //     return UnivariatePolynomialZp64.Create(ring, data);
-    // }
+    public static UnivariatePolynomialZp64 AsOverZp64Q(UnivariatePolynomial<Rational<BigInteger>> poly,
+        IntegersZp64 ring)
+    {
+        long modulus = ring.modulus;
+        long[] data = new long[poly.degree + 1];
+        for (int i = 0; i < data.Length; i++)
+            data[i] = ring.Divide((long)(poly.data[i].Numerator() % modulus),
+                (long)(poly.data[i].Denominator() % modulus));
+        return UnivariatePolynomialZp64.Create(ring, data);
+    }
     public UnivariatePolynomialZ64 AsPolyZ(bool copy)
     {
         if (this is UnivariatePolynomialZp64 zp && ring is IntegersZp64)
@@ -204,6 +205,11 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>, IUni
         thisZ.degree += oth.degree;
         thisZ.FixDegree();
         return thisZ;
+    }
+
+    public object GetAsObject(int i)
+    {
+        return Get(i);
     }
 
     public int Degree()
@@ -551,6 +557,14 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>, IUni
     {
         return ring.PerfectPowerExponent();
     }
+    
+    public HashSet<int> Exponents() {
+        HashSet<int> degrees = new HashSet<int>();
+        for (int i = Degree(); i >= 0; --i)
+            if (!IsZeroAt(i))
+                degrees.Add(i);
+        return degrees;
+    }
 
 
     public static BigInteger MignotteBound(UnivariatePolynomial<BigInteger> poly)
@@ -778,22 +792,19 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>, IUni
         return result;
     }
 
-    // TODO
-    // public MultivariatePolynomial<E> Composition(AMultivariatePolynomial<E> value)
-    // {
-    //     if (!(value is MultivariatePolynomial))
-    //         throw new ArgumentException();
-    //     if (!((MultivariatePolynomial)value).ring.Equals(ring))
-    //         throw new ArgumentException();
-    //     if (value.IsOne())
-    //         return AsMultivariate();
-    //     if (value.IsZero())
-    //         return CcAsPoly().AsMultivariate();
-    //     MultivariatePolynomial<E> result = (MultivariatePolynomial<E>)value.CreateZero();
-    //     for (int i = degree; i >= 0; --i)
-    //         result = result.Multiply((MultivariatePolynomial<E>)value).Add(data[i]);
-    //     return result;
-    // }
+    public MultivariatePolynomial<E> Composition(MultivariatePolynomial<E> value)
+    {
+        if (!value.ring.Equals(ring))
+            throw new ArgumentException();
+        if (value.IsOne())
+            return AsMultivariate();
+        if (value.IsZero())
+            return CcAsPoly().AsMultivariate();
+        MultivariatePolynomial<E> result = (MultivariatePolynomial<E>)value.CreateZero();
+        for (int i = degree; i >= 0; --i)
+            result = result.Multiply((MultivariatePolynomial<E>)value).Add(data[i]);
+        return result;
+    }
 
 
     public UnivariatePolynomial<E> Scale(E scaling)
@@ -848,7 +859,7 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>, IUni
     }
 
 
-    public UnivariatePolynomial<E> Add(UnivariatePolynomial<E> oth)
+    public override UnivariatePolynomial<E> Add(UnivariatePolynomial<E> oth)
     {
         AssertSameCoefficientRingWith(oth);
         if (oth.IsZero())
@@ -1147,17 +1158,15 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>, IUni
         return data;
     }
 
-    // TODO
-    // public MultivariatePolynomial<E> AsMultivariate()
-    // {
-    //     return AsMultivariate(MonomialOrder.DEFAULT);
-    // }
+    public MultivariatePolynomial<E> AsMultivariate()
+    {
+        return AsMultivariate(MonomialOrder.DEFAULT);
+    }
 
-    // TODO
-    // public MultivariatePolynomial<E> AsMultivariate(IComparer<DegreeVector> ordering)
-    // {
-    //     return MultivariatePolynomial<E>.AsMultivariate(this, 1, 0, ordering);
-    // }
+    public MultivariatePolynomial<E> AsMultivariate(IComparer<DegreeVector> ordering)
+    {
+        return MultivariatePolynomial<E>.AsMultivariate(this, 1, 0, ordering);
+    }
 
 
     public int CompareTo(UnivariatePolynomial<E>? o)

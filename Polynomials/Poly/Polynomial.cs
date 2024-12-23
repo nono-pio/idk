@@ -15,6 +15,7 @@ public abstract class Polynomial<Poly> where Poly : Polynomial<Poly>
     public abstract Poly Monic();
     public abstract Poly Clone();
     public abstract Poly Multiply(Poly other);
+    public abstract Poly Add(Poly other);
     public abstract bool IsOverField();
     public abstract bool IsOne();
     public abstract Poly CreateOne();

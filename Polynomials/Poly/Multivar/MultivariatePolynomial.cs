@@ -8,7 +8,12 @@ using MultivariatePolynomialZp64 = Polynomials.Poly.Multivar.MultivariatePolynom
 
 namespace Polynomials.Poly.Multivar;
 
-public class MultivariatePolynomial<E> : Polynomial<MultivariatePolynomial<E>>, MonomialSetView<E>
+public interface IMultivariatePolynomial
+{
+    
+}
+
+public class MultivariatePolynomial<E> : Polynomial<MultivariatePolynomial<E>>, MonomialSetView<E>, IMultivariatePolynomial
 {
     public readonly int nVariables;
 
@@ -152,7 +157,7 @@ public class MultivariatePolynomial<E> : Polynomial<MultivariatePolynomial<E>>, 
     }
 
 
-    protected virtual void Release()
+    public virtual void Release()
     {
         cachedDegrees = null;
         cachedDegree = -1;
@@ -881,7 +886,7 @@ public class MultivariatePolynomial<E> : Polynomial<MultivariatePolynomial<E>>, 
     }
 
 
-    public MultivariatePolynomial<E> Add(MultivariatePolynomial<E> oth)
+    public override MultivariatePolynomial<E> Add(MultivariatePolynomial<E> oth)
     {
         if (terms == oth.terms)
             return Multiply(2);
@@ -1216,7 +1221,7 @@ public class MultivariatePolynomial<E> : Polynomial<MultivariatePolynomial<E>>, 
 
 
     /* ============================================ Factory methods ============================================ */
-    static void Add(SortedDictionary<DegreeVector, Monomial<E>> polynomial, Monomial<E> term, Ring<E> ring)
+    public static void Add(SortedDictionary<DegreeVector, Monomial<E>> polynomial, Monomial<E> term, Ring<E> ring)
     {
         if (ring.IsZero(term.coefficient))
             return;
@@ -1897,55 +1902,55 @@ public class MultivariatePolynomial<E> : Polynomial<MultivariatePolynomial<E>>, 
         return Monic(ordering, olc);
     }
 
-    // TODO
-    // public UnivariatePolynomial ToDenseRecursiveForm()
-    // {
-    //     if (nVariables == 0)
-    //         throw new ArgumentException("#variables = 0");
-    //     return ToDenseRecursiveForm(nVariables - 1);
-    // }
-    //
-    //
-    // private UnivariatePolynomial ToDenseRecursiveForm(int variable)
-    // {
-    //     if (variable == 0)
-    //         return AsUnivariate();
-    //     UnivariatePolynomial<MultivariatePolynomial<E>> result = AsUnivariateEliminate(variable);
-    //     IUnivariatePolynomial[] data = new IUnivariatePolynomial[result.Degree() + 1];
-    //     for (int j = 0; j < data.Length; ++j)
-    //         data[j] = result[j].ToDenseRecursiveForm(variable - 1);
-    //     return UnivariatePolynomial.Create(Rings.PolynomialRing(data[0]), data);
-    // }
-    //
-    //
-    // public static MultivariatePolynomial<E> FromDenseRecursiveForm(UnivariatePolynomial<E> recForm, int nVariables,
-    //     IComparer<DegreeVector> ordering)
-    // {
-    //     return FromDenseRecursiveForm(recForm, nVariables, ordering, nVariables - 1);
-    // }
-    //
-    //
-    // private static MultivariatePolynomial<E> FromDenseRecursiveForm(UnivariatePolynomial recForm, int nVariables,
-    //     IComparer<DegreeVector> ordering, int variable)
-    // {
-    //     if (variable == 0)
-    //         return (MultivariatePolynomial<E>)AsMultivariate(recForm, nVariables, 0, ordering);
-    //     UnivariatePolynomial<UnivariatePolynomial> _recForm = (UnivariatePolynomial<UnivariatePolynomial>)recForm;
-    //     MultivariatePolynomial<E>[] data = new MultivariatePolynomial[_recForm.Degree() + 1];
-    //     for (int j = 0; j < data.Length; ++j)
-    //         data[j] = FromDenseRecursiveForm(_recForm[j], nVariables, ordering, variable - 1);
-    //     return AsMultivariate(UnivariatePolynomial.Create(Rings.MultivariateRing(data[0]), data), variable);
-    // }
-    //
-    //
-    // public static E EvaluateDenseRecursiveForm(UnivariatePolynomial recForm, int nVariables, E[] values)
+    
+    public IUnivariatePolynomial ToDenseRecursiveForm()
+    {
+        if (nVariables == 0)
+            throw new ArgumentException("#variables = 0");
+        return ToDenseRecursiveForm(nVariables - 1);
+    }
+    
+    
+    private IUnivariatePolynomial ToDenseRecursiveForm(int variable)
+    {
+        if (variable == 0)
+            return AsUnivariate();
+        UnivariatePolynomial<MultivariatePolynomial<E>> result = AsUnivariateEliminate(variable);
+        IUnivariatePolynomial[] data = new IUnivariatePolynomial[result.Degree() + 1];
+        for (int j = 0; j < data.Length; ++j)
+            data[j] = result[j].ToDenseRecursiveForm(variable - 1);
+        return GenericHandler.CreateGenericUniPoly(data);
+        // return UnivariatePolynomial.Create(Rings.UnivariateRing(data[0]), data);
+    }
+    
+    
+    public static MultivariatePolynomial<E> FromDenseRecursiveForm(UnivariatePolynomial<E> recForm, int nVariables,
+        IComparer<DegreeVector> ordering)
+    {
+        return FromDenseRecursiveForm(recForm, nVariables, ordering, nVariables - 1);
+    }
+    
+    
+    private static MultivariatePolynomial<E> FromDenseRecursiveForm(IUnivariatePolynomial recForm, int nVariables,
+        IComparer<DegreeVector> ordering, int variable)
+    {
+        if (variable == 0)
+            return AsMultivariate(recForm as UnivariatePolynomial<E>, nVariables, 0, ordering);
+        MultivariatePolynomial<E>[] data = new MultivariatePolynomial<E>[recForm.Degree() + 1];
+        for (int j = 0; j < data.Length; ++j)
+            data[j] = FromDenseRecursiveForm(recForm.GetAsObject(j) as IUnivariatePolynomial, nVariables, ordering, variable - 1);
+        return AsMultivariate(UnivariatePolynomial<MultivariatePolynomial<E>>.Create(Rings.MultivariateRing(data[0]), data), variable);
+    }
+    
+    
+    // public static E EvaluateDenseRecursiveForm(IUnivariatePolynomial recForm, int nVariables, E[] values)
     // {
     //     // compute number of variables
-    //     UnivariatePolynomial p = recForm;
+    //     IUnivariatePolynomial p = recForm;
     //     int n = nVariables - 1;
     //     while (n > 0)
     //     {
-    //         p = (UnivariatePolynomial)((UnivariatePolynomial)p).Cc();
+    //         p = (IUnivariatePolynomial)((UnivariatePolynomial)p).Cc();
     //         --n;
     //     }
     //
@@ -1962,144 +1967,141 @@ public class MultivariatePolynomial<E> : Polynomial<MultivariatePolynomial<E>>, 
     //         return ((UnivariatePolynomial<E>)recForm).Evaluate(values[0]);
     //     UnivariatePolynomial<UnivariatePolynomial> _recForm = (UnivariatePolynomial<UnivariatePolynomial>)recForm;
     //     E result = ring.GetZero();
-    //     for (int i = _recForm.degree(); i >= 0; --i)
+    //     for (int i = _recForm.Degree(); i >= 0; --i)
     //         result = ring.Add(ring.Multiply(values[variable], result),
     //             EvaluateDenseRecursiveForm(_recForm[i], values, ring, variable - 1));
     //     return result;
     // }
-    //
-    //
-    // public AMultivariatePolynomial ToSparseRecursiveForm()
-    // {
-    //     if (nVariables == 0)
-    //         throw new ArgumentException("#variables = 0");
-    //     return ToSparseRecursiveForm(nVariables - 1);
-    // }
-    //
-    //
-    // private AMultivariatePolynomial ToSparseRecursiveForm(int variable)
-    // {
-    //     if (variable == 0)
-    //     {
-    //         return this.SetNVariables(1);
-    //     }
-    //
-    //     MultivariatePolynomial<MultivariatePolynomial<E>> result =
-    //         AsOverMultivariateEliminate(ArraysUtil.Sequence(0, variable), MonomialOrder.GRLEX);
-    //     Monomial<AMultivariatePolynomial>[] data = new Monomial[result.Count == 0 ? 1 : result.Count];
-    //     int j = 0;
-    //     foreach (Monomial<MultivariatePolynomial<E>> term in result.Count == 0
-    //                  ? Collections.SingletonList(result.Lt())
-    //                  : result)
-    //         data[j++] = new Monomial(term, term.coefficient.ToSparseRecursiveForm(variable - 1));
-    //     return MultivariatePolynomial.Create(1, Rings.MultivariateRing(data[0].coefficient), MonomialOrder.GRLEX,
-    //         data);
-    // }
-    //
-    //
-    // public static MultivariatePolynomial<E> FromSparseRecursiveForm<E>(AMultivariatePolynomial recForm,
-    //     int nVariables, IComparer<DegreeVector> ordering)
-    // {
-    //     return FromSparseRecursiveForm(recForm, nVariables, ordering, nVariables - 1);
-    // }
-    //
-    //
-    // private static MultivariatePolynomial<E> FromSparseRecursiveForm<E>(AMultivariatePolynomial recForm,
-    //     int nVariables, IComparer<DegreeVector> ordering, int variable)
-    // {
-    //     if (variable == 0)
-    //     {
-    //         return ((MultivariatePolynomial<E>)recForm).SetNVariables(nVariables).SetOrdering(ordering);
-    //     }
-    //
-    //     MultivariatePolynomial<AMultivariatePolynomial> _recForm =
-    //         (MultivariatePolynomial<AMultivariatePolynomial>)recForm;
-    //     Monomial<MultivariatePolynomial<E>>[] data = new Monomial[_recForm.Count == 0 ? 1 : _recForm.Count];
-    //     int j = 0;
-    //     foreach (Monomial<AMultivariatePolynomial> term in _recForm.Count == 0
-    //                  ? Collections.SingletonList(_recForm.Lt())
-    //                  : _recForm)
-    //     {
-    //         int[] exponents = new int[nVariables];
-    //         exponents[variable] = term.totalDegree;
-    //         data[j++] = new Monomial(exponents, term.totalDegree,
-    //             FromSparseRecursiveForm(term.coefficient, nVariables, ordering, variable - 1));
-    //     }
-    //
-    //     MultivariatePolynomial<MultivariatePolynomial<E>> result =
-    //         MultivariatePolynomial.Create(nVariables, Rings.MultivariateRing(data[0].coefficient), ordering, data);
-    //     return AsNormalMultivariate(result);
-    // }
-    //
-    //
-    // public static E EvaluateSparseRecursiveForm(AMultivariatePolynomial recForm, int nVariables, E[] values)
-    // {
-    //     // compute number of variables
-    //     AMultivariatePolynomial p = recForm;
-    //     TIntArrayList degrees = new TIntArrayList();
-    //     int n = nVariables - 1;
-    //     while (n > 0)
-    //     {
-    //         p = (AMultivariatePolynomial)((MultivariatePolynomial)p).Cc();
-    //         degrees.Add(p.Degree());
-    //         --n;
-    //     }
-    //
-    //     degrees.Add(p.Degree());
-    //     if (nVariables != values.Length)
-    //         throw new ArgumentException();
-    //     Ring<E> ring = ((MultivariatePolynomial<E>)p).ring;
-    //     PrecomputedPowers<E>[] pp = new PrecomputedPowers[nVariables];
-    //     for (int i = 0; i < nVariables; ++i)
-    //         pp[i] = new PrecomputedPowers(Math.Min(degrees[i], MAX_POWERS_CACHE_SIZE), values[i], ring);
-    //     return EvaluateSparseRecursiveForm(recForm, new PrecomputedPowersHolder(ring, pp), nVariables - 1);
-    // }
-    //
-    //
-    // static E EvaluateSparseRecursiveForm(AMultivariatePolynomial recForm, PrecomputedPowersHolder ph,
-    //     int variable)
-    // {
-    //     Ring<E> ring = ph.ring;
-    //     if (variable == 0)
-    //     {
-    //         MultivariatePolynomial<E> _recForm = (MultivariatePolynomial<E>)recForm;
-    //         IEnumerator<Monomial<E>> it = _recForm.terms.DescendingIterator();
-    //         int previousExponent = -1;
-    //         E result = ring.GetZero();
-    //         while (it.HasNext())
-    //         {
-    //             Monomial<E> m = it.Next();
-    //             result = ring.Add(
-    //                 ring.Multiply(result,
-    //                     ph.Pow(variable, previousExponent == -1 ? 1 : previousExponent - m.totalDegree)),
-    //                 m.coefficient);
-    //             previousExponent = m.totalDegree;
-    //         }
-    //
-    //         if (previousExponent > 0)
-    //             result = ring.Multiply(result, ph.Pow(variable, previousExponent));
-    //         return result;
-    //     }
-    //
-    //     MultivariatePolynomial<AMultivariatePolynomial> _recForm =
-    //         (MultivariatePolynomial<AMultivariatePolynomial>)recForm;
-    //     IEnumerator<Monomial<AMultivariatePolynomial>> it = _recForm.terms.DescendingIterator();
-    //     int previousExponent = -1;
-    //     E result = ring.GetZero();
-    //     while (it.HasNext())
-    //     {
-    //         Monomial<AMultivariatePolynomial> m = it.Next();
-    //         result = ring.Add(
-    //             ring.Multiply(result,
-    //                 ph.Pow(variable, previousExponent == -1 ? 1 : previousExponent - m.totalDegree)),
-    //             EvaluateSparseRecursiveForm(m.coefficient, ph, variable - 1));
-    //         previousExponent = m.totalDegree;
-    //     }
-    //
-    //     if (previousExponent > 0)
-    //         result = ring.Multiply(result, ph.Pow(variable, previousExponent));
-    //     return result;
-    // }
+    
+    
+    public IMultivariatePolynomial ToSparseRecursiveForm()
+    {
+        if (nVariables == 0)
+            throw new ArgumentException("#variables = 0");
+        return ToSparseRecursiveForm(nVariables - 1);
+    }
+    
+    
+    private IMultivariatePolynomial ToSparseRecursiveForm(int variable)
+    {
+        if (variable == 0)
+        {
+            return this.SetNVariables(1);
+        }
+    
+        var result = AsOverMultivariateEliminate(Utils.Utils.Sequence(0, variable), MonomialOrder.GRLEX);
+        var data = new Monomial<IMultivariatePolynomial>[result.Count == 0 ? 1 : result.Count];
+        int j = 0;
+        foreach (Monomial<MultivariatePolynomial<E>> term in result.Count == 0 ? (Monomial<MultivariatePolynomial<E>>[])[result.Lt()] : result)
+            data[j++] = new Monomial(term, term.coefficient.ToSparseRecursiveForm(variable - 1));
+        return MultivariatePolynomial.Create(1, Rings.MultivariateRing(data[0].coefficient), MonomialOrder.GRLEX,
+            data);
+    }
+    
+    
+    public static MultivariatePolynomial<E> FromSparseRecursiveForm(IMultivariatePolynomial recForm,
+        int nVariables, IComparer<DegreeVector> ordering)
+    {
+        return FromSparseRecursiveForm(recForm, nVariables, ordering, nVariables - 1);
+    }
+    
+    
+    private static MultivariatePolynomial<E> FromSparseRecursiveForm(IMultivariatePolynomial recForm,
+        int nVariables, IComparer<DegreeVector> ordering, int variable)
+    {
+        if (variable == 0)
+        {
+            return ((MultivariatePolynomial<E>)recForm).SetNVariables(nVariables).SetOrdering(ordering);
+        }
+    
+        MultivariatePolynomial<AMultivariatePolynomial> _recForm =
+            (MultivariatePolynomial<AMultivariatePolynomial>)recForm;
+        Monomial<MultivariatePolynomial<E>>[] data = new Monomial[_recForm.Count == 0 ? 1 : _recForm.Count];
+        int j = 0;
+        foreach (Monomial<AMultivariatePolynomial> term in _recForm.Count == 0
+                     ? Collections.SingletonList(_recForm.Lt())
+                     : _recForm)
+        {
+            int[] exponents = new int[nVariables];
+            exponents[variable] = term.totalDegree;
+            data[j++] = new Monomial(exponents, term.totalDegree,
+                FromSparseRecursiveForm(term.coefficient, nVariables, ordering, variable - 1));
+        }
+    
+        MultivariatePolynomial<MultivariatePolynomial<E>> result =
+            MultivariatePolynomial.Create(nVariables, Rings.MultivariateRing(data[0].coefficient), ordering, data);
+        return AsNormalMultivariate(result);
+    }
+    
+    
+    public static E EvaluateSparseRecursiveForm(AMultivariatePolynomial recForm, int nVariables, E[] values)
+    {
+        // compute number of variables
+        AMultivariatePolynomial p = recForm;
+        List<int> degrees = new List<int>();
+        int n = nVariables - 1;
+        while (n > 0)
+        {
+            p = (AMultivariatePolynomial)((MultivariatePolynomial)p).Cc();
+            degrees.Add(p.Degree());
+            --n;
+        }
+    
+        degrees.Add(p.Degree());
+        if (nVariables != values.Length)
+            throw new ArgumentException();
+        Ring<E> ring = ((MultivariatePolynomial<E>)p).ring;
+        PrecomputedPowers[] pp = new PrecomputedPowers[nVariables];
+        for (int i = 0; i < nVariables; ++i)
+            pp[i] = new PrecomputedPowers(Math.Min(degrees[i], MAX_POWERS_CACHE_SIZE), values[i], ring);
+        return EvaluateSparseRecursiveForm(recForm, new PrecomputedPowersHolder(ring, pp), nVariables - 1);
+    }
+    
+    
+    static E EvaluateSparseRecursiveForm(IMultivariatePolynomial recForm, PrecomputedPowersHolder ph,
+        int variable)
+    {
+        Ring<E> ring = ph.ring;
+        if (variable == 0)
+        {
+            MultivariatePolynomial<E> _recForm = (MultivariatePolynomial<E>)recForm;
+            IEnumerator<Monomial<E>> it = _recForm.terms.DescendingIterator();
+            int previousExponent = -1;
+            E result = ring.GetZero();
+            while (it.HasNext())
+            {
+                Monomial<E> m = it.Next();
+                result = ring.Add(
+                    ring.Multiply(result,
+                        ph.Pow(variable, previousExponent == -1 ? 1 : previousExponent - m.totalDegree)),
+                    m.coefficient);
+                previousExponent = m.totalDegree;
+            }
+    
+            if (previousExponent > 0)
+                result = ring.Multiply(result, ph.Pow(variable, previousExponent));
+            return result;
+        }
+    
+        MultivariatePolynomial<AMultivariatePolynomial> _recForm =
+            (MultivariatePolynomial<AMultivariatePolynomial>)recForm;
+        IEnumerator<Monomial<AMultivariatePolynomial>> it = _recForm.terms.DescendingIterator();
+        int previousExponent = -1;
+        E result = ring.GetZero();
+        while (it.HasNext())
+        {
+            Monomial<AMultivariatePolynomial> m = it.Next();
+            result = ring.Add(
+                ring.Multiply(result,
+                    ph.Pow(variable, previousExponent == -1 ? 1 : previousExponent - m.totalDegree)),
+                EvaluateSparseRecursiveForm(m.coefficient, ph, variable - 1));
+            previousExponent = m.totalDegree;
+        }
+    
+        if (previousExponent > 0)
+            result = ring.Multiply(result, ph.Pow(variable, previousExponent));
+        return result;
+    }
 
     // TODO
     // public HornerForm GetHornerForm(int[] evaluationVariables)
@@ -2152,7 +2154,7 @@ public class MultivariatePolynomial<E> : Polynomial<MultivariatePolynomial<E>>, 
     }
 
 
-    MultivariatePolynomial<E> Evaluate(int variable, PrecomputedPowers powers)
+    public MultivariatePolynomial<E> Evaluate(int variable, PrecomputedPowers powers)
     {
         if (Degree(variable) == 0)
             return Clone();
@@ -2371,7 +2373,7 @@ public class MultivariatePolynomial<E> : Polynomial<MultivariatePolynomial<E>>, 
     public sealed class PrecomputedPowersHolder
     {
         public readonly Ring<E> ring;
-        readonly PrecomputedPowers[] powers;
+        public readonly PrecomputedPowers[] powers;
 
         public PrecomputedPowersHolder(Ring<E> ring, PrecomputedPowers[] powers)
         {
@@ -2523,7 +2525,7 @@ public class MultivariatePolynomial<E> : Polynomial<MultivariatePolynomial<E>>, 
     }
 
 
-    sealed class USubstitution : PrecomputedSubstitution
+    public sealed class USubstitution : PrecomputedSubstitution
     {
         readonly int variable;
         readonly int nVariables;
@@ -2569,7 +2571,7 @@ public class MultivariatePolynomial<E> : Polynomial<MultivariatePolynomial<E>>, 
     }
 
 
-    void Add(MonomialSet<E> terms, Monomial<E> term)
+    public void Add(MonomialSet<E> terms, Monomial<E> term)
     {
         Add(terms, term, ring);
     }

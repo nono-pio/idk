@@ -1,5 +1,8 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Numerics;
+using System.Text;
+using Polynomials.Linear;
 using Polynomials.Poly.Univar;
 using Polynomials.Primes;
 using Polynomials.Utils;
@@ -16,7 +19,7 @@ public static class MultivariateGCD
         return PolynomialGCD(arr, MultivariateGCD.PolynomialGCD);
     }
 
-    static MultivariatePolynomial<E> PolynomialGCD<E>(MultivariatePolynomial<E> poly, MultivariatePolynomial<E>[] arr)
+    public static MultivariatePolynomial<E> PolynomialGCD<E>(MultivariatePolynomial<E> poly, MultivariatePolynomial<E>[] arr)
     {
         var all = new MultivariatePolynomial<E>[arr.Length + 1];
         all[0] = poly;
@@ -339,7 +342,7 @@ public static class MultivariateGCD
         return null;
     }
 
-    static bool isOverPolynomialRing<E>(MultivariatePolynomial<E> p)
+    public static bool isOverPolynomialRing<E>(MultivariatePolynomial<E> p)
     {
         return isOverUnivariate(p) || isOverUnivariateZp64(p) || isOverMultivariate(p) || isOverMultivariateZp64(p);
     }
@@ -572,7 +575,7 @@ public static class MultivariateGCD
     }
 
     private static MultivariatePolynomialZp64? equalsUpToConstant(MultivariatePolynomialZp64 a,
-        MultivariatePolynomialZp64 b)
+        MultivariatePolynomialZp64 b) // TODO check if can use generic
     {
         if (a == b)
             return a.Clone();
@@ -1470,29 +1473,6 @@ public static class MultivariateGCD
                 previousBase = candidate;
             }
         }
-    }
-
-    static MultivariatePolynomialZp64 interpolateGCD(MultivariatePolynomialZp64 a, MultivariatePolynomialZp64 b,
-        MultivariatePolynomialZp64 skeleton, Random rnd)
-    {
-        a.AssertSameCoefficientRingWith(b);
-        a.AssertSameCoefficientRingWith(skeleton);
-
-        // a and b must be Content-free
-        Debug.Assert(ContentGCD(a, b, 0, MultivariateGCD.PolynomialGCD).IsConstant());
-//        MultivariatePolynomialZp64 Content = ContentGCD(a, b, 0, MultivariateGCD::PolynomialGCD);
-//        a = divideExact(a, Content);
-//        b = divideExact(b, Content);
-//        skeleton = divideSkeletonExact(skeleton, Content);
-
-        lSparseInterpolation interpolation = CreateInterpolation(-1, a, b, skeleton, 1, rnd);
-        if (interpolation == null)
-            return null;
-        MultivariatePolynomialZp64 gcd = interpolation.evaluate();
-        if (gcd == null)
-            return null;
-
-        return gcd; //.Multiply(Content);
     }
 
     static MultivariatePolynomial<E> divideSkeletonExact<E>(MultivariatePolynomial<E> dividend,
@@ -2556,505 +2536,554 @@ public static class MultivariateGCD
 //
 //
 //     /* ======================== Multivariate GCD over finite fields with small cardinality ========================== */
-    
-    
-    // public static  MultivariatePolynomial<E> KaltofenMonaganSparseModularGCDInGF<E>(
-    //         MultivariatePolynomial<E> a,
-    //         MultivariatePolynomial<E> b) {
-    //     return KaltofenMonaganModularGCDInGF(a, b, MultivariateGCD.KaltofenMonaganSparseModularGCDInGF0);
-    // }
-    //
-    // public static  MultivariatePolynomial<E> KaltofenMonaganEEZModularGCDInGF<E>(
-    //         MultivariatePolynomial<E> a,
-    //         MultivariatePolynomial<E> b) {
-    //     return KaltofenMonaganModularGCDInGF(a, b, MultivariateGCD.KaltofenMonaganEEZModularGCDInGF0);
-    // }
-    // //
-    // public delegate MultivariatePolynomial<UnivariatePolynomial<uE>> KaltofenMonaganAlgorithm<uE>(MultivariatePolynomial<UnivariatePolynomial<uE>> a, MultivariatePolynomial<UnivariatePolynomial<uE>> b, int uDegreeBound, int finiteExtensionDegree);
-    //
-    //
-    // static  MultivariatePolynomial<E> KaltofenMonaganModularGCDInGF<E>(
-    //         MultivariatePolynomial<E> a,
-    //         MultivariatePolynomial<E> b,
-    //         KaltofenMonaganAlgorithm algorithm) {
-    //     Util.EnsureOverFiniteField(a, b);
-    //     a.AssertSameCoefficientRingWith(b);
-    //
-    //     if (CanConvertToZp64(a))
-    //         return ConvertFromZp64(KaltofenMonaganModularGCDInGF(AsOverZp64(a), AsOverZp64(b), algorithm));
-    //
-    //     if (a == b)
-    //         return a.Clone();
-    //     if (a.IsZero()) return b.Clone();
-    //     if (b.IsZero()) return a.Clone();
-    //
-    //     if (a.Degree() < b.Degree())
-    //         return KaltofenMonaganModularGCDInGF(b, a, algorithm);
-    //
-    //     GCDInput<E>
-    //             gcdInput = preparedGCDInput(a, b, (u, v) => KaltofenMonaganModularGCDInGF(u, v, algorithm));
-    //     if (gcdInput.earlyGCD != null)
-    //         return gcdInput.earlyGCD;
-    //
-    //     return KaltofenMonaganModularGCDInGF(gcdInput, algorithm);
-    // }
-    //
-    // private static MultivariatePolynomial<E> KaltofenMonaganSparseModularGCDInGF<E>(
-    //         GCDInput<E> gcdInput) {
-    //     return KaltofenMonaganModularGCDInGF(gcdInput, MultivariateGCD.KaltofenMonaganSparseModularGCDInGF0);
-    // }
-    //
-    //
-    // private static  MultivariatePolynomial<E> KaltofenMonaganModularGCDInGF<E>(
-    //         GCDInput<E> gcdInput,
-    //         KaltofenMonaganAlgorithm algorithm) {
-    //     MultivariatePolynomial<E> a = gcdInput.aReduced;
-    //     MultivariatePolynomial<E> b = gcdInput.bReduced;
-    //
-    //     MultivariatePolynomial<E> pContentGCD = ContentGCD(a, b, 0, (u, v) => KaltofenMonaganModularGCDInGF(u, v, algorithm));
-    //     if (!pContentGCD.IsConstant()) {
-    //         a = MultivariateDivision.DivideExact(a, pContentGCD);
-    //         b = MultivariateDivision.DivideExact(b, pContentGCD);
-    //         return gcdInput.restoreGCD(KaltofenMonaganModularGCDInGF(a, b, algorithm).Multiply(pContentGCD));
-    //     }
-    //
-    //     for (int uVariable = a.nVariables - 1; uVariable >= 0; --uVariable)
-    //         if (a.ring is IntegersZp && a.CoefficientRingCardinality().Value.IsLong()) {
-    //             // use machine integers
-    //             
-    //             MultivariatePolynomial<UnivariatePolynomialZp64>
-    //                     ua = AsOverUnivariate0(a as MultivariatePolynomial<BigInteger>, uVariable),
-    //                     ub = AsOverUnivariate0(b as MultivariatePolynomial<BigInteger>, uVariable);
-    //
-    //             UnivariatePolynomialZp64 aContent = ua.Content(), bContent = ub.Content();
-    //             UnivariatePolynomialZp64 ContentGCD = ua.ring.Gcd(aContent, bContent);
-    //
-    //             ua = ua.DivideOrNull(aContent);
-    //             ub = ub.DivideOrNull(bContent);
-    //
-    //             MultivariatePolynomial<UnivariatePolynomialZp64> ugcd =
-    //                     algorithm(ua, ub, gcdInput.DegreeBounds[uVariable], gcdInput.finiteExtensionDegree);
-    //             if (ugcd == null)
-    //                 continue;
-    //             ugcd = ugcd.Multiply(ContentGCD);
-    //
-    //             
-    //             MultivariatePolynomial<E> r = gcdInput.restoreGCD(AsNormalMultivariate0(ugcd, uVariable) as MultivariatePolynomial<E>);
-    //             return r;
-    //         } else {
-    //             MultivariatePolynomial<UnivariatePolynomial<E>>
-    //                     ua = a.AsOverUnivariateEliminate(uVariable),
-    //                     ub = b.AsOverUnivariateEliminate(uVariable);
-    //
-    //             UnivariatePolynomial<E> aContent = ua.Content(), bContent = ub.Content();
-    //             UnivariatePolynomial<E> ContentGCD = ua.ring.Gcd(aContent, bContent);
-    //
-    //             ua = ua.DivideOrNull(aContent);
-    //             ub = ub.DivideOrNull(bContent);
-    //
-    //             MultivariatePolynomial<UnivariatePolynomial<E>> ugcd =
-    //                     algorithm(ua, ub, gcdInput.DegreeBounds[uVariable], gcdInput.finiteExtensionDegree);
-    //             if (ugcd == null)
-    //                 continue;
-    //             ugcd = ugcd.Multiply(ContentGCD);
-    //
-    //             return gcdInput.restoreGCD(MultivariatePolynomial<E>.AsNormalMultivariate(ugcd, uVariable));
-    //         }
-    //     throw new Exception();
-    // }
-    //
-    // private static MultivariatePolynomial<UnivariatePolynomialZp64> AsOverUnivariate0(MultivariatePolynomial<BigInteger> poly, int variable) {
-    //     IntegersZp64 ring = new IntegersZp64((long)((IntegersZp) poly.ring).modulus);
-    //     UnivariatePolynomialZp64 factory = UnivariatePolynomialZp64.Zero(ring);
-    //     UnivariateRing<long> pDomain = new UnivariateRing<long>(factory);
-    //     MonomialSet<UnivariatePolynomialZp64> newData = new MonomialSet<UnivariatePolynomialZp64>(poly.ordering);
-    //     foreach (Monomial<BigInteger> e in poly.terms) {
-    //         MultivariatePolynomial<UnivariatePolynomialZp64>.Add(newData, new Monomial<UnivariatePolynomialZp64>(
-    //                         e.Without(variable),
-    //                         factory.CreateMonomial((long)e.coefficient, e.exponents[variable])),
-    //                 pDomain);
-    //     }
-    //     return new MultivariatePolynomial<UnivariatePolynomialZp64>(poly.nVariables - 1, pDomain, poly.ordering, newData);
-    // }
-    //
-    // private static MultivariatePolynomial<BigInteger> AsNormalMultivariate0(MultivariatePolynomial<UnivariatePolynomialZp64> poly, int variable) {
-    //     Ring<BigInteger> ring = ((IntegersZp64)poly.ring.GetZero().ring).AsGenericRing();
-    //     int nVariables = poly.nVariables + 1;
-    //     MultivariatePolynomial<BigInteger> result = MultivariatePolynomial<BigInteger>.Zero(nVariables, ring, poly.ordering);
-    //     foreach (Monomial<UnivariatePolynomialZp64> entry in poly.terms) {
-    //         UnivariatePolynomialZp64 uPoly = entry.coefficient;
-    //         DegreeVector dv = entry.DvInsert(variable);
-    //         for (int i = 0; i <= uPoly.Degree(); ++i) {
-    //             if (uPoly.IsZeroAt(i))
-    //                 continue;
-    //             result.Add(new Monomial<BigInteger>(dv.DvSet(variable, i), new BigInteger(uPoly.Get(i))));
-    //         }
-    //     }
-    //     return result;
-    // }
-    //
-    // public static MultivariatePolynomialZp64 KaltofenMonaganSparseModularGCDInGF(
-    //         MultivariatePolynomialZp64 a,
-    //         MultivariatePolynomialZp64 b) {
-    //     return KaltofenMonaganModularGCDInGF(a, b, MultivariateGCD.KaltofenMonaganSparseModularGCDInGF0);
-    // }
-    //
-    // public static MultivariatePolynomialZp64 KaltofenMonaganEEZModularGCDInGF(
-    //         MultivariatePolynomialZp64 a,
-    //         MultivariatePolynomialZp64 b) {
-    //     return KaltofenMonaganModularGCDInGF(a, b, MultivariateGCD.KaltofenMonaganEEZModularGCDInGF0);
-    // }
-    //
-    // public static MultivariatePolynomialZp64 KaltofenMonaganModularGCDInGF(
-    //         MultivariatePolynomialZp64 a,
-    //         MultivariatePolynomialZp64 b,
-    //         KaltofenMonaganAlgorithm algorithm) {
-    //     Util.EnsureOverFiniteField(a, b);
-    //     if (a == b)
-    //         return a.Clone();
-    //     if (a.IsZero()) return b.Clone();
-    //     if (b.IsZero()) return a.Clone();
-    //
-    //     if (a.Degree() < b.Degree())
-    //         return KaltofenMonaganModularGCDInGF(b, a, algorithm);
-    //
-    //     GCDInput<long>
-    //             gcdInput = preparedGCDInput(a, b, (u, v) => KaltofenMonaganModularGCDInGF(u, v, algorithm));
-    //     if (gcdInput.earlyGCD != null)
-    //         return gcdInput.earlyGCD;
-    //
-    //     return lKaltofenMonaganModularGCDInGF(gcdInput, algorithm);
-    // }
-    //
-    // private static MultivariatePolynomialZp64 lKaltofenMonaganSparseModularGCDInGF(
-    //         GCDInput<long> gcdInput) {
-    //     return lKaltofenMonaganModularGCDInGF(gcdInput, MultivariateGCD.KaltofenMonaganSparseModularGCDInGF0);
-    // }
-    //
-    // private static MultivariatePolynomialZp64 lKaltofenMonaganModularGCDInGF(
-    //         GCDInput<long> gcdInput,
-    //         KaltofenMonaganAlgorithm<UnivariatePolynomialZp64> algorithm) {
-    //     MultivariatePolynomialZp64 a = gcdInput.aReduced;
-    //     MultivariatePolynomialZp64 b = gcdInput.bReduced;
-    //     MultivariatePolynomialZp64 pContentGCD = ContentGCD(a, b, 0, (u, v) => KaltofenMonaganModularGCDInGF(u, v, algorithm));
-    //
-    //     if (!pContentGCD.IsConstant()) {
-    //         a = MultivariateDivision.DivideExact(a, pContentGCD);
-    //         b = MultivariateDivision.DivideExact(b, pContentGCD);
-    //         return gcdInput.restoreGCD(KaltofenMonaganModularGCDInGF(a, b, algorithm).Multiply(pContentGCD));
-    //     }
-    //
-    //     for (int uVariable = a.nVariables - 1; uVariable >= 0; --uVariable) {
-    //         MultivariatePolynomial<UnivariatePolynomialZp64>
-    //                 ua = a.AsOverUnivariateEliminate(uVariable),
-    //                 ub = b.AsOverUnivariateEliminate(uVariable);
-    //
-    //         UnivariatePolynomialZp64 aContent = ua.Content(), bContent = ub.Content();
-    //         UnivariatePolynomialZp64 ContentGCD = ua.ring.Gcd(aContent, bContent);
-    //
-    //         ua = ua.DivideOrNull(aContent);
-    //         ub = ub.DivideOrNull(bContent);
-    //
-    //         MultivariatePolynomial<UnivariatePolynomialZp64> ugcd =
-    //                 algorithm(ua, ub, gcdInput.DegreeBounds[uVariable], gcdInput.finiteExtensionDegree);
-    //         if (ugcd == null)
-    //             // bad variable chosen
-    //             continue;
-    //
-    //         ugcd = ugcd.Multiply(ContentGCD);
-    //         return gcdInput.restoreGCD(MultivariatePolynomialZp64.AsNormalMultivariate(ugcd, uVariable));
-    //     }
-    //     throw new Exception("\na: " + a + "\nb: " + b);
-    // }
-    //
-    // private const int MAX_OVER_ITERATIONS = 18;
-    //
-    // static <uPoly extends IUnivariatePolynomial<uPoly>>
-    // MultivariatePolynomial<uPoly> KaltofenMonaganSparseModularGCDInGF0(
-    //         MultivariatePolynomial<uPoly> a,
-    //         MultivariatePolynomial<uPoly> b,
-    //         int uDegreeBound,
-    //         int finiteExtensionDegree) {
-    //
-    //     uPoly lcGCD = UnivariateGCD.PolynomialGCD(a.Lc(), b.Lc());
-    //
-    //     Ring<uPoly> univariateRing = a.ring;
-    //     Random random = PrivateRandom.GetRandom();
-    //     IrreduciblePolynomialsIEnumerable<uPoly> primesLoop = new IrreduciblePolynomialsIEnumerable<>(univariateRing.getOne(), finiteExtensionDegree);
-    //     main_loop:
-    //     while (true) {
-    //         // prepare the skeleton
-    //         uPoly basePrime = primesLoop.next();
-    //
-    //         FiniteField<uPoly> fField = new FiniteField<>(basePrime);
-    //
-    //         // reduce Zp[x] -> GF
-    //         MultivariatePolynomial<uPoly>
-    //                 aMod = a.setRing(fField),
-    //                 bMod = b.setRing(fField);
-    //         if (!aMod.sameSkeletonQ(a) || !bMod.sameSkeletonQ(b))
-    //             continue;
-    //
-    //         //accumulator to update coefficients via Chineese remainding
-    //         MultivariatePolynomial<uPoly> base = PolynomialGCD(aMod, bMod);
-    //         uPoly lLcGCD = fField.valueOf(lcGCD);
-    //
-    //         if (base.IsConstant())
-    //             return a.CreateOne();
-    //
-    //         // scale to correct l.c.
-    //         base = base.Monic(lLcGCD);
-    //
-    //         // cache the previous base
-    //         MultivariatePolynomial<uPoly> previousBase = null;
-    //
-    //         // over all primes
-    //         while (true) {
-    //             if (basePrime.Degree() >= uDegreeBound + MAX_OVER_ITERATIONS)
-    //                 // fixme:
-    //                 // probably this should not ever happen, but it happens (extremely rare, only for small
-    //                 // characteristic and independently on the particular value of MAX_OVER_ITERATIONS)
-    //                 // the current workaround is to switch to another variable in R[x_N][x1....x_(N-1)]
-    //                 // representation and try again
-    //                 //
-    //                 // UPDATE: when increasing NUMBER_OF_UNDER_DETERMINED_RETRIES the problem seems to be disappeared
-    //                 // (at the expense of longer time spent in LinZip)
-    //                 return null;
-    //
-    //             uPoly prime = primesLoop.next();
-    //             fField = new FiniteField<>(prime);
-    //
-    //             // reduce Zp[x] -> GF
-    //             aMod = a.setRing(fField);
-    //             bMod = b.setRing(fField);
-    //             if (!aMod.sameSkeletonQ(a) || !bMod.sameSkeletonQ(b))
-    //                 continue;
-    //
-    //             // calculate new GCD using previously calculated skeleton via sparse interpolation
-    //             MultivariatePolynomial<uPoly> modularGCD;
-    //             if (aMod.nVariables == 1)
-    //                 modularGCD = MultivariatePolynomial.asMultivariate(UnivariateGCD.PolynomialGCD(aMod.asUnivariate(), bMod.asUnivariate()), 1, 0, aMod.ordering);
-    //             else
-    //                 modularGCD = interpolateGCD(aMod, bMod, base.setRingUnsafe(fField), random);
-    //
-    //             if (modularGCD == null) {
-    //                 // interpolation failed => assumed form is wrong => start over
-    //                 continue main_loop;
-    //             }
-    //
-    //             if (!isGCDTriplet(aMod, bMod, modularGCD)) {
-    //                 // extremely rare event
-    //                 // bad base prime chosen
-    //                 continue main_loop;
-    //             }
-    //
-    //             if (modularGCD.IsConstant())
-    //                 return a.CreateOne();
-    //
-    //             // better Degree bound found -> start over
-    //             if (modularGCD.Degree(0) < base.Degree(0)) {
-    //                 lLcGCD = fField.valueOf(lcGCD);
-    //                 // scale to correct l.c.
-    //                 base = modularGCD.Monic(lLcGCD);
-    //                 basePrime = prime;
-    //                 continue;
-    //             }
-    //
-    //             //skip unlucky prime
-    //             if (modularGCD.Degree(0) > base.Degree(0))
-    //                 continue;
-    //
-    //             //lifting
-    //             uPoly newBasePrime = basePrime.Clone().Multiply(prime);
-    //             uPoly MonicFactor = fField.divideExact(fField.valueOf(lcGCD), modularGCD.Lc());
-    //
-    //             PairedIEnumerable<
-    //                     Monomial<uPoly>, MultivariatePolynomial<uPoly>,
-    //                     Monomial<uPoly>, MultivariatePolynomial<uPoly>
-    //                     > iterator = new PairedIEnumerable<>(base, modularGCD);
-    //             ChineseRemaindersMagic<uPoly> magic = CreateMagic(univariateRing, basePrime, prime);
-    //             while (iterator.hasNext()) {
-    //                 iterator.advance();
-    //
-    //                 Monomial<uPoly>
-    //                         baseTerm = iterator.aTerm,
-    //                         imageTerm = iterator.bTerm;
-    //
-    //                 if (baseTerm.coefficient.IsZero())
-    //                     // term is absent in the base
-    //                     continue;
-    //
-    //                 if (imageTerm.coefficient.IsZero()) {
-    //                     // term is absent in the modularGCD => remove it from the base
-    //                     base.subtract(baseTerm);
-    //                     continue;
-    //                 }
-    //
-    //                 uPoly oth = fField.Multiply(imageTerm.coefficient, MonicFactor);
-    //
-    //                 // update base term
-    //                 uPoly newCoeff = ChineseRemainders.ChineseRemainders(univariateRing, magic, baseTerm.coefficient, oth);
-    //                 base.put(baseTerm.setCoefficient(newCoeff));
-    //             }
-    //
-    //             basePrime = newBasePrime;
-    //
-    //             // set ring back to the normal univariate ring
-    //             base = base.setRingUnsafe(univariateRing);
-    //             // two trials didn't change the result, probably we are done
-    //             MultivariatePolynomial<uPoly> candidate = base.Clone().primitivePart();
-    //             if (basePrime.Degree() >= uDegreeBound || (previousBase != null && candidate.equals(previousBase))) {
-    //                 previousBase = candidate;
-    //                 //first check b since b is less Degree
-    //                 if (!isGCDTriplet(b, a, candidate))
-    //                     continue;
-    //
-    //                 return candidate;
-    //             }
-    //             previousBase = candidate;
-    //         }
-    //     }
-    // }
-//
-//     static <uPoly extends IUnivariatePolynomial<uPoly>>
-//     MultivariatePolynomial<uPoly> KaltofenMonaganEEZModularGCDInGF0(
-//             MultivariatePolynomial<uPoly> a,
-//             MultivariatePolynomial<uPoly> b,
-//             int uDegreeBound,
-//             int finiteExtensionDegree) {
-//
-//         uPoly lcGCD = UnivariateGCD.PolynomialGCD(a.Lc(), b.Lc());
-//
-//         Ring<uPoly> univariateRing = a.ring;
-//
-//         MultivariatePolynomial<uPoly> base = null;
-//         uPoly basePrime = null;
-//
-//         IrreduciblePolynomialsIEnumerable<uPoly> primesLoop = new IrreduciblePolynomialsIEnumerable<>(univariateRing.getOne(), finiteExtensionDegree);
-//         main_loop:
-//         while (true) {
-//             if (basePrime != null && basePrime.Degree() >= uDegreeBound + MAX_OVER_ITERATIONS)
-//                 // fixme:
-//                 // probably this should not ever happen, but it happens (extremely rare, only for small
-//                 // characteristic and independently on the particular value of MAX_OVER_ITERATIONS)
-//                 // the current workaround is to switch to another variable in R[x_N][x1....x_(N-1)]
-//                 // representation and try again
-//                 //
-//                 // UPDATE: when increasing NUMBER_OF_UNDER_DETERMINED_RETRIES the problem seems to be disappeared
-//                 // (at the expense of longer time spent in LinZip)
-//                 return null;
-//
-//             // prepare the skeleton
-//             uPoly prime = primesLoop.next();
-//
-//             FiniteField<uPoly> fField = new FiniteField<>(prime);
-//
-//             // reduce Zp[x] -> GF
-//             MultivariatePolynomial<uPoly>
-//                     aMod = a.setRing(fField),
-//                     bMod = b.setRing(fField);
-//             if (!aMod.sameSkeletonQ(a) || !bMod.sameSkeletonQ(b))
-//                 continue;
-//
-//             //accumulator to update coefficients via Chineese remainding
-//             MultivariatePolynomial<uPoly> modGCD = PolynomialGCD(aMod, bMod);
-//             uPoly lLcGCD = fField.valueOf(lcGCD);
-//
-//             if (modGCD.IsConstant())
-//                 return a.CreateOne();
-//
-//             // scale to correct l.c.
-//             modGCD = modGCD.Monic(lLcGCD);
-//
-//             if (base == null) {
-//                 base = modGCD;
-//                 basePrime = prime;
-//                 continue;
-//             }
-//
-//
-//             //lifting
-//             uPoly newBasePrime = basePrime.Clone().Multiply(prime);
-//             uPoly MonicFactor = fField.divideExact(fField.valueOf(lcGCD), modGCD.Lc());
-//
-//             PairedIEnumerable<Monomial<uPoly>, MultivariatePolynomial<uPoly>,
-//                     Monomial<uPoly>, MultivariatePolynomial<uPoly>> iterator = new PairedIEnumerable<>(base, modGCD);
-//             ChineseRemaindersMagic<uPoly> magic = CreateMagic(univariateRing, basePrime, prime);
-//             while (iterator.hasNext()) {
-//                 iterator.advance();
-//
-//                 Monomial<uPoly>
-//                         baseTerm = iterator.aTerm,
-//                         imageTerm = iterator.bTerm;
-//
-//                 if (baseTerm.coefficient.IsZero())
-//                     // term is absent in the base
-//                     continue;
-//
-//                 if (imageTerm.coefficient.IsZero()) {
-//                     // term is absent in the modularGCD => remove it from the base
-//                     base.subtract(baseTerm);
-//                     continue;
-//                 }
-//
-//                 uPoly oth = fField.Multiply(imageTerm.coefficient, MonicFactor);
-//
-//                 // update base term
-//                 uPoly newCoeff = ChineseRemainders.ChineseRemainders(univariateRing, magic, baseTerm.coefficient, oth);
-//                 base.put(baseTerm.setCoefficient(newCoeff));
-//             }
-//
-//             basePrime = newBasePrime;
-//
-//             // set ring back to the normal univariate ring
-//             base = base.setRingUnsafe(univariateRing);
-//             // two trials didn't change the result, probably we are done
-//             MultivariatePolynomial<uPoly> candidate = base.Clone().primitivePart();
-//             //first check b since b is less Degree
-//             if (!isGCDTriplet(b, a, candidate))
-//                 continue;
-//
-//             return candidate;
-//         }
-//     }
-//
-//     private static final class IrreduciblePolynomialsIEnumerable<uPoly extends IUnivariatePolynomial<uPoly>> {
-//         final uPoly factory;
-//         int Degree;
-//
-//         IrreduciblePolynomialsIEnumerable(uPoly factory, int Degree) {
-//             this.factory = factory;
-//             this.Degree = Degree;
-//         }
-//
-//         uPoly next() {
-//             return IrreduciblePolynomials.randomIrreduciblePolynomial(factory, Degree++, PrivateRandom.GetRandom());
-//         }
-//     }
-//
-//     static <E> MultivariatePolynomial<E> interpolateGCD(MultivariatePolynomial<E> a, MultivariatePolynomial<E> b, MultivariatePolynomial<E> skeleton, Random rnd) {
-//         a.assertSameCoefficientRingWith(b);
-//         a.assertSameCoefficientRingWith(skeleton);
-//
-//         // a and b must be Content-free
-// //        if (!ContentGCD(a, b, 0, MultivariateGCD::PolynomialGCD).IsConstant())
-// //            return null;
-// //        MultivariatePolynomialZp64 Content = ContentGCD(a, b, 0, MultivariateGCD::PolynomialGCD);
-// //        a = divideExact(a, Content);
-// //        b = divideExact(b, Content);
-// //        skeleton = divideSkeletonExact(skeleton, Content);
-//
-//         SparseInterpolation<E> interpolation = CreateInterpolation(-1, a, b, skeleton, 1, rnd);
-//         if (interpolation == null)
-//             return null;
-//         MultivariatePolynomial<E> gcd = interpolation.evaluate();
-//         if (gcd == null)
-//             return null;
-//
-//         return gcd;//.Multiply(Content);
-//     }
-//
-//     /* ===================================== Multivariate GCD over finite fields ==================================== */
+
+
+    public static MultivariatePolynomial<E> KaltofenMonaganSparseModularGCDInGF<E>(
+        MultivariatePolynomial<E> a,
+        MultivariatePolynomial<E> b)
+    {
+        return KaltofenMonaganModularGCDInGF(a, b, MultivariateGCD.KaltofenMonaganSparseModularGCDInGF0);
+    }
+
+    public static MultivariatePolynomial<E> KaltofenMonaganEEZModularGCDInGF<E>(
+        MultivariatePolynomial<E> a,
+        MultivariatePolynomial<E> b)
+    {
+        return KaltofenMonaganModularGCDInGF(a, b, MultivariateGCD.KaltofenMonaganEEZModularGCDInGF0);
+    }
+
+    public delegate MultivariatePolynomial<UnivariatePolynomial<uE>> KaltofenMonaganAlgorithm<uE>(
+        MultivariatePolynomial<UnivariatePolynomial<uE>> a, MultivariatePolynomial<UnivariatePolynomial<uE>> b,
+        int uDegreeBound, int finiteExtensionDegree);
+
+
+    static MultivariatePolynomial<E> KaltofenMonaganModularGCDInGF<E>(
+        MultivariatePolynomial<E> a,
+        MultivariatePolynomial<E> b,
+        KaltofenMonaganAlgorithm<E> algorithm)
+    {
+        Util.EnsureOverFiniteField(a, b);
+        a.AssertSameCoefficientRingWith(b);
+
+        if (CanConvertToZp64(a))
+            return ConvertFromZp64<E>(KaltofenMonaganModularGCDInGF(AsOverZp64(a), AsOverZp64(b),
+                algorithm as KaltofenMonaganAlgorithm<long>));
+
+        if (a == b)
+            return a.Clone();
+        if (a.IsZero()) return b.Clone();
+        if (b.IsZero()) return a.Clone();
+
+        if (a.Degree() < b.Degree())
+            return KaltofenMonaganModularGCDInGF(b, a, algorithm);
+
+        GCDInput<E>
+            gcdInput = preparedGCDInput(a, b, (u, v) => KaltofenMonaganModularGCDInGF(u, v, algorithm));
+        if (gcdInput.earlyGCD != null)
+            return gcdInput.earlyGCD;
+
+        return KaltofenMonaganModularGCDInGF(gcdInput, algorithm);
+    }
+
+    private static MultivariatePolynomial<E> KaltofenMonaganSparseModularGCDInGF<E>(
+        GCDInput<E> gcdInput)
+    {
+        return KaltofenMonaganModularGCDInGF(gcdInput, MultivariateGCD.KaltofenMonaganSparseModularGCDInGF0);
+    }
+
+
+    private static MultivariatePolynomial<E> KaltofenMonaganModularGCDInGF<E>(
+        GCDInput<E> gcdInput,
+        KaltofenMonaganAlgorithm<E> algorithm)
+    {
+        MultivariatePolynomial<E> a = gcdInput.aReduced;
+        MultivariatePolynomial<E> b = gcdInput.bReduced;
+
+        MultivariatePolynomial<E> pContentGCD =
+            ContentGCD(a, b, 0, (u, v) => KaltofenMonaganModularGCDInGF(u, v, algorithm));
+        if (!pContentGCD.IsConstant())
+        {
+            a = MultivariateDivision.DivideExact(a, pContentGCD);
+            b = MultivariateDivision.DivideExact(b, pContentGCD);
+            return gcdInput.restoreGCD(KaltofenMonaganModularGCDInGF(a, b, algorithm).Multiply(pContentGCD));
+        }
+
+        var algorithmZp = algorithm as KaltofenMonaganAlgorithm<long>;
+
+        for (int uVariable = a.nVariables - 1; uVariable >= 0; --uVariable)
+            if (a.ring is IntegersZp && a.CoefficientRingCardinality().Value.IsLong())
+            {
+                // use machine integers
+
+                MultivariatePolynomial<UnivariatePolynomialZp64>
+                    ua = AsOverUnivariate0(a as MultivariatePolynomial<BigInteger>, uVariable),
+                    ub = AsOverUnivariate0(b as MultivariatePolynomial<BigInteger>, uVariable);
+
+                UnivariatePolynomialZp64 aContent = ua.Content(), bContent = ub.Content();
+                UnivariatePolynomialZp64 ContentGCD = ua.ring.Gcd(aContent, bContent);
+
+                ua = ua.DivideOrNull(aContent);
+                ub = ub.DivideOrNull(bContent);
+
+
+                MultivariatePolynomial<UnivariatePolynomialZp64> ugcd =
+                    algorithmZp(ua, ub, gcdInput.DegreeBounds[uVariable], gcdInput.finiteExtensionDegree);
+                if (ugcd == null)
+                    continue;
+                ugcd = ugcd.Multiply(ContentGCD);
+
+
+                MultivariatePolynomial<E> r =
+                    gcdInput.restoreGCD(AsNormalMultivariate0(ugcd, uVariable) as MultivariatePolynomial<E>);
+                return r;
+            }
+            else
+            {
+                MultivariatePolynomial<UnivariatePolynomial<E>>
+                    ua = a.AsOverUnivariateEliminate(uVariable),
+                    ub = b.AsOverUnivariateEliminate(uVariable);
+
+                UnivariatePolynomial<E> aContent = ua.Content(), bContent = ub.Content();
+                UnivariatePolynomial<E> ContentGCD = ua.ring.Gcd(aContent, bContent);
+
+                ua = ua.DivideOrNull(aContent);
+                ub = ub.DivideOrNull(bContent);
+
+                MultivariatePolynomial<UnivariatePolynomial<E>> ugcd =
+                    algorithm(ua, ub, gcdInput.DegreeBounds[uVariable], gcdInput.finiteExtensionDegree);
+                if (ugcd == null)
+                    continue;
+                ugcd = ugcd.Multiply(ContentGCD);
+
+                return gcdInput.restoreGCD(MultivariatePolynomial<E>.AsNormalMultivariate(ugcd, uVariable));
+            }
+
+        throw new Exception();
+    }
+
+    private static MultivariatePolynomial<UnivariatePolynomialZp64> AsOverUnivariate0(
+        MultivariatePolynomial<BigInteger> poly, int variable)
+    {
+        IntegersZp64 ring = new IntegersZp64((long)((IntegersZp)poly.ring).modulus);
+        UnivariatePolynomialZp64 factory = UnivariatePolynomialZp64.Zero(ring);
+        UnivariateRing<long> pDomain = new UnivariateRing<long>(factory);
+        MonomialSet<UnivariatePolynomialZp64> newData = new MonomialSet<UnivariatePolynomialZp64>(poly.ordering);
+        foreach (Monomial<BigInteger> e in poly.terms)
+        {
+            MultivariatePolynomial<UnivariatePolynomialZp64>.Add(newData, new Monomial<UnivariatePolynomialZp64>(
+                    e.Without(variable),
+                    factory.CreateMonomial((long)e.coefficient, e.exponents[variable])),
+                pDomain);
+        }
+
+        return new MultivariatePolynomial<UnivariatePolynomialZp64>(poly.nVariables - 1, pDomain, poly.ordering,
+            newData);
+    }
+
+    private static MultivariatePolynomial<BigInteger> AsNormalMultivariate0(
+        MultivariatePolynomial<UnivariatePolynomialZp64> poly, int variable)
+    {
+        Ring<BigInteger> ring = ((IntegersZp64)poly.ring.GetZero().ring).AsGenericRing();
+        int nVariables = poly.nVariables + 1;
+        MultivariatePolynomial<BigInteger> result =
+            MultivariatePolynomial<BigInteger>.Zero(nVariables, ring, poly.ordering);
+        foreach (Monomial<UnivariatePolynomialZp64> entry in poly.terms)
+        {
+            UnivariatePolynomialZp64 uPoly = entry.coefficient;
+            DegreeVector dv = entry.DvInsert(variable);
+            for (int i = 0; i <= uPoly.Degree(); ++i)
+            {
+                if (uPoly.IsZeroAt(i))
+                    continue;
+                result.Add(new Monomial<BigInteger>(dv.DvSet(variable, i), new BigInteger(uPoly.Get(i))));
+            }
+        }
+
+        return result;
+    }
+
+    public static MultivariatePolynomialZp64 KaltofenMonaganEEZModularGCDInGF(
+        MultivariatePolynomialZp64 a,
+        MultivariatePolynomialZp64 b)
+    {
+        return KaltofenMonaganModularGCDInGF(a, b, MultivariateGCD.KaltofenMonaganEEZModularGCDInGF0);
+    }
+
+    public static MultivariatePolynomialZp64 KaltofenMonaganModularGCDInGF(
+        MultivariatePolynomialZp64 a,
+        MultivariatePolynomialZp64 b,
+        KaltofenMonaganAlgorithm<long> algorithm)
+    {
+        Util.EnsureOverFiniteField(a, b);
+        if (a == b)
+            return a.Clone();
+        if (a.IsZero()) return b.Clone();
+        if (b.IsZero()) return a.Clone();
+
+        if (a.Degree() < b.Degree())
+            return KaltofenMonaganModularGCDInGF(b, a, algorithm);
+
+        GCDInput<long>
+            gcdInput = preparedGCDInput(a, b, (u, v) => KaltofenMonaganModularGCDInGF(u, v, algorithm));
+        if (gcdInput.earlyGCD != null)
+            return gcdInput.earlyGCD;
+
+        return lKaltofenMonaganModularGCDInGF(gcdInput, algorithm);
+    }
+
+    private static MultivariatePolynomialZp64 lKaltofenMonaganSparseModularGCDInGF(
+        GCDInput<long> gcdInput)
+    {
+        return lKaltofenMonaganModularGCDInGF(gcdInput, MultivariateGCD.KaltofenMonaganSparseModularGCDInGF0);
+    }
+
+    private static MultivariatePolynomialZp64 lKaltofenMonaganModularGCDInGF(
+        GCDInput<long> gcdInput,
+        KaltofenMonaganAlgorithm<long> algorithm)
+    {
+        MultivariatePolynomialZp64 a = gcdInput.aReduced;
+        MultivariatePolynomialZp64 b = gcdInput.bReduced;
+        MultivariatePolynomialZp64 pContentGCD =
+            ContentGCD(a, b, 0, (u, v) => KaltofenMonaganModularGCDInGF(u, v, algorithm));
+
+        if (!pContentGCD.IsConstant())
+        {
+            a = MultivariateDivision.DivideExact(a, pContentGCD);
+            b = MultivariateDivision.DivideExact(b, pContentGCD);
+            return gcdInput.restoreGCD(KaltofenMonaganModularGCDInGF(a, b, algorithm).Multiply(pContentGCD));
+        }
+
+        for (int uVariable = a.nVariables - 1; uVariable >= 0; --uVariable)
+        {
+            MultivariatePolynomial<UnivariatePolynomialZp64>
+                ua = a.AsOverUnivariateEliminate(uVariable),
+                ub = b.AsOverUnivariateEliminate(uVariable);
+
+            UnivariatePolynomialZp64 aContent = ua.Content(), bContent = ub.Content();
+            UnivariatePolynomialZp64 ContentGCD = ua.ring.Gcd(aContent, bContent);
+
+            ua = ua.DivideOrNull(aContent);
+            ub = ub.DivideOrNull(bContent);
+
+            MultivariatePolynomial<UnivariatePolynomialZp64> ugcd =
+                algorithm(ua, ub, gcdInput.DegreeBounds[uVariable], gcdInput.finiteExtensionDegree);
+            if (ugcd == null)
+                // bad variable chosen
+                continue;
+
+            ugcd = ugcd.Multiply(ContentGCD);
+            return gcdInput.restoreGCD(MultivariatePolynomialZp64.AsNormalMultivariate(ugcd, uVariable));
+        }
+
+        throw new Exception("\na: " + a + "\nb: " + b);
+    }
+
+    private const int MAX_OVER_ITERATIONS = 18;
+
+    static MultivariatePolynomial<UnivariatePolynomial<uE>> KaltofenMonaganSparseModularGCDInGF0<uE>(
+        MultivariatePolynomial<UnivariatePolynomial<uE>> a,
+        MultivariatePolynomial<UnivariatePolynomial<uE>> b,
+        int uDegreeBound,
+        int finiteExtensionDegree)
+    {
+        var lcGCD = UnivariateGCD.PolynomialGCD(a.Lc(), b.Lc());
+
+        Ring<UnivariatePolynomial<uE>> univariateRing = a.ring;
+        Random random = PrivateRandom.GetRandom();
+        IrreduciblePolynomialsIEnumerable<uE> primesLoop =
+            new IrreduciblePolynomialsIEnumerable<uE>(univariateRing.GetOne(), finiteExtensionDegree);
+        while (true)
+        {
+            main_loop: ;
+
+            // prepare the skeleton
+            UnivariatePolynomial<uE> basePrime = primesLoop.next();
+
+            FiniteField<uE> fField = new FiniteField<uE>(basePrime);
+
+            // reduce Zp[x] -> GF
+            MultivariatePolynomial<UnivariatePolynomial<uE>>
+                aMod = a.SetRing(fField),
+                bMod = b.SetRing(fField);
+            if (!aMod.SameSkeletonQ(a) || !bMod.SameSkeletonQ(b))
+                continue;
+
+            //accumulator to update coefficients via Chineese remainding
+            MultivariatePolynomial<UnivariatePolynomial<uE>> @base = PolynomialGCD(aMod, bMod);
+            UnivariatePolynomial<uE> lLcGCD = fField.ValueOf(lcGCD);
+
+            if (@base.IsConstant())
+                return a.CreateOne();
+
+            // scale to correct l.c.
+            @base = @base.Monic(lLcGCD);
+
+            // cache the previous base
+            MultivariatePolynomial<UnivariatePolynomial<uE>> previousBase = null;
+
+            // over all primes
+            while (true)
+            {
+                if (basePrime.Degree() >= uDegreeBound + MAX_OVER_ITERATIONS)
+                    // fixme:
+                    // probably this should not ever happen, but it happens (extremely rare, only for small
+                    // characteristic and independently on the particular value of MAX_OVER_ITERATIONS)
+                    // the current workaround is to switch to another variable in R[x_N][x1....x_(N-1)]
+                    // representation and try again
+                    //
+                    // UPDATE: when increasing NUMBER_OF_UNDER_DETERMINED_RETRIES the problem seems to be disappeared
+                    // (at the expense of longer time spent in LinZip)
+                    return null;
+
+                UnivariatePolynomial<uE> prime = primesLoop.next();
+                fField = new FiniteField<uE>(prime);
+
+                // reduce Zp[x] -> GF
+                aMod = a.SetRing(fField);
+                bMod = b.SetRing(fField);
+                if (!aMod.SameSkeletonQ(a) || !bMod.SameSkeletonQ(b))
+                    continue;
+
+                // calculate new GCD using previously calculated skeleton via sparse interpolation
+                MultivariatePolynomial<UnivariatePolynomial<uE>> modularGCD;
+                if (aMod.nVariables == 1)
+                    modularGCD = MultivariatePolynomial<UnivariatePolynomial<uE>>.AsMultivariate(
+                        UnivariateGCD.PolynomialGCD(aMod.AsUnivariate(), bMod.AsUnivariate()), 1, 0, aMod.ordering);
+                else
+                    modularGCD = interpolateGCD(aMod, bMod, @base.SetRingUnsafe(fField), random);
+
+                if (modularGCD == null)
+                {
+                    // interpolation failed => assumed form is wrong => start over
+                    goto main_loop;
+                }
+
+                if (!isGCDTriplet(aMod, bMod, modularGCD))
+                {
+                    // extremely rare event
+                    // bad base prime chosen
+                    goto main_loop;
+                }
+
+                if (modularGCD.IsConstant())
+                    return a.CreateOne();
+
+                // better Degree bound found -> start over
+                if (modularGCD.Degree(0) < @base.Degree(0))
+                {
+                    lLcGCD = fField.ValueOf(lcGCD);
+                    // scale to correct l.c.
+                    @base = modularGCD.Monic(lLcGCD);
+                    basePrime = prime;
+                    continue;
+                }
+
+                //skip unlucky prime
+                if (modularGCD.Degree(0) > @base.Degree(0))
+                    continue;
+
+                //lifting
+                var newBasePrime = basePrime.Clone().Multiply(prime);
+                var MonicFactor = fField.DivideExact(fField.ValueOf(lcGCD), modularGCD.Lc());
+
+                PairedIterator<UnivariatePolynomial<uE>, UnivariatePolynomial<uE>> iterator =
+                    new PairedIterator<UnivariatePolynomial<uE>, UnivariatePolynomial<uE>>(@base, modularGCD);
+                ChineseRemainders.ChineseRemaindersMagic<UnivariatePolynomial<uE>> magic =
+                    ChineseRemainders.CreateMagic(univariateRing, basePrime, prime);
+                while (iterator.MoveNext())
+                {
+                    Monomial<UnivariatePolynomial<uE>>
+                        baseTerm = iterator.aTerm,
+                        imageTerm = iterator.bTerm;
+
+                    if (baseTerm.coefficient.IsZero())
+                        // term is absent in the base
+                        continue;
+
+                    if (imageTerm.coefficient.IsZero())
+                    {
+                        // term is absent in the modularGCD => remove it from the base
+                        @base.Subtract(baseTerm);
+                        continue;
+                    }
+
+                    UnivariatePolynomial<uE> oth = fField.Multiply(imageTerm.coefficient, MonicFactor);
+
+                    // update base term
+                    UnivariatePolynomial<uE> newCoeff =
+                        ChineseRemainders.ChineseRemainder(univariateRing, magic, baseTerm.coefficient, oth);
+                    @base.Put(baseTerm.SetCoefficient(newCoeff));
+                }
+
+                basePrime = newBasePrime;
+
+                // set ring back to the normal univariate ring
+                @base = @base.SetRingUnsafe(univariateRing);
+                // two trials didn't change the result, probably we are done
+                MultivariatePolynomial<UnivariatePolynomial<uE>> candidate = @base.Clone().PrimitivePart();
+                if (basePrime.Degree() >= uDegreeBound || (previousBase != null && candidate.Equals(previousBase)))
+                {
+                    previousBase = candidate;
+                    //first check b since b is less Degree
+                    if (!isGCDTriplet(b, a, candidate))
+                        continue;
+
+                    return candidate;
+                }
+
+                previousBase = candidate;
+            }
+        }
+    }
+
+    static MultivariatePolynomial<UnivariatePolynomial<uE>> KaltofenMonaganEEZModularGCDInGF0<uE>(
+        MultivariatePolynomial<UnivariatePolynomial<uE>> a,
+        MultivariatePolynomial<UnivariatePolynomial<uE>> b,
+        int uDegreeBound,
+        int finiteExtensionDegree)
+    {
+        UnivariatePolynomial<uE> lcGCD = UnivariateGCD.PolynomialGCD(a.Lc(), b.Lc());
+
+        Ring<UnivariatePolynomial<uE>> univariateRing = a.ring;
+
+        MultivariatePolynomial<UnivariatePolynomial<uE>> @base = null;
+        UnivariatePolynomial<uE> basePrime = null;
+
+        IrreduciblePolynomialsIEnumerable<uE> primesLoop =
+            new IrreduciblePolynomialsIEnumerable<uE>(univariateRing.GetOne(), finiteExtensionDegree);
+        main_loop:
+        while (true)
+        {
+            if (basePrime != null && basePrime.Degree() >= uDegreeBound + MAX_OVER_ITERATIONS)
+                // fixme:
+                // probably this should not ever happen, but it happens (extremely rare, only for small
+                // characteristic and independently on the particular value of MAX_OVER_ITERATIONS)
+                // the current workaround is to switch to another variable in R[x_N][x1....x_(N-1)]
+                // representation and try again
+                //
+                // UPDATE: when increasing NUMBER_OF_UNDER_DETERMINED_RETRIES the problem seems to be disappeared
+                // (at the expense of longer time spent in LinZip)
+                return null;
+
+            // prepare the skeleton
+            UnivariatePolynomial<uE> prime = primesLoop.next();
+
+            FiniteField<uE> fField = new FiniteField<uE>(prime);
+
+            // reduce Zp[x] -> GF
+            MultivariatePolynomial<UnivariatePolynomial<uE>>
+                aMod = a.SetRing(fField),
+                bMod = b.SetRing(fField);
+            if (!aMod.SameSkeletonQ(a) || !bMod.SameSkeletonQ(b))
+                continue;
+
+            //accumulator to update coefficients via Chineese remainding
+            MultivariatePolynomial<UnivariatePolynomial<uE>> modGCD = PolynomialGCD(aMod, bMod);
+            UnivariatePolynomial<uE> lLcGCD = fField.ValueOf(lcGCD);
+
+            if (modGCD.IsConstant())
+                return a.CreateOne();
+
+            // scale to correct l.c.
+            modGCD = modGCD.Monic(lLcGCD);
+
+            if (@base == null)
+            {
+                @base = modGCD;
+                basePrime = prime;
+                continue;
+            }
+
+
+            //lifting
+            UnivariatePolynomial<uE> newBasePrime = basePrime.Clone().Multiply(prime);
+            UnivariatePolynomial<uE> MonicFactor = fField.DivideExact(fField.ValueOf(lcGCD), modGCD.Lc());
+
+            PairedIterator<UnivariatePolynomial<uE>, UnivariatePolynomial<uE>> iterator =
+                new PairedIterator<UnivariatePolynomial<uE>, UnivariatePolynomial<uE>>(@base, modGCD);
+            ChineseRemainders.ChineseRemaindersMagic<UnivariatePolynomial<uE>> magic =
+                ChineseRemainders.CreateMagic(univariateRing, basePrime, prime);
+            while (iterator.MoveNext())
+            {
+                Monomial<UnivariatePolynomial<uE>>
+                    baseTerm = iterator.aTerm,
+                    imageTerm = iterator.bTerm;
+
+                if (baseTerm.coefficient.IsZero())
+                    // term is absent in the base
+                    continue;
+
+                if (imageTerm.coefficient.IsZero())
+                {
+                    // term is absent in the modularGCD => remove it from the base
+                    @base.Subtract(baseTerm);
+                    continue;
+                }
+
+                UnivariatePolynomial<uE> oth = fField.Multiply(imageTerm.coefficient, MonicFactor);
+
+                // update base term
+                UnivariatePolynomial<uE> newCoeff =
+                    ChineseRemainders.ChineseRemainder(univariateRing, magic, baseTerm.coefficient, oth);
+                @base.Put(baseTerm.SetCoefficient(newCoeff));
+            }
+
+            basePrime = newBasePrime;
+
+            // set ring back to the normal univariate ring
+            @base = @base.SetRingUnsafe(univariateRing);
+            // two trials didn't change the result, probably we are done
+            MultivariatePolynomial<UnivariatePolynomial<uE>> candidate = @base.Clone().PrimitivePart();
+            //first check b since b is less Degree
+            if (!isGCDTriplet(b, a, candidate))
+                continue;
+
+            return candidate;
+        }
+    }
+
+    private sealed class IrreduciblePolynomialsIEnumerable<uE>
+    {
+        readonly UnivariatePolynomial<uE> factory;
+        int Degree;
+
+        public IrreduciblePolynomialsIEnumerable(UnivariatePolynomial<uE> factory, int Degree)
+        {
+            this.factory = factory;
+            this.Degree = Degree;
+        }
+
+        public UnivariatePolynomial<uE> next()
+        {
+            return IrreduciblePolynomials.RandomIrreduciblePolynomial(factory, Degree++, PrivateRandom.GetRandom());
+        }
+    }
+
+    static MultivariatePolynomial<E> interpolateGCD<E>(MultivariatePolynomial<E> a, MultivariatePolynomial<E> b,
+        MultivariatePolynomial<E> skeleton, Random rnd)
+    {
+        a.AssertSameCoefficientRingWith(b);
+        a.AssertSameCoefficientRingWith(skeleton);
+
+        // a and b must be Content-free
+//        if (!ContentGCD(a, b, 0, MultivariateGCD::PolynomialGCD).IsConstant())
+//            return null;
+//        MultivariatePolynomialZp64 Content = ContentGCD(a, b, 0, MultivariateGCD::PolynomialGCD);
+//        a = divideExact(a, Content);
+//        b = divideExact(b, Content);
+//        skeleton = divideSkeletonExact(skeleton, Content);
+
+        SparseInterpolation<E> interpolation = CreateInterpolation(-1, a, b, skeleton, 1, rnd);
+        if (interpolation == null)
+            return null;
+        MultivariatePolynomial<E> gcd = interpolation.evaluate();
+        if (gcd == null)
+            return null;
+
+        return gcd; //.Multiply(Content);
+    }
+
+     /* ===================================== Multivariate GCD over finite fields ==================================== */
 
 
     // public static  MultivariatePolynomial<E> BrownGCD<E>(
@@ -3215,21 +3244,26 @@ public static class MultivariateGCD
 //     }
 //
 //     
-     private static MultivariatePolynomial<E> doDivisionCheck<E>(
-             MultivariatePolynomial<E> a, MultivariatePolynomial<E> b,
-             UnivariatePolynomial<E> ContentGCD, MultivariateInterpolation.Interpolation<E> interpolation, int variable) {
-         if (interpolation == null)
-             return null;
-         MultivariatePolynomial<E> interpolated =
-                 MultivariatePolynomial<E>.AsNormalMultivariate(interpolation.GetInterpolatingPolynomial().AsOverUnivariateEliminate(variable).PrimitivePart(), variable);
-         if (!isGCDTriplet(a, b, interpolated))
-             return null;
+    private static MultivariatePolynomial<E> doDivisionCheck<E>(
+        MultivariatePolynomial<E> a, MultivariatePolynomial<E> b,
+        UnivariatePolynomial<E> ContentGCD, MultivariateInterpolation.Interpolation<E> interpolation, int variable)
+    {
+        if (interpolation == null)
+            return null;
+        MultivariatePolynomial<E> interpolated =
+            MultivariatePolynomial<E>.AsNormalMultivariate(
+                interpolation.GetInterpolatingPolynomial().AsOverUnivariateEliminate(variable).PrimitivePart(),
+                variable);
+        if (!isGCDTriplet(a, b, interpolated))
+            return null;
 
-         if (ContentGCD == null)
-             return interpolated;
-         MultivariatePolynomial<E> poly = MultivariatePolynomial<E>.AsMultivariate(ContentGCD, a.nVariables, variable, a.ordering);
-         return interpolated.Multiply(poly);
-     }
+        if (ContentGCD == null)
+            return interpolated;
+        MultivariatePolynomial<E> poly =
+            MultivariatePolynomial<E>.AsMultivariate(ContentGCD, a.nVariables, variable, a.ordering);
+        return interpolated.Multiply(poly);
+    }
+
 //
     // when to use fast division check
     private const int LARGE_SIZE_USE_FAST_DIV_TEST = 64_000;
@@ -3314,20 +3348,20 @@ public static class MultivariateGCD
         return gcdInput.restoreGCD(result);
     }
 
-    
-     private const int MAX_SPARSE_INTERPOLATION_FAILS = 64;
-     
-     private const int ALLOWED_OVER_INTERPOLATED_ATTEMPTS = 64;
 
-    
+    private const int MAX_SPARSE_INTERPOLATION_FAILS = 64;
+
+    private const int ALLOWED_OVER_INTERPOLATED_ATTEMPTS = 64;
+
+
     private static MultivariatePolynomial<E> ZippelGCD<E>(
-            MultivariatePolynomial<E> a,
-            MultivariatePolynomial<E> b,
-            Random rnd,
-            int variable,
-            int[] DegreeBounds,
-            int evaluationStackLimit) {
-
+        MultivariatePolynomial<E> a,
+        MultivariatePolynomial<E> b,
+        Random rnd,
+        int variable,
+        int[] DegreeBounds,
+        int evaluationStackLimit)
+    {
         //check for trivial gcd
         MultivariatePolynomial<E> trivialGCD = MultivariateGCD.trivialGCD(a, b);
         if (trivialGCD != null)
@@ -3336,7 +3370,7 @@ public static class MultivariateGCD
         MultivariatePolynomial<E> factory = a;
         int nVariables = factory.nVariables;
         if (variable == 0)
-        // switch to univariate gcd
+            // switch to univariate gcd
         {
             UnivariatePolynomial<E> gcd = UnivariateGCD.PolynomialGCD(a.AsUnivariate(), b.AsUnivariate());
             if (gcd.Degree() == 0)
@@ -3354,13 +3388,15 @@ public static class MultivariateGCD
         b = primitiveInput.bPrimitive;
         // gcd of Zp[x_k] Content and lc
         UnivariatePolynomial<E>
-                ContentGCD = primitiveInput.contentGCD,
-                lcGCD = primitiveInput.lcGCD;
+            ContentGCD = primitiveInput.contentGCD,
+            lcGCD = primitiveInput.lcGCD;
 
         //check again for trivial gcd
         trivialGCD = MultivariateGCD.trivialGCD(a, b);
-        if (trivialGCD != null) {
-            MultivariatePolynomial<E> poly = MultivariatePolynomial<E>.AsMultivariate(ContentGCD, a.nVariables, variable, a.ordering);
+        if (trivialGCD != null)
+        {
+            MultivariatePolynomial<E> poly =
+                MultivariatePolynomial<E>.AsMultivariate(ContentGCD, a.nVariables, variable, a.ordering);
             return trivialGCD.Multiply(poly);
         }
 
@@ -3372,8 +3408,10 @@ public static class MultivariateGCD
         int failedSparseInterpolations = 0;
 
         int[] tmpDegreeBounds = (int[])DegreeBounds.Clone();
-        main:
-        while (true) {
+
+        while (true)
+        {
+            main: ;
             if (evaluationStackLimit == globalEvaluationStack.Count)
                 return null;
 
@@ -3390,8 +3428,8 @@ public static class MultivariateGCD
             // evaluate a and b at variable = randomPoint
             // calculate gcd of the result by the recursive call
             MultivariatePolynomial<E>
-                    aVal = a.Evaluate(variable, seedPoint),
-                    bVal = b.Evaluate(variable, seedPoint);
+                aVal = a.Evaluate(variable, seedPoint),
+                bVal = b.Evaluate(variable, seedPoint);
 
             // check for unlucky substitution
             int[] aValDegrees = aVal.DegreesRef(), bValDegrees = bVal.DegreesRef();
@@ -3399,7 +3437,8 @@ public static class MultivariateGCD
                 if (aDegrees[i] != aValDegrees[i] || bDegrees[i] != bValDegrees[i])
                     goto main;
 
-            MultivariatePolynomial<E> cVal = ZippelGCD(aVal, bVal, rnd, variable - 1, tmpDegreeBounds, evaluationStackLimit);
+            MultivariatePolynomial<E> cVal = ZippelGCD(aVal, bVal, rnd, variable - 1, tmpDegreeBounds,
+                evaluationStackLimit);
             if (cVal == null)
                 //unlucky homomorphism
                 continue;
@@ -3409,7 +3448,8 @@ public static class MultivariateGCD
                 //unlucky homomorphism
                 continue;
 
-            if (currExponent < tmpDegreeBounds[variable - 1]) {
+            if (currExponent < tmpDegreeBounds[variable - 1])
+            {
                 //better Degree bound detected
                 tmpDegreeBounds[variable - 1] = currExponent;
             }
@@ -3417,26 +3457,32 @@ public static class MultivariateGCD
             cVal = cVal.Multiply(ring.Multiply(ring.Reciprocal(cVal.Lc()), lcVal));
             Debug.Assert(cVal.Lc().Equals(lcVal));
 
-            SparseInterpolation<E> sparseInterpolator = CreateInterpolation(variable, a, b, cVal, tmpDegreeBounds[variable], rnd);
+            SparseInterpolation<E> sparseInterpolator =
+                CreateInterpolation(variable, a, b, cVal, tmpDegreeBounds[variable], rnd);
             if (sparseInterpolator == null)
                 //unlucky homomorphism
                 continue;
 
             // we are applying dense interpolation for univariate skeleton coefficients
-            MultivariateInterpolation.Interpolation<E> denseInterpolation = new MultivariateInterpolation.Interpolation<E>(variable, seedPoint, cVal);
+            MultivariateInterpolation.Interpolation<E> denseInterpolation =
+                new MultivariateInterpolation.Interpolation<E>(variable, seedPoint, cVal);
             //previous interpolation (used to detect whether update doesn't change the result)
             MultivariatePolynomial<E> previousInterpolation;
             //local evaluation stack for points that are calculated via sparse interpolation (but not gcd evaluation) -> always same skeleton
             HashSet<E> localEvaluationStack = new HashSet<E>(globalEvaluationStack);
-            while (true) {
+            while (true)
+            {
                 if (evaluationStackLimit == localEvaluationStack.Count)
                     return null;
 
-                if (denseInterpolation.NumberOfPoints() > tmpDegreeBounds[variable] + ALLOWED_OVER_INTERPOLATED_ATTEMPTS) {
+                if (denseInterpolation.NumberOfPoints() >
+                    tmpDegreeBounds[variable] + ALLOWED_OVER_INTERPOLATED_ATTEMPTS)
+                {
                     // restore original Degree bounds, since unlucky homomorphism may destruct correct bounds
                     tmpDegreeBounds = (int[])DegreeBounds.Clone();
                     goto main;
                 }
+
                 E randomPoint = randomElement(ring, rnd);
                 if (localEvaluationStack.Contains(randomPoint))
                     continue;
@@ -3447,7 +3493,8 @@ public static class MultivariateGCD
                     continue;
 
                 cVal = sparseInterpolator.evaluate(randomPoint);
-                if (cVal == null) {
+                if (cVal == null)
+                {
                     ++failedSparseInterpolations;
                     if (failedSparseInterpolations == MAX_SPARSE_INTERPOLATION_FAILS)
                         return null; //throw new RuntimeException("Sparse interpolation failed");
@@ -3455,6 +3502,7 @@ public static class MultivariateGCD
                     tmpDegreeBounds = (int[])DegreeBounds.Clone();
                     goto main;
                 }
+
                 cVal = cVal.Multiply(ring.Multiply(ring.Reciprocal(cVal.Lc()), lcVal));
                 Debug.Assert(cVal.Lc().Equals(lcVal));
 
@@ -3465,8 +3513,9 @@ public static class MultivariateGCD
 
                 // do division test
                 if ((tmpDegreeBounds[variable] <= denseInterpolation.NumberOfPoints()
-                        && denseInterpolation.NumberOfPoints() - tmpDegreeBounds[variable] < 3)
-                        || previousInterpolation.Equals(denseInterpolation.GetInterpolatingPolynomial())) {
+                     && denseInterpolation.NumberOfPoints() - tmpDegreeBounds[variable] < 3)
+                    || previousInterpolation.Equals(denseInterpolation.GetInterpolatingPolynomial()))
+                {
                     MultivariatePolynomial<E> result = doDivisionCheck(a, b, ContentGCD, denseInterpolation, variable);
                     if (result != null)
                         return result;
@@ -3475,746 +3524,834 @@ public static class MultivariateGCD
         }
     }
 
-     private const bool ALWAYS_LINZIP = false;
-     
-     private const int MAX_FAILED_SUBSTITUTIONS = 32;
+    private const bool ALWAYS_LINZIP = false;
 
-     static  SparseInterpolation<E> CreateInterpolation<E>(int variable,
-                                                           MultivariatePolynomial<E> a,
-                                                           MultivariatePolynomial<E> b,
-                                                           MultivariatePolynomial<E> skeleton,
-                                                           int expectedNumberOfEvaluations,
-                                                           Random rnd) {
-         Debug.Assert(a.nVariables > 1);
-         skeleton = skeleton.Clone().SetAllCoefficientsToUnit();
-         if (skeleton.Size() == 1)
-             return new TrivialSparseInterpolation<E>(skeleton);
+    private const int MAX_FAILED_SUBSTITUTIONS = 32;
 
-         bool Monic = a.CoefficientOf(0, a.Degree(0)).IsConstant() && b.CoefficientOf(0, a.Degree(0)).IsConstant();
-         var globalSkeleton = skeleton.GetSkeleton();
-         Dictionary<int, MultivariatePolynomial<E>> univarSkeleton = getSkeleton(skeleton);
-         int[] sparseUnivarDegrees = univarSkeleton.Keys.ToArray();
+    static SparseInterpolation<E> CreateInterpolation<E>(int variable,
+        MultivariatePolynomial<E> a,
+        MultivariatePolynomial<E> b,
+        MultivariatePolynomial<E> skeleton,
+        int expectedNumberOfEvaluations,
+        Random rnd)
+    {
+        Debug.Assert(a.nVariables > 1);
+        skeleton = skeleton.Clone().SetAllCoefficientsToUnit();
+        if (skeleton.Size() == 1)
+            return new TrivialSparseInterpolation<E>(skeleton);
 
-         Ring<E> ring = a.ring;
+        bool Monic = a.CoefficientOf(0, a.Degree(0)).IsConstant() && b.CoefficientOf(0, a.Degree(0)).IsConstant();
+        var globalSkeleton = skeleton.GetSkeleton();
+        Dictionary<int, MultivariatePolynomial<E>> univarSkeleton = getSkeleton(skeleton);
+        int[] sparseUnivarDegrees = univarSkeleton.Keys.ToArray();
 
-         int lastVariable = variable == -1 ? a.nVariables - 1 : variable;
-         int[] evaluationVariables = Utils.Utils.Sequence(1, lastVariable + 1);//variable inclusive
-         E[] evaluationPoint = new E[evaluationVariables.Length];
+        Ring<E> ring = a.ring;
 
-         MultivariatePolynomial<E>.PrecomputedPowersHolder powers;
-         int fails = 0;
-         while (true) {
-             search_for_good_evaluation_point: ;
-             if (fails >= MAX_FAILED_SUBSTITUTIONS)
-                 return null;
-             //avoid zero evaluation points
-             for (int i = lastVariable - 1; i >= 0; --i)
-                 do {
-                     evaluationPoint[i] = randomElement(ring, rnd);
-                 } while (ring.IsZero(evaluationPoint[i]));
+        int lastVariable = variable == -1 ? a.nVariables - 1 : variable;
+        int[] evaluationVariables = Utils.Utils.Sequence(1, lastVariable + 1); //variable inclusive
+        E[] evaluationPoint = new E[evaluationVariables.Length];
 
-             powers = mkPrecomputedPowers(a, b, evaluationVariables, evaluationPoint);
+        MultivariatePolynomial<E>.PrecomputedPowersHolder powers;
+        int fails = 0;
+        while (true)
+        {
+            search_for_good_evaluation_point: ;
+            if (fails >= MAX_FAILED_SUBSTITUTIONS)
+                return null;
+            //avoid zero evaluation points
+            for (int i = lastVariable - 1; i >= 0; --i)
+                do
+                {
+                    evaluationPoint[i] = randomElement(ring, rnd);
+                } while (ring.IsZero(evaluationPoint[i]));
 
-             foreach (MultivariatePolynomial<E> p in (MultivariatePolynomial<E>[])[a, b, skeleton])
-                 if (!p.GetSkeleton(0).Equals(p.Evaluate(powers, evaluationVariables).GetSkeleton())) {
-                     ++fails;
-                     goto search_for_good_evaluation_point;
-                 }
-             break;
-         }
+            powers = mkPrecomputedPowers(a, b, evaluationVariables, evaluationPoint);
 
-         int requiredNumberOfEvaluations = -1, MonicScalingExponent = -1;
-         for (var it = univarSkeleton.GetEnumerator(); it.MoveNext(); ) {
-             MultivariatePolynomial<E> v = it.Current.Value;
-             if (v.Size() > requiredNumberOfEvaluations)
-                 requiredNumberOfEvaluations = v.Size();
-             if (v.Size() == 1)
-                 MonicScalingExponent = it.Current.Key;
-         }
+            foreach (MultivariatePolynomial<E> p in (MultivariatePolynomial<E>[]) [a, b, skeleton])
+                if (!p.GetSkeleton(0).Equals(p.Evaluate(powers, evaluationVariables).GetSkeleton()))
+                {
+                    ++fails;
+                    goto search_for_good_evaluation_point;
+                }
 
-         if (!ALWAYS_LINZIP) {
-             if (Monic)
-                 MonicScalingExponent = -1;
+            break;
+        }
 
-             if (Monic || MonicScalingExponent != -1)
-                 return new MonicInterpolation<E>(ring, variable, a, b, globalSkeleton, univarSkeleton, sparseUnivarDegrees,
-                         evaluationVariables, evaluationPoint, powers, expectedNumberOfEvaluations, rnd, requiredNumberOfEvaluations, MonicScalingExponent);
-         }
+        int requiredNumberOfEvaluations = -1, MonicScalingExponent = -1;
+        for (var it = univarSkeleton.GetEnumerator(); it.MoveNext();)
+        {
+            MultivariatePolynomial<E> v = it.Current.Value;
+            if (v.Size() > requiredNumberOfEvaluations)
+                requiredNumberOfEvaluations = v.Size();
+            if (v.Size() == 1)
+                MonicScalingExponent = it.Current.Key;
+        }
 
-         return new LinZipInterpolation<E>(ring, variable, a, b, globalSkeleton, univarSkeleton, sparseUnivarDegrees,
-                 evaluationVariables, evaluationPoint, powers, expectedNumberOfEvaluations, rnd);
-     }
+        if (!ALWAYS_LINZIP)
+        {
+            if (Monic)
+                MonicScalingExponent = -1;
 
-     
-     private static  MultivariatePolynomial<E>.PrecomputedPowersHolder mkPrecomputedPowers<E>(
-             MultivariatePolynomial<E> a, MultivariatePolynomial<E> b,
-             int[] evaluationVariables, E[] evaluationPoint) {
-         int[] Degrees = Utils.Utils.Max(a.DegreesRef(), b.DegreesRef());
-         MultivariatePolynomial<E>.PrecomputedPowers[] pp = new MultivariatePolynomial<E>.PrecomputedPowers[a.nVariables];
-         for (int i = 0; i < evaluationVariables.Length; ++i)
-             pp[evaluationVariables[i]] = new MultivariatePolynomial<E>.PrecomputedPowers(
-                     Math.Min(Degrees[evaluationVariables[i]], MultivariatePolynomialZp64.MAX_POWERS_CACHE_SIZE),
-                     evaluationPoint[i], a.ring);
-         return new MultivariatePolynomial<E>.PrecomputedPowersHolder(a.ring, pp);
-     }
+            if (Monic || MonicScalingExponent != -1)
+                return new MonicInterpolation<E>(ring, variable, a, b, globalSkeleton, univarSkeleton,
+                    sparseUnivarDegrees,
+                    evaluationVariables, evaluationPoint, powers, expectedNumberOfEvaluations, rnd,
+                    requiredNumberOfEvaluations, MonicScalingExponent);
+        }
+
+        return new LinZipInterpolation<E>(ring, variable, a, b, globalSkeleton, univarSkeleton, sparseUnivarDegrees,
+            evaluationVariables, evaluationPoint, powers, expectedNumberOfEvaluations, rnd);
+    }
 
 
-     
-     static  Dictionary<int, MultivariatePolynomial<E>> getSkeleton<E>(MultivariatePolynomial<E> poly)
-     {
-         Dictionary<int, MultivariatePolynomial<E>> skeleton = new Dictionary<int, MultivariatePolynomial<E>>();
-         foreach (Monomial<E> term in poly.terms) {
-             Monomial<E> newDV = term.SetZero(0);
-             if (skeleton.TryGetValue(term.exponents[0], out var coeff))
-                 coeff.Add(newDV);
-             else
-                 skeleton.Add(term.exponents[0], MultivariatePolynomial<E>.Create(poly.nVariables,
-                         poly.ring, poly.ordering, newDV));
-         }
-         return skeleton;
-     }
+    private static MultivariatePolynomial<E>.PrecomputedPowersHolder mkPrecomputedPowers<E>(
+        MultivariatePolynomial<E> a, MultivariatePolynomial<E> b,
+        int[] evaluationVariables, E[] evaluationPoint)
+    {
+        int[] Degrees = Utils.Utils.Max(a.DegreesRef(), b.DegreesRef());
+        MultivariatePolynomial<E>.PrecomputedPowers[]
+            pp = new MultivariatePolynomial<E>.PrecomputedPowers[a.nVariables];
+        for (int i = 0; i < evaluationVariables.Length; ++i)
+            pp[evaluationVariables[i]] = new MultivariatePolynomial<E>.PrecomputedPowers(
+                Math.Min(Degrees[evaluationVariables[i]], MultivariatePolynomialZp64.MAX_POWERS_CACHE_SIZE),
+                evaluationPoint[i], a.ring);
+        return new MultivariatePolynomial<E>.PrecomputedPowersHolder(a.ring, pp);
+    }
 
-     interface SparseInterpolation<E> {
 
-         MultivariatePolynomial<E> evaluate();
-         
-         MultivariatePolynomial<E> evaluate(E newPoint);
-     }
+    static Dictionary<int, MultivariatePolynomial<E>> getSkeleton<E>(MultivariatePolynomial<E> poly)
+    {
+        Dictionary<int, MultivariatePolynomial<E>> skeleton = new Dictionary<int, MultivariatePolynomial<E>>();
+        foreach (Monomial<E> term in poly.terms)
+        {
+            Monomial<E> newDV = term.SetZero(0);
+            if (skeleton.TryGetValue(term.exponents[0], out var coeff))
+                coeff.Add(newDV);
+            else
+                skeleton.Add(term.exponents[0], MultivariatePolynomial<E>.Create(poly.nVariables,
+                    poly.ring, poly.ordering, newDV));
+        }
 
-     sealed class TrivialSparseInterpolation<E> : SparseInterpolation<E> {
-         readonly MultivariatePolynomial<E> val;
+        return skeleton;
+    }
 
-         public TrivialSparseInterpolation(MultivariatePolynomial<E> val) {
-             this.val = val;
-         }
+    interface SparseInterpolation<E>
+    {
+        MultivariatePolynomial<E> evaluate();
 
-         public MultivariatePolynomial<E> evaluate() {
-             return val;
-         }
+        MultivariatePolynomial<E> evaluate(E newPoint);
+    }
 
-         public MultivariatePolynomial<E> evaluate(E newPoint) {
-             return val;
-         }
-     }
+    sealed class TrivialSparseInterpolation<E> : SparseInterpolation<E>
+    {
+        readonly MultivariatePolynomial<E> val;
 
-     abstract class ASparseInterpolation<E> : SparseInterpolation<E> {
-         
-         readonly Ring<E> ring;
-         
-         readonly int variable;
-         
-         readonly MultivariatePolynomial<E> a, b;
-         
-         readonly Set<DegreeVector> globalSkeleton;
-         
-         readonly Dictionary<int, MultivariatePolynomial<E>> univarSkeleton;
-         
-         readonly int[] sparseUnivarDegrees;
-         
-         readonly int[] evaluationVariables;
-         
-         readonly E[] evaluationPoint;
-         
-         readonly MultivariatePolynomial<E>.PrecomputedPowersHolder powers;
-         
-         readonly ZippelEvaluations<E> aEvals, bEvals;
-         
-         readonly Random rnd;
+        public TrivialSparseInterpolation(MultivariatePolynomial<E> val)
+        {
+            this.val = val;
+        }
 
-         ASparseInterpolation(Ring<E> ring, int variable,
-                              MultivariatePolynomial<E> a, MultivariatePolynomial<E> b,
-                              Set<DegreeVector> globalSkeleton,
-                              Dictionary<int, MultivariatePolynomial<E>> univarSkeleton,
-                              int[] sparseUnivarDegrees, int[] evaluationVariables,
-                              E[] evaluationPoint,
-                              MultivariatePolynomial<E>.PrecomputedPowersHolder powers, int expectedNumberOfEvaluations, Random rnd) {
-             this.ring = ring;
-             this.variable = variable;
-             this.a = a;
-             this.b = b;
-             this.globalSkeleton = globalSkeleton;
-             this.univarSkeleton = univarSkeleton;
-             this.sparseUnivarDegrees = sparseUnivarDegrees;
-             this.evaluationVariables = evaluationVariables;
-             this.evaluationPoint = evaluationPoint;
-             this.aEvals = CreateEvaluations(a, evaluationVariables, evaluationPoint, powers, expectedNumberOfEvaluations);
-             this.bEvals = CreateEvaluations(b, evaluationVariables, evaluationPoint, powers, expectedNumberOfEvaluations);
-             this.powers = powers;
-             this.rnd = rnd;
-         }
+        public MultivariatePolynomial<E> evaluate()
+        {
+            return val;
+        }
 
-         public MultivariatePolynomial<E> evaluate() {
-             return evaluate(evaluationPoint[evaluationPoint.Length - 1]);
-         }
+        public MultivariatePolynomial<E> evaluate(E newPoint)
+        {
+            return val;
+        }
+    }
 
-         
-         public MultivariatePolynomial<E> evaluate(E newPoint) {
-             // constant is constant
-             if (globalSkeleton.Size() == 1)
-                 return a.Create(((Monomial<E>) globalSkeleton.iterator().next()).SetCoefficient(ring.GetOne()));
-             // variable = newPoint
-             evaluationPoint[evaluationPoint.Length - 1] = newPoint;
-             powers.Set(evaluationVariables[evaluationVariables.Length - 1], newPoint);
-             return evaluate0(newPoint);
-         }
+    abstract class ASparseInterpolation<E> : SparseInterpolation<E>
+    {
+        public readonly Ring<E> ring;
 
-         public abstract MultivariatePolynomial<E> evaluate0(E newPoint);
-     }
+        public readonly int variable;
 
-    
-     private const int N_EVALUATIONS_RECURSIVE_SWITCH = 16;
+        public readonly MultivariatePolynomial<E> a;
+        public readonly MultivariatePolynomial<E> b;
 
-     private const int SIZE_OF_POLY_RECURSIVE_SWITCH = 512;
+        public readonly ImmutableList<DegreeVector> globalSkeleton;
 
-     static  ZippelEvaluations<E> CreateEvaluations<E>(MultivariatePolynomial<E> poly,
-                                                       int[] evaluationVariables,
-                                                       E[] evaluationPoint,
-                                                       MultivariatePolynomial<E>.PrecomputedPowersHolder basePowers,
-                                                       int expectedNumberOfEvaluations) {
-         if (expectedNumberOfEvaluations > N_EVALUATIONS_RECURSIVE_SWITCH
-                 && poly.Size() > SIZE_OF_POLY_RECURSIVE_SWITCH)
-             return new FastSparseRecursiveEvaluations<E>(poly, evaluationPoint, evaluationVariables[evaluationVariables.Length - 1]);
-         else
-             return new PlainEvaluations<E>(poly, evaluationVariables, evaluationPoint, basePowers);
-     }
+        public readonly Dictionary<int, MultivariatePolynomial<E>> univarSkeleton;
 
-     
-     interface ZippelEvaluations<E> {
-         
-         UnivariatePolynomial<E> evaluate(int raiseFactor, E value);
-     }
+        public readonly int[] sparseUnivarDegrees;
 
-     
-     private sealed class PlainEvaluations<E> : ZippelEvaluations<E> {
-         
-         private readonly MultivariatePolynomial<E> poly;
-     
-         private readonly int[] evaluationVariables;
-         
-         private readonly E[] evaluationPoint;
-         
-         private readonly MultivariatePolynomial<E>.PrecomputedPowersHolder basePowers;
-         
-         private readonly Dictionary<int, MultivariatePolynomial<E>.PrecomputedPowersHolder> powersCache
-                 = new Dictionary<int, MultivariatePolynomial<E>.PrecomputedPowersHolder>();
+        readonly int[] evaluationVariables;
 
-         public PlainEvaluations(MultivariatePolynomial<E> poly,
-                          int[] evaluationVariables,
-                          E[] evaluationPoint,
-                          MultivariatePolynomial<E>.PrecomputedPowersHolder basePowers) {
-             this.poly = poly;
-             this.evaluationVariables = evaluationVariables;
-             this.evaluationPoint = evaluationPoint;
-             this.basePowers = basePowers.Clone();
-             this.powersCache.Add(1, this.basePowers);
-         }
+        readonly E[] evaluationPoint;
 
-         public UnivariatePolynomial<E> evaluate(int raiseFactor, E value) {
-             basePowers.Set(evaluationVariables[evaluationVariables.Length - 1], value);
+        public readonly MultivariatePolynomial<E>.PrecomputedPowersHolder powers;
 
-             MultivariatePolynomial<E>.PrecomputedPowersHolder powers = powersCache.GetValueOrDefault(raiseFactor, null);
-             Ring<E> ring = poly.ring;
-             if (powers == null) {
-                 powers = basePowers.Clone();
-                 for (int i = 0; i < (evaluationVariables.Length - 1); ++i)
-                     powers.Set(evaluationVariables[i], ring.Pow(evaluationPoint[i], raiseFactor));
-                 powersCache.Add(raiseFactor, powers);
-             }
-             powers.Set(evaluationVariables[evaluationVariables.Length - 1], value);
+        public readonly ZippelEvaluations<E> aEvals;
+        public readonly ZippelEvaluations<E> bEvals;
 
-             E[] result = ring.CreateZeroesArray(poly.Degree(0) + 1);
-             foreach (Monomial<E> el in poly.terms) {
-                 E ucf = el.coefficient;
-                 foreach (int variable in evaluationVariables)
-                     ucf = ring.Multiply(ucf, powers.Pow(variable, el.exponents[variable]));
-                 int uDeg = el.exponents[0];
-                 result[uDeg] = ring.Add(result[uDeg], ucf);
-             }
+        readonly Random rnd;
 
-             return UnivariatePolynomial<E>.Create(ring, result);
-         }
-     }
+        public ASparseInterpolation(Ring<E> ring, int variable,
+            MultivariatePolynomial<E> a, MultivariatePolynomial<E> b,
+            ImmutableList<DegreeVector> globalSkeleton,
+            Dictionary<int, MultivariatePolynomial<E>> univarSkeleton,
+            int[] sparseUnivarDegrees, int[] evaluationVariables,
+            E[] evaluationPoint,
+            MultivariatePolynomial<E>.PrecomputedPowersHolder powers, int expectedNumberOfEvaluations, Random rnd)
+        {
+            this.ring = ring;
+            this.variable = variable;
+            this.a = a;
+            this.b = b;
+            this.globalSkeleton = globalSkeleton;
+            this.univarSkeleton = univarSkeleton;
+            this.sparseUnivarDegrees = sparseUnivarDegrees;
+            this.evaluationVariables = evaluationVariables;
+            this.evaluationPoint = evaluationPoint;
+            this.aEvals = CreateEvaluations(a, evaluationVariables, evaluationPoint, powers,
+                expectedNumberOfEvaluations);
+            this.bEvals = CreateEvaluations(b, evaluationVariables, evaluationPoint, powers,
+                expectedNumberOfEvaluations);
+            this.powers = powers;
+            this.rnd = rnd;
+        }
 
-     
-     private sealed class FastSparseRecursiveEvaluations<E> : ZippelEvaluations<E> {
-         
-         private readonly MultivariatePolynomial<E> poly;
-         
-         private readonly E[] evaluationPoint;
-         
-         private readonly int variable;
+        public MultivariatePolynomial<E> evaluate()
+        {
+            return evaluate(evaluationPoint[evaluationPoint.Length - 1]);
+        }
 
-         public FastSparseRecursiveEvaluations(MultivariatePolynomial<E> poly, E[] evaluationPoint, int variable) {
-             this.poly = poly;
-             this.variable = variable;
-             this.evaluationPoint = evaluationPoint;
-         }
 
-         
-         private readonly Dictionary<int, MultivariatePolynomial<MultivariatePolynomial<E>>> bivariateCache
-                 = new ();
+        public MultivariatePolynomial<E> evaluate(E newPoint)
+        {
+            // constant is constant
+            if (globalSkeleton.Count == 1)
+                return a.Create(((Monomial<E>)globalSkeleton[0]).SetCoefficient(ring.GetOne()));
+            // variable = newPoint
+            evaluationPoint[evaluationPoint.Length - 1] = newPoint;
+            powers.Set(evaluationVariables[evaluationVariables.Length - 1], newPoint);
+            return evaluate0(newPoint);
+        }
 
-    
-         MultivariatePolynomial<MultivariatePolynomial<E>> getSparseRecursiveForm(int raiseFactor) {
-             MultivariatePolynomial<MultivariatePolynomial<E>> recForm = bivariateCache.GetValueOrDefault(raiseFactor, null);
-             if (recForm == null) {
-                 MultivariatePolynomial<E> bivariate;
-                 if (variable == 1)
-                     bivariate = poly;
-                 else {
-                     // values for all variables except first and last
-                     E[] values = new E[variable - 1];
-                     for (int i = 0; i < values.Length; ++i)
-                         values[i] = poly.ring.Pow(evaluationPoint[i], raiseFactor);
+        public abstract MultivariatePolynomial<E> evaluate0(E newPoint);
+    }
 
-                     // substitute all that variables to obtain bivariate poly R[x0, xN]
-                     bivariate = poly.Evaluate(Utils.Utils.Sequence(1, variable), values);
-                 }
-                 if (bivariate.nVariables > 2)
-                     bivariate = bivariate.dropSelectVariables(0, variable);
-                 // swap variables to R[xN, x0]
-                 bivariate = AMultivariatePolynomial.swapVariables(bivariate, 0, 1);
-                 // convert to sparse recursive form R[xN][x0]
-                 recForm = (MultivariatePolynomial<MultivariatePolynomial<E>>) bivariate.toSparseRecursiveForm();
-                 bivariateCache.put(raiseFactor, recForm);
-             }
-             return recForm;
-         }
-         
-         public UnivariatePolynomial<E> evaluate(int raiseFactor, E value) {
-             // get sparse recursive form for fast evaluation
-             MultivariatePolynomial<MultivariatePolynomial<E>> recForm = getSparseRecursiveForm(raiseFactor);
-             // resulting univariate data
-             E[] data = poly.ring.CreateZeroesArray(recForm.Degree() + 1);
 
-             int cacheSize = 128;//recForm.stream().mapToInt(p -> p.Degree()).max().orElse(1);
-             // cached exponents for value^i
-             MultivariatePolynomial.PrecomputedPowersHolder<E> ph =
-                     new MultivariatePolynomial.PrecomputedPowersHolder<E>(poly.ring,
-                             new MultivariatePolynomial.PrecomputedPowers[]{new MultivariatePolynomial.PrecomputedPowers<>(cacheSize, value, poly.ring)});
-             for (Monomial<MultivariatePolynomial<E>> r : recForm)
-                 // fast Horner-like evaluation of sparse univariate polynomials
-                 data[r.totalDegree] = MultivariatePolynomial.evaluateSparseRecursiveForm(r.coefficient, ph, 0);
+    private const int N_EVALUATIONS_RECURSIVE_SWITCH = 16;
 
-             return UnivariatePolynomial.Create(poly.ring, data);
-         }
-     }
-//
-//     
-//     private static final int
-//             SMALL_FIELD_BIT_LENGTH = 13,
-//             NUMBER_OF_UNDER_DETERMINED_RETRIES = 8,
-//             NUMBER_OF_UNDER_DETERMINED_RETRIES_SMALL_FIELD = 24;
-//
-//     static final class LinZipInterpolation<E> extends ASparseInterpolation<E> {
-//         LinZipInterpolation(Ring<E> ring, int variable, MultivariatePolynomial<E> a, MultivariatePolynomial<E> b,
-//                             Set<DegreeVector> globalSkeleton, TIntObjectHashMap<MultivariatePolynomial<E>> univarSkeleton,
-//                             int[] sparseUnivarDegrees, int[] evaluationVariables, E[] evaluationPoint,
-//                             MultivariatePolynomial.PrecomputedPowersHolder<E> powers, int expectedNumberOfEvaluations,
-//                             Random rnd) {
-//             super(ring, variable, a, b, globalSkeleton, univarSkeleton, sparseUnivarDegrees, evaluationVariables,
-//                     evaluationPoint, powers, expectedNumberOfEvaluations, rnd);
-//         }
-//
-//         @Override
-//         public MultivariatePolynomial<E> evaluate0(E newPoint) {
-//             
-//             LinZipSystem<E>[] systems = new LinZipSystem[sparseUnivarDegrees.Length];
-//             for (int i = 0; i < sparseUnivarDegrees.Length; i++)
-//                 systems[i] = new LinZipSystem<>(sparseUnivarDegrees[i], univarSkeleton.get(sparseUnivarDegrees[i]), powers, variable == -1 ? a.nVariables - 1 : variable - 1);
-//
-//
-//             int nUnknowns = globalSkeleton.Size(), nUnknownScalings = -1;
-//             int raiseFactor = 0;
-//
-//             // number of retries before meet raise condition
-//             int nUnderDeterminedRetries = ring.characteristic().bitLength() <= SMALL_FIELD_BIT_LENGTH
-//                     ? NUMBER_OF_UNDER_DETERMINED_RETRIES_SMALL_FIELD
-//                     : NUMBER_OF_UNDER_DETERMINED_RETRIES;
-//
-//             int previousFreeVars = -1, underDeterminedTries = 0;
-//             bool lastChanceUsed = false;
-//             for (int iTry = 0; ; ++iTry) {
-//                 if (iTry == nUnderDeterminedRetries) {
-//                     if (lastChanceUsed)
-//                         // allow this trick only once, then break
-//                         break;
-//                     else {
-//                         // give the last chance
-//                         lastChanceUsed = true;
-//                         nUnderDeterminedRetries += nUnderDeterminedLinZip(a, systems, nUnknownScalings);
-//                     }
-//                 }
-//
-//                 for (; ; ) {
-//                     // increment at each loop!
-//                     ++nUnknownScalings;
-//                     // sequential powers of evaluation point
-//                     ++raiseFactor;
-//
-//                     E lastVarValue = newPoint;
-//                     if (variable == -1)
-//                         lastVarValue = ring.pow(lastVarValue, raiseFactor);
-//
-//                     // evaluate a and b to univariate and calculate gcd
-//                     UnivariatePolynomial<E>
-//                             aUnivar = aEvals.evaluate(raiseFactor, lastVarValue),
-//                             bUnivar = bEvals.evaluate(raiseFactor, lastVarValue),
-//                             gcdUnivar = UnivariateGCD.PolynomialGCD(aUnivar, bUnivar);
-//
-//                     if (a.Degree(0) != aUnivar.Degree() || b.Degree(0) != bUnivar.Degree())
-//                         // unlucky main homomorphism or bad evaluation point
-//                         return null;
-//
-//                     assert gcdUnivar.IsMonic();
-//                     if (!univarSkeleton.keySet().containsAll(gcdUnivar.exponents()))
-//                         // univariate gcd contains terms that are not present in the skeleton
-//                         // again unlucky main homomorphism
-//                         return null;
-//
-//                     int totalEquations = 0;
-//                     for (LinZipSystem<E> system : systems) {
-//                         E rhs = gcdUnivar.Degree() < system.univarDegree ? ring.getZero() : gcdUnivar.get(system.univarDegree);
-//                         system.oneMoreEquation(rhs, nUnknownScalings != 0);
-//                         totalEquations += system.nEquations();
-//                     }
-//
-//                     if (nUnknowns + nUnknownScalings <= totalEquations)
-//                         break;
-//
-//                     if (underDeterminedTries > nUnderDeterminedRetries)
-//                         // raise condition: new equations does not fix enough variables
-//                         return null;
-//
-//                     int freeVars = nUnknowns + nUnknownScalings - totalEquations;
-//                     if (freeVars >= previousFreeVars)
-//                         ++underDeterminedTries;
-//                     else
-//                         underDeterminedTries = 0;
-//
-//                     previousFreeVars = freeVars;
-//                 }
-//
-//                 MultivariatePolynomial<E> result = a.CreateZero();
-//                 LinearSolver.SystemInfo info = solveLinZip(a, systems, nUnknownScalings, result);
-//                 if (info == LinearSolver.SystemInfo.UnderDetermined)
-//                     //try to generate more equations
-//                     continue;
-//                 if (info == LinearSolver.SystemInfo.Consistent)
-//                     //well done
-//                     return result;
-//                 if (info == LinearSolver.SystemInfo.Inconsistent)
-//                     //inconsistent system => unlucky homomorphism
-//                     return null;
-//             }
-//             // still under determined
-//             return null;
-//         }
-//     }
-//
-//     private static <E> int nUnderDeterminedLinZip(MultivariatePolynomial<E> factory, LinZipSystem<E>[] subSystems, int nUnknownScalings) {
-//         int nUnknownsMonomials = 0;
-//         for (LinZipSystem<E> system : subSystems)
-//             nUnknownsMonomials += system.skeleton.Length;
-//
-//         int nUnknownsTotal = nUnknownsMonomials + nUnknownScalings;
-//         ArrayList<E[]> lhsGlobal = new ArrayList<>();
-//         int offset = 0;
-//         Ring<E> ring = factory.ring;
-//         for (LinZipSystem<E> system : subSystems) {
-//             for (int j = 0; j < system.matrix.Size(); j++) {
-//                 E[] row = ring.CreateZeroesArray(nUnknownsTotal);
-//                 E[] subRow = system.matrix.get(j);
-//
-//                 System.arraycopy(subRow, 0, row, offset, subRow.Length);
-//                 if (j > 0)
-//                     row[nUnknownsMonomials + j - 1] = system.scalingMatrix.get(j);
-//                 lhsGlobal.add(row);
-//             }
-//
-//             offset += system.skeleton.Length;
-//         }
-//
-//         return LinearSolver.rowEchelonForm(factory.ring, lhsGlobal.toArray(ring.CreateArray2d(lhsGlobal.Size())), null, false, false);
-//     }
-//
-//     private static <E> LinearSolver.SystemInfo solveLinZip(MultivariatePolynomial<E> factory, LinZipSystem<E>[] subSystems, int nUnknownScalings, MultivariatePolynomial<E> destination) {
-//         ArrayList<Monomial<E>> unknowns = new ArrayList<>();
-//         for (LinZipSystem<E> system : subSystems)
-//             for (Monomial<E> DegreeVector : system.skeleton)
-//                 unknowns.add(DegreeVector.set(0, system.univarDegree));
-//
-//         int nUnknownsMonomials = unknowns.Size();
-//         int nUnknownsTotal = nUnknownsMonomials + nUnknownScalings;
-//         ArrayList<E[]> lhsGlobal = new ArrayList<>();
-//         ArrayList<E> rhsGlobal = new ArrayList<>();
-//         int offset = 0;
-//         Ring<E> ring = factory.ring;
-//         for (LinZipSystem<E> system : subSystems) {
-//             for (int j = 0; j < system.matrix.Size(); j++) {
-//                 E[] row = ring.CreateZeroesArray(nUnknownsTotal);
-//                 E[] subRow = system.matrix.get(j);
-//
-//                 System.arraycopy(subRow, 0, row, offset, subRow.Length);
-//                 if (j > 0)
-//                     row[nUnknownsMonomials + j - 1] = system.scalingMatrix.get(j);
-//                 lhsGlobal.add(row);
-//                 rhsGlobal.add(system.rhs.get(j));
-//             }
-//
-//             offset += system.skeleton.Length;
-//         }
-//
-//         E[] solution = ring.CreateArray(nUnknownsTotal);
-//         LinearSolver.SystemInfo info = LinearSolver.solve(ring, lhsGlobal, rhsGlobal, solution);
-//         if (info == LinearSolver.SystemInfo.Consistent) {
-//             
-//             Monomial<E>[] terms = new Monomial[unknowns.Size()];
-//             for (int i = 0; i < terms.Length; i++)
-//                 terms[i] = unknowns.get(i).setCoefficient(solution[i]);
-//             destination.add(terms);
-//         }
-//
-//         return info;
-//     }
-//
-//
-//     static final class MonicInterpolation<E> extends ASparseInterpolation<E> {
-//         
-//         final int requiredNumberOfEvaluations;
-//         
-//         final int MonicScalingExponent;
-//
-//         MonicInterpolation(Ring<E> ring, int variable, MultivariatePolynomial<E> a, MultivariatePolynomial<E> b,
-//                            Set<DegreeVector> globalSkeleton, TIntObjectHashMap<MultivariatePolynomial<E>> univarSkeleton,
-//                            int[] sparseUnivarDegrees, int[] evaluationVariables, E[] evaluationPoint,
-//                            MultivariatePolynomial.PrecomputedPowersHolder<E> powers, int expectedNumberOfEvaluations,
-//                            Random rnd, int requiredNumberOfEvaluations, int MonicScalingExponent) {
-//             super(ring, variable, a, b, globalSkeleton, univarSkeleton, sparseUnivarDegrees, evaluationVariables,
-//                     evaluationPoint, powers, expectedNumberOfEvaluations, rnd);
-//             this.requiredNumberOfEvaluations = requiredNumberOfEvaluations;
-//             this.MonicScalingExponent = MonicScalingExponent;
-//         }
-//
-//         @Override
-//         public MultivariatePolynomial<E> evaluate0(E newPoint) {
-//             
-//             VandermondeSystem<E>[] systems = new VandermondeSystem[sparseUnivarDegrees.Length];
-//             for (int i = 0; i < sparseUnivarDegrees.Length; i++)
-//                 systems[i] = new VandermondeSystem<>(sparseUnivarDegrees[i], univarSkeleton.get(sparseUnivarDegrees[i]), powers, variable == -1 ? a.nVariables - 1 : variable - 1);
-//
-//             for (int i = 0; i < requiredNumberOfEvaluations; ++i) {
-//                 // sequential powers of evaluation point
-//                 int raiseFactor = i + 1;
-//
-//                 E lastVarValue = newPoint;
-//                 if (variable == -1)
-//                     lastVarValue = ring.pow(lastVarValue, raiseFactor);
-//
-//                 // evaluate a and b to univariate and calculate gcd
-//                 UnivariatePolynomial<E>
-//                         aUnivar = aEvals.evaluate(raiseFactor, lastVarValue),
-//                         bUnivar = bEvals.evaluate(raiseFactor, lastVarValue),
-//                         gcdUnivar = UnivariateGCD.PolynomialGCD(aUnivar, bUnivar);
-//
-//                 if (a.Degree(0) != aUnivar.Degree() || b.Degree(0) != bUnivar.Degree())
-//                     // unlucky main homomorphism or bad evaluation point
-//                     return null;
-//
-//                 assert gcdUnivar.IsMonic();
-//                 if (!univarSkeleton.keySet().containsAll(gcdUnivar.exponents()))
-//                     // univariate gcd contains terms that are not present in the skeleton
-//                     // again unlucky main homomorphism
-//                     return null;
-//
-//                 if (MonicScalingExponent != -1) {
-//                     // single scaling factor
-//                     // scale the system according to it
-//
-//                     if (gcdUnivar.Degree() < MonicScalingExponent || ring.isZero(gcdUnivar.get(MonicScalingExponent)))
-//                         // unlucky homomorphism
-//                         return null;
-//
-//                     E normalization = evaluateExceptFirst(ring, powers, ring.getOne(), univarSkeleton.get(MonicScalingExponent).Lt(), i + 1, variable == -1 ? a.nVariables - 1 : variable - 1);
-//                     //normalize univariate gcd in order to reconstruct leading coefficient polynomial
-//                     normalization = ring.Multiply(ring.reciprocal(gcdUnivar.get(MonicScalingExponent)), normalization);
-//                     gcdUnivar = gcdUnivar.Multiply(normalization);
-//                 }
-//
-//                 bool allDone = true;
-//                 for (VandermondeSystem<E> system : systems)
-//                     if (system.nEquations() < system.nUnknownVariables()) {
-//                         E rhs = gcdUnivar.Degree() < system.univarDegree ? ring.getZero() : gcdUnivar.get(system.univarDegree);
-//                         system.oneMoreEquation(rhs);
-//                         if (system.nEquations() < system.nUnknownVariables())
-//                             allDone = false;
-//                     }
-//
-//                 if (allDone)
-//                     break;
-//             }
-//
-//             for (VandermondeSystem<E> system : systems) {
-//                 //solve each system
-//                 LinearSolver.SystemInfo info = system.solve();
-//                 if (info != LinearSolver.SystemInfo.Consistent)
-//                     // system is inconsistent or under determined
-//                     // unlucky homomorphism
-//                     return null;
-//             }
-//
-//             MultivariatePolynomial<E> gcdVal = a.CreateZero();
-//             for (VandermondeSystem<E> system : systems) {
-//                 assert MonicScalingExponent == -1 || system.univarDegree != MonicScalingExponent || ring.isOne(system.solution[0]);
-//                 for (int i = 0; i < system.skeleton.Length; i++) {
-//                     Monomial<E> DegreeVector = system.skeleton[i].set(0, system.univarDegree);
-//                     E value = system.solution[i];
-//                     gcdVal.add(DegreeVector.setCoefficient(value));
-//                 }
-//             }
-//
-//             return gcdVal;
-//         }
-//     }
-//
-//     private static abstract class LinearSystem<E> {
-//         final int univarDegree;
-//         
-//         final Ring<E> ring;
-//         
-//         final Monomial<E>[] skeleton;
-//         
-//         final ArrayList<E[]> matrix;
-//         
-//         final ArrayList<E> rhs = new ArrayList<>();
-//         
-//         final MultivariatePolynomial.PrecomputedPowersHolder<E> powers;
-//         
-//         final int nVars;
-//
-//         
-//         LinearSystem(int univarDegree, MultivariatePolynomial<E> skeleton, MultivariatePolynomial.PrecomputedPowersHolder<E> powers, int nVars) {
-//             this.univarDegree = univarDegree;
-//             this.ring = skeleton.ring;
-//             //todo refactor generics
-//             this.skeleton = skeleton.getSkeleton().toArray(new Monomial[skeleton.Size()]);
-//             this.powers = powers;
-//             this.nVars = nVars;
-//             this.matrix = new ArrayList<>();
-//         }
-//
-//         final int nUnknownVariables() {
-//             return skeleton.Length;
-//         }
-//
-//         final int nEquations() {
-//             return matrix.Size();
-//         }
-//
-//         @Override
-//         public String toString() {
-//             return "{" + matrix.stream().map(Arrays::toString).collect(Collectors.joining(",")) + "} = " + rhs;
-//         }
-//     }
-//
-//     
-//     private static final class LinZipSystem<E> extends LinearSystem<E> {
-//         public LinZipSystem(int univarDegree, MultivariatePolynomial<E> skeleton, MultivariatePolynomial.PrecomputedPowersHolder<E> powers, int nVars) {
-//             super(univarDegree, skeleton, powers, nVars);
-//         }
-//
-//         private final ArrayList<E> scalingMatrix = new ArrayList<>();
-//
-//         public void oneMoreEquation(E rhsVal, bool newScalingIntroduced) {
-//             E[] row = ring.CreateArray(skeleton.Length);
-//             for (int i = 0; i < skeleton.Length; i++)
-//                 row[i] = evaluateExceptFirst(ring, powers, ring.getOne(), skeleton[i], matrix.Size() + 1, nVars);
-//             matrix.add(row);
-//
-//             if (newScalingIntroduced) {
-//                 scalingMatrix.add(ring.negate(rhsVal));
-//                 rhsVal = ring.getZero();
-//             } else
-//                 scalingMatrix.add(ring.getZero());
-//             rhs.add(rhsVal);
-//         }
-//
-//         @Override
-//         public String toString() {
-//             StringBuilder sb = new StringBuilder();
-//             for (int i = 0; i < matrix.Size(); i++) {
-//                 E[] row = matrix.get(i);
-//                 for (int j = 0; j < row.Length; j++) {
-//                     if (j != 0)
-//                         sb.append("+");
-//                     sb.append(row[j]).append("*c" + j);
-//                 }
-//                 if (i != 0)
-//                     sb.append("+").append(scalingMatrix.get(i)).append("*m" + (i - 1));
-//
-//                 sb.append("=").append(rhs.get(i)).append("\n");
-//             }
-//             return sb.toString();
-//         }
-//     }
-//
-//     
-//     static final class VandermondeSystem<E> extends LinearSystem<E> {
-//         public VandermondeSystem(int univarDegree, MultivariatePolynomial<E> skeleton, MultivariatePolynomial.PrecomputedPowersHolder<E> powers, int nVars) {
-//             super(univarDegree, skeleton, powers, nVars);
-//         }
-//
-//         E[] solution = null;
-//
-//         LinearSolver.SystemInfo solve() {
-//             if (solution == null)
-//                 solution = ring.CreateArray(nUnknownVariables());
-//
-//             if (nUnknownVariables() <= 8)
-//                 // for small systems Gaussian elimination is indeed faster
-//                 return LinearSolver.solve(ring, matrix.toArray(ring.CreateArray2d(matrix.Size())), rhs.toArray(ring.CreateArray(rhs.Size())), solution);
-//
-//             // solve vandermonde system
-//             E[] vandermondeRow = matrix.get(0);
-//             LinearSolver.SystemInfo info = LinearSolver.solveVandermondeT(ring, vandermondeRow, rhs.toArray(ring.CreateArray(rhs.Size())), solution);
-//             if (info == LinearSolver.SystemInfo.Consistent)
-//                 for (int i = 0; i < solution.Length; ++i)
-//                     solution[i] = ring.divideExact(solution[i], vandermondeRow[i]);
-//
-//             return info;
-//         }
-//
-//         public VandermondeSystem<E> oneMoreEquation(E rhsVal) {
-//             E[] row = ring.CreateArray(skeleton.Length);
-//             for (int i = 0; i < skeleton.Length; i++)
-//                 row[i] = evaluateExceptFirst(ring, powers, ring.getOne(), skeleton[i], matrix.Size() + 1, nVars);
-//             matrix.add(row);
-//             rhs.add(rhsVal);
-//             return this;
-//         }
-//     }
-//
-//     private static <E> E evaluateExceptFirst(Ring<E> ring,
-//                                              MultivariatePolynomial.PrecomputedPowersHolder<E> powers,
-//                                              E coefficient,
-//                                              Monomial<E> skeleton,
-//                                              int raiseFactor,
-//                                              int nVars) {
-//         E tmp = coefficient;
-//         for (int k = 1; k <= nVars; k++)
-//             tmp = ring.Multiply(tmp, powers.pow(k, raiseFactor * skeleton.exponents[k]));
-//         return tmp;
-//     }
-//
-//     private static <E> bool isVandermonde(E[][] lhs, Ring<E> ring) {
-//         for (int i = 1; i < lhs.Length; i++) {
-//             for (int j = 0; j < lhs[0].Length; j++) {
-//                 if (!lhs[i][j].equals(ring.pow(lhs[0][j], i + 1)))
-//                     return false;
-//             }
-//         }
-//         return true;
-//     }
+    private const int SIZE_OF_POLY_RECURSIVE_SWITCH = 512;
+
+    static ZippelEvaluations<E> CreateEvaluations<E>(MultivariatePolynomial<E> poly,
+        int[] evaluationVariables,
+        E[] evaluationPoint,
+        MultivariatePolynomial<E>.PrecomputedPowersHolder basePowers,
+        int expectedNumberOfEvaluations)
+    {
+        if (expectedNumberOfEvaluations > N_EVALUATIONS_RECURSIVE_SWITCH
+            && poly.Size() > SIZE_OF_POLY_RECURSIVE_SWITCH)
+            return new FastSparseRecursiveEvaluations<E>(poly, evaluationPoint,
+                evaluationVariables[evaluationVariables.Length - 1]);
+        else
+            return new PlainEvaluations<E>(poly, evaluationVariables, evaluationPoint, basePowers);
+    }
+
+
+    interface ZippelEvaluations<E>
+    {
+        UnivariatePolynomial<E> evaluate(int raiseFactor, E value);
+    }
+
+
+    private sealed class PlainEvaluations<E> : ZippelEvaluations<E>
+    {
+        private readonly MultivariatePolynomial<E> poly;
+
+        private readonly int[] evaluationVariables;
+
+        private readonly E[] evaluationPoint;
+
+        private readonly MultivariatePolynomial<E>.PrecomputedPowersHolder basePowers;
+
+        private readonly Dictionary<int, MultivariatePolynomial<E>.PrecomputedPowersHolder> powersCache
+            = new Dictionary<int, MultivariatePolynomial<E>.PrecomputedPowersHolder>();
+
+        public PlainEvaluations(MultivariatePolynomial<E> poly,
+            int[] evaluationVariables,
+            E[] evaluationPoint,
+            MultivariatePolynomial<E>.PrecomputedPowersHolder basePowers)
+        {
+            this.poly = poly;
+            this.evaluationVariables = evaluationVariables;
+            this.evaluationPoint = evaluationPoint;
+            this.basePowers = basePowers.Clone();
+            this.powersCache.Add(1, this.basePowers);
+        }
+
+        public UnivariatePolynomial<E> evaluate(int raiseFactor, E value)
+        {
+            basePowers.Set(evaluationVariables[evaluationVariables.Length - 1], value);
+
+            MultivariatePolynomial<E>.PrecomputedPowersHolder powers = powersCache.GetValueOrDefault(raiseFactor, null);
+            Ring<E> ring = poly.ring;
+            if (powers == null)
+            {
+                powers = basePowers.Clone();
+                for (int i = 0; i < (evaluationVariables.Length - 1); ++i)
+                    powers.Set(evaluationVariables[i], ring.Pow(evaluationPoint[i], raiseFactor));
+                powersCache.Add(raiseFactor, powers);
+            }
+
+            powers.Set(evaluationVariables[evaluationVariables.Length - 1], value);
+
+            E[] result = ring.CreateZeroesArray(poly.Degree(0) + 1);
+            foreach (Monomial<E> el in poly.terms)
+            {
+                E ucf = el.coefficient;
+                foreach (int variable in evaluationVariables)
+                    ucf = ring.Multiply(ucf, powers.Pow(variable, el.exponents[variable]));
+                int uDeg = el.exponents[0];
+                result[uDeg] = ring.Add(result[uDeg], ucf);
+            }
+
+            return UnivariatePolynomial<E>.Create(ring, result);
+        }
+    }
+
+
+    private sealed class FastSparseRecursiveEvaluations<E> : ZippelEvaluations<E>
+    {
+        private readonly MultivariatePolynomial<E> poly;
+
+        private readonly E[] evaluationPoint;
+
+        private readonly int variable;
+
+        public FastSparseRecursiveEvaluations(MultivariatePolynomial<E> poly, E[] evaluationPoint, int variable)
+        {
+            this.poly = poly;
+            this.variable = variable;
+            this.evaluationPoint = evaluationPoint;
+        }
+
+
+        private readonly Dictionary<int, MultivariatePolynomial<MultivariatePolynomial<E>>> bivariateCache 
+            = new();
+
+
+        MultivariatePolynomial<MultivariatePolynomial<E>> getSparseRecursiveForm(int raiseFactor)
+        {
+            MultivariatePolynomial<MultivariatePolynomial<E>> recForm =
+                bivariateCache.GetValueOrDefault(raiseFactor, null);
+            if (recForm == null)
+            {
+                MultivariatePolynomial<E> bivariate;
+                if (variable == 1)
+                    bivariate = poly;
+                else
+                {
+                    // values for all variables except first and last
+                    E[] values = new E[variable - 1];
+                    for (int i = 0; i < values.Length; ++i)
+                        values[i] = poly.ring.Pow(evaluationPoint[i], raiseFactor);
+
+                    // substitute all that variables to obtain bivariate poly R[x0, xN]
+                    bivariate = poly.Evaluate(Utils.Utils.Sequence(1, variable), values);
+                }
+
+                if (bivariate.nVariables > 2)
+                    bivariate = bivariate.DropSelectVariables(0, variable);
+                // swap variables to R[xN, x0]
+                bivariate = MultivariatePolynomial<E>.SwapVariables(bivariate, 0, 1);
+                // convert to sparse recursive form R[xN][x0]
+                recForm = (MultivariatePolynomial<MultivariatePolynomial<E>>)bivariate.ToSparseRecursiveForm();
+                bivariateCache.Add(raiseFactor, recForm);
+            }
+
+            return recForm;
+        }
+
+        public UnivariatePolynomial<E> evaluate(int raiseFactor, E value)
+        {
+            // get sparse recursive form for fast evaluation
+            MultivariatePolynomial<MultivariatePolynomial<E>> recForm = getSparseRecursiveForm(raiseFactor);
+            // resulting univariate data
+            E[] data = poly.ring.CreateZeroesArray(recForm.Degree() + 1);
+
+            int cacheSize = 128; //recForm.stream().mapToInt(p -> p.Degree()).max().orElse(1);
+            // cached exponents for value^i
+            MultivariatePolynomial<E>.PrecomputedPowersHolder ph =
+                new MultivariatePolynomial<E>.PrecomputedPowersHolder(poly.ring,
+                    new MultivariatePolynomial<E>.PrecomputedPowers[]
+                        { new MultivariatePolynomial<E>.PrecomputedPowers(cacheSize, value, poly.ring) });
+            foreach (Monomial<MultivariatePolynomial<E>> r in recForm.terms)
+                // fast Horner-like evaluation of sparse univariate polynomials
+                data[r.totalDegree] = MultivariatePolynomial<E>.EvaluateSparseRecursiveForm(r.coefficient, ph, 0);
+
+            return UnivariatePolynomial<E>.Create(poly.ring, data);
+        }
+    }
+
+
+    private const int
+        SMALL_FIELD_BIT_LENGTH = 13,
+        NUMBER_OF_UNDER_DETERMINED_RETRIES = 8,
+        NUMBER_OF_UNDER_DETERMINED_RETRIES_SMALL_FIELD = 24;
+
+    sealed class LinZipInterpolation<E> : ASparseInterpolation<E>
+    {
+        public LinZipInterpolation(Ring<E> ring, int variable, MultivariatePolynomial<E> a, MultivariatePolynomial<E> b,
+            ImmutableList<DegreeVector> globalSkeleton, Dictionary<int, MultivariatePolynomial<E>> univarSkeleton,
+            int[] sparseUnivarDegrees, int[] evaluationVariables, E[] evaluationPoint,
+            MultivariatePolynomial<E>.PrecomputedPowersHolder powers, int expectedNumberOfEvaluations,
+            Random rnd) : base(ring, variable, a, b, globalSkeleton, univarSkeleton, sparseUnivarDegrees,
+            evaluationVariables,
+            evaluationPoint, powers, expectedNumberOfEvaluations, rnd)
+        {
+        }
+
+        public override MultivariatePolynomial<E> evaluate0(E newPoint)
+        {
+            LinZipSystem<E>[] systems = new LinZipSystem<E>[sparseUnivarDegrees.Length];
+            for (int i = 0; i < sparseUnivarDegrees.Length; i++)
+                systems[i] = new LinZipSystem<E>(sparseUnivarDegrees[i], univarSkeleton[sparseUnivarDegrees[i]], powers,
+                    variable == -1 ? a.nVariables - 1 : variable - 1);
+
+
+            int nUnknowns = globalSkeleton.Count, nUnknownScalings = -1;
+            int raiseFactor = 0;
+
+            // number of retries before meet raise condition
+            int nUnderDeterminedRetries = ring.Characteristic().GetBitLength() <= SMALL_FIELD_BIT_LENGTH
+                ? NUMBER_OF_UNDER_DETERMINED_RETRIES_SMALL_FIELD
+                : NUMBER_OF_UNDER_DETERMINED_RETRIES;
+
+            int previousFreeVars = -1, underDeterminedTries = 0;
+            bool lastChanceUsed = false;
+            for (int iTry = 0;; ++iTry)
+            {
+                if (iTry == nUnderDeterminedRetries)
+                {
+                    if (lastChanceUsed)
+                        // allow this trick only once, then break
+                        break;
+                    else
+                    {
+                        // give the last chance
+                        lastChanceUsed = true;
+                        nUnderDeterminedRetries += nUnderDeterminedLinZip(a, systems, nUnknownScalings);
+                    }
+                }
+
+                for (;;)
+                {
+                    // increment at each loop!
+                    ++nUnknownScalings;
+                    // sequential powers of evaluation point
+                    ++raiseFactor;
+
+                    E lastVarValue = newPoint;
+                    if (variable == -1)
+                        lastVarValue = ring.Pow(lastVarValue, raiseFactor);
+
+                    // evaluate a and b to univariate and calculate gcd
+                    UnivariatePolynomial<E>
+                        aUnivar = aEvals.evaluate(raiseFactor, lastVarValue),
+                        bUnivar = bEvals.evaluate(raiseFactor, lastVarValue),
+                        gcdUnivar = UnivariateGCD.PolynomialGCD(aUnivar, bUnivar);
+
+                    if (a.Degree(0) != aUnivar.Degree() || b.Degree(0) != bUnivar.Degree())
+                        // unlucky main homomorphism or bad evaluation point
+                        return null;
+
+                    Debug.Assert(gcdUnivar.IsMonic());
+                    if (!univarSkeleton.Keys.ContainsAll(gcdUnivar.Exponents()))
+                        // univariate gcd contains terms that are not present in the skeleton
+                        // again unlucky main homomorphism
+                        return null;
+
+                    int totalEquations = 0;
+                    foreach (LinZipSystem<E> system in systems)
+                    {
+                        E rhs = gcdUnivar.Degree() < system.univarDegree
+                            ? ring.GetZero()
+                            : gcdUnivar[system.univarDegree];
+                        system.oneMoreEquation(rhs, nUnknownScalings != 0);
+                        totalEquations += system.nEquations();
+                    }
+
+                    if (nUnknowns + nUnknownScalings <= totalEquations)
+                        break;
+
+                    if (underDeterminedTries > nUnderDeterminedRetries)
+                        // raise condition: new equations does not fix enough variables
+                        return null;
+
+                    int freeVars = nUnknowns + nUnknownScalings - totalEquations;
+                    if (freeVars >= previousFreeVars)
+                        ++underDeterminedTries;
+                    else
+                        underDeterminedTries = 0;
+
+                    previousFreeVars = freeVars;
+                }
+
+                MultivariatePolynomial<E> result = a.CreateZero();
+                LinearSolver.SystemInfo info = solveLinZip(a, systems, nUnknownScalings, result);
+                if (info == LinearSolver.SystemInfo.UnderDetermined)
+                    //try to generate more equations
+                    continue;
+                if (info == LinearSolver.SystemInfo.Consistent)
+                    //well done
+                    return result;
+                if (info == LinearSolver.SystemInfo.Inconsistent)
+                    //inconsistent system => unlucky homomorphism
+                    return null;
+            }
+
+            // still under determined
+            return null;
+        }
+    }
+
+    private static int nUnderDeterminedLinZip<E>(MultivariatePolynomial<E> factory, LinZipSystem<E>[] subSystems,
+        int nUnknownScalings)
+    {
+        int nUnknownsMonomials = 0;
+        foreach (LinZipSystem<E> system in subSystems)
+            nUnknownsMonomials += system.skeleton.Length;
+
+        int nUnknownsTotal = nUnknownsMonomials + nUnknownScalings;
+        var lhsGlobal = new List<E[]>();
+        int offset = 0;
+        Ring<E> ring = factory.ring;
+        foreach (LinZipSystem<E> system in subSystems)
+        {
+            for (int j = 0; j < system.matrix.Count; j++)
+            {
+                E[] row = ring.CreateZeroesArray(nUnknownsTotal);
+                E[] subRow = system.matrix[j];
+
+                Array.Copy(subRow, 0, row, offset, subRow.Length);
+                if (j > 0)
+                    row[nUnknownsMonomials + j - 1] = system.scalingMatrix[j];
+                lhsGlobal.Add(row);
+            }
+
+            offset += system.skeleton.Length;
+        }
+
+        return LinearSolver.RowEchelonForm(factory.ring, lhsGlobal.ToArray().AsArray2D(), null, false, false);
+    }
+
+    private static LinearSolver.SystemInfo solveLinZip<E>(MultivariatePolynomial<E> factory,
+        LinZipSystem<E>[] subSystems, int nUnknownScalings, MultivariatePolynomial<E> destination)
+    {
+        List<Monomial<E>> unknowns = new List<Monomial<E>>();
+        foreach (LinZipSystem<E> system in subSystems)
+        foreach (Monomial<E> DegreeVector in system.skeleton)
+            unknowns.Add(DegreeVector.Set(0, system.univarDegree));
+
+        int nUnknownsMonomials = unknowns.Count;
+        int nUnknownsTotal = nUnknownsMonomials + nUnknownScalings;
+        List<E[]> lhsGlobal = new List<E[]>();
+        List<E> rhsGlobal = new List<E>();
+        int offset = 0;
+        Ring<E> ring = factory.ring;
+        foreach (LinZipSystem<E> system in subSystems)
+        {
+            for (int j = 0; j < system.matrix.Count; j++)
+            {
+                E[] row = ring.CreateZeroesArray(nUnknownsTotal);
+                E[] subRow = system.matrix[j];
+
+                Array.Copy(subRow, 0, row, offset, subRow.Length);
+                if (j > 0)
+                    row[nUnknownsMonomials + j - 1] = system.scalingMatrix[j];
+                lhsGlobal.Add(row);
+                rhsGlobal.Add(system.rhs[j]);
+            }
+
+            offset += system.skeleton.Length;
+        }
+
+        E[] solution = new E[nUnknownsTotal];
+        LinearSolver.SystemInfo info = LinearSolver.Solve(ring, lhsGlobal, rhsGlobal, solution);
+        if (info == LinearSolver.SystemInfo.Consistent)
+        {
+            Monomial<E>[] terms = new Monomial<E>[unknowns.Count];
+            for (int i = 0; i < terms.Length; i++)
+                terms[i] = unknowns[i].SetCoefficient(solution[i]);
+            destination.Add(terms);
+        }
+
+        return info;
+    }
+
+
+    sealed class MonicInterpolation<E> : ASparseInterpolation<E>
+    {
+        readonly int requiredNumberOfEvaluations;
+
+        readonly int MonicScalingExponent;
+
+        public MonicInterpolation(Ring<E> ring, int variable, MultivariatePolynomial<E> a, MultivariatePolynomial<E> b,
+            ImmutableList<DegreeVector> globalSkeleton, Dictionary<int, MultivariatePolynomial<E>> univarSkeleton,
+            int[] sparseUnivarDegrees, int[] evaluationVariables, E[] evaluationPoint,
+            MultivariatePolynomial<E>.PrecomputedPowersHolder powers, int expectedNumberOfEvaluations,
+            Random rnd, int requiredNumberOfEvaluations, int MonicScalingExponent) : base(ring, variable, a, b,
+            globalSkeleton, univarSkeleton, sparseUnivarDegrees, evaluationVariables,
+            evaluationPoint, powers, expectedNumberOfEvaluations, rnd)
+        {
+            this.requiredNumberOfEvaluations = requiredNumberOfEvaluations;
+            this.MonicScalingExponent = MonicScalingExponent;
+        }
+
+        public override MultivariatePolynomial<E> evaluate0(E newPoint)
+        {
+            VandermondeSystem<E>[] systems = new VandermondeSystem<E>[sparseUnivarDegrees.Length];
+            for (int i = 0; i < sparseUnivarDegrees.Length; i++)
+                systems[i] = new VandermondeSystem<E>(sparseUnivarDegrees[i], univarSkeleton[sparseUnivarDegrees[i]],
+                    powers, variable == -1 ? a.nVariables - 1 : variable - 1);
+
+            for (int i = 0; i < requiredNumberOfEvaluations; ++i)
+            {
+                // sequential powers of evaluation point
+                int raiseFactor = i + 1;
+
+                E lastVarValue = newPoint;
+                if (variable == -1)
+                    lastVarValue = ring.Pow(lastVarValue, raiseFactor);
+
+                // evaluate a and b to univariate and calculate gcd
+                UnivariatePolynomial<E>
+                    aUnivar = aEvals.evaluate(raiseFactor, lastVarValue),
+                    bUnivar = bEvals.evaluate(raiseFactor, lastVarValue),
+                    gcdUnivar = UnivariateGCD.PolynomialGCD(aUnivar, bUnivar);
+
+                if (a.Degree(0) != aUnivar.Degree() || b.Degree(0) != bUnivar.Degree())
+                    // unlucky main homomorphism or bad evaluation point
+                    return null;
+
+                Debug.Assert(gcdUnivar.IsMonic());
+                if (!univarSkeleton.Keys.ContainsAll(gcdUnivar.Exponents()))
+                    // univariate gcd contains terms that are not present in the skeleton
+                    // again unlucky main homomorphism
+                    return null;
+
+                if (MonicScalingExponent != -1)
+                {
+                    // single scaling factor
+                    // scale the system according to it
+
+                    if (gcdUnivar.Degree() < MonicScalingExponent || ring.IsZero(gcdUnivar[MonicScalingExponent]))
+                        // unlucky homomorphism
+                        return null;
+
+                    E normalization = evaluateExceptFirst(ring, powers, ring.GetOne(),
+                        univarSkeleton[MonicScalingExponent].Lt(), i + 1,
+                        variable == -1 ? a.nVariables - 1 : variable - 1);
+                    //normalize univariate gcd in order to reconstruct leading coefficient polynomial
+                    normalization = ring.Multiply(ring.Reciprocal(gcdUnivar[MonicScalingExponent]), normalization);
+                    gcdUnivar = gcdUnivar.Multiply(normalization);
+                }
+
+                bool allDone = true;
+                foreach (VandermondeSystem<E> system in systems)
+                    if (system.nEquations() < system.nUnknownVariables())
+                    {
+                        E rhs = gcdUnivar.Degree() < system.univarDegree
+                            ? ring.GetZero()
+                            : gcdUnivar[system.univarDegree];
+                        system.oneMoreEquation(rhs);
+                        if (system.nEquations() < system.nUnknownVariables())
+                            allDone = false;
+                    }
+
+                if (allDone)
+                    break;
+            }
+
+            foreach (VandermondeSystem<E> system in systems)
+            {
+                //solve each system
+                LinearSolver.SystemInfo info = system.solve();
+                if (info != LinearSolver.SystemInfo.Consistent)
+                    // system is inconsistent or under determined
+                    // unlucky homomorphism
+                    return null;
+            }
+
+            MultivariatePolynomial<E> gcdVal = a.CreateZero();
+            foreach (VandermondeSystem<E> system in systems)
+            {
+                Debug.Assert(MonicScalingExponent == -1 || system.univarDegree != MonicScalingExponent ||
+                             ring.IsOne(system.solution[0]));
+                for (int i = 0; i < system.skeleton.Length; i++)
+                {
+                    Monomial<E> DegreeVector = system.skeleton[i].Set(0, system.univarDegree);
+                    E value = system.solution[i];
+                    gcdVal.Add(DegreeVector.SetCoefficient(value));
+                }
+            }
+
+            return gcdVal;
+        }
+    }
+
+    private abstract class LinearSystem<E>
+    {
+        public readonly int univarDegree;
+        public readonly Ring<E> ring;
+        public readonly Monomial<E>[] skeleton;
+        public readonly List<E[]> matrix;
+        public readonly List<E> rhs = new List<E>();
+        public readonly MultivariatePolynomial<E>.PrecomputedPowersHolder powers;
+        public readonly int nVars;
+
+        public LinearSystem(int univarDegree, MultivariatePolynomial<E> skeleton,
+            MultivariatePolynomial<E>.PrecomputedPowersHolder powers, int nVars)
+        {
+            this.univarDegree = univarDegree;
+            this.ring = skeleton.ring;
+            //todo refactor generics
+            this.skeleton = skeleton.GetSkeleton().Select(d => (Monomial<E>)d).ToArray();
+            this.powers = powers;
+            this.nVars = nVars;
+            this.matrix = new List<E[]>();
+        }
+
+        public int nUnknownVariables()
+        {
+            return skeleton.Length;
+        }
+
+        public int nEquations()
+        {
+            return matrix.Count;
+        }
+
+
+        public String toString()
+        {
+            return "{" + string.Join(", ", matrix.Select(row => row.ToString())) + "} = " + rhs;
+        }
+    }
+
+    private sealed class LinZipSystem<E> : LinearSystem<E>
+    {
+        public LinZipSystem(int univarDegree, MultivariatePolynomial<E> skeleton,
+            MultivariatePolynomial<E>.PrecomputedPowersHolder powers, int nVars) : base(univarDegree, skeleton, powers,
+            nVars)
+        {
+        }
+
+        public readonly List<E> scalingMatrix = new List<E>();
+
+        public void oneMoreEquation(E rhsVal, bool newScalingIntroduced)
+        {
+            E[] row = new E[skeleton.Length];
+            for (int i = 0; i < skeleton.Length; i++)
+                row[i] = evaluateExceptFirst(ring, powers, ring.GetOne(), skeleton[i], matrix.Count + 1, nVars);
+            matrix.Add(row);
+
+            if (newScalingIntroduced)
+            {
+                scalingMatrix.Add(ring.Negate(rhsVal));
+                rhsVal = ring.GetZero();
+            }
+            else
+                scalingMatrix.Add(ring.GetZero());
+
+            rhs.Add(rhsVal);
+        }
+
+        public new String toString()
+        {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < matrix.Count; i++)
+            {
+                E[] row = matrix[i];
+                for (int j = 0; j < row.Length; j++)
+                {
+                    if (j != 0)
+                        sb.Append("+");
+                    sb.Append(row[j]).Append("*c" + j);
+                }
+
+                if (i != 0)
+                    sb.Append("+").Append(scalingMatrix[i]).Append("*m" + (i - 1));
+
+                sb.Append("=").Append(rhs[i]).Append("\n");
+            }
+
+            return sb.ToString();
+        }
+    }
+
+    sealed class VandermondeSystem<E> : LinearSystem<E>
+    {
+        public VandermondeSystem(int univarDegree, MultivariatePolynomial<E> skeleton,
+            MultivariatePolynomial<E>.PrecomputedPowersHolder powers, int nVars) : base(univarDegree, skeleton, powers,
+            nVars)
+        {
+        }
+
+        public E[]? solution = null;
+
+        public LinearSolver.SystemInfo solve()
+        {
+            if (solution == null)
+                solution = new E[nUnknownVariables()];
+
+            if (nUnknownVariables() <= 8)
+                // for small systems Gaussian elimination is indeed faster
+                return LinearSolver.Solve(ring, matrix.ToArray().AsArray2D(), rhs.ToArray(), solution);
+
+            // solve vandermonde system
+            E[] vandermondeRow = matrix[0];
+            LinearSolver.SystemInfo
+                info = LinearSolver.SolveVandermondeT(ring, vandermondeRow, rhs.ToArray(), solution);
+            if (info == LinearSolver.SystemInfo.Consistent)
+                for (int i = 0; i < solution.Length; ++i)
+                    solution[i] = ring.DivideExact(solution[i], vandermondeRow[i]);
+
+            return info;
+        }
+
+        public VandermondeSystem<E> oneMoreEquation(E rhsVal)
+        {
+            E[] row = new E[skeleton.Length];
+            for (int i = 0; i < skeleton.Length; i++)
+                row[i] = evaluateExceptFirst(ring, powers, ring.GetOne(), skeleton[i], matrix.Count + 1, nVars);
+            matrix.Add(row);
+            rhs.Add(rhsVal);
+            return this;
+        }
+    }
+
+    private static E evaluateExceptFirst<E>(Ring<E> ring,
+        MultivariatePolynomial<E>.PrecomputedPowersHolder powers,
+        E coefficient,
+        Monomial<E> skeleton,
+        int raiseFactor,
+        int nVars)
+    {
+        E tmp = coefficient;
+        for (int k = 1; k <= nVars; k++)
+            tmp = ring.Multiply(tmp, powers.Pow(k, raiseFactor * skeleton.exponents[k]));
+        return tmp;
+    }
+
+    private static bool isVandermonde<E>(E[][] lhs, Ring<E> ring)
+    {
+        for (int i = 1; i < lhs.Length; i++)
+        {
+            for (int j = 0; j < lhs[0].Length; j++)
+            {
+                if (!lhs[i][j].Equals(ring.Pow(lhs[0][j], i + 1)))
+                    return false;
+            }
+        }
+
+        return true;
+    }
 //
 //
 //     /* ================================================ Machine numbers ============================================= */
@@ -4381,392 +4518,6 @@ public static class MultivariateGCD
 //     }
 //
 //     
-
-     
-     
-    public static MultivariatePolynomialZp64 ZippelGCD(
-        MultivariatePolynomialZp64 a,
-        MultivariatePolynomialZp64 b)
-    {
-        // prepare input and test for early termination
-        GCDInput<long> gcdInput = preparedGCDInput(a, b, MultivariateGCD.ZippelGCD);
-        if (gcdInput.earlyGCD != null)
-            return gcdInput.earlyGCD;
-
-        if (gcdInput.finiteExtensionDegree > 1)
-            return lKaltofenMonaganSparseModularGCDInGF(gcdInput);
-
-        a = gcdInput.aReduced;
-        b = gcdInput.bReduced;
-
-        // Content in the main variable => avoid raise condition in LINZIP!
-        // see Example 4 in "Algorithms for the non-Monic case of the sparse modular GCD algorithm"
-        MultivariatePolynomialZp64 Content = ContentGCD(a, b, 0, MultivariateGCD.ZippelGCD);
-        a = MultivariateDivision.DivideExact(a, Content);
-        b = MultivariateDivision.DivideExact(b, Content);
-
-        MultivariatePolynomialZp64 result = ZippelGCD(a, b, PrivateRandom.GetRandom(),
-            gcdInput.lastPresentVariable, gcdInput.DegreeBounds, gcdInput.evaluationStackLimit);
-        if (result == null)
-            // ground fill is too small for modular algorithm
-            return lKaltofenMonaganSparseModularGCDInGF(gcdInput);
-
-        return gcdInput.restoreGCD(result.Multiply(Content));
-    }
-
-
-    private static MultivariatePolynomialZp64 ZippelGCD(
-        MultivariatePolynomialZp64 a,
-        MultivariatePolynomialZp64 b,
-        Random rnd,
-        int variable,
-        int[] DegreeBounds,
-        int evaluationStackLimit)
-    {
-        //check for trivial gcd
-        MultivariatePolynomialZp64 trivialGCD = MultivariateGCD.trivialGCD(a, b);
-        if (trivialGCD != null)
-            return trivialGCD;
-
-        MultivariatePolynomialZp64 factory = a;
-        int nVariables = factory.nVariables;
-        if (variable == 0)
-            // switch to univariate gcd
-        {
-            UnivariatePolynomialZp64 gcd = UnivariateGCD.PolynomialGCD(a.AsUnivariate(), b.AsUnivariate());
-            if (gcd.Degree() == 0)
-                return factory.CreateOne();
-            return MultivariatePolynomialZp64.AsMultivariate(gcd, nVariables, variable, factory.ordering);
-        }
-
-//        MultivariatePolynomialZp64 Content = ZippelContentGCD(a, b, variable);
-//        a = divideExact(a, Content);
-//        b = divideExact(b, Content);
-
-        PrimitiveInput<long> primitiveInput = makePrimitive(a, b, variable);
-        // primitive parts of a and b as Zp[x_k][x_1 ... x_{k-1}]
-        a = primitiveInput.aPrimitive;
-        b = primitiveInput.bPrimitive;
-        // gcd of Zp[x_k] Content and lc
-        UnivariatePolynomialZp64
-            ContentGCD = primitiveInput.contentGCD,
-            lcGCD = primitiveInput.lcGCD;
-
-        //check again for trivial gcd
-        trivialGCD = MultivariateGCD.trivialGCD(a, b);
-        if (trivialGCD != null)
-        {
-            MultivariatePolynomialZp64 poly =
-                MultivariatePolynomialZp64.AsMultivariate(ContentGCD, a.nVariables, variable, a.ordering);
-            return trivialGCD.Multiply(poly);
-        }
-
-        IntegersZp64 ring = (IntegersZp64)factory.ring;
-        //store points that were already used in interpolation
-        HashSet<long> globalEvaluationStack = new HashSet<long>();
-
-        int[] aDegrees = a.DegreesRef(), bDegrees = b.DegreesRef();
-        int failedSparseInterpolations = 0;
-
-        int[] tmpDegreeBounds = (int[])DegreeBounds.Clone();
-        
-        while (true)
-        {
-            main: ;
-            if (evaluationStackLimit == globalEvaluationStack.Count)
-                return null;
-
-            long seedPoint = ring.RandomElement(rnd);
-            if (globalEvaluationStack.Contains(seedPoint))
-                continue;
-
-            globalEvaluationStack.Add(seedPoint);
-
-            long lcVal = lcGCD.Evaluate(seedPoint);
-            if (lcVal == 0)
-                continue;
-
-            // evaluate a and b at variable = randomPoint
-            // calculate gcd of the result by the recursive call
-            MultivariatePolynomialZp64
-                aVal = a.Evaluate(variable, seedPoint),
-                bVal = b.Evaluate(variable, seedPoint);
-
-            // check for unlucky substitution
-            int[] aValDegrees = aVal.DegreesRef(), bValDegrees = bVal.DegreesRef();
-            for (int i = variable - 1; i >= 0; --i)
-                if (aDegrees[i] != aValDegrees[i] || bDegrees[i] != bValDegrees[i])
-                    goto main;
-
-            MultivariatePolynomialZp64 cVal = ZippelGCD(aVal, bVal, rnd, variable - 1, tmpDegreeBounds,
-                evaluationStackLimit);
-            if (cVal == null)
-                //unlucky homomorphism
-                continue;
-
-            int currExponent = cVal.Degree(variable - 1);
-            if (currExponent > tmpDegreeBounds[variable - 1])
-                //unlucky homomorphism
-                continue;
-
-            if (currExponent < tmpDegreeBounds[variable - 1])
-            {
-                //better Degree bound detected
-                tmpDegreeBounds[variable - 1] = currExponent;
-            }
-
-            cVal = cVal.Multiply(ring.Multiply(ring.Reciprocal(cVal.Lc()), lcVal));
-            Debug.Assert(cVal.Lc() == lcVal);
-
-            lSparseInterpolation sparseInterpolator =
-                CreateInterpolation(variable, a, b, cVal, tmpDegreeBounds[variable], rnd);
-            if (sparseInterpolator == null)
-                //unlucky homomorphism
-                continue;
-
-            // we are applying dense interpolation for univariate skeleton coefficients
-            MultivariateInterpolation.InterpolationZp64 denseInterpolation =
-                new MultivariateInterpolation.InterpolationZp64(variable, seedPoint, cVal);
-            //previous interpolation (used to detect whether update doesn't change the result)
-            MultivariatePolynomialZp64 previousInterpolation;
-            //local evaluation stack for points that are calculated via sparse interpolation (but not gcd evaluation) -> always same skeleton
-            HashSet<long> localEvaluationStack = new HashSet<long>(globalEvaluationStack);
-            while (true)
-            {
-                if (evaluationStackLimit == localEvaluationStack.Count)
-                    return null;
-
-                if (denseInterpolation.NumberOfPoints() >
-                    tmpDegreeBounds[variable] + ALLOWED_OVER_INTERPOLATED_ATTEMPTS)
-                {
-                    // restore original Degree bounds, since unlucky homomorphism may destruct correct bounds
-                    tmpDegreeBounds = (int[]) DegreeBounds.Clone();
-                    goto main;
-                }
-
-                long randomPoint = ring.RandomElement(rnd);
-                if (localEvaluationStack.Contains(randomPoint))
-                    continue;
-                localEvaluationStack.Add(randomPoint);
-
-                lcVal = lcGCD.Evaluate(randomPoint);
-                if (lcVal == 0)
-                    continue;
-
-                cVal = sparseInterpolator.evaluate(randomPoint);
-                if (cVal == null)
-                {
-                    ++failedSparseInterpolations;
-                    if (failedSparseInterpolations == MAX_SPARSE_INTERPOLATION_FAILS)
-                        return null; //throw new RuntimeException("Sparse interpolation failed");
-                    // restore original Degree bounds, since unlucky homomorphism may destruct correct bounds
-                    tmpDegreeBounds = (int[])DegreeBounds.Clone();
-                    goto main;
-                }
-
-                cVal = cVal.Multiply(ring.Multiply(ring.Reciprocal(cVal.Lc()), lcVal));
-                Debug.Assert(cVal.Lc() == lcVal);
-
-                // Cache previous interpolation. NOTE: Clone() is important, since the poly will
-                // be modified inplace by the update() method
-                previousInterpolation = denseInterpolation.GetInterpolatingPolynomial().Clone();
-                denseInterpolation.Update(randomPoint, cVal);
-
-                // do division test
-                if ((tmpDegreeBounds[variable] <= denseInterpolation.NumberOfPoints()
-                     && denseInterpolation.NumberOfPoints() - tmpDegreeBounds[variable] < 3)
-                    || previousInterpolation.Equals(denseInterpolation.GetInterpolatingPolynomial()))
-                {
-                    MultivariatePolynomialZp64 result = doDivisionCheck(a, b, ContentGCD, denseInterpolation, variable);
-                    if (result != null)
-                        return result;
-                }
-            }
-        }
-    }
-
-
-     static lSparseInterpolation CreateInterpolation(int variable,
-                                                     MultivariatePolynomialZp64 a,
-                                                     MultivariatePolynomialZp64 b,
-                                                     MultivariatePolynomialZp64 skeleton,
-                                                     int expectedNumberOfEvaluations,
-                                                     Random rnd) {
-         Debug.Assert(a.nVariables > 1);
-         skeleton = skeleton.Clone().SetAllCoefficientsToUnit();
-         if (skeleton.Size() == 1)
-             return new lTrivialSparseInterpolation(skeleton);
-
-         bool Monic = a.CoefficientOf(0, a.Degree(0)).IsConstant() && b.CoefficientOf(0, a.Degree(0)).IsConstant();
-
-         var globalSkeleton = skeleton.GetSkeleton();
-         Dictionary<int, MultivariatePolynomialZp64> univarSkeleton = getSkeleton(skeleton);
-         int[] sparseUnivarDegrees = univarSkeleton.Keys.ToArray();
-
-         IntegersZp64 ring = (IntegersZp64)a.ring;
-
-         int lastVariable = variable == -1 ? a.nVariables - 1 : variable;
-         int[] evaluationVariables = Utils.Utils.Sequence(1, lastVariable + 1);//variable inclusive
-         long[] evaluationPoint = new long[evaluationVariables.Length];
-
-         MultivariatePolynomialZp64.PrecomputedPowersHolder powers;
-         int fails = 0;
-         while (true) {
-             search_for_good_evaluation_point: ;
-
-             if (fails >= MAX_FAILED_SUBSTITUTIONS)
-                 return null;
-             //avoid zero evaluation points
-             for (int i = lastVariable - 1; i >= 0; --i)
-                 do {
-                     evaluationPoint[i] = ring.RandomElement(rnd);
-                 } while (evaluationPoint[i] == 0);
-
-             powers = mkPrecomputedPowers(a, b, evaluationVariables, evaluationPoint);
-
-             foreach (MultivariatePolynomialZp64 p in (MultivariatePolynomialZp64[])[a, b, skeleton])
-                 if (!p.GetSkeleton(0).Equals(p.Evaluate(powers, evaluationVariables).GetSkeleton())) {
-                     ++fails;
-                     goto search_for_good_evaluation_point;
-                 }
-             break;
-         }
-
-         int requiredNumberOfEvaluations = -1, MonicScalingExponent = -1;
-         for (var it = univarSkeleton.GetEnumerator(); it.MoveNext(); ) {
-             MultivariatePolynomialZp64 v = it.Current.Value;
-             if (v.Size() > requiredNumberOfEvaluations)
-                 requiredNumberOfEvaluations = v.Size();
-             if (v.Size() == 1)
-                 MonicScalingExponent = it.Current.Key;
-         }
-
-
-         if (!ALWAYS_LINZIP) {
-             if (Monic)
-                 MonicScalingExponent = -1;
-
-             if (Monic || MonicScalingExponent != -1)
-                 return new lMonicInterpolation(ring, variable, a, b, globalSkeleton, univarSkeleton, sparseUnivarDegrees,
-                         evaluationVariables, evaluationPoint, powers, expectedNumberOfEvaluations, rnd, requiredNumberOfEvaluations, MonicScalingExponent);
-         }
-
-         return new lLinZipInterpolation(ring, variable, a, b, globalSkeleton, univarSkeleton, sparseUnivarDegrees,
-                 evaluationVariables, evaluationPoint, powers, expectedNumberOfEvaluations, rnd);
-     }
-
-     static MultivariatePolynomialZp64.PrecomputedPowersHolder mkPrecomputedPowers(
-             MultivariatePolynomialZp64 a, MultivariatePolynomialZp64 b,
-             int[] evaluationVariables, long[] evaluationPoint) {
-         int[] Degrees = Utils.Utils.Max(a.DegreesRef(), b.DegreesRef());
-         MultivariatePolynomialZp64.PrecomputedPowers[] pp = new MultivariatePolynomialZp64.PrecomputedPowers[a.nVariables];
-         for (int i = 0; i < evaluationVariables.Length; ++i)
-             pp[evaluationVariables[i]] = new MultivariatePolynomialZp64.PrecomputedPowers(
-                     Math.Min(Degrees[evaluationVariables[i]], MultivariatePolynomialZp64.MAX_POWERS_CACHE_SIZE),
-                     evaluationPoint[i], a.ring);
-         return new MultivariatePolynomialZp64.PrecomputedPowersHolder(a.ring, pp);
-     }
-     
-     static Dictionary<int, MultivariatePolynomialZp64> getSkeleton(MultivariatePolynomialZp64 poly) {
-         Dictionary<int, MultivariatePolynomialZp64> skeleton = new Dictionary<int, MultivariatePolynomialZp64>();
-         foreach (var term in poly.terms) {
-             var newDV = term.SetZero(0);
-             if (skeleton.TryGetValue(term.exponents[0], out var coeff))
-                 coeff.Add(newDV);
-             else
-                 skeleton.Add(term.exponents[0], MultivariatePolynomialZp64.Create(poly.nVariables, poly.ring, poly.ordering, newDV));
-         }
-         return skeleton;
-     }
-
-     interface lSparseInterpolation {
-
-         MultivariatePolynomialZp64 evaluate();
-
-         MultivariatePolynomialZp64 evaluate(long newPoint);
-     }
-
-     sealed class lTrivialSparseInterpolation : lSparseInterpolation {
-         readonly MultivariatePolynomialZp64 val;
-
-         public lTrivialSparseInterpolation(MultivariatePolynomialZp64 val) {
-             this.val = val;
-         }
-
-         public MultivariatePolynomialZp64 evaluate() {
-             return val;
-         }
-
-         public MultivariatePolynomialZp64 evaluate(long newPoint) {
-             return val;
-         }
-     }
-
-     abstract class lASparseInterpolation : lSparseInterpolation {
-         public readonly IntegersZp64 ring;
-
-         public readonly int variable;
-
-         public readonly MultivariatePolynomialZp64 a;
-         readonly MultivariatePolynomialZp64 b;
-
-         readonly Set<DegreeVector> globalSkeleton;
-
-         public readonly Dictionary<int, MultivariatePolynomialZp64> univarSkeleton;
-
-         public readonly int[] sparseUnivarDegrees;
-
-         readonly int[] evaluationVariables;
-  
-         readonly long[] evaluationPoint;
-
-         public readonly MultivariatePolynomialZp64.PrecomputedPowersHolder powers;
-
-         public readonly ZippelEvaluationsZp64 aEvals;
-         public readonly ZippelEvaluationsZp64 bEvals;
-
-         readonly Random rnd;
-
-         public lASparseInterpolation(IntegersZp64 ring, int variable,
-                               MultivariatePolynomialZp64 a, MultivariatePolynomialZp64 b,
-                               Set<DegreeVector> globalSkeleton,
-                               Dictionary<int, MultivariatePolynomialZp64> univarSkeleton,
-                               int[] sparseUnivarDegrees, int[] evaluationVariables,
-                               long[] evaluationPoint,
-                               MultivariatePolynomialZp64.PrecomputedPowersHolder powers,
-                               int expectedNumberOfEvaluations, Random rnd) {
-             this.ring = ring;
-             this.variable = variable;
-             this.a = a;
-             this.b = b;
-             this.globalSkeleton = globalSkeleton;
-             this.univarSkeleton = univarSkeleton;
-             this.sparseUnivarDegrees = sparseUnivarDegrees;
-             this.evaluationPoint = evaluationPoint;
-             this.aEvals = CreateEvaluations(a, evaluationVariables, evaluationPoint, powers, expectedNumberOfEvaluations);
-             this.bEvals = CreateEvaluations(b, evaluationVariables, evaluationPoint, powers, expectedNumberOfEvaluations);
-             this.evaluationVariables = evaluationVariables;
-             this.powers = powers;
-             this.rnd = rnd;
-         }
-
-         public MultivariatePolynomialZp64 evaluate() {
-             return evaluate(evaluationPoint[evaluationPoint.Length - 1]);
-         }
-
-         public MultivariatePolynomialZp64 evaluate(long newPoint) {
-             // constant is constant
-             if (globalSkeleton.Size() == 1)
-                 return a.Create(((MonomialZp64) globalSkeleton.iterator().next()).setCoefficient(1));
-             // variable = newPoint
-             evaluationPoint[evaluationPoint.Length - 1] = newPoint;
-             powers.Set(evaluationVariables[evaluationVariables.Length - 1], newPoint);
-             return evaluate0(newPoint);
-         }
-
-         public abstract MultivariatePolynomialZp64 evaluate0(long newPoint);
-     }
-//
 //     static ZippelEvaluationsZp64 CreateEvaluations(MultivariatePolynomialZp64 poly,
 //                                                    int[] evaluationVariables,
 //                                                    long[] evaluationPoint,
@@ -4915,110 +4666,7 @@ public static class MultivariateGCD
 //         }
 //     }
 //
-//     static final class lLinZipInterpolation extends lASparseInterpolation {
-//         lLinZipInterpolation(IntegersZp64 ring, int variable, MultivariatePolynomialZp64 a,
-//                              MultivariatePolynomialZp64 b, Set<DegreeVector> globalSkeleton,
-//                              TIntObjectHashMap<MultivariatePolynomialZp64> univarSkeleton, int[] sparseUnivarDegrees,
-//                              int[] evaluationVariables, long[] evaluationPoint, MultivariatePolynomialZp64.lPrecomputedPowersHolder powers,
-//                              int expectedNumberOfEvaluations, Random rnd) {
-//             super(ring, variable, a, b, globalSkeleton, univarSkeleton, sparseUnivarDegrees, evaluationVariables, evaluationPoint, powers, expectedNumberOfEvaluations, rnd);
-//         }
-//
-//         @Override
-//         public MultivariatePolynomialZp64 evaluate0(long newPoint) {
-//             
-//             lLinZipSystem[] systems = new lLinZipSystem[sparseUnivarDegrees.Length];
-//             for (int i = 0; i < sparseUnivarDegrees.Length; i++)
-//                 systems[i] = new lLinZipSystem(sparseUnivarDegrees[i], univarSkeleton.get(sparseUnivarDegrees[i]), powers, variable == -1 ? a.nVariables - 1 : variable - 1);
-//
-//             int nUnknowns = globalSkeleton.Size(), nUnknownScalings = -1;
-//             int raiseFactor = 0;
-//
-//             // number of retries before meet raise condition
-//             int nUnderDeterminedRetries = ring.modulus <= (1 << SMALL_FIELD_BIT_LENGTH)
-//                     ? NUMBER_OF_UNDER_DETERMINED_RETRIES_SMALL_FIELD
-//                     : NUMBER_OF_UNDER_DETERMINED_RETRIES;
-//
-//             int previousFreeVars = -1, underDeterminedTries = 0;
-//             bool lastChanceUsed = false;
-//             for (int iTry = 0; ; ++iTry) {
-//                 if (iTry == nUnderDeterminedRetries) {
-//                     if (lastChanceUsed)
-//                         // allow this trick only once, then break
-//                         break;
-//                     else {
-//                         // give the last chance
-//                         lastChanceUsed = true;
-//                         nUnderDeterminedRetries += nUnderDeterminedLinZip(a, systems, nUnknownScalings);
-//                     }
-//                 }
-//
-//                 for (; ; ) {
-//                     // increment at each loop!
-//                     ++nUnknownScalings;
-//                     // sequential powers of evaluation point
-//                     ++raiseFactor;
-//
-//                     long lastVarValue = newPoint;
-//                     if (variable == -1)
-//                         lastVarValue = ring.powMod(lastVarValue, raiseFactor);
-//
-//                     // evaluate a and b to univariate and calculate gcd
-//                     UnivariatePolynomialZp64
-//                             aUnivar = aEvals.evaluate(raiseFactor, lastVarValue),
-//                             bUnivar = bEvals.evaluate(raiseFactor, lastVarValue),
-//                             gcdUnivar = UnivariateGCD.PolynomialGCD(aUnivar, bUnivar);
-//
-//                     if (a.Degree(0) != aUnivar.Degree() || b.Degree(0) != bUnivar.Degree())
-//                         // unlucky main homomorphism or bad evaluation point
-//                         return null;
-//
-//                     assert gcdUnivar.IsMonic();
-//                     if (!univarSkeleton.keySet().containsAll(gcdUnivar.exponents()))
-//                         // univariate gcd contains terms that are not present in the skeleton
-//                         // again unlucky main homomorphism
-//                         return null;
-//
-//                     int totalEquations = 0;
-//                     for (lLinZipSystem system : systems) {
-//                         long rhs = gcdUnivar.Degree() < system.univarDegree ? 0 : gcdUnivar.get(system.univarDegree);
-//                         system.oneMoreEquation(rhs, nUnknownScalings != 0);
-//                         totalEquations += system.nEquations();
-//                     }
-//
-//                     if (nUnknowns + nUnknownScalings <= totalEquations)
-//                         break;
-//
-//                     if (underDeterminedTries > nUnderDeterminedRetries) {
-//                         // raise condition: new equations does not fix enough variables
-//                         return null;
-//                     }
-//
-//                     int freeVars = nUnknowns + nUnknownScalings - totalEquations;
-//                     if (freeVars >= previousFreeVars)
-//                         ++underDeterminedTries;
-//                     else
-//                         underDeterminedTries = 0;
-//
-//                     previousFreeVars = freeVars;
-//                 }
-//
-//                 MultivariatePolynomialZp64 result = a.CreateZero();
-//                 LinearSolver.SystemInfo info = solveLinZip(a, systems, nUnknownScalings, result);
-//                 if (info == LinearSolver.SystemInfo.UnderDetermined)
-//                     //try to generate more equations
-//                     continue;
-//                 if (info == LinearSolver.SystemInfo.Consistent)
-//                     //well done
-//                     return result;
-//                 if (info == LinearSolver.SystemInfo.Inconsistent)
-//                     //inconsistent system => unlucky homomorphism
-//                     return null;
-//             }
-//             // still under determined
-//             return null;
-//         }
-//     }
+
 //
 //     private static int nUnderDeterminedLinZip(MultivariatePolynomialZp64 factory,
 //                                               lLinZipSystem[] subSystems,
@@ -5091,101 +4739,7 @@ public static class MultivariateGCD
 //         return info;
 //     }
 //
-     sealed class lMonicInterpolation : lASparseInterpolation {
-         
-         readonly int requiredNumberOfEvaluations;
-         
-         readonly int MonicScalingExponent;
 
-         public lMonicInterpolation(IntegersZp64 ring, int variable, MultivariatePolynomialZp64 a, MultivariatePolynomialZp64 b,
-                             Set<DegreeVector> globalSkeleton, Dictionary<int, MultivariatePolynomialZp64> univarSkeleton,
-                             int[] sparseUnivarDegrees, int[] evaluationVariables, long[] evaluationPoint,
-                             MultivariatePolynomialZp64.PrecomputedPowersHolder powers, int expectedNumberOfEvaluations, Random rnd, int requiredNumberOfEvaluations,
-                             int MonicScalingExponent) : base(ring, variable, a, b, globalSkeleton, univarSkeleton, sparseUnivarDegrees, evaluationVariables, evaluationPoint, powers, expectedNumberOfEvaluations, rnd)
-         {
-             this.requiredNumberOfEvaluations = requiredNumberOfEvaluations;
-             this.MonicScalingExponent = MonicScalingExponent;
-         }
-
-         public override MultivariatePolynomialZp64 evaluate0(long newPoint) {
-             
-             lVandermondeSystem[] systems = new lVandermondeSystem[sparseUnivarDegrees.Length];
-             for (int i = 0; i < sparseUnivarDegrees.Length; i++)
-                 systems[i] = new lVandermondeSystem(sparseUnivarDegrees[i], univarSkeleton.get(sparseUnivarDegrees[i]), powers, variable == -1 ? a.nVariables - 1 : variable - 1);
-
-             for (int i = 0; i < requiredNumberOfEvaluations; ++i) {
-                 // sequential powers of evaluation point
-                 int raiseFactor = i + 1;
-
-                 long lastVarValue = newPoint;
-                 if (variable == -1)
-                     lastVarValue = ring.PowMod(lastVarValue, raiseFactor);
-
-                 // evaluate a and b to univariate and calculate gcd
-                 UnivariatePolynomialZp64
-                         aUnivar = aEvals.evaluate(raiseFactor, lastVarValue),
-                         bUnivar = bEvals.evaluate(raiseFactor, lastVarValue),
-                         gcdUnivar = UnivariateGCD.PolynomialGCD(aUnivar, bUnivar);
-
-                 if (a.Degree(0) != aUnivar.Degree() || b.Degree(0) != bUnivar.Degree())
-                     // unlucky main homomorphism or bad evaluation point
-                     return null;
-
-                 Debug.Assert(gcdUnivar.IsMonic());
-                 if (!univarSkeleton.Keys.ContainsAll(gcdUnivar.exponents()))
-                     // univariate gcd contains terms that are not present in the skeleton
-                     // again unlucky main homomorphism
-                     return null;
-
-                 if (MonicScalingExponent != -1) {
-                     // single scaling factor
-                     // scale the system according to it
-
-                     if (gcdUnivar.Degree() < MonicScalingExponent || gcdUnivar.get(MonicScalingExponent) == 0)
-                         // unlucky homomorphism
-                         return null;
-
-                     long normalization = evaluateExceptFirst(ring, powers, 1, univarSkeleton.get(MonicScalingExponent).Lt(), i + 1, variable == -1 ? a.nVariables - 1 : variable - 1);
-                     //normalize univariate gcd in order to reconstruct leading coefficient polynomial
-                     normalization = ring.Multiply(ring.Reciprocal(gcdUnivar.get(MonicScalingExponent)), normalization);
-                     gcdUnivar = gcdUnivar.Multiply(normalization);
-                 }
-
-                 bool allDone = true;
-                 foreach (lVandermondeSystem system in systems)
-                     if (system.nEquations() < system.nUnknownVariables()) {
-                         long rhs = gcdUnivar.Degree() < system.univarDegree ? 0 : gcdUnivar.get(system.univarDegree);
-                         system.oneMoreEquation(rhs);
-                         if (system.nEquations() < system.nUnknownVariables())
-                             allDone = false;
-                     }
-
-                 if (allDone)
-                     break;
-             }
-
-             foreach (lVandermondeSystem system in systems) {
-                 //solve each system
-                 LinearSolver.SystemInfo info = system.solve();
-                 if (info != LinearSolver.SystemInfo.Consistent)
-                     // system is inconsistent or under determined
-                     // unlucky homomorphism
-                     return null;
-             }
-
-             MultivariatePolynomialZp64 gcdVal = a.CreateZero();
-             foreach (lVandermondeSystem system in systems) {
-                 assert MonicScalingExponent == -1 || system.univarDegree != MonicScalingExponent || system.solution[0] == 1;
-                 for (int i = 0; i < system.skeleton.Length; i++) {
-                     MonomialZp64 DegreeVector = system.skeleton[i].set(0, system.univarDegree);
-                     long value = system.solution[i];
-                     gcdVal.Add(DegreeVector.setCoefficient(value));
-                 }
-             }
-
-             return gcdVal;
-         }
-     }
 //
 //     static abstract class lLinearSystem {
 //         final int univarDegree;
@@ -5494,25 +5048,19 @@ public static class MultivariateGCD
 //         }
 //     }
 //
-//     private static <
-//             Term extends AMonomial<Term>,
-//             Poly extends AMultivariatePolynomial<Term, Poly>>
-//     void liftPair(Poly base, Poly a, Poly b, Poly aLC, Poly bLC, HenselLifting.IEvaluation<Term, Poly> evaluation) {
-//         HenselLifting.multivariateLift0(base,
-//                 base.CreateArray(a, b),
-//                 base.CreateArray(aLC, bLC),
-//                 evaluation,
-//                 base.Degrees());
-//     }
-//
-//     private static <
-//             Term extends AMonomial<Term>,
-//             Poly extends AMultivariatePolynomial<Term, Poly>>
-//     void liftPairAutomaticLC(Poly base, Poly a, Poly b, HenselLifting.IEvaluation<Term, Poly> evaluation) {
-//         HenselLifting.multivariateLiftAutomaticLC(base,
-//                 base.CreateArray(a, b),
-//                 evaluation);
-//     }
+     private static void liftPair<E>(MultivariatePolynomial<E> @base, MultivariatePolynomial<E> a, MultivariatePolynomial<E> b, MultivariatePolynomial<E> aLC, MultivariatePolynomial<E> bLC, HenselLifting.IEvaluation<E> evaluation) {
+         HenselLifting.multivariateLift0(@base,
+             [a, b],
+             [aLC, bLC],
+                 evaluation,
+             @base.Degrees());
+     }
+
+     private static void liftPairAutomaticLC<E>(MultivariatePolynomial<E> @base, MultivariatePolynomial<E> a, MultivariatePolynomial<E> b, HenselLifting.IEvaluation<E> evaluation) {
+         HenselLifting.multivariateLiftAutomaticLC(@base,
+                 [a, b],
+                 evaluation);
+     }
 //
 //     static ZeroVariables commonPossibleZeroes(MultivariatePolynomialZp64 a, MultivariatePolynomialZp64 b, int nVariables) {
 //         return commonPossibleZeroes(possibleZeros(a, nVariables), possibleZeros(b, nVariables));
@@ -5828,7 +5376,7 @@ public static class MultivariateGCD
 //     }
 //
 //     /* =============================================== EEZ-GCD algorithm ============================================ */
- 
+
     public static MultivariatePolynomial<E> EEZGCD<E>(MultivariatePolynomial<E> a, MultivariatePolynomial<E> b)
     {
         return EEZGCD(a, b, false);
@@ -5879,158 +5427,172 @@ public static class MultivariateGCD
         return gcdInput.restoreGCD(result);
     }
 
-//     private static <Term extends AMonomial<Term>, Poly extends AMultivariatePolynomial<Term, Poly>>
-//     Poly KaltofenMonaganEEZModularGCDInGF(Poly a, Poly b) {
-//         if (a instanceof MultivariatePolynomialZp64)
-//             return (Poly) KaltofenMonaganEEZModularGCDInGF((MultivariatePolynomialZp64) a, (MultivariatePolynomialZp64) b);
-//         else
-//             return (Poly) KaltofenMonaganEEZModularGCDInGF((MultivariatePolynomial) a, (MultivariatePolynomial) b);
-//     }
-//
-//     
-     private static MultivariatePolynomial<E> EEZGCD0<E>(MultivariatePolynomial<E> a, MultivariatePolynomial<E> b) {
+     // private static MultivariatePolynomial<E> KaltofenMonaganEEZModularGCDInGF<E>(MultivariatePolynomial<E> a, MultivariatePolynomial<E> b) {
+     //     if (a is MultivariatePolynomialZp64)
+     //         return (Poly) KaltofenMonaganEEZModularGCDInGF((MultivariatePolynomialZp64) a, (MultivariatePolynomialZp64) b);
+     //     else
+     //         return (Poly) KaltofenMonaganEEZModularGCDInGF((MultivariatePolynomial) a, (MultivariatePolynomial) b);
+     // }
 
-         // Degree of univariate gcd
-         int ugcdDegree = int.MaxValue;
-         // Degrees of a and b as Z[y1, ... ,yN][x]
-         int
-                 uaDegree = a.Degree(0),
-                 ubDegree = b.Degree(0);
+     
+    private static MultivariatePolynomial<E> EEZGCD0<E>(MultivariatePolynomial<E> a, MultivariatePolynomial<E> b)
+    {
+        // Degree of univariate gcd
+        int ugcdDegree = int.MaxValue;
+        // Degrees of a and b as Z[y1, ... ,yN][x]
+        int
+            uaDegree = a.Degree(0),
+            ubDegree = b.Degree(0);
 
-         MultivariateFactorization.IEvaluationLoop<Term, Poly> evaluations = MultivariateFactorization.getEvaluationsGF(a);
-         Set<DegreeVector> aSkeleton = a.getSkeleton(0), bSkeleton = b.getSkeleton(0);
-         choose_evaluation:
-         while (true) {
-             HenselLifting.IEvaluation<Term, Poly> evaluation = evaluations.next();
-             if (evaluation == null)
-                 // switch to KM algorithm
-                 return KaltofenMonaganEEZModularGCDInGF(a, b);
-             Poly
-                     mua = evaluation.evaluateFrom(a, 1),
-                     mub = evaluation.evaluateFrom(b, 1);
+        MultivariateFactorization.IEvaluationLoop<Term, Poly> evaluations = MultivariateFactorization.getEvaluationsGF(a);
+        ImmutableList<DegreeVector> aSkeleton = a.GetSkeleton(0), bSkeleton = b.GetSkeleton(0);
 
-             if (!aSkeleton.equals(mua.getSkeleton()) || !bSkeleton.equals(mub.getSkeleton()))
-                 continue;
+        while (true)
+        {
+            choose_evaluation: ;
+            HenselLifting.IEvaluation<E> evaluation = evaluations.next();
+            if (evaluation == null)
+                // switch to KM algorithm
+                return KaltofenMonaganEEZModularGCDInGF(a, b);
+            MultivariatePolynomial<E>
+                mua = evaluation.evaluateFrom(a, 1),
+                mub = evaluation.evaluateFrom(b, 1);
 
-             IUnivariatePolynomial
-                     ua = mua.asUnivariate(),
-                     ub = mub.asUnivariate();
+            if (!aSkeleton.Equals(mua.GetSkeleton()) || !bSkeleton.Equals(mub.GetSkeleton()))
+                continue;
 
-             assert ua.Degree() == uaDegree;
-             assert ub.Degree() == ubDegree;
+            UnivariatePolynomial<E>
+                ua = mua.AsUnivariate(),
+                ub = mub.AsUnivariate();
 
-             // gcd of a mod I and b mod I (univariate)
-             IUnivariatePolynomial ugcd = UnivariateGCD.PolynomialGCD(ua, ub);
+            Debug.Assert(ua.Degree() == uaDegree);
+            Debug.Assert(ub.Degree() == ubDegree);
 
-             if (ugcd.Degree() == 0)
-                 // coprime polynomials
-                 return a.CreateOne();
+            // gcd of a mod I and b mod I (univariate)
+            UnivariatePolynomial<E> ugcd = UnivariateGCD.PolynomialGCD(ua, ub);
 
-             if (ugcd.Degree() > ugcdDegree)
-                 // unlucky evaluation
-                 continue choose_evaluation;
+            if (ugcd.Degree() == 0)
+                // coprime polynomials
+                return a.CreateOne();
 
-             ugcdDegree = ugcd.Degree();
+            if (ugcd.Degree() > ugcdDegree)
+                // unlucky evaluation
+                goto choose_evaluation;
 
-             if (ugcdDegree == uaDegree) {
-                 // a is a divisor of b
-                 if (MultivariateDivision.DividesQ(b, a))
-                     return a;
-                 //continue choose_evaluation;
-             }
+            ugcdDegree = ugcd.Degree();
 
-             if (ugcdDegree == ubDegree) {
-                 // b is a divisor of a
-                 if (MultivariateDivision.DividesQ(a, b))
-                     return b;
-                 //continue choose_evaluation;
-             }
+            if (ugcdDegree == uaDegree)
+            {
+                // a is a divisor of b
+                if (MultivariateDivision.DividesQ(b, a))
+                    return a;
+                //continue choose_evaluation;
+            }
 
-             // base polynomial to lift (either a or b)
-             Poly base = null;
-             // a cofactor with gcd to lift, i.e. base = ugcd * uCoFactor mod I
-             IUnivariatePolynomial uCoFactor = null;
-             Poly coFactorLC = null;
+            if (ugcdDegree == ubDegree)
+            {
+                // b is a divisor of a
+                if (MultivariateDivision.DividesQ(a, b))
+                    return b;
+                //continue choose_evaluation;
+            }
 
-             // deg(b) < deg(a), so it is better to try to lift b
-             IUnivariatePolynomial ubCoFactor = UnivariateDivision.quotient(ub, ugcd, true);
-             if (UnivariateGCD.PolynomialGCD(ugcd, ubCoFactor).IsConstant()) {
-                 // b splits into coprime factors
-                 base = b;
-                 uCoFactor = ubCoFactor;
-                 coFactorLC = b.lc(0);
-             }
+            // base polynomial to lift (either a or b)
+            MultivariatePolynomial<E>? @base = null;
+            // a cofactor with gcd to lift, i.e. base = ugcd * uCoFactor mod I
+            UnivariatePolynomial<E> uCoFactor = null;
+            MultivariatePolynomial<E>? coFactorLC = null;
 
-             if (base == null) {
-                 // b does not split into coprime factors => try a
-                 IUnivariatePolynomial uaCoFactor = UnivariateDivision.quotient(ua, ugcd, true);
-                 if (UnivariateGCD.PolynomialGCD(ugcd, uaCoFactor).IsConstant()) {
-                     base = a;
-                     uCoFactor = uaCoFactor;
-                     coFactorLC = a.lc(0);
-                 }
-             }
+            // deg(b) < deg(a), so it is better to try to lift b
+            UnivariatePolynomial<E> ubCoFactor = UnivariateDivision.Quotient(ub, ugcd, true);
+            if (UnivariateGCD.PolynomialGCD(ugcd, ubCoFactor).IsConstant())
+            {
+                // b splits into coprime factors
+                @base = b;
+                uCoFactor = ubCoFactor;
+                coFactorLC = b.Lc(0);
+            }
 
-             if (base == null) {
-                 // neither a nor b does not split into coprime factors => square free decomposition required
-                 Poly
-                         bRepeatedFactor = EEZGCD(b, b.derivative(0, 1)),
-                         squareFreeGCD = EEZGCD(MultivariateDivision.divideExact(b, bRepeatedFactor), a),
-                         aRepeatedFactor = MultivariateDivision.divideExact(a, squareFreeGCD),
-                         gcd = squareFreeGCD.Clone();
+            if (@base == null)
+            {
+                // b does not split into coprime factors => try a
+                UnivariatePolynomial<E> uaCoFactor = UnivariateDivision.Quotient(ua, ugcd, true);
+                if (UnivariateGCD.PolynomialGCD(ugcd, uaCoFactor).IsConstant())
+                {
+                    @base = a;
+                    uCoFactor = uaCoFactor;
+                    coFactorLC = a.Lc(0);
+                }
+            }
 
-                 IUnivariatePolynomial
-                         uSquareFreeGCD = evaluation.evaluateFrom(squareFreeGCD, 1).asUnivariate(),
-                         uaRepeatedFactor = evaluation.evaluateFrom(aRepeatedFactor, 1).asUnivariate(),
-                         ubRepeatedFactor = evaluation.evaluateFrom(bRepeatedFactor, 1).asUnivariate();
-                 while (true) {
-                     ugcd = UnivariateGCD.PolynomialGCD(
-                             uSquareFreeGCD, uaRepeatedFactor, ubRepeatedFactor);
+            if (@base == null)
+            {
+                // neither a nor b does not split into coprime factors => square free decomposition required
+                MultivariatePolynomial<E>
+                    bRepeatedFactor = EEZGCD(b, b.Derivative(0, 1)),
+                    squareFreeGCD = EEZGCD(MultivariateDivision.DivideExact(b, bRepeatedFactor), a),
+                    aRepeatedFactor = MultivariateDivision.DivideExact(a, squareFreeGCD),
+                    gcd1 = squareFreeGCD.Clone();
 
-                     if (ugcd.Degree() == 0)
-                         return gcd;
+                UnivariatePolynomial<E>
+                    uSquareFreeGCD = evaluation.evaluateFrom(squareFreeGCD, 1).AsUnivariate(),
+                    uaRepeatedFactor = evaluation.evaluateFrom(aRepeatedFactor, 1).AsUnivariate(),
+                    ubRepeatedFactor = evaluation.evaluateFrom(bRepeatedFactor, 1).AsUnivariate();
+                while (true)
+                {
+                    ugcd = UnivariateGCD.PolynomialGCD(
+                        uSquareFreeGCD, uaRepeatedFactor, ubRepeatedFactor);
 
-                     if (!uSquareFreeGCD.Clone().Monic().equals(ugcd.Clone().Monic())) {
-                         Poly
-                                 mgcd = (Poly) AMultivariatePolynomial.asMultivariate(ugcd, a.nVariables, 0, a.ordering),
-                                 gcdCoFactor = (Poly) AMultivariatePolynomial.asMultivariate(
-                                         UnivariateDivision.divideExact(uSquareFreeGCD, ugcd, false), a.nVariables, 0, a.ordering);
+                    if (ugcd.Degree() == 0)
+                        return gcd1;
 
-                         liftPairAutomaticLC(squareFreeGCD, mgcd, gcdCoFactor, evaluation);
+                    if (!uSquareFreeGCD.Clone().Monic().Equals(ugcd.Clone().Monic()))
+                    {
+                        MultivariatePolynomial<E>
+                            mgcd = MultivariatePolynomial<E>.AsMultivariate(ugcd, a.nVariables, 0, a.ordering),
+                            gcdCoFactor = MultivariatePolynomial<E>.AsMultivariate(
+                                UnivariateDivision.DivideExact(uSquareFreeGCD, ugcd, false), a.nVariables, 0,
+                                a.ordering);
 
-                         squareFreeGCD = mgcd.Clone();
-                         uSquareFreeGCD = evaluation.evaluateFrom(squareFreeGCD, 1).asUnivariate();
-                     }
+                        liftPairAutomaticLC(squareFreeGCD, mgcd, gcdCoFactor, evaluation);
 
-                     gcd = gcd.Multiply(squareFreeGCD);
-                     uaRepeatedFactor = UnivariateDivision.divideExact(uaRepeatedFactor, ugcd, false);
-                     ubRepeatedFactor = UnivariateDivision.divideExact(ubRepeatedFactor, ugcd, false);
-                 }
-             }
+                        squareFreeGCD = mgcd.Clone();
+                        uSquareFreeGCD = evaluation.evaluateFrom(squareFreeGCD, 1).AsUnivariate();
+                    }
 
-             Poly gcd = AMultivariatePolynomial.asMultivariate(ugcd, a.nVariables, 0, a.ordering);
-             Poly coFactor = AMultivariatePolynomial.asMultivariate(uCoFactor, a.nVariables, 0, a.ordering);
+                    gcd1 = gcd1.Multiply(squareFreeGCD);
+                    uaRepeatedFactor = UnivariateDivision.DivideExact(uaRepeatedFactor, ugcd, false);
+                    ubRepeatedFactor = UnivariateDivision.DivideExact(ubRepeatedFactor, ugcd, false);
+                }
+            }
 
-             // impose the leading coefficient
-             Poly lcCorrection = EEZGCD(a.lc(0), b.lc(0));
-             //assert ZippelGCD(a.lc(0), b.lc(0)).Monic(lcCorrection.Lc()).equals(lcCorrection) : "\n" + a.lc(0) + "  \n " + b.lc(0);
+            MultivariatePolynomial<E> gcd = MultivariatePolynomial<E>.AsMultivariate(ugcd, a.nVariables, 0, a.ordering);
+            MultivariatePolynomial<E> coFactor =
+                MultivariatePolynomial<E>.AsMultivariate(uCoFactor, a.nVariables, 0, a.ordering);
 
-             if (lcCorrection.isOne()) {
-                 liftPair(base, gcd, coFactor, null, base.lc(0), evaluation);
-             } else {
-                 Poly lcCorrectionMod = evaluation.evaluateFrom(lcCorrection, 1);
-                 assert lcCorrectionMod.IsConstant();
+            // impose the leading coefficient
+            MultivariatePolynomial<E> lcCorrection = EEZGCD(a.Lc(0), b.Lc(0));
+            //assert ZippelGCD(a.lc(0), b.lc(0)).Monic(lcCorrection.Lc()).equals(lcCorrection) : "\n" + a.lc(0) + "  \n " + b.lc(0);
 
-                 coFactor = coFactor.MultiplyByLC(gcd);
-                 gcd = gcd.MonicWithLC(lcCorrectionMod);
+            if (lcCorrection.IsOne())
+            {
+                liftPair(@base, gcd, coFactor, null, @base.Lc(0), evaluation);
+            }
+            else
+            {
+                MultivariatePolynomial<E> lcCorrectionMod = evaluation.evaluateFrom(lcCorrection, 1);
+                Debug.Assert(lcCorrectionMod.IsConstant());
 
-                 liftPair(base.Clone().Multiply(lcCorrection), gcd, coFactor, lcCorrection, coFactorLC, evaluation);
-                 assert gcd.lc(0).equals(lcCorrection);
-                 gcd = HenselLifting.primitivePart(gcd);
-             }
+                coFactor = coFactor.MultiplyByLC(gcd);
+                gcd = gcd.MonicWithLC(lcCorrectionMod);
 
-             if (isGCDTriplet(b, a, gcd))
-                 return gcd;
-         }
-     }
+                liftPair(@base.Clone().Multiply(lcCorrection), gcd, coFactor, lcCorrection, coFactorLC, evaluation);
+                Debug.Assert(gcd.Lc(0).Equals(lcCorrection));
+                gcd = HenselLifting.primitivePart(gcd);
+            }
+
+            if (isGCDTriplet(b, a, gcd))
+                return gcd;
+        }
+    }
 }

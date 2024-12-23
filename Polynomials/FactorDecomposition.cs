@@ -132,6 +132,12 @@ public class FactorDecomposition<E>
         return this;
     }
 
+    public static  FactorDecomposition<E> FromUnit(Ring<E> ring, E unit) {
+        if (!ring.IsUnitOrZero(unit))
+            throw new ArgumentException("not a unit");
+        return new FactorDecomposition<E>(ring, unit, new List<E>(), new List<int>());
+    }
+    
     public static FactorDecomposition<E> Empty(Ring<E> ring) => new FactorDecomposition<E>(ring, ring.GetOne());
 
     public static FactorDecomposition<E> Of(Ring<E> ring, E unit, List<E> factors, List<int> exponents)

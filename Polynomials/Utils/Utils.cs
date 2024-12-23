@@ -1,4 +1,6 @@
-﻿namespace Polynomials.Utils;
+﻿using System.Collections;
+
+namespace Polynomials.Utils;
 
 public static class Utils
 {
@@ -119,6 +121,18 @@ public static class Utils
         return a;
     }
     
+    public static T[,] Swap<T>(T[,] a, int i, int j)
+    {
+        for (int k = 0; k < a.GetLength(1); k++)
+        {
+            var t = a[i, k];
+            a[i, k] = a[j, k];
+            a[j, k] = t;
+        }
+        
+        return a;
+    }
+    
     public static T[] AddAll<T>(T[] array1, params T[] array2)
     {
         T[] r = new T[array1.Length + array2.Length];
@@ -152,5 +166,88 @@ public static class Utils
             arr[i] = -arr[i];
         return arr;
     }
+
+    public static T[,] AsArray2D<T>(this T[][] array)
+    {
+        var result = new T[array.Length, array[0].Length];
+        for (int i = 0; i < array.Length; i++)
+        {
+            for (int j = 0; j < array[i].Length; j++)
+            {
+                result[i, j] = array[i][j];
+            }
+        }
+        
+        return result;
+    }
     
+    public static int Cardinality(this BitArray arr)
+    {
+        int count = 0;
+        for (int i = 0; i < arr.Length; i++)
+            if (arr[i])
+                count++;
+        return count;
+    }
+    
+    public static int NextSetBit(this BitArray bitArray, int fromIndex)
+    {
+        if (bitArray == null)
+            throw new ArgumentNullException(nameof(bitArray));
+
+        if (fromIndex < 0 || fromIndex >= bitArray.Length)
+            throw new ArgumentOutOfRangeException(nameof(fromIndex), "Index hors des limites de la BitArray.");
+
+        for (int i = fromIndex; i < bitArray.Length; i++)
+        {
+            if (bitArray[i])
+                return i;
+        }
+
+        return -1; // Retourne -1 si aucun bit `true` n'est trouvé
+    }
+
+    public static void Set(this BitArray bitArray, int from, int to, bool value)
+    {
+        for (int i = from; i < to; i++)
+        {
+            bitArray[i] = value;
+        }
+    }
+    
+    public class ComparerBy<T> : IComparer<T>
+    {
+        private readonly Func<T, int> _comparer;
+
+        public ComparerBy(Func<T, int> comparer)
+        {
+            _comparer = comparer;
+        }
+
+        public int Compare(T x, T y)
+        {
+            return _comparer(x).CompareTo(_comparer(y));
+        }
+    }
+    
+    public static void RemoveAll<T>(this List<T> list, List<T> toRemove)
+    {
+        foreach (var item in toRemove)
+        {
+            list.Remove(item);
+        }
+    }
+
+    public static T[] ArrayOf<T>(T value, int length)
+    {
+        var array = new T[length];
+        Array.Fill(array, value);
+        return array;
+    }
+    
+    public static bool ContainsAll<T>(this IEnumerable<T> source, IEnumerable<T> toCheck)
+    {
+        return toCheck.All(source.Contains);
+    }
+
 }
