@@ -2313,7 +2313,7 @@ public class MultivariatePolynomial<E> : Polynomial<MultivariatePolynomial<E>>, 
         {
             this.value = ring.ValueOf(value);
             this.ring = ring;
-            this.precomputedPowers = new Utils.Nullable<E>[cacheSize];
+            this.precomputedPowers = new Utils.Nullable<E>[cacheSize + 1];
             Array.Fill(this.precomputedPowers, Utils.Nullable<E>.Null);
         }
 

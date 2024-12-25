@@ -128,7 +128,7 @@ public static class MultivariateGCD
             MultivariatePolynomial<E> tmp;
             do
             {
-                tmp = arr[i].Clone().Multiply(rnd.Next(2048));
+                tmp = arr[i].Clone().Multiply(rnd.Next(2048)); 
             } while (tmp.IsZero());
 
             bool shouldHaveCC = !arr[i].CcAsPoly().IsZero() || !sum.CcAsPoly().IsZero();

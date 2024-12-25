@@ -448,7 +448,7 @@ public abstract class Ring<E> : IComparer<E>
         var k2p = Copy(@base); // <= copy the base (mutable operations are used below)
         for (;;)
         {
-            if ((exponent.IsEven))
+            if ((!exponent.IsEven))
                 result = MultiplyMutable(result, k2p);
             exponent = exponent >> 1;
             if (exponent.IsZero)
