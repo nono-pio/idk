@@ -1,4 +1,5 @@
 using System.Numerics;
+using Polynomials.Poly.Multivar;
 using Polynomials.Poly.Univar;
 
 namespace Polynomials.Poly;
@@ -38,25 +39,25 @@ public sealed class PolynomialMethods
         return UnivariateGCD.PolynomialGCD(a, b);
     }
 
-    //
-    // public static Poly PolynomialGCD<Term, Poly>(Poly a, Poly b) where Term : AMonomial<Term>
-    //     where Poly : AMultivariatePolynomial<Term, Poly>
-    // {
-    //     return MultivariateGCD.PolynomialGCD(a, b);
-    // }
+    
+    public static MultivariatePolynomial<E> PolynomialGCD<E>(MultivariatePolynomial<E> a, MultivariatePolynomial<E> b) {
+        return MultivariateGCD.PolynomialGCD(a, b);
+    }
 
+    public static Poly PolynomialGCD<Poly>(Poly a, Poly b) where Poly : Polynomial<Poly> {
+        return a.Gcd(b);
+    }
 
     public static UnivariatePolynomial<E> PolynomialGCD<E>(params UnivariatePolynomial<E>[] array)
     {
         return UnivariateGCD.PolynomialGCD(array);
     }
 
-    //
-    // public static Poly PolynomialGCD<Term, Poly>(params Poly[] array) where Term : AMonomial<Term>
-    //     where Poly : AMultivariatePolynomial<Term, Poly>
-    // {
-    //     return MultivariateGCD.PolynomialGCD(array);
-    // }
+    
+    public static MultivariatePolynomial<E> PolynomialGCD<E>(params MultivariatePolynomial<E>[] array)
+    {
+        return MultivariateGCD.PolynomialGCD(array);
+    }
 
 
     public static UnivariatePolynomial<E> PolynomialGCD<E>(IEnumerable<UnivariatePolynomial<E>> array)
@@ -120,24 +121,38 @@ public sealed class PolynomialMethods
     {
         return a.DivideExact(b);
     }
-    //
-    //
-    // public static bool CoprimeQ<Poly>(params Poly[] polynomials) where Poly : IPolynomial<Poly>
-    // {
-    //     for (int i = 0; i < polynomials.Length - 1; i++)
-    //     for (int j = i + 1; j < polynomials.Length; j++)
-    //         if (!PolynomialGCD(polynomials[i], polynomials[j]).IsConstant())
-    //             return false;
-    //     return true;
-    // }
-    //
-    //
-    // public static bool CoprimeQ<Poly>(IEnumerable<Poly> polynomials) where Poly : IPolynomial<Poly>
-    // {
-    //     return CoprimeQ(polynomials.ToArray());
-    // }
-    //
-    //
+    
+    
+    public static bool CoprimeQ<E>(params UnivariatePolynomial<E>[] polynomials)
+    {
+        for (int i = 0; i < polynomials.Length - 1; i++)
+        for (int j = i + 1; j < polynomials.Length; j++)
+            if (!PolynomialGCD(polynomials[i], polynomials[j]).IsConstant())
+                return false;
+        return true;
+    }
+    
+    
+    public static bool CoprimeQ<E>(IEnumerable<UnivariatePolynomial<E>> polynomials)
+    {
+        return CoprimeQ(polynomials.ToArray());
+    }
+    
+    public static bool CoprimeQ<E>(params MultivariatePolynomial<E>[] polynomials)
+    {
+        for (int i = 0; i < polynomials.Length - 1; i++)
+        for (int j = i + 1; j < polynomials.Length; j++)
+            if (!PolynomialGCD(polynomials[i], polynomials[j]).IsConstant())
+                return false;
+        return true;
+    }
+    
+    
+    public static bool CoprimeQ<E>(IEnumerable<MultivariatePolynomial<E>> polynomials)
+    {
+        return CoprimeQ(polynomials.ToArray());
+    }
+    
     // public static bool IrreducibleQ<Poly>(Poly poly) where Poly : IPolynomial<Poly>
     // {
     //     if (poly is IUnivariatePolynomial)

@@ -56,7 +56,7 @@ public static class GenericHandler
     }
     
     /// Create a multivariate polynomial of multivariate polynomials of unknown type.
-    public static IMultivariatePolynomial CreateGenericMultiPoly(IMultivariatePolynomial[] data)
+    public static IMultivariatePolynomial CreateGenericMultiPoly(Monomial<IMultivariatePolynomial>[] data)
     {
         var factory = data[0];
         var innerType = factory.GetType().GetGenericArguments()[0];

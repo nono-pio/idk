@@ -249,5 +249,39 @@ public static class Utils
     {
         return toCheck.All(source.Contains);
     }
+    
+    public static int FirstIndexOf<T>(this IEnumerable<T> source, T element)
+    {
+        int i = 0;
+        foreach (var item in source)
+        {
+            if (Equals(item, element))
+                return i;
+            i++;
+        }
+
+        return -1;
+    }
+
+    public static void InsertionSort<T, B>(T[] target, B[] coSort) where T : IComparable<T>
+    {
+        InsertionSort(target, 0, target.Length, coSort);
+    }
+
+    public static void InsertionSort<T, B>(T[] target, int fromIndex, int toIndex, B[] coSort) where T : IComparable<T> {
+        int i, j;
+        T key;
+        B keyC;
+        for (i = fromIndex + 1; i < toIndex; i++) {
+            key = target[i];
+            keyC = coSort[i];
+            for (j = i; j > fromIndex && target[j - 1].CompareTo(key) > 0; j--) {
+                target[j] = target[j - 1];
+                coSort[j] = coSort[j - 1];
+            }
+            target[j] = key;
+            coSort[j] = keyC;
+        }
+    }
 
 }

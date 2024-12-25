@@ -402,7 +402,7 @@ public abstract class Ring<E> : IComparer<E>
     public E[] CreateZeroesArray(int length)
     {
         var array = new E[length];
-        Array.Fill(array, GetZero());
+        FillZeros(array);
         return array;
     }
 

@@ -347,7 +347,7 @@ public static class MultivariateGCD
         return isOverUnivariate(p) || isOverUnivariateZp64(p) || isOverMultivariate(p) || isOverMultivariateZp64(p);
     }
 
-    static bool isOverUnivariate<E>(MultivariatePolynomial<E> p)
+    public static bool isOverUnivariate<E>(MultivariatePolynomial<E> p)
     {
         return p.ring is IUnivariateRing;
     }
@@ -362,7 +362,7 @@ public static class MultivariateGCD
             .AsOverUnivariateEliminate(0);
     }
 
-    static
+    public static
         bool isOverMultivariate<E>(MultivariatePolynomial<E> p)
     {
         return p.ring is IMultivariateRing;
@@ -380,7 +380,7 @@ public static class MultivariateGCD
             .AsOverMultivariateEliminate(cfVars);
     }
 
-    static bool isOverUnivariateZp64<E>(MultivariatePolynomial<E> p)
+    public static bool isOverUnivariateZp64<E>(MultivariatePolynomial<E> p)
     {
         return p.ring is IUnivariateRing && p.Lc() is UnivariatePolynomialZp64 uZp64 && uZp64.ring is IntegersZp64;
     }
@@ -394,7 +394,7 @@ public static class MultivariateGCD
             MultivariatePolynomialZp64.AsNormalMultivariate(b, 0)).AsOverUnivariateEliminate(0);
     }
 
-    static bool isOverMultivariateZp64<E>(MultivariatePolynomial<E> p)
+    public static bool isOverMultivariateZp64<E>(MultivariatePolynomial<E> p)
     {
         return p.ring is IMultivariateRing && p.Lc() is MultivariatePolynomialZp64 mZp64 && mZp64.ring is IntegersZp64;
     }
@@ -434,7 +434,7 @@ public static class MultivariateGCD
     //             .mapCoefficients(ring, ring::image);
     // }
     /* ============================================== Auxiliary methods ============================================= */
-    static int[] inversePermutation(int[] permutation)
+    public static int[] inversePermutation(int[] permutation)
     {
         int[] inv = new int[permutation.Length];
         for (int i = permutation.Length - 1; i >= 0; --i)
@@ -920,7 +920,7 @@ public static class MultivariateGCD
 
     static UnivariatePolynomial<E>[] univariateImages<E>(MultivariatePolynomial<E> poly, E[] subs)
     {
-        E[][] univariate = new E[][poly.nVariables];
+        E[][] univariate = new E[poly.nVariables][];
         for (int i = 0; i < univariate.Length; ++i)
             univariate[i] = poly.ring.CreateZeroesArray(poly.Degree(i) + 1);
 
@@ -5444,7 +5444,7 @@ public static class MultivariateGCD
             uaDegree = a.Degree(0),
             ubDegree = b.Degree(0);
 
-        MultivariateFactorization.IEvaluationLoop<Term, Poly> evaluations = MultivariateFactorization.getEvaluationsGF(a);
+        MultivariateFactorization.IEvaluationLoop<E> evaluations = MultivariateFactorization.getEvaluationsGF(a);
         ImmutableList<DegreeVector> aSkeleton = a.GetSkeleton(0), bSkeleton = b.GetSkeleton(0);
 
         while (true)

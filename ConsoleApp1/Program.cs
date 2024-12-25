@@ -100,30 +100,13 @@ static (int, int) sqrt(int n)
 
 
 
+// x^2 + 2xy + y^2 = (x+y)^2
+var monomial1 = new Monomial<BigInteger>([3, 0], 1);
+var monomial2 = new Monomial<BigInteger>([2, 1], 3);
+var monomial3 = new Monomial<BigInteger>([1, 2], 3);
+var monomial4 = new Monomial<BigInteger>([0, 3], 1);
 
-// Create some monomials
-var monomial1 = new Monomial<Rational<BigInteger>>([2, 0], new Rational<BigInteger>(Rings.Z, 3));
-var monomial2 = new Monomial<Rational<BigInteger>>([0, 1], new Rational<BigInteger>(Rings.Z, 5));
+var poly = MultivariatePolynomial<BigInteger>.Create(2, Rings.Z, MonomialOrder.GRLEX, [monomial1, monomial2, monomial3, monomial4]);
 
-// Create a multivariate polynomial
-var poly = MultivariatePolynomial<Rational<BigInteger>>.Create(2, Rings.Q, MonomialOrder.GRLEX, [monomial1, monomial2]);
-
-// Print the polynomial
-print(poly.Lt());
-
-// // Evaluate the polynomial at (x=1, y=2)
-// var evalResult = poly.Evaluate([new Rational<BigInteger>(Rings.Z, 1), new Rational<BigInteger>(Rings.Z, 2)]);
-// print(evalResult);
-//
-// // Add two polynomials
-var poly2 =  MultivariatePolynomial<Rational<BigInteger>>.Create(2, Rings.Q, MonomialOrder.GRLEX, [monomial1]);
-print(poly2);
-// var sum = poly.Clone().Add(poly2);
-// print(sum);
-
-// Multiply two polynomials
-// var product = poly.Clone().Multiply(poly2);
-// print(product);
-
-print(MultivariateDivision.DivideAndRemainder(poly, poly2));
-print(MultivariateDivision.DivideAndRemainder(poly2, poly));
+print(poly);
+print(MultivariateFactorization.Factor(poly));

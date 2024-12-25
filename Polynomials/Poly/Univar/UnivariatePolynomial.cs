@@ -10,6 +10,7 @@ namespace Polynomials.Poly.Univar;
 public interface IUnivariatePolynomial
 {
     public object GetAsObject(int i);
+    public object CcAsObject();
     public int Degree();
 }
 
@@ -212,13 +213,22 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>, IUni
         return Get(i);
     }
 
+    public object CcAsObject()
+    {
+        return Cc();
+    }
+
     public int Degree()
     {
         return degree;
     }
 
 
-    public E this[int i] => Get(i);
+    public E this[int i]
+    {
+        get => Get(i);
+        set => Set(i, value);
+    }
 
     public E Get(int i)
     {
@@ -1101,6 +1111,11 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>, IUni
     public override UnivariatePolynomial<E> DivideExact(UnivariatePolynomial<E> other)
     {
         return UnivariateDivision.DivideExact(this, other);
+    }
+
+    public override UnivariatePolynomial<E> Gcd(UnivariatePolynomial<E> other)
+    {
+        return UnivariateGCD.PolynomialGCD(this, other);
     }
 
 

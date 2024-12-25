@@ -206,6 +206,8 @@ public sealed class PolynomialFactorDecomposition<Poly> : FactorDecomposition<Po
         return Of(polynomials[0].CreateOne(), l, _e);
     }
 
+    public IEnumerable<Poly> StreamWithoutUnit() => Factors;
+
     public int Count => Factors.Count;
     public Poly this[int i] => Factors[i];
 }

@@ -119,6 +119,10 @@ public class FactorDecomposition<E>
 
         return r;
     }
+    
+    public E SquareFreePart() {
+        return MultiplyIgnoreExponents();
+    }
 
     public virtual FactorDecomposition<E> Canonical()
     {
@@ -177,6 +181,11 @@ public class FactorDecomposition<E>
     public virtual FactorDecomposition<R> MapTo<R>(Ring<R> othRing, Func<E, R> mapper)
     {
         return FactorDecomposition<R>.Of(othRing, mapper(Unit), Factors.Select(mapper).ToList(), Exponents);
+    }
+
+    public E[] ToArrayWithoutUnit()
+    {
+        return Factors.ToArray();
     }
 
     public override string ToString()

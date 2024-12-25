@@ -112,13 +112,12 @@ public static class HenselLifting
             return poly;
         }
 
-        IEvaluation<E> dropVariable(int variable);
-
-        IEvaluation<E> renameVariables(int[] newVariablesExceptFirst);
+        Evaluation<E> dropVariable(int variable);
+        Evaluation<E> renameVariables(int[] newVariablesExceptFirst);
     }
 
-  
-    sealed class Evaluation<E> : IEvaluation<E> {
+
+    public sealed class Evaluation<E> : IEvaluation<E> {
         readonly E[] values;
         readonly int nVariables;
         readonly Ring<E> ring;
@@ -126,7 +125,7 @@ public static class HenselLifting
         readonly MultivariatePolynomial<E>.USubstitution[] linearPowers;
         readonly IComparer<DegreeVector> ordering;
 
-        Evaluation(int nVariables, E[] values, Ring<E> ring, IComparer<DegreeVector> ordering) {
+        public Evaluation(int nVariables, E[] values, Ring<E> ring, IComparer<DegreeVector> ordering) { 
             this.nVariables = nVariables;
             this.values = values;
             this.ring = ring;
@@ -139,7 +138,7 @@ public static class HenselLifting
                         i + 1, nVariables, ordering);
         }
 
-        Evaluation<E> setRing(Ring<E> ring) {
+        public Evaluation<E> setRing(Ring<E> ring) {
             return new Evaluation<E>(nVariables, values, ring, ordering);
         }
 
@@ -179,11 +178,11 @@ public static class HenselLifting
             return ring.IsZero(values[variable - 1]);
         }
 
-        public IEvaluation<E> dropVariable(int variable) {
+        public Evaluation<E> dropVariable(int variable) {
             return new Evaluation<E>(nVariables - 1, Utils.Utils.Remove(values, variable - 1), ring, ordering);
         }
 
-        public IEvaluation<E> renameVariables(int[] variablesExceptFirst) {
+        public Evaluation<E> renameVariables(int[] variablesExceptFirst) {
             return new Evaluation<E>(nVariables, map(ring, values, variablesExceptFirst), ring, ordering);
         }
 
@@ -424,7 +423,7 @@ public static class HenselLifting
 //        factors[0].multiplyByLC(lc.divideByLC(flc));
 //    }
 
-    static UnivariatePolynomial<UnivariatePolynomial<E>>[] bivariateLiftDense<E>(
+public static UnivariatePolynomial<UnivariatePolynomial<E>>[] bivariateLiftDense<E>(
             UnivariatePolynomial<UnivariatePolynomial<E>> baseSeries, UnivariatePolynomial<E>[] factors, int degreeBound) {
         AllProductsCache<UnivariatePolynomial<E>> uFactors = new AllProductsCache<UnivariatePolynomial<E>>(factors);
         // univariate multifactor diophantine solver
@@ -517,8 +516,8 @@ public static class HenselLifting
             coefficients[i] =  evaluate.taylorCoefficient(poly, variable, i).AsUnivariate();
         return UnivariatePolynomial<UnivariatePolynomial<E>>.CreateUnsafe(ring, coefficients);
     }
-    
-    static MultivariatePolynomial<E> denseSeriesToPoly<E>(MultivariatePolynomial<E> factory, UnivariatePolynomial<UnivariatePolynomial<E>> series, int seriesVariable, IEvaluation<E> evaluation) {
+
+    public static MultivariatePolynomial<E> denseSeriesToPoly<E>(MultivariatePolynomial<E> factory, UnivariatePolynomial<UnivariatePolynomial<E>> series, int seriesVariable, IEvaluation<E> evaluation) {
         var result = factory.CreateZero();
         for (int i = 0; i <= series.Degree(); i++) {
             var mPoly = MultivariatePolynomial<E>.AsMultivariate(series.Get(i), factory.nVariables, 0, factory.ordering);
