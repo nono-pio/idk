@@ -8,10 +8,6 @@ public class Integers : Ring<BigInteger>
 {
     public static readonly Integers Z = new Integers();
 
-    public Integers()
-    {
-    }
-
     public override bool IsField()
     {
         return false;
@@ -163,7 +159,7 @@ public class Integers : Ring<BigInteger>
     }
 
 
-    public override IEnumerator<BigInteger> Iterator()
+    public override IEnumerable<BigInteger> Iterator()
     {
         throw new NotSupportedException("Ring of infinite cardinality.");
     }

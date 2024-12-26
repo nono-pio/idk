@@ -100,13 +100,15 @@ static (int, int) sqrt(int n)
 
 
 
-// x^2 + 2xy + y^2 = (x+y)^2
-var monomial1 = new Monomial<BigInteger>([3, 0], 1);
-var monomial2 = new Monomial<BigInteger>([2, 1], 3);
-var monomial3 = new Monomial<BigInteger>([1, 2], 3);
-var monomial4 = new Monomial<BigInteger>([0, 3], 1);
+// x^2 + y^2 + z^2 + 2xy + 2xz + 2yz = (x + y + z)^2
+var monomial1 = new Monomial<BigInteger>([2, 0, 0], 1);
+var monomial2 = new Monomial<BigInteger>([1, 1, 0], -1);
+var monomial3 = new Monomial<BigInteger>([1, 0, 1], 1);
+var monomial4 = new Monomial<BigInteger>([0, 1, 1], -1);
+// var monomial5 = new Monomial<BigInteger>([1, 0, 1], 2);
+// var monomial6 = new Monomial<BigInteger>([0, 1, 1], 2);
 
-var poly = MultivariatePolynomial<BigInteger>.Create(2, Rings.Z, MonomialOrder.GRLEX, [monomial1, monomial2, monomial3, monomial4]);
+var poly = MultivariatePolynomial<BigInteger>.Create(3, Rings.Z, MonomialOrder.GRLEX, [monomial1, monomial2, monomial3, monomial4]);
 
 print(poly);
 print(MultivariateFactorization.Factor(poly));

@@ -114,8 +114,8 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>, IUni
     {
         if (ring is Integers64 && this is UnivariatePolynomialZ64 uZ64)
             return uZ64.MapCoefficients(Rings.Z, e => new BigInteger(e));
-        if (ring is IntegersZp64 && this is UnivariatePolynomialZ64 uZp64)
-            return uZp64.MapCoefficients(Rings.Z, e => new BigInteger(e));
+        if (ring is IntegersZp64 rZp64 && this is UnivariatePolynomialZ64 uZp64)
+            return uZp64.MapCoefficients(Rings.Zp(rZp64.modulus), e => new BigInteger(e));
         if (this is UnivariatePolynomial<BigInteger> bigPoly)
             return bigPoly;
 
@@ -839,6 +839,18 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>, IUni
     {
         return Composition(CreateLinear(value, ring.GetOne()));
     }
+    
+    public UnivariatePolynomial<E> Composition(Ring<UnivariatePolynomial<E>> ring, UnivariatePolynomial<E> value)
+    {
+        if (value.IsOne())
+            return ring.ValueOf(this.Clone());
+        if (value.IsZero())
+            return CcAsPoly();
+        UnivariatePolynomial<E> result = ring.GetZero();
+        for (int i = Degree(); i >= 0; --i)
+            result = ring.Add(ring.Multiply(result, value), GetAsPoly(i));
+        return result;
+    }
 
 
     public UnivariatePolynomial<E> Add(E val)
@@ -1160,7 +1172,11 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>, IUni
     {
         return new UnivariatePolynomial<T>(ring, Stream().Select(mapper).ToArray());
     }
-
+    
+    public UnivariatePolynomial<T> MapCoefficientsAsPolys<T>(Ring<T> ring, Func<UnivariatePolynomial<E>, T> mapper)
+    {
+        return new UnivariatePolynomial<T>(ring, Stream().Select(c => mapper(Constant(this.ring, c))).ToArray());
+    }
 
     public UnivariatePolynomialZp64 MapCoefficients(IntegersZp64 ring, Func<E, long> mapper)
     {

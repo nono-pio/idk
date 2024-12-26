@@ -439,7 +439,7 @@ public static class MachineArithmetic
         }
 
         if (old_r != 1)
-            throw new ArgumentException(String.Format("modInverse(%s, %s) : not invertible (old_r = %s)", num, modulus,
+            throw new ArgumentException(string.Format("modInverse(%s, %s) : not invertible (old_r = %s)", num, modulus,
                 old_r));
         return Mod(old_s, modulus);
     }
@@ -502,11 +502,11 @@ public static class MachineArithmetic
     }
 
 
-    public static long[] PerfectPowerDecomposition(long n)
+    public static long[]? PerfectPowerDecomposition(long n)
     {
         if (n < 0)
         {
-            long[] ipp = PerfectPowerDecomposition(-n);
+            var ipp = PerfectPowerDecomposition(-n);
             if (ipp == null)
                 return null;
             if (ipp[1] % 2 == 0)
@@ -537,7 +537,7 @@ public static class MachineArithmetic
                     lowa = mida;
                 else
                 {
-                    long[] ipp = PerfectPowerDecomposition(mida);
+                    var ipp = PerfectPowerDecomposition(mida);
                     if (ipp != null)
                         return new long[]
                         {

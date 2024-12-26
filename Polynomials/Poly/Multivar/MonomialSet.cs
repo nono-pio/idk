@@ -94,4 +94,14 @@ public sealed class MonomialSet<E> : SortedDictionary<DegreeVector, Monomial<E>>
             return h;
         }
     }
+
+    public override bool Equals(object? obj)
+    {
+        if (obj is null || obj.GetType() != GetType())
+            return false;
+
+        var set = (MonomialSet<E>)obj;
+
+        return Enumerable.SequenceEqual(this.Iterator(), set.Iterator());
+    }
 }

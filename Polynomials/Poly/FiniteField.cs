@@ -6,7 +6,6 @@ using UnivariatePolynomialZ64 = Polynomials.Poly.Univar.UnivariatePolynomial<lon
 
 public sealed class FiniteField<E> : SimpleFieldExtension<E>
 {
-    private static readonly long serialVersionUID = 1;
 
 
     public static readonly FiniteField<long> GF27 =
@@ -14,7 +13,7 @@ public sealed class FiniteField<E> : SimpleFieldExtension<E>
 
 
     public static readonly FiniteField<long> GF17p5 =
-        new FiniteField<long>(UnivariatePolynomialZ64.Create(11, 11, 0, 3, 9, 9).Modulus(17).Monic());
+        new FiniteField<long>(UnivariatePolynomialZ64.Create(11, 11, 0, 3, 9, 9).Modulus(17).Monic()!);
 
 
     public FiniteField(UnivariatePolynomial<E> minimalPoly) : base(minimalPoly)
@@ -64,7 +63,7 @@ public sealed class FiniteField<E> : SimpleFieldExtension<E>
     }
 
 
-    public override IEnumerator<UnivariatePolynomial<E>> Iterator()
+    public override IEnumerable<UnivariatePolynomial<E>> Iterator()
     {
         if (!IsFinite())
             throw new Exception("Ring of infinite cardinality.");
@@ -75,7 +74,7 @@ public sealed class FiniteField<E> : SimpleFieldExtension<E>
         var data = new E[degree];
         for (int k = 0; k < iterators.Length; k++)
         {
-            iterators[k] = ring.Iterator();
+            iterators[k] = ring.Iterator().GetEnumerator();
             iterators[k].MoveNext();
             data[k] = iterators[k].Current;   
         }
@@ -88,7 +87,7 @@ public sealed class FiniteField<E> : SimpleFieldExtension<E>
             if (!iterators[i].MoveNext())
                 while (i < iterators.Length && !iterators[i].MoveNext())
                 {
-                    iterators[i] = ring.Iterator();
+                    iterators[i] = ring.Iterator().GetEnumerator();
                     iterators[i].MoveNext();
                     data[i] = iterators[i].Current;
                     ++i;

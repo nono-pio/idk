@@ -202,7 +202,7 @@ public sealed class UnivariateRing<E> : PolynomialRing<UnivariatePolynomial<E>>,
     }
 
 
-    public override IEnumerator<UnivariatePolynomial<E>> Iterator()
+    public override IEnumerable<UnivariatePolynomial<E>> Iterator()
     {
         throw new NotSupportedException("Ring of infinite cardinality.");
     }

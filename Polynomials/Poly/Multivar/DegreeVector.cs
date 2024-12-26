@@ -188,7 +188,12 @@ public class DegreeVector
         if (n == exponents.Length)
             return this;
         if (n > exponents.Length)
-            return new DegreeVector(exponents[..n], totalDegree);
+        {
+            var newExponents = new int[n];
+            for (int i = 0; i < exponents.Length; i++)
+                newExponents[i] = exponents[i];
+            return new DegreeVector(newExponents, totalDegree);
+        }
         else
             return new DegreeVector(exponents[..n]);
     }

@@ -344,7 +344,7 @@ public static class UnivariateFactorization
     {
         if (val < 0)
         {
-            var l = BigPrimes.NextPrime((long)val);
+            var l = BigPrimes.NextPrime(unchecked((uint)val));
             return (int)l;
         }
         else

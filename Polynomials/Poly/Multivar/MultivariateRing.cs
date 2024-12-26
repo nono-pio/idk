@@ -330,7 +330,7 @@ public sealed class MultivariateRing<E> : PolynomialRing<MultivariatePolynomial<
     }
 
 
-    public override IEnumerator<MultivariatePolynomial<E>> Iterator()
+    public override IEnumerable<MultivariatePolynomial<E>> Iterator()
     {
         throw new NotSupportedException("Ring of infinite cardinality.");
     }

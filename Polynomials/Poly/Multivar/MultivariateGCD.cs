@@ -4195,7 +4195,7 @@ public static class MultivariateGCD
         }
     }
 
-    private abstract class LinearSystem<E>
+    public abstract class LinearSystem<E>
     {
         public readonly int univarDegree;
         public readonly Ring<E> ring;
@@ -4285,7 +4285,7 @@ public static class MultivariateGCD
         }
     }
 
-    sealed class VandermondeSystem<E> : LinearSystem<E>
+    public sealed class VandermondeSystem<E> : LinearSystem<E>
     {
         public VandermondeSystem(int univarDegree, MultivariatePolynomial<E> skeleton,
             MultivariatePolynomial<E>.PrecomputedPowersHolder powers, int nVars) : base(univarDegree, skeleton, powers,

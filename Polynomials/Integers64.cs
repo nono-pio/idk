@@ -5,9 +5,6 @@ namespace Polynomials;
 
 public class Integers64 : Ring<long>
 {
-    
-    public Integers64(){}
-    
     public override bool IsField()
     {
         return false;
@@ -68,9 +65,9 @@ public class Integers64 : Ring<long>
         return new Integers64();
     }
 
-    public override long[]? DivideAndRemainder(long dividend, long divider)
+    public override long[] DivideAndRemainder(long dividend, long divider)
     {
-        return new long[] { dividend / divider, dividend % divider };
+        return [dividend / divider, dividend % divider];
     }
 
     public override long Reciprocal(long element)
@@ -121,7 +118,7 @@ public class Integers64 : Ring<long>
         return val;
     }
 
-    public override IEnumerator<long> Iterator()
+    public override IEnumerable<long> Iterator()
     {
         throw new NotSupportedException("Ring of infinite cardinality.");
     }

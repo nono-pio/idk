@@ -1,10 +1,9 @@
-﻿using System.Collections;
-using System.Text;
+﻿using System.Text;
 using Polynomials.Utils;
 
 namespace Polynomials;
 
-public class FactorDecomposition<E>
+public class FactorDecomposition<E> where E : notnull
 {
     public Ring<E> Ring;
     public E Unit;

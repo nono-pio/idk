@@ -966,7 +966,7 @@ public class MultivariatePolynomial<E> : Polynomial<MultivariatePolynomial<E>>, 
 
     public override MultivariatePolynomial<E> Negate()
     {
-        foreach (var entry in terms.EntryIterator())
+        foreach (var entry in terms.EntryIterator().ToList())
         {
             Monomial<E> term = entry.Value;
             terms[entry.Key] = monomialAlgebra.Negate(term);
@@ -1652,6 +1652,14 @@ public class MultivariatePolynomial<E> : Polynomial<MultivariatePolynomial<E>>, 
         return CreateConstant(monomial.coefficient);
     }
 
+    public UnivariatePolynomial<E> Composition(Ring<UnivariatePolynomial<E>> uRing, params UnivariatePolynomial<E>[] values)
+    {
+        if (values.Length != nVariables)
+            throw new ArgumentException();
+        var factory = values[0];
+        return this.MapCoefficients(uRing, cf => factory.CreateConstant(cf)).Evaluate(values);
+
+    }
 
     public MultivariatePolynomial<E> CreateZero()
     {
@@ -2898,7 +2906,7 @@ public class MultivariatePolynomial<E> : Polynomial<MultivariatePolynomial<E>>, 
     {
         BigInteger factor = BigInteger.One;
         for (int i = 0; i < order; ++i)
-            factor *= exponent - 1;
+            factor *= exponent - i;
         factor /= Rings.Z.Factorial(order);
         return ring.ValueOfBigInteger(factor);
     }

@@ -229,11 +229,11 @@ public sealed class PolynomialMethods
         for (;;)
         {
             if ((exponent & 1) != 0)
-                cache.Add(rExp += kExp, result.Multiply(k2p).Clone());
+                cache.TryAdd(rExp += kExp, result.Multiply(k2p).Clone());
             exponent = exponent >> 1;
             if (exponent == 0)
             {
-                cache.Add(rExp, result);
+                cache.TryAdd(rExp, result);
                 return result;
             }
 

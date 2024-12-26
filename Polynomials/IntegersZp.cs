@@ -50,7 +50,13 @@ public class IntegersZp : Ring<BigInteger>
 
     public BigInteger Modulus(BigInteger val)
     {
-        return (val.Sign >= 0 && val.CompareTo(modulus) < 0) ? val : val % modulus;
+        if (val.Sign < 0)
+        {
+            return modulus - Modulus(-val);
+        }
+        
+        
+        return val.CompareTo(modulus) < 0 ? val : val % modulus;
     }
 
 
@@ -151,7 +157,7 @@ public class IntegersZp : Ring<BigInteger>
     }
 
 
-    public override IEnumerator<BigInteger> Iterator()
+    public override IEnumerable<BigInteger> Iterator()
     {
         BigInteger val = BigInteger.Zero;
         while (val.CompareTo(modulus) < 0)

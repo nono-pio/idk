@@ -129,7 +129,7 @@ public abstract class Ring<E> : IComparer<E>
 
     public abstract E Copy(E element);
     public abstract bool Equal(E x, E y);
-    public abstract int Compare(E x, E y);
+    public abstract int Compare(E? x, E? y);
     public abstract object Clone();
 
     public virtual int Signum(E element)
@@ -467,7 +467,7 @@ public abstract class Ring<E> : IComparer<E>
     }
 
 
-    public abstract IEnumerator<E> Iterator();
+    public abstract IEnumerable<E> Iterator();
 
 
     public virtual E RandomElement()

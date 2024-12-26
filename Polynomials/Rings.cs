@@ -35,4 +35,19 @@ public static class Rings
     {
         return new MultivariateRing<E>(factory);
     }
+
+    public static SimpleFieldExtension<E> SimpleFieldExtension<E>(UnivariatePolynomial<E> minimalPolynomial)
+    {
+        return minimalPolynomial.IsOverFiniteField() ? GF(minimalPolynomial) : AlgebraicNumberField(minimalPolynomial);
+    }
+
+    public static AlgebraicNumberField<E> AlgebraicNumberField<E>(UnivariatePolynomial<E> minimalPolynomial)
+    {
+        return new AlgebraicNumberField<E>(minimalPolynomial);
+    }
+
+    public static FiniteField<E> GF<E>(UnivariatePolynomial<E> minimalPolynomial)
+    {
+        return new FiniteField<E>(minimalPolynomial);
+    }
 }

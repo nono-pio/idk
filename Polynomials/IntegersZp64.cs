@@ -6,7 +6,6 @@ namespace Polynomials;
 
 public class IntegersZp64 : Ring<long>
 {
-    private static readonly long serialVersionUID = 1;
     
     public readonly long modulus;
     
@@ -37,9 +36,11 @@ public class IntegersZp64 : Ring<long>
 
     public long Modulus(BigInteger val)
     {
-        return val.IsLong()
-            ? ModSignedFast((long)val, magic)
-            : (long)(val % modulus);
+        if (val.IsLong())
+            return ModSignedFast((long)val, magic);
+        if (val.Sign < 0)
+            return modulus - Modulus(-val);
+        return (long)(val % modulus);
     }
 
 
@@ -77,21 +78,21 @@ public class IntegersZp64 : Ring<long>
     }
 
 
-    private volatile int[]? cachedReciprocals = null;
+    private volatile int[]? CachedReciprocals;
 
 
     public void BuildCachedReciprocals()
     {
-        if (cachedReciprocals != null)
+        if (CachedReciprocals != null)
             return;
         lock (this)
         {
-            if (cachedReciprocals == null)
+            if (CachedReciprocals == null)
             {
                 int[] cachedReciprocals = new int[MachineArithmetic.SafeToInt(modulus)];
                 for (int val = 1; val < cachedReciprocals.Length; ++val)
                     cachedReciprocals[val] = (int)MachineArithmetic.ModInverse(val, modulus);
-                this.cachedReciprocals = cachedReciprocals;
+                CachedReciprocals = cachedReciprocals;
             }
         }
     }
@@ -99,10 +100,10 @@ public class IntegersZp64 : Ring<long>
 
     public override long Reciprocal(long val)
     {
-        return cachedReciprocals == null
+        return CachedReciprocals == null
             ? MachineArithmetic.ModInverse(val, modulus)
-            : (val < cachedReciprocals.Length
-                ? cachedReciprocals[(int)val]
+            : (val < CachedReciprocals.Length
+                ? CachedReciprocals[(int)val]
                 : MachineArithmetic.ModInverse(val, modulus));
     }
 
@@ -128,7 +129,7 @@ public class IntegersZp64 : Ring<long>
 
     public override bool IsUnit(long element)
     {
-        return element != 0 && modulus % element != 0;
+        return element != 0 && (modulus % element) != 0;
     }
 
 
@@ -173,9 +174,9 @@ public class IntegersZp64 : Ring<long>
         return new IntegersZp64(modulus, magic, magic32MulMod, modulusFits32);
     }
 
-    public override long[]? DivideAndRemainder(long dividend, long divider)
+    public override long[] DivideAndRemainder(long dividend, long divider)
     {
-        return new long[] { Divide(dividend, divider), 0 };
+        return [Divide(dividend, divider), 0];
     }
 
 
@@ -217,7 +218,7 @@ public class IntegersZp64 : Ring<long>
     }
 
 
-    public override IEnumerator<long> Iterator()
+    public override IEnumerable<long> Iterator()
     {
         long val = 0;
         while (val < modulus)
@@ -326,7 +327,7 @@ public class IntegersZp64 : Ring<long>
     }
 
 
-    private IntegersZp64? ppBaseDomain = null;
+    private IntegersZp64? ppBaseDomain;
 
 
     public IntegersZp64 PerfectPowerBaseDomain()

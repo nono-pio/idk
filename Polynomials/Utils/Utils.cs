@@ -224,7 +224,7 @@ public static class Utils
             _comparer = comparer;
         }
 
-        public int Compare(T x, T y)
+        public int Compare(T? x, T? y)
         {
             return _comparer(x).CompareTo(_comparer(y));
         }

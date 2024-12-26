@@ -157,10 +157,10 @@ public static class UnivariateDivision
     // --------------------------------- Quotient ---------------------------------
 
 
-    public static UnivariatePolynomial<E>? Quotient<E>(UnivariatePolynomial<E> dividend,
+    public static UnivariatePolynomial<E> Quotient<E>(UnivariatePolynomial<E> dividend,
         UnivariatePolynomial<E> divider, bool copy = true)
     {
-        return DivideAndRemainder(dividend, divider, copy)?[0];
+        return DivideAndRemainder(dividend, divider, copy)?[0] ?? throw new ArithmeticException();
     }
 
     public static UnivariatePolynomial<E> DivideExact<E>(UnivariatePolynomial<E> dividend,

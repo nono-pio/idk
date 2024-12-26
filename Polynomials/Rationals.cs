@@ -3,10 +3,8 @@ using System.Numerics;
 
 namespace Polynomials;
 
-public interface IRationals
-{
-    
-}
+public interface IRationals;
+
 public sealed class Rationals<E> : Ring<Rational<E>>, IRationals
 {
 
@@ -286,13 +284,13 @@ public sealed class Rationals<E> : Ring<Rational<E>>, IRationals
         return new Rational<E>(ring, ring.RandomElementTree(rnd), den);
     }
 
-    public override IEnumerator<Rational<E>> Iterator()
+    public override IEnumerable<Rational<E>> Iterator()
     {
         throw new NotSupportedException("Ring of infinite cardinality.");
     }
 
 
-    public IEnumerator<Rational<E>> GetEnumerator()
+    public IEnumerable<Rational<E>> GetEnumerator()
     {
         return Iterator();
     }

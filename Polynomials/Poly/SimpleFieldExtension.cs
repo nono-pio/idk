@@ -8,13 +8,12 @@ namespace Polynomials.Poly;
 
 public abstract class SimpleFieldExtension<E> : PolynomialRing<UnivariatePolynomial<E>>
 {
-    private static readonly long serialVersionUID = 1;
 
 
     public readonly UnivariatePolynomial<E> minimalPoly;
 
 
-    readonly UnivariatePolynomial<E> factory;
+    public readonly UnivariatePolynomial<E> factory;
 
 
     readonly UnivariateDivision.InverseModMonomial<E> inverseMod;
