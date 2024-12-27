@@ -1,3 +1,4 @@
+using System.Numerics;
 using Polynomials.Poly.Multivar;
 using Polynomials.Utils;
 
@@ -58,12 +59,6 @@ public static class Util
         return poly.ring is IntegersZp zp && zp.modulus.GetBitLength() < MachineArithmetic.MAX_SUPPORTED_MODULUS_BITS;
     }
 
-    // TODO
-    // public static bool CanConvertToZp64<Poly>(IPolynomial<Poly> poly) where Poly : IPolynomial<Poly>
-    // {
-    //     // TODO : check if poly is univariate or multivariate (use func) else return false
-    //     throw new NotImplementedException();
-    // }
 
     public static bool IsOverRationals<E>(UnivariatePolynomial<E> poly)
     {
@@ -75,75 +70,67 @@ public static class Util
         return poly.ring is IRationals;
     }
 
-    // TODO
-    // public static bool IsOverSimpleFieldExtension<T>(T poly) where T : IPolynomial<T>
-    // {
-    //     if (poly is UnivariatePolynomial && ((UnivariatePolynomial)poly).ring is SimpleFieldExtension)
-    //         return true;
-    //     else if (poly is MultivariatePolynomial && ((MultivariatePolynomial)poly).ring is SimpleFieldExtension)
-    //         return true;
-    //     else
-    //         return false;
-    // }
-    //
-    //
-    // public static bool IsOverMultipleFieldExtension<T>(T poly) where T : IPolynomial<T>
-    // {
-    //     if (poly is UnivariatePolynomial && ((UnivariatePolynomial)poly).ring is MultipleFieldExtension)
-    //         return true;
-    //     else if (poly is MultivariatePolynomial && ((MultivariatePolynomial)poly).ring is MultipleFieldExtension)
-    //         return true;
-    //     else
-    //         return false;
-    // }
-    //
-    //
-    // public static bool IsOverSimpleNumberField<T>(T poly) where T : IPolynomial<T>
-    // {
-    //     if (poly is UnivariatePolynomial && ((UnivariatePolynomial)poly).ring is AlgebraicNumberField &&
-    //         IsOverQ(((AlgebraicNumberField)((UnivariatePolynomial)poly).ring).GetMinimalPolynomial()))
-    //         return true;
-    //     else if (poly is MultivariatePolynomial && ((MultivariatePolynomial)poly).ring is AlgebraicNumberField &&
-    //              IsOverQ(((AlgebraicNumberField)((MultivariatePolynomial)poly).ring).GetMinimalPolynomial()))
-    //         return true;
-    //     else
-    //         return false;
-    // }
-    //
-    //
-    // public static bool IsOverRingOfIntegersOfSimpleNumberField<T>(T poly) where T : IPolynomial<T>
-    // {
-    //     if (poly is UnivariatePolynomial && ((UnivariatePolynomial)poly).ring is AlgebraicNumberField &&
-    //         IsOverZ(((AlgebraicNumberField)((UnivariatePolynomial)poly).ring).GetMinimalPolynomial()))
-    //         return true;
-    //     else if (poly is MultivariatePolynomial && ((MultivariatePolynomial)poly).ring is AlgebraicNumberField &&
-    //              IsOverZ(((AlgebraicNumberField)((MultivariatePolynomial)poly).ring).GetMinimalPolynomial()))
-    //         return true;
-    //     else
-    //         return false;
-    // }
-    //
-    //
-    // public static bool IsOverQ<T>(T poly) where T : IPolynomial<T>
-    // {
-    //     object rep;
-    //     if (poly is UnivariatePolynomial)
-    //         rep = ((UnivariatePolynomial)poly).ring.GetOne();
-    //     else if (poly is MultivariatePolynomial)
-    //         rep = ((MultivariatePolynomial)poly).ring.GetOne();
-    //     else
-    //         return false;
-    //     if (!(rep is Rational))
-    //         return false;
-    //     return ((Rational)rep).Numerator() is BigInteger;
-    // }
+    public static bool IsOverSimpleFieldExtension<T>(UnivariatePolynomial<T> poly)
+    {
+        return poly.ring is ISimpleFieldExtension;
+    }
+
+    public static bool IsOverSimpleFieldExtension<T>(MultivariatePolynomial<T> poly)
+    {
+        return poly.ring is ISimpleFieldExtension;
+    }
+
+    
+    public static bool IsOverMultipleFieldExtension<T>(UnivariatePolynomial<T> poly) 
+    {
+        return poly.ring is IMultipleFieldExtension;
+    }
     
     
-    // public static bool IsOverZ<T>(T poly) where T : IPolynomial<T>
-    // {
-    //     return poly.IsOverZ();
-    // }
+    public static bool IsOverMultipleFieldExtension<T>(MultivariatePolynomial<T> poly) 
+    {
+        return poly.ring is IMultipleFieldExtension;
+    }
+    public static bool IsOverSimpleNumberField<T>(UnivariatePolynomial<T> poly) 
+    {
+        return poly.ring is AlgebraicNumberField<Rationals<BigInteger>>;
+    }
     
+    public static bool IsOverSimpleNumberField<T>(MultivariatePolynomial<T> poly) 
+    {
+        return poly.ring is AlgebraicNumberField<Rationals<BigInteger>>;
+    }
+    
+    public static bool IsOverRingOfIntegersOfSimpleNumberField<T>(UnivariatePolynomial<T> poly)
+    {
+        return poly.ring is AlgebraicNumberField<BigInteger>;
+    }
+    
+    public static bool IsOverRingOfIntegersOfSimpleNumberField<T>(MultivariatePolynomial<T> poly)
+    {
+        return poly.ring is AlgebraicNumberField<BigInteger>;
+    }
+    
+    public static bool IsOverQ<T>(UnivariatePolynomial<T> poly)
+    {
+        return poly.ring is Rationals<BigInteger>;
+    }
+    
+    public static bool IsOverQ<T>(MultivariatePolynomial<T> poly)
+    {
+        return poly.ring is Rationals<BigInteger>;
+    }
+    
+    public static bool IsOverZ<T>(UnivariatePolynomial<T> poly)
+    {
+        return poly.IsOverZ();
+    }
+    
+    
+    public static bool IsOverZ<T>(MultivariatePolynomial<T> poly)
+    {
+        return poly.IsOverZ();
+    }
     
     public static (UnivariatePolynomial<E>, E) ToCommonDenominator<E>(UnivariatePolynomial<Rational<E>> poly)
     {

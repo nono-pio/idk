@@ -5,7 +5,8 @@ using Polynomials.Utils;
 
 namespace Polynomials.Poly;
 
-public class MultipleFieldExtension<E> : ImageRing<UnivariatePolynomial<E>, MultivariatePolynomial<E>>
+public interface IMultipleFieldExtension;
+public class MultipleFieldExtension<E> : ImageRing<UnivariatePolynomial<E>, MultivariatePolynomial<E>>, IMultipleFieldExtension
 {
     readonly MultivariatePolynomial<E> mFactory;
 

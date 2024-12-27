@@ -1427,22 +1427,21 @@ public static class UnivariateGCD
     //     }
     // }
 
-    // TODO
-    // public static bool UpdateCRT(ChineseRemainders.ChineseRemaindersMagic<BigInteger> magic,
-    //     UnivariatePolynomial<BigInteger> accumulated, UnivariatePolynomialZp64 update)
-    // {
-    //     bool updated = false;
-    //     accumulated.EnsureCapacity(update.degree);
-    //     for (int i = Math.Max(accumulated.degree, update.degree); i >= 0; --i)
-    //     {
-    //         BigInteger oldCf = accumulated[i];
-    //         BigInteger newCf = ChineseRemainders.ChineseRemainders(Z, magic, oldCf, new BigInteger(update[i]));
-    //         if (!oldCf.Equals(newCf))
-    //             updated = true;
-    //         accumulated.data[i] = newCf;
-    //     }
-    //
-    //     accumulated.FixDegree();
-    //     return updated;
-    // }
+    public static bool UpdateCRT(ChineseRemainders.ChineseRemaindersMagic<BigInteger> magic,
+        UnivariatePolynomial<BigInteger> accumulated, UnivariatePolynomialZp64 update)
+    {
+        bool updated = false;
+        accumulated.EnsureCapacity(update.degree);
+        for (int i = Math.Max(accumulated.degree, update.degree); i >= 0; --i)
+        {
+            BigInteger oldCf = accumulated[i];
+            BigInteger newCf = ChineseRemainders.ChineseRemainder(Rings.Z, magic, oldCf, new BigInteger(update[i]));
+            if (!oldCf.Equals(newCf))
+                updated = true;
+            accumulated.data[i] = newCf;
+        }
+    
+        accumulated.FixDegree();
+        return updated;
+    }
 }

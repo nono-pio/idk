@@ -6,7 +6,8 @@ using static Polynomials.Poly.Univar.UnivariatePolynomialArithmetic;
 
 namespace Polynomials.Poly;
 
-public abstract class SimpleFieldExtension<E> : PolynomialRing<UnivariatePolynomial<E>>
+public interface ISimpleFieldExtension;
+public abstract class SimpleFieldExtension<E> : PolynomialRing<UnivariatePolynomial<E>>, ISimpleFieldExtension
 {
 
 

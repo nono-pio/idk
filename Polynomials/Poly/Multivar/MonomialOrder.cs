@@ -185,7 +185,7 @@ public static class MonomialOrder
 
     public sealed class GrevLexWithPermutation : IComparer<DegreeVector>
     {
-        readonly int[] permutation;
+        public readonly int[] permutation;
 
         GrevLexWithPermutation(int[] permutation)
         {

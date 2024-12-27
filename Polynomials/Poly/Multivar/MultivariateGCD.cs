@@ -1158,7 +1158,7 @@ public static class MultivariateGCD
         return gcd;
     }
 
-    static E randomElement<E>(Ring<E> ring, Random rnd)
+    public static E randomElement<E>(Ring<E> ring, Random rnd)
     {
         if (ring.IsFiniteField() && ring.Characteristic().GetBitLength() > 16)
             return ring.ValueOfLong(rnd.NextInt64());
@@ -3526,7 +3526,7 @@ public static class MultivariateGCD
 
     private const bool ALWAYS_LINZIP = false;
 
-    private const int MAX_FAILED_SUBSTITUTIONS = 32;
+    public const int MAX_FAILED_SUBSTITUTIONS = 32;
 
     static SparseInterpolation<E> CreateInterpolation<E>(int variable,
         MultivariatePolynomial<E> a,
@@ -3619,7 +3619,7 @@ public static class MultivariateGCD
     }
 
 
-    static Dictionary<int, MultivariatePolynomial<E>> getSkeleton<E>(MultivariatePolynomial<E> poly)
+    public static Dictionary<int, MultivariatePolynomial<E>> getSkeleton<E>(MultivariatePolynomial<E> poly)
     {
         Dictionary<int, MultivariatePolynomial<E>> skeleton = new Dictionary<int, MultivariatePolynomial<E>>();
         foreach (Monomial<E> term in poly.terms)
@@ -3738,7 +3738,7 @@ public static class MultivariateGCD
 
     private const int SIZE_OF_POLY_RECURSIVE_SWITCH = 512;
 
-    static ZippelEvaluations<E> CreateEvaluations<E>(MultivariatePolynomial<E> poly,
+    public static ZippelEvaluations<E> CreateEvaluations<E>(MultivariatePolynomial<E> poly,
         int[] evaluationVariables,
         E[] evaluationPoint,
         MultivariatePolynomial<E>.PrecomputedPowersHolder basePowers,
@@ -3753,7 +3753,7 @@ public static class MultivariateGCD
     }
 
 
-    interface ZippelEvaluations<E>
+    public interface ZippelEvaluations<E>
     {
         UnivariatePolynomial<E> evaluate(int raiseFactor, E value);
     }

@@ -345,7 +345,7 @@ public class DegreeVector
     }
 
 
-    int FirstNonZeroVariable()
+    public int FirstNonZeroVariable()
     {
         for (int i = 0; i < exponents.Length; ++i)
             if (exponents[i] != 0)

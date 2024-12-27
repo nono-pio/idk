@@ -1,76 +1,52 @@
-﻿namespace Polynomials.Poly.Multivar;
+﻿using System.Collections.ObjectModel;
+using System.Numerics;
+using Microsoft.VisualBasic;
+using Polynomials.Linear;
+using Polynomials.Poly.Univar;
+using Polynomials.Primes;
+using Polynomials.Utils.Utils;
 
-using Cc.Redberry.Rings.ChineseRemainders;
-using Cc.Redberry;
-using Cc.Redberry.Rings.Bigint;
-using Cc.Redberry.Rings.Linear;
-using Cc.Redberry.Rings.Linear.LinearSolver;
-using Cc.Redberry.Rings.Poly;
-using Cc.Redberry.Rings.Poly.Multivar.MonomialOrder;
-using Cc.Redberry.Rings.Poly.Univar;
-using Cc.Redberry.Rings.Primes;
-using Cc.Redberry.Rings.Util;
-using Gnu.Trove.Impl;
-using Gnu.Trove.List.Array;
-using Gnu.Trove.Map.Hash;
-using Gnu.Trove.Set.Hash;
-using Java;
-using Java.Util.Concurrent.Atomic;
-using Java.Util.Function;
-using Java.Util.Stream;
-using Cc.Redberry.Rings;
-using Cc.Redberry.Rings.Poly.Multivar;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
+namespace Polynomials.Poly.Multivar;
 
-namespace Cc.Redberry.Rings.Poly.Multivar
-{
-    public sealed class GroebnerBases
+
+    public static class GroebnerBases
     {
-        private GroebnerBases()
-        {
-        }
 
 
-        public static IList<Poly> GroebnerBasis<Term extends AMonomial<Term>, Poly
-            extends AMultivariatePolynomial<Term, Poly>>(IList<Poly> generators, Comparator<DegreeVector> monomialOrder)
+        public static List<MultivariatePolynomial<E>> GroebnerBasis<E>(List<MultivariatePolynomial<E>> generators, IComparer<DegreeVector> monomialOrder)
         {
-            if (generators.IsEmpty())
-                return Collections.EmptyList();
-            if (monomialOrder is GrevLexWithPermutation)
+            if (generators.Count == 0)
+                return [];
+            if (monomialOrder is MonomialOrder.GrevLexWithPermutation glOrder)
             {
-                GroebnerAlgorithm<Term, Poly> ga = (p, o, s) => GBResult.NotBuchberger(GroebnerBasis(p, o));
+                GroebnerAlgorithm<E> ga = (p, o, s) => GBResult.NotBuchberger(GroebnerBasis(p, o));
                 return GroebnerBasisRegardingGrevLexWithPermutation(generators, ga,
-                    (GrevLexWithPermutation)monomialOrder);
+                    glOrder);
             }
 
-            Poly factory = generators[0];
+            var factory = generators[0];
             if (factory.IsOverFiniteField())
                 return GroebnerBasisInGF(generators, monomialOrder, null);
             if (factory.IsOverZ())
-                return (IList<Poly>)GroebnerBasisInZ((IList)generators, monomialOrder, null, true);
+                return (GroebnerBasisInZ(generators, monomialOrder, null, true);
             if (Util.IsOverRationals(factory) && ((MultivariatePolynomial)factory).ring.Equals(Rings.Q))
-                return (IList<Poly>)GroebnerBasisInQ((IList)generators, monomialOrder, null, true);
+                return GroebnerBasisInQ((List)generators, monomialOrder, null, true);
             else
                 return BuchbergerGB(generators, monomialOrder);
         }
 
 
-        public static GBResult<Term, Poly> GroebnerBasisInGF<Term extends AMonomial<Term>, Poly
-            extends AMultivariatePolynomial<Term, Poly>>(IList<Poly> generators, Comparator<DegreeVector> monomialOrder,
+        public static GBResult<E> GroebnerBasisInGF<E>(List<MultivariatePolynomial<E>> generators, IComparer<DegreeVector> monomialOrder,
             HilbertSeries hilbertSeries)
         {
-            Poly factory = generators[0];
+            var factory = generators[0];
             if (!factory.IsOverFiniteField())
                 throw new ArgumentException("not over finite field");
             if (CanConvertToZp64(factory))
             {
-                GBResult<MonomialZp64, MultivariatePolynomialZp64> r = GroebnerBasisInGF(AsOverZp64(generators),
+                GBResult<long> r = GroebnerBasisInGF(AsOverZp64(generators),
                     monomialOrder, hilbertSeries);
-                return new GBResult<Term, Poly>(ConvertFromZp64(r), r);
+                return new GBResult<E>(ConvertFromZp64(r), r);
             }
             else if (IsGradedOrder(monomialOrder))
                 return F4GB(generators, monomialOrder, hilbertSeries);
@@ -89,8 +65,8 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         private static readonly int MODULAR_ALGORITHM_MAX_N_VARIABLES = 3;
 
 
-        public static GBResult<Monomial<BigInteger>, MultivariatePolynomial<BigInteger>> GroebnerBasisInZ(
-            IList<MultivariatePolynomial<BigInteger>> generators, Comparator<DegreeVector> monomialOrder,
+        public static GBResult<BigInteger> GroebnerBasisInZ(
+            List<MultivariatePolynomial<BigInteger>> generators, IComparer<DegreeVector> monomialOrder,
             HilbertSeries hilbertSeries, bool tryModular)
         {
             MultivariatePolynomial<BigInteger> factory = generators[0];
@@ -110,16 +86,15 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         }
 
 
-        public static IList<MultivariatePolynomial<Rational<BigInteger>>> GroebnerBasisInQ(
-            IList<MultivariatePolynomial<Rational<BigInteger>>> generators, Comparator<DegreeVector> monomialOrder,
+        public static List<MultivariatePolynomial<Rational<BigInteger>>> GroebnerBasisInQ(
+            List<MultivariatePolynomial<Rational<BigInteger>>> generators, IComparer<DegreeVector> monomialOrder,
             HilbertSeries hilbertSeries, bool tryModular)
         {
             return FracGB(generators, monomialOrder, hilbertSeries, (p, o, s) => GroebnerBasisInZ(p, o, s, tryModular));
         }
 
 
-        public static IList<Poly> ConvertBasis<Term extends AMonomial<Term>, Poly
-            extends AMultivariatePolynomial<Term, Poly>>(IList<Poly> generators, Comparator<DegreeVector> desiredOrder)
+        public static List<MultivariatePolynomial<E>> ConvertBasis<E>(List<MultivariatePolynomial<E>> generators, IComparer<DegreeVector> desiredOrder)
         {
             return HilbertConvertBasis(generators, desiredOrder);
         }
@@ -127,29 +102,29 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         /* **************************************** Common methods ************************************************ */
 
 
-        static void SetMonomialOrder<Poly extends AMultivariatePolynomial<?, Poly>>(IList<Poly> list,
-            Comparator<DegreeVector> order)
+        static void SetMonomialOrder<E>(List<MultivariatePolynomial<E>> list,
+            IComparer<DegreeVector> order)
         {
             for (int i = 0; i < list.Count; i++)
             {
-                Poly p = list[i];
+                var p = list[i];
                 if (!order.Equals(p.ordering))
                     list[i] = p.SetOrdering(order);
             }
         }
 
 
-        static IList<Poly> Canonicalize<Poly extends AMultivariatePolynomial<?, Poly>>(IList<Poly> list)
+        static List<MultivariatePolynomial<E>> Canonicalize<E>(List<MultivariatePolynomial<E>> list)
         {
             if (Util.IsOverRationals(list[0]))
-                CanonicalizeFrac((IList)list);
+                CanonicalizeFrac(list);
             else
                 list.ForEach(Poly.Canonical());
             list.Sort(Comparable.CompareTo());
             return list;
         }
 
-        static void CanonicalizeFrac<E>(IList<MultivariatePolynomial<Rational<E>>> list)
+        static void CanonicalizeFrac<E>(List<MultivariatePolynomial<Rational<E>>> list)
         {
             Ring<E> fRing = list[0].ring.GetOne().ring;
             list.ReplaceAll((p) =>
@@ -157,21 +132,20 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         }
 
 
-        private static IList<Poly> PrepareGenerators<Term extends AMonomial<Term>, Poly
-            extends AMultivariatePolynomial<Term, Poly>>(IList<Poly> generators, Comparator<DegreeVector> monomialOrder)
+        private static List<MultivariatePolynomial<E>> PrepareGenerators<E>(List<MultivariatePolynomial<E>> generators, IComparer<DegreeVector> monomialOrder)
         {
             // clone generators & set monomial order
-            generators = generators.Stream().Map((p) => p.SetOrdering(monomialOrder)).Map(Poly.Canonical())
-                .Collect(Collectors.ToList());
-            Poly factory = generators[0];
+            generators = generators.Select((p) => p.SetOrdering(monomialOrder)).Select(MultivariatePolynomial<E>.Canonical())
+                .ToList();
+            var factory = generators[0];
             if (factory.nVariables == 1)
 
                 // univariate case
-                return Canonicalize(Collections.SingletonList(MultivariateGCD.PolynomialGCD(generators)));
+                return Canonicalize([MultivariateGCD.PolynomialGCD(generators)]);
 
             // remove zeroes
             generators.RemoveIf(Poly.IsZero());
-            if (generators.IsEmpty())
+            if (generators.Count == 0)
             {
                 // empty ideal
                 generators.Add(factory.CreateZero());
@@ -184,87 +158,88 @@ namespace Cc.Redberry.Rings.Poly.Multivar
 
             // remove zeroes (may occur after reduction)
             generators.RemoveIf(Poly.IsZero());
-            if (generators.IsEmpty())
+            if (generators.Count == 0)
             {
                 // empty ideal
                 generators.Add(factory.CreateZero());
                 return generators;
             }
 
-            if (generators.Stream().AnyMatch(Poly.IsConstant()))
+            if (generators.Any(p => p.IsConstant()))
 
                 // contains non zero constant => ideal == whole ring
-                return Collections.SingletonList(factory.CreateOne());
+                return [factory.CreateOne()];
             return generators;
         }
 
 
-        public static void MinimizeGroebnerBases<Term extends AMonomial<Term>, Poly
-            extends AMultivariatePolynomial<Term, Poly>>(IList<Poly> basis)
+        public static void MinimizeGroebnerBases<E>(List<MultivariatePolynomial<E>> basis)
         {
-            outer:
-            for (int i = basis.size() - 1; i >= 1; --i)
+            for (int i = basis.Count - 1; i >= 1; --i)
             {
                 for (int j = i - 1; j >= 0; --j)
                 {
-                    Poly pi = basis[i], pj = basis[j];
+                    var pi = basis[i];
+                    var pj = basis[j];
                     if (pi.Lt().DvDivisibleBy(pj.Lt()))
                     {
-                        basis.Remove(i);
+                        basis.RemoveAt(i);
                         continue;
                     }
 
                     if (pj.Lt().DvDivisibleBy(pi.Lt()))
                     {
-                        basis.Remove(j);
+                        basis.RemoveAt(j);
                         --i;
-                        continue;
+                        goto outer;
                     }
                 }
+                
+                outer: ;
             }
         }
 
 
-        public static void RemoveRedundant<Term extends AMonomial<Term>, Poly
-            extends AMultivariatePolynomial<Term, Poly>>(IList<Poly> basis)
+        public static void RemoveRedundant<E>(List<MultivariatePolynomial<E>> basis)
         {
-            for (int i = 0, size = basis.size(); i < size; ++i)
+            for (int i = 0, size = basis.Count; i < size; ++i)
             {
-                Poly el = basis.Remove(i);
-                Poly r = MultivariateDivision.PseudoRemainder(el, basis);
+                var el = basis.Pop(i);
+                var r = MultivariateDivision.PseudoRemainder(el, basis);
                 if (r.IsZero())
                 {
                     --i;
                     --size;
                 }
                 else
-                    basis.Add(i, r);
+                    basis.Insert(i, r);
             }
         }
 
 
-        public class SyzygyPair<Term, Poly>
+        public class SyzygyPair<E>
         {
             readonly int i, j;
 
 
-            readonly Poly fi, fj;
+            public readonly MultivariatePolynomial<E> fi;
+            public readonly MultivariatePolynomial<E> fj;
 
 
-            readonly DegreeVector syzygyGamma;
+            public readonly DegreeVector syzygyGamma;
 
 
             readonly int sugar;
 
 
-            SyzygyPair(int i, int j, Poly fi, Poly fj)
+            SyzygyPair(int i, int j, MultivariatePolynomial<E> fi, MultivariatePolynomial<E> fj)
             {
                 if (i > j)
                 {
                     int s = i;
                     i = j;
                     j = s;
-                    Poly fs = fi;
+                    MultivariatePolynomial<E> fs = fi;
                     fi = fj;
                     fj = fs;
                 }
@@ -279,7 +254,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             }
 
 
-            SyzygyPair(int i, int j, IList<Poly> generators) : this(i, j, generators[i], generators[j])
+            SyzygyPair(int i, int j, List<MultivariatePolynomial<E>> generators) : this(i, j, generators[i], generators[j])
             {
             }
 
@@ -297,44 +272,45 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         }
 
 
-        public static Poly Syzygy<Term extends AMonomial<Term>, Poly extends AMultivariatePolynomial<Term, Poly>>(Poly a
-            , Poly b)
+        public static MultivariatePolynomial<E> Syzygy<E>(MultivariatePolynomial<E> a
+            , MultivariatePolynomial<E> b)
         {
             return Syzygy(new DegreeVector(Lcm(a.Multidegree(), b.Multidegree())), a, b);
         }
 
 
-        public static Poly Syzygy<Term extends AMonomial<Term>, Poly extends AMultivariatePolynomial<Term, Poly>>(
-            SyzygyPair<Term, Poly> sPair)
+        public static MultivariatePolynomial<E> Syzygy<E>(
+            SyzygyPair<E> sPair)
         {
             return Syzygy(sPair.syzygyGamma, sPair.fi, sPair.fj);
         }
 
 
-        static Poly Syzygy<Term extends AMonomial<Term>, Poly extends AMultivariatePolynomial<Term, Poly>>(DegreeVector
-            dvlcm, Poly a, Poly b)
+        static MultivariatePolynomial<E> Syzygy<E>(DegreeVector
+            dvlcm, MultivariatePolynomial<E> a, MultivariatePolynomial<E> b)
         {
-            IMonomialAlgebra<Term> mAlgebra = a.monomialAlgebra;
-            Term lcm;
+            var mAlgebra = a.monomialAlgebra;
+            Monomial<E> lcm;
             if (a.IsOverField())
                 lcm = mAlgebra.Create(dvlcm);
             else
-                lcm = (Term)new Monomial(dvlcm,
-                    ((MultivariatePolynomial)a).ring.Lcm(((MultivariatePolynomial)a).Lc(),
-                        ((MultivariatePolynomial)b).Lc()));
-            Poly aReduced = a.Clone().Multiply(mAlgebra.DivideExact(lcm, a.Lt())),
-                bReduced = b.Clone().Multiply(mAlgebra.DivideExact(lcm, b.Lt())),
+                lcm = new Monomial<E>(dvlcm,
+                    a.ring.Lcm(a.Lc(), b.Lc()));
+            var aReduced = a.Clone().Multiply(mAlgebra.DivideExact(lcm, a.Lt()));
+            var
+                bReduced = b.Clone().Multiply(mAlgebra.DivideExact(lcm, b.Lt()));
+            var
                 syzygy = aReduced.Subtract(bReduced);
             return syzygy;
         }
 
 
-        interface SyzygySet<Term, Poly>
+        interface SyzygySet<E>
         {
-            void Add(SyzygyPair<Term, Poly> sPair);
+            void Add(SyzygyPair<E> sPair);
 
 
-            void Remove(SyzygyPair<Term, Poly> sPair);
+            void Remove(SyzygyPair<E> sPair);
 
 
             bool IsEmpty();
@@ -342,38 +318,38 @@ namespace Cc.Redberry.Rings.Poly.Multivar
 
             int Size()
             {
-                return AllSets().Stream().MapToInt(TreeSet.Size()).Sum();
+                return AllSets().Select(TreeSet.Size()).Sum();
             }
 
 
-            Collection<SyzygyPair<Term, Poly>> GetAndRemoveNextBunch();
+            Collection<SyzygyPair<E>> GetAndRemoveNextBunch();
 
 
-            Collection<TreeSet<SyzygyPair<Term, Poly>>> AllSets();
+            Collection<TreeSet<SyzygyPair<E>>> AllSets();
 
 
-            IList<SyzygyPair<Term, Poly>> AllPairs()
+            List<SyzygyPair<E>> AllPairs()
             {
-                return AllSets().Stream().FlatMap(Collection.Stream()).Collect(Collectors.ToList());
+                return AllSets().SelectMany(Collection.Stream()).ToList();
             }
         }
 
 
-        sealed class SyzygyTreeSet<Term, Poly> : SyzygySet<Term, Poly>
+        sealed class SyzygyTreeSet<E> : SyzygySet<E>
         {
-            readonly TreeSet<SyzygyPair<Term, Poly>> sPairs;
+            readonly TreeSet<SyzygyPair<E>> sPairs;
 
-            SyzygyTreeSet(TreeSet<SyzygyPair<Term, Poly>> sPairs)
+            SyzygyTreeSet(TreeSet<SyzygyPair<E>> sPairs)
             {
                 this.sPairs = sPairs;
             }
 
-            public void Add(SyzygyPair<Term, Poly> sPair)
+            public void Add(SyzygyPair<E> sPair)
             {
                 sPairs.Add(sPair);
             }
 
-            public void Remove(SyzygyPair<Term, Poly> sPair)
+            public void Remove(SyzygyPair<E> sPair)
             {
                 sPairs.Remove(sPair);
             }
@@ -384,43 +360,43 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             }
 
 
-            public Collection<SyzygyPair<Term, Poly>> GetAndRemoveNextBunch()
+            public Collection<SyzygyPair<E>> GetAndRemoveNextBunch()
             {
-                return Collections.Singleton(sPairs.PollFirst());
+                return [sPairs.PollFirst()];
             }
 
 
-            public Collection<TreeSet<SyzygyPair<Term, Poly>>> AllSets()
+            public Collection<TreeSet<SyzygyPair<E>>> AllSets()
             {
-                return new List(Collections.Singleton(sPairs));
+                return new List<TreeSet<SyzygyPair<E>>>([sPairs]);
             }
         }
 
 
         sealed class GradedSyzygyTreeSet<Term, Poly> : SyzygySet<Term, Poly>
         {
-            readonly TreeMap<int, TreeSet<SyzygyPair<Term, Poly>>> sPairs;
-            readonly Comparator<SyzygyPair> selectionStrategy;
-            readonly ToIntFunction<SyzygyPair<Term, Poly>> weightFunction;
+            readonly TreeMap<int, TreeSet<SyzygyPair<E>>> sPairs;
+            readonly IComparer<SyzygyPair> selectionStrategy;
+            readonly ToIntFunction<SyzygyPair<E>> weightFunction;
 
-            GradedSyzygyTreeSet(TreeMap<int, TreeSet<SyzygyPair<Term, Poly>>> sPairs,
-                Comparator<SyzygyPair> selectionStrategy, ToIntFunction<SyzygyPair<Term, Poly>> weightFunction)
+            GradedSyzygyTreeSet(TreeMap<int, TreeSet<SyzygyPair<E>>> sPairs,
+                IComparer<SyzygyPair> selectionStrategy, ToIntFunction<SyzygyPair<E>> weightFunction)
             {
                 this.sPairs = sPairs;
                 this.selectionStrategy = selectionStrategy;
                 this.weightFunction = weightFunction;
             }
 
-            public void Add(SyzygyPair<Term, Poly> sPair)
+            public void Add(SyzygyPair<E> sPair)
             {
                 sPairs.ComputeIfAbsent(weightFunction.ApplyAsInt(sPair), (__) => new TreeSet(selectionStrategy))
                     .Add(sPair);
             }
 
-            public void Remove(SyzygyPair<Term, Poly> sPair)
+            public void Remove(SyzygyPair<E> sPair)
             {
                 int weight = weightFunction.ApplyAsInt(sPair);
-                TreeSet<SyzygyPair<Term, Poly>> set = sPairs[weight];
+                TreeSet<SyzygyPair<E>> set = sPairs[weight];
                 if (set != null)
                 {
                     set.Remove(sPair);
@@ -435,20 +411,20 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             }
 
 
-            public Collection<SyzygyPair<Term, Poly>> GetAndRemoveNextBunch()
+            public Collection<SyzygyPair<E>> GetAndRemoveNextBunch()
             {
                 return sPairs.PollFirstEntry().GetValue();
             }
 
 
-            public Collection<TreeSet<SyzygyPair<Term, Poly>>> AllSets()
+            public Collection<TreeSet<SyzygyPair<E>>> AllSets()
             {
                 return sPairs.Values();
             }
         }
 
 
-        private static void UpdateBasis<Term extends AMonomial<Term>, Poly extends MonomialSetView<Term>>(IList<Poly>
+        private static void UpdateBasis<Term extends AMonomial<Term>, Poly extends MonomialSetView<Term>>(List<Poly>
             basis, SyzygySet<Term, Poly> sPairs, Poly newElement)
         {
             // array of lcm( lt(fi), lt(newElement) ) <- cache once for performance
@@ -512,10 +488,10 @@ namespace Cc.Redberry.Rings.Poly.Multivar
                     pairsToAdd.RemoveAt(i);
 
             // ruling out redundant Buchberger triplets from the old set of critical pairs
-            IEnumerator<TreeSet<SyzygyPair<Term, Poly>>> it = sPairs.AllSets().Iterator();
+            IEnumerator<TreeSet<SyzygyPair<E>>> it = sPairs.AllSets().Iterator();
             while (it.HasNext())
             {
-                TreeSet<SyzygyPair<Term, Poly>> c = it.Next();
+                TreeSet<SyzygyPair<E>> c = it.Next();
 
                 // remove redundant critical pairs
                 c.RemoveIf((sPair) => DividesQ(newLeadTerm, sPair.syzygyGamma) &&
@@ -561,13 +537,12 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         }
 
 
-        public static bool IsGroebnerBasis<Term extends AMonomial<Term>, Poly
-            extends AMultivariatePolynomial<Term, Poly>>(IList<Poly> ideal, IList<Poly> generators,
-            Comparator<DegreeVector> monomialOrder)
+        public static bool IsGroebnerBasis<E>(List<Poly> ideal, List<Poly> generators,
+            IComparer<DegreeVector> monomialOrder)
         {
             // form set of syzygies to check
             SyzygySet<Term, Poly> sPairs = new SyzygyTreeSet(new TreeSet(DefaultSelectionStrategy(monomialOrder)));
-            IList<Poly> tmp = new List();
+            List<Poly> tmp = new List();
             ideal.ForEach((g) => UpdateBasis(tmp, sPairs, g));
             Poly factory = ideal[0];
             Poly[] gb = generators.ToArray(factory.CreateArray(generators.Count));
@@ -576,7 +551,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         }
 
 
-        public static Comparator<SyzygyPair> NormalSelectionStrategy(Comparator<DegreeVector> monomialOrder)
+        public static IComparer<SyzygyPair> NormalSelectionStrategy(IComparer<DegreeVector> monomialOrder)
         {
             return (sa, sb) =>
             {
@@ -591,7 +566,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         }
 
 
-        public static Comparator<SyzygyPair> WithSugar(Comparator<SyzygyPair> initial)
+        public static IComparer<SyzygyPair> WithSugar(IComparer<SyzygyPair> initial)
         {
             return (sa, sb) =>
             {
@@ -603,9 +578,9 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         }
 
 
-        public static Comparator<SyzygyPair> DefaultSelectionStrategy(Comparator<DegreeVector> monomialOrder)
+        public static IComparer<SyzygyPair> DefaultSelectionStrategy(IComparer<DegreeVector> monomialOrder)
         {
-            Comparator<SyzygyPair> selectionStrategy = NormalSelectionStrategy(monomialOrder);
+            IComparer<SyzygyPair> selectionStrategy = NormalSelectionStrategy(monomialOrder);
 
             // fixme use sugar always?
             if (!IsGradedOrder(monomialOrder))
@@ -616,7 +591,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         }
 
 
-        private sealed class EcartComparator<Poly> : Comparator<Poly>
+        private sealed class EcartIComparer<Poly> : IComparer<Poly>
         {
             public int Compare(Poly a, Poly b)
             {
@@ -628,13 +603,13 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         }
 
 
-        static bool IsHomogenizationCompatibleOrder(Comparator<DegreeVector> monomialOrder)
+        static bool IsHomogenizationCompatibleOrder(IComparer<DegreeVector> monomialOrder)
         {
             return IsGradedOrder(monomialOrder) || monomialOrder == MonomialOrder.LEX;
         }
 
 
-        static bool IsEasyOrder(Comparator<DegreeVector> monomialOrder)
+        static bool IsEasyOrder(IComparer<DegreeVector> monomialOrder)
         {
             return IsGradedOrder(monomialOrder);
         }
@@ -675,24 +650,24 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             return false;
         }
 
-        static IList<Poly> Homogenize<Term extends AMonomial<Term>, Poly extends AMultivariatePolynomial<Term, Poly>>(
-            IList<Poly> ideal)
+        static List<Poly> Homogenize<E>(
+            List<Poly> ideal)
         {
             return ideal.Stream().Map((p) => p.Homogenize(p.nVariables)).Collect(Collectors.ToList());
         }
 
-        static IList<Poly> Dehomogenize<Term extends AMonomial<Term>, Poly extends AMultivariatePolynomial<Term, Poly>>(
-            IList<Poly> ideal)
+        static List<Poly> Dehomogenize<E>(
+            List<Poly> ideal)
         {
             return ideal.Stream().Map((p) => p.DropVariable(p.nVariables - 1)).Collect(Collectors.ToList());
         }
 
-        static IList<MultivariatePolynomial<E>> ToIntegral<E>(IList<MultivariatePolynomial<Rational<E>>> ideal)
+        static List<MultivariatePolynomial<E>> ToIntegral<E>(List<MultivariatePolynomial<Rational<E>>> ideal)
         {
             return ideal.Stream().Map((p) => Util.ToCommonDenominator(p)._1).Collect(Collectors.ToList());
         }
 
-        static IList<MultivariatePolynomial<Rational<E>>> ToFractions<E>(IList<MultivariatePolynomial<E>> ideal)
+        static List<MultivariatePolynomial<Rational<E>>> ToFractions<E>(List<MultivariatePolynomial<E>> ideal)
         {
             Ring<Rational<E>> ring = Frac(ideal[0].ring);
             return ideal.Stream().Map((p) => p.MapCoefficients(ring, (c) => new Rational(p.ring, c)))
@@ -701,7 +676,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
 
 
         static GBResult<Monomial<Rational<E>>, MultivariatePolynomial<Rational<E>>> FracGB<E>(
-            IList<MultivariatePolynomial<Rational<E>>> ideal, Comparator<DegreeVector> monomialOrder, HilbertSeries hps,
+            List<MultivariatePolynomial<Rational<E>>> ideal, IComparer<DegreeVector> monomialOrder, HilbertSeries hps,
             GroebnerAlgorithm<Monomial<E>, MultivariatePolynomial<E>> algorithm)
         {
             return FracGB(algorithm).GroebnerBasis(ideal, monomialOrder, hps);
@@ -722,7 +697,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
 
         interface GroebnerAlgorithm<Term, Poly>
         {
-            GBResult<Term, Poly> GroebnerBasis(IList<Poly> ideal, Comparator<DegreeVector> monomialOrder,
+            GBResult<Term, Poly> GroebnerBasis(List<Poly> ideal, IComparer<DegreeVector> monomialOrder,
                 HilbertSeries hps);
         }
 
@@ -738,7 +713,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             readonly int nHilbertRemoved;
 
 
-            GBResult(IList<Poly> list, int nProcessedPolynomials, int nZeroReductions, int nHilbertRemoved) : base(list)
+            GBResult(List<Poly> list, int nProcessedPolynomials, int nZeroReductions, int nHilbertRemoved) : base(list)
             {
                 this.nProcessedPolynomials = nProcessedPolynomials;
                 this.nZeroReductions = nZeroReductions;
@@ -746,7 +721,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             }
 
 
-            GBResult(IList<Poly> list, GBResult r) : base(list)
+            GBResult(List<Poly> list, GBResult r) : base(list)
             {
                 this.nProcessedPolynomials = r.nProcessedPolynomials;
                 this.nZeroReductions = r.nZeroReductions;
@@ -761,13 +736,13 @@ namespace Cc.Redberry.Rings.Poly.Multivar
 
 
             static GBResult<T, P> NotBuchberger<T extends AMonomial<T>, P extends AMultivariatePolynomial<T, P>>(
-                IList<P> basis)
+                List<P> basis)
             {
                 return new GBResult(basis, -1, -1, -1);
             }
 
 
-            static GBResult<T, P> Trivial<T extends AMonomial<T>, P extends AMultivariatePolynomial<T, P>>(IList<P>
+            static GBResult<T, P> Trivial<T extends AMonomial<T>, P extends AMultivariatePolynomial<T, P>>(List<P>
                 basis)
             {
                 return new GBResult(basis, 0, 0, 0);
@@ -777,29 +752,26 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         /* ************************************** Buchberger algorithm ********************************************** */
 
 
-        public static GBResult<Term, Poly> BuchbergerGB<Term extends AMonomial<Term>, Poly
-            extends AMultivariatePolynomial<Term, Poly>>(IList<Poly> generators, Comparator<DegreeVector> monomialOrder)
+        public static GBResult<Term, Poly> BuchbergerGB<E>(List<Poly> generators, IComparer<DegreeVector> monomialOrder)
         {
             return BuchbergerGB(generators, monomialOrder, (HilbertSeries)null);
         }
 
 
-        public static GBResult<Term, Poly> BuchbergerGB<Term extends AMonomial<Term>, Poly
-            extends AMultivariatePolynomial<Term, Poly>>(IList<Poly> generators, Comparator<DegreeVector> monomialOrder,
-            Comparator<SyzygyPair> strategy)
+        public static GBResult<Term, Poly> BuchbergerGB<E>(List<Poly> generators, IComparer<DegreeVector> monomialOrder,
+            IComparer<SyzygyPair> strategy)
         {
             return BuchbergerGB(generators, monomialOrder, () => new SyzygyTreeSet(new TreeSet(strategy)), null);
         }
 
 
-        static GBResult<Term, Poly> BuchbergerGB<Term extends AMonomial<Term>, Poly
-            extends AMultivariatePolynomial<Term, Poly>>(IList<Poly> generators, Comparator<DegreeVector> monomialOrder,
+        static GBResult<Term, Poly> BuchbergerGB<E>(List<Poly> generators, IComparer<DegreeVector> monomialOrder,
             HilbertSeries hilbertSeries)
         {
             if (Util.IsOverRationals(generators[0]))
-                return (GBResult<Term, Poly>)FracGB((IList)generators, monomialOrder, hilbertSeries,
+                return (GBResult<Term, Poly>)FracGB((List)generators, monomialOrder, hilbertSeries,
                     GroebnerBases.BuchbergerGB());
-            Comparator<SyzygyPair> strategy = DefaultSelectionStrategy(monomialOrder);
+            IComparer<SyzygyPair> strategy = DefaultSelectionStrategy(monomialOrder);
             return BuchbergerGB(generators, monomialOrder,
                 hilbertSeries == null
                     ? () => new SyzygyTreeSet(new TreeSet(strategy))
@@ -807,16 +779,14 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         }
 
 
-        static GBResult<Term, Poly> BuchbergerGB<Term extends AMonomial<Term>, Poly
-            extends AMultivariatePolynomial<Term, Poly>>(IList<Poly> generators, Comparator<DegreeVector> monomialOrder,
+        static GBResult<Term, Poly> BuchbergerGB<E>(List<Poly> generators, IComparer<DegreeVector> monomialOrder,
             Supplier<SyzygySet<Term, Poly>> syzygySetSupplier, HilbertSeries hilbertSeries)
         {
             return BuchbergerGB(generators, monomialOrder, NO_MINIMIZATION, syzygySetSupplier, hilbertSeries);
         }
 
 
-        static GBResult<Term, Poly> BuchbergerGB<Term extends AMonomial<Term>, Poly
-            extends AMultivariatePolynomial<Term, Poly>>(IList<Poly> generators, Comparator<DegreeVector> monomialOrder,
+        static GBResult<Term, Poly> BuchbergerGB<E>(List<Poly> generators, IComparer<DegreeVector> monomialOrder,
             MinimizationStrategy minimizationStrategy, Supplier<SyzygySet<Term, Poly>> syzygySetSupplier, HilbertSeries
             hilbertSeries)
         {
@@ -827,16 +797,16 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             Poly factory = generators[0];
 
             // sort polynomials in the basis to achieve faster divisions
-            Comparator<Poly> polyOrder = IsGradedOrder(monomialOrder)
+            IComparer<Poly> polyOrder = IsGradedOrder(monomialOrder)
                 ? (a, b) => monomialOrder.Compare(a.Lt(), b.Lt())
-                : new EcartComparator();
+                : new EcartIComparer();
             generators.Sort(polyOrder);
 
             // set of syzygies
             SyzygySet<Term, Poly> sPairs = syzygySetSupplier.Get();
 
             // Groebner basis that will be computed
-            IList<Poly> groebner = new List();
+            List<Poly> groebner = new List();
 
             // update Groebner basis with initial generators
             generators.ForEach((g) => UpdateBasis(groebner, sPairs, g));
@@ -864,11 +834,11 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             while (!sPairs.IsEmpty())
             {
                 // pick up (and remove) a bunch of critical pairs
-                Collection<SyzygyPair<Term, Poly>> subset = hilbertSeries == null
+                Collection<SyzygyPair<E>> subset = hilbertSeries == null
                     ? sPairs.GetAndRemoveNextBunch()
                     : ((GradedSyzygyTreeSet<Term, Poly>)sPairs).sPairs.Remove(hilbertDegree);
                 if (subset != null)
-                    foreach (SyzygyPair<Term, Poly> pair in subset)
+                    foreach (SyzygyPair<E> pair in subset)
                     {
                         if (hilbertDelta == 0)
                             break;
@@ -1001,8 +971,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         public static MinimizationStrategy NO_MINIMIZATION = (prev, curr) => false;
 
 
-        private static void ReduceAndMinimizeGroebnerBases<Term extends AMonomial<Term>, Poly
-            extends AMultivariatePolynomial<Term, Poly>>(IList<Poly> generators, SyzygySet<Term, Poly> sPairs, int from)
+        private static void ReduceAndMinimizeGroebnerBases<E>(List<Poly> generators, SyzygySet<Term, Poly> sPairs, int from)
         {
             for (int i = from; i < generators.Count; i++)
             {
@@ -1047,8 +1016,8 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             }
         }
 
-        private static Poly Remainder0<Term extends AMonomial<Term>, Poly extends AMultivariatePolynomial<Term, Poly>>(
-            Poly dividend, IList<Poly> dividers)
+        private static Poly Remainder0<E>(
+            Poly dividend, List<Poly> dividers)
         {
             Poly[] dividersArr = dividers.Stream().Filter(Objects.NonNull()).ToArray(dividend.CreateArray());
 
@@ -1057,8 +1026,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         }
 
 
-        public static GBResult<Term, Poly> HilbertGB<Term extends AMonomial<Term>, Poly
-            extends AMultivariatePolynomial<Term, Poly>>(IList<Poly> generators, Comparator<DegreeVector> monomialOrder,
+        public static GBResult<Term, Poly> HilbertGB<E>(List<Poly> generators, IComparer<DegreeVector> monomialOrder,
             HilbertSeries hilbertSeries)
         {
             if (hilbertSeries == null)
@@ -1067,11 +1035,10 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         }
 
 
-        public static GBResult<Term, Poly> HilbertConvertBasis<Term extends AMonomial<Term>, Poly
-            extends AMultivariatePolynomial<Term, Poly>>(IList<Poly> groebnerBasis, Comparator<DegreeVector>
+        public static GBResult<Term, Poly> HilbertConvertBasis<E>(List<Poly> groebnerBasis, IComparer<DegreeVector>
             desiredOrdering)
         {
-            Comparator<DegreeVector> ordering = groebnerBasis[0].ordering;
+            IComparer<DegreeVector> ordering = groebnerBasis[0].ordering;
             if (ordering == desiredOrdering)
                 return GBResult.Trivial(new List(groebnerBasis));
             if (IsHomogeneousIdeal(groebnerBasis) || (IsGradedOrder(desiredOrdering) && IsGradedOrder(ordering)))
@@ -1085,15 +1052,13 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         }
 
 
-        public static GBResult<Term, Poly> HilbertGB<Term extends AMonomial<Term>, Poly
-            extends AMultivariatePolynomial<Term, Poly>>(IList<Poly> generators, Comparator<DegreeVector> monomialOrder)
+        public static GBResult<Term, Poly> HilbertGB<E>(List<Poly> generators, IComparer<DegreeVector> monomialOrder)
         {
             return HilbertGB(generators, monomialOrder, (p, o, s) => GBResult.NotBuchberger(GroebnerBasis(p, o)));
         }
 
 
-        public static GBResult<Term, Poly> HilbertGB<Term extends AMonomial<Term>, Poly
-            extends AMultivariatePolynomial<Term, Poly>>(IList<Poly> generators, Comparator<DegreeVector> monomialOrder,
+        public static GBResult<Term, Poly> HilbertGB<E>(List<Poly> generators, IComparer<DegreeVector> monomialOrder,
             GroebnerAlgorithm<Term, Poly> baseAlgorithm)
         {
             if (IsEasyOrder(monomialOrder))
@@ -1104,39 +1069,36 @@ namespace Cc.Redberry.Rings.Poly.Multivar
 
             // we don't check whether we are in homogenization-compatible order
             GBResult<Term, Poly> r = HilbertGB(Homogenize(generators), monomialOrder, baseAlgorithm);
-            IList<Poly> l = Dehomogenize(r);
+            List<Poly> l = Dehomogenize(r);
             RemoveRedundant(l);
             Canonicalize(l);
             return new GBResult(l, r);
         }
 
 
-        public static IList<Poly> GroebnerBasisWithOptimizedGradedOrder<Term extends AMonomial<Term>, Poly
-            extends AMultivariatePolynomial<Term, Poly>>(IList<Poly> ideal)
+        public static List<Poly> GroebnerBasisWithOptimizedGradedOrder<E>(List<Poly> ideal)
         {
             return GroebnerBasisWithOptimizedGradedOrder(ideal,
                 (l, o, h) => GBResult.NotBuchberger(GroebnerBasis(l, o)));
         }
 
 
-        public static IList<Poly> GroebnerBasisWithOptimizedGradedOrder<Term extends AMonomial<Term>, Poly
-            extends AMultivariatePolynomial<Term, Poly>>(IList<Poly> ideal, GroebnerAlgorithm<Term, Poly> baseAlgorithm)
+        public static List<Poly> GroebnerBasisWithOptimizedGradedOrder<E>(List<Poly> ideal, GroebnerAlgorithm<Term, Poly> baseAlgorithm)
         {
-            Comparator<DegreeVector> ord = OptimalOrder(ideal);
+            IComparer<DegreeVector> ord = OptimalOrder(ideal);
             if (ord == GREVLEX)
 
                 // all variables have the same degree
                 return baseAlgorithm.GroebnerBasis(ideal, GREVLEX, null);
 
             // the ordering for which the Groebner basis will be obtained
-            GrevLexWithPermutation order = (GrevLexWithPermutation)ord;
+            MonomialOrder.GrevLexWithPermutation order = (MonomialOrder.GrevLexWithPermutation)ord;
             return GroebnerBasisRegardingGrevLexWithPermutation(ideal, baseAlgorithm, order);
         }
 
 
-        public static IList<Poly> GroebnerBasisRegardingGrevLexWithPermutation<Term extends AMonomial<Term>, Poly
-            extends AMultivariatePolynomial<Term, Poly>>(IList<Poly> ideal, GroebnerAlgorithm<Term, Poly> baseAlgorithm,
-            GrevLexWithPermutation order)
+        public static List<Poly> GroebnerBasisRegardingGrevLexWithPermutation<E>(List<Poly> ideal, GroebnerAlgorithm<Term, Poly> baseAlgorithm,
+            MonomialOrder.GrevLexWithPermutation order)
         {
             int[] inversePermutation = MultivariateGCD.InversePermutation(order.permutation);
             return baseAlgorithm
@@ -1148,8 +1110,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         }
 
 
-        public static Comparator<DegreeVector> OptimalOrder<Term extends AMonomial<Term>, Poly
-            extends AMultivariatePolynomial<Term, Poly>>(IList<Poly> ideal)
+        public static IComparer<DegreeVector> OptimalOrder<E>(List<Poly> ideal)
         {
             if (ideal.IsEmpty())
                 return GREVLEX;
@@ -1164,27 +1125,25 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             ArraysUtil.QuickSort(degrees, permutation);
 
             // the ordering for which the Groebner basis will be obtained
-            return new GrevLexWithPermutation(permutation);
+            return new MonomialOrder.GrevLexWithPermutation(permutation);
         }
 
         /* ************************************************** F4 ******************************************************* */
 
 
-        public static GBResult<Term, Poly> F4GB<Term extends AMonomial<Term>, Poly
-            extends AMultivariatePolynomial<Term, Poly>>(IList<Poly> generators, Comparator<DegreeVector> monomialOrder)
+        public static GBResult<Term, Poly> F4GB<E>(List<Poly> generators, IComparer<DegreeVector> monomialOrder)
         {
             return F4GB(generators, monomialOrder, null);
         }
 
 
-        static GBResult<Term, Poly> F4GB<Term extends AMonomial<Term>, Poly
-            extends AMultivariatePolynomial<Term, Poly>>(IList<Poly> generators, Comparator<DegreeVector> monomialOrder,
+        static GBResult<Term, Poly> F4GB<E>(List<Poly> generators, IComparer<DegreeVector> monomialOrder,
             HilbertSeries hilbertSeries)
         {
             if (!IsGradedOrder(monomialOrder))
                 throw new NotSupportedException("F4 works only with graded orders");
             if (Util.IsOverRationals(generators[0]))
-                return (GBResult<Term, Poly>)FracGB((IList)generators, monomialOrder, hilbertSeries,
+                return (GBResult<Term, Poly>)FracGB((List)generators, monomialOrder, hilbertSeries,
                     GroebnerBases.F4GB());
             return F4GB(generators, monomialOrder,
                 () => new GradedSyzygyTreeSet(new TreeMap(), DefaultSelectionStrategy(monomialOrder),
@@ -1298,7 +1257,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
 
 
             // retrieve data array from poly in descending order
-            Term Find(Term dv, Comparator<DegreeVector> ordering)
+            Term Find(Term dv, IComparer<DegreeVector> ordering)
             {
                 int i = Arrays.BinarySearch(data, dv, (a, b) => ordering.Compare(b, a));
                 if (i < 0)
@@ -1416,8 +1375,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         private static readonly int F4_OVER_FIELD_LINALG_THRESHOLD = 16, F4_OVER_EUCLID_LINALG_THRESHOLD = 6;
 
 
-        static GBResult<Term, Poly> F4GB<Term extends AMonomial<Term>, Poly
-            extends AMultivariatePolynomial<Term, Poly>>(IList<Poly> generators, Comparator<DegreeVector> monomialOrder,
+        static GBResult<Term, Poly> F4GB<E>(List<Poly> generators, IComparer<DegreeVector> monomialOrder,
             Supplier<GradedSyzygyTreeSet<Term, ArrayBasedPoly<Term>>> syzygySetSupplier, HilbertSeries hilbertSeries)
         {
             // simplify generators as much as possible
@@ -1427,21 +1385,21 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             Poly factory = generators[0];
 
             // sort polynomials in the basis to achieve in general faster inital reductions
-            Comparator<Poly> polyOrder = IsGradedOrder(monomialOrder)
+            IComparer<Poly> polyOrder = IsGradedOrder(monomialOrder)
                 ? (a, b) => monomialOrder.Compare(a.Lt(), b.Lt())
-                : new EcartComparator();
+                : new EcartIComparer();
             generators.Sort(polyOrder);
 
             // set of all syzygies
             GradedSyzygyTreeSet<Term, ArrayBasedPoly<Term>> sPairs = syzygySetSupplier.Get();
 
             // Groebner basis that will be computed
-            IList<ArrayBasedPoly<Term>> groebner = new List();
+            List<ArrayBasedPoly<Term>> groebner = new List();
 
             // a history of performed reductions: index of generator -> list of available reductions
             // this is extensively used in simplify routine; the data is updated each time when a new row-echelon
             // form is calculated; for details see Joux & Vitse, "A variant of F4 algorithm" (TabSimplify structure)
-            IList<IList<ArrayBasedPoly<Term>>> f4reductions = new List();
+            List<List<ArrayBasedPoly<Term>>> f4reductions = new List();
 
             // update Groebner basis with initial generators
             foreach (Poly generator in generators)
@@ -1453,7 +1411,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
 
 
             // a list of reducers that will be used for a full  direct (without linear algebra) reduction of syzygies
-            IList<Poly> reducers = new List(generators);
+            List<Poly> reducers = new List(generators);
 
             // cache array used in divisions (little performance improvement actually)
             Poly[] reducersArray = reducers.Stream().Filter(Objects.NonNull()).ToArray(factory.CreateArray());
@@ -1537,7 +1495,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
                         nProcessedPolynomials += subset.Count;
 
                         // the list of polynomials to reduce (H-polynomials)
-                        IList<HPolynomial<Term>> hPolynomials = new List();
+                        List<HPolynomial<Term>> hPolynomials = new List();
 
                         // all monomials that occur in H-polynomials
                         TreeSet<DegreeVector> hMonomials = new TreeSet(monomialOrder);
@@ -1626,7 +1584,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
                         });
 
                         // reduce all H-polynomials with linear algebra and compute new basis elements (N+)
-                        IList<ArrayBasedPoly<Term>> nPlus = ReduceMatrix(factory, groebner, hPolynomials,
+                        List<ArrayBasedPoly<Term>> nPlus = ReduceMatrix(factory, groebner, hPolynomials,
                             hMonomialsArray, f4reductions);
                         nRedundantSyzygies += subset.Count - nPlus.Count;
 
@@ -1665,7 +1623,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             groebner.RemoveAll(Collections.Singleton(null));
 
             // convert from array-based polynomials to normal
-            IList<Poly> result = groebner.Stream().Map(factory.Create()).Collect(Collectors.ToList());
+            List<Poly> result = groebner.Stream().Map(factory.Create()).Collect(Collectors.ToList());
 
             // minimize Groebner basis
             MinimizeGroebnerBases(result);
@@ -1699,7 +1657,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
 
 
         static ArrayBasedPoly<Term> Simplify<Term extends AMonomial<Term>>(ArrayBasedPoly<Term> generator,
-            DegreeVector factor, IList<ArrayBasedPoly<Term>> reductions)
+            DegreeVector factor, List<ArrayBasedPoly<Term>> reductions)
         {
             // the desired leading term of H-polynomial
             DegreeVector desiredLeadTerm = generator.Lt().DvMultiply(factor);
@@ -1734,27 +1692,26 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         }
 
 
-        static IList<ArrayBasedPoly<Term>> ReduceMatrix<Term extends AMonomial<Term>, Poly
-            extends AMultivariatePolynomial<Term, Poly>>(Poly factory, IList<ArrayBasedPoly<Term>> basis,
-            IList<HPolynomial<Term>> hPolynomials, DegreeVector[] hMonomials, IList<IList<ArrayBasedPoly<Term>>>
+        static List<ArrayBasedPoly<Term>> ReduceMatrix<E>(Poly factory, List<ArrayBasedPoly<Term>> basis,
+            List<HPolynomial<Term>> hPolynomials, DegreeVector[] hMonomials, List<List<ArrayBasedPoly<Term>>>
             f4reductions)
         {
             if (hPolynomials.IsEmpty())
                 return new List();
             if (factory is MultivariatePolynomialZp64)
-                return (IList<ArrayBasedPoly<Term>>)ReduceMatrixZp64((MultivariatePolynomialZp64)factory, (IList)basis,
-                    (IList)hPolynomials, hMonomials, (IList)f4reductions);
+                return (List<ArrayBasedPoly<Term>>)ReduceMatrixZp64((MultivariatePolynomialZp64)factory, (List)basis,
+                    (List)hPolynomials, hMonomials, (List)f4reductions);
             else
-                return (IList<ArrayBasedPoly<Term>>)ReduceMatrixE((MultivariatePolynomial)factory, (IList)basis,
-                    (IList)hPolynomials, hMonomials, (IList)f4reductions);
+                return (List<ArrayBasedPoly<Term>>)ReduceMatrixE((MultivariatePolynomial)factory, (List)basis,
+                    (List)hPolynomials, hMonomials, (List)f4reductions);
         }
 
         private static readonly double DENSE_FILLING_THRESHOLD = 0.1;
 
         /* ******************************************* F4 Zp64 linear algebra ******************************************* */
-        private static IList<ArrayBasedPoly<MonomialZp64>> ReduceMatrixZp64(MultivariatePolynomialZp64 factory,
-            IList<ArrayBasedPoly<MonomialZp64>> basis, IList<HPolynomial<MonomialZp64>> hPolynomials,
-            DegreeVector[] hMonomials, IList<IList<ArrayBasedPoly<MonomialZp64>>> f4reductions)
+        private static List<ArrayBasedPoly<MonomialZp64>> ReduceMatrixZp64(MultivariatePolynomialZp64 factory,
+            List<ArrayBasedPoly<MonomialZp64>> basis, List<HPolynomial<MonomialZp64>> hPolynomials,
+            DegreeVector[] hMonomials, List<List<ArrayBasedPoly<MonomialZp64>>> f4reductions)
         {
             IntegersZp64 ring = factory.ring;
             IMonomialAlgebra<MonomialZp64> mAlgebra = factory.monomialAlgebra;
@@ -1796,7 +1753,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             // 3) row echelon & row reduce D
             // 4) row reduce B
             // reverse order for binary searching
-            Comparator<DegreeVector> reverseOrder = (a, b) => factory.ordering.Compare(b, a);
+            IComparer<DegreeVector> reverseOrder = (a, b) => factory.ordering.Compare(b, a);
             int nRows = hPolynomials.Count, nColumns = hMonomials.Length, iRow, iColumn;
 
             // <- STEP 0: bring matrix to F4-form
@@ -2009,7 +1966,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             // this can be optimized (use dense structures, use same structured elimination), but actually
             // it doesn't take too much time
             // make D maximally triangular
-            Arrays.Sort(dMatrix.rows, Comparator.ComparingInt(SparseArrayZp64.FirstNonZeroPosition()));
+            Arrays.Sort(dMatrix.rows, IComparer.ComparingInt(SparseArrayZp64.FirstNonZeroPosition()));
             dMatrix.RowReduce();
 
             // <-  STEP 5: row reduce B
@@ -2037,7 +1994,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             // leading monomials of H-polynomials
             TreeSet<DegreeVector> hLeadMonomials = hPolynomials.Stream().Map((p) => p.hPoly.Lt())
                 .Collect(Collectors.ToCollection(() => new TreeSet(factory.ordering)));
-            IList<ArrayBasedPoly<MonomialZp64>> nPolynomials = new List();
+            List<ArrayBasedPoly<MonomialZp64>> nPolynomials = new List();
             for (iRow = 0; iRow < nRows; ++iRow)
             {
                 List<MonomialZp64> candidateList = new List();
@@ -2080,7 +2037,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             nPolynomials.Sort((a, b) => reverseOrder.Compare(a.Lt(), b.Lt()));
 
             // resulting N+ set
-            IList<ArrayBasedPoly<MonomialZp64>> nPlusPolynomials = new List();
+            List<ArrayBasedPoly<MonomialZp64>> nPlusPolynomials = new List();
             foreach (ArrayBasedPoly<MonomialZp64> candidate in nPolynomials)
             {
                 if (!hLeadMonomials.Contains(candidate.Lt()))
@@ -2099,7 +2056,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
                             continue;
                         if (candidate.Lt().DvDivisibleBy(g.Lt()))
                         {
-                            IList<ArrayBasedPoly<MonomialZp64>> reductions = f4reductions[iIndex];
+                            List<ArrayBasedPoly<MonomialZp64>> reductions = f4reductions[iIndex];
                             bool reduced = false;
                             for (int i = 0; i < reductions.Count; ++i)
                             {
@@ -2502,9 +2459,9 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         }
 
         /* ******************************************* F4 generic linear algebra ******************************************* */
-        private static IList<ArrayBasedPoly<Monomial<E>>> ReduceMatrixE<E>(MultivariatePolynomial<E> factory,
-            IList<ArrayBasedPoly<Monomial<E>>> basis, IList<HPolynomial<Monomial<E>>> hPolynomials,
-            DegreeVector[] hMonomials, IList<IList<ArrayBasedPoly<Monomial<E>>>> f4reductions)
+        private static List<ArrayBasedPoly<Monomial<E>>> ReduceMatrixE<E>(MultivariatePolynomial<E> factory,
+            List<ArrayBasedPoly<Monomial<E>>> basis, List<HPolynomial<Monomial<E>>> hPolynomials,
+            DegreeVector[] hMonomials, List<List<ArrayBasedPoly<Monomial<E>>>> f4reductions)
         {
             Ring<E> ring = factory.ring;
             IMonomialAlgebra<Monomial<E>> mAlgebra = factory.monomialAlgebra;
@@ -2546,7 +2503,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             // 3) row echelon & row reduce D
             // 4) row reduce B
             // reverse order for binary searching
-            Comparator<DegreeVector> reverseOrder = (a, b) => factory.ordering.Compare(b, a);
+            IComparer<DegreeVector> reverseOrder = (a, b) => factory.ordering.Compare(b, a);
             int nRows = hPolynomials.Count, nColumns = hMonomials.Length, iRow, iColumn;
 
             // <- STEP 0: bring matrix to F4-form
@@ -2819,7 +2776,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             // this can be optimized (use dense structures, use same structured elimination), but actually
             // it doesn't take too much time
             // make D maximally triangular
-            Arrays.Sort(dMatrix.rows, Comparator.ComparingInt(SparseArray.FirstNonZeroPosition()));
+            Arrays.Sort(dMatrix.rows, IComparer.ComparingInt(SparseArray.FirstNonZeroPosition()));
             dMatrix.RowReduce();
 
             // <-  STEP 5: row reduce B
@@ -2866,7 +2823,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             // leading monomials of H-polynomials
             TreeSet<DegreeVector> hLeadMonomials = hPolynomials.Stream().Map((p) => p.hPoly.Lt())
                 .Collect(Collectors.ToCollection(() => new TreeSet(factory.ordering)));
-            IList<ArrayBasedPoly<Monomial<E>>> nPolynomials = new List();
+            List<ArrayBasedPoly<Monomial<E>>> nPolynomials = new List();
             for (iRow = 0; iRow < nRows; ++iRow)
             {
                 List<Monomial<E>> candidateList = new List();
@@ -2906,7 +2863,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             nPolynomials.Sort((a, b) => reverseOrder.Compare(a.Lt(), b.Lt()));
 
             // resulting N+ set
-            IList<ArrayBasedPoly<Monomial<E>>> nPlusPolynomials = new List();
+            List<ArrayBasedPoly<Monomial<E>>> nPlusPolynomials = new List();
             foreach (ArrayBasedPoly<Monomial<E>> candidate in nPolynomials)
             {
                 if (!hLeadMonomials.Contains(candidate.Lt()))
@@ -2925,7 +2882,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
                             continue;
                         if (candidate.Lt().DvDivisibleBy(g.Lt()))
                         {
-                            IList<ArrayBasedPoly<Monomial<E>>> reductions = f4reductions[iIndex];
+                            List<ArrayBasedPoly<Monomial<E>>> reductions = f4reductions[iIndex];
                             bool reduced = false;
                             for (int i = 0; i < reductions.Count; ++i)
                             {
@@ -3462,25 +3419,25 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         /* ************************************** Hilbert-Poincare series ********************************************** */
 
 
-        public static bool IsMonomialIdeal(IList<TWildcardTodoAMultivariatePolynomial> ideal)
+        public static bool IsMonomialIdeal(List<TWildcardTodoAMultivariatePolynomial> ideal)
         {
             return ideal.Stream().AllMatch(AMultivariatePolynomial.IsMonomial());
         }
 
 
-        public static bool IsHomogeneousIdeal(IList<TWildcardTodoAMultivariatePolynomial> ideal)
+        public static bool IsHomogeneousIdeal(List<TWildcardTodoAMultivariatePolynomial> ideal)
         {
             return ideal.Stream().AllMatch(AMultivariatePolynomial.IsHomogeneous());
         }
 
 
-        public static IList<DegreeVector> LeadTermsSet(IList<TWildcardTodoAMultivariatePolynomial> ideal)
+        public static List<DegreeVector> LeadTermsSet(List<TWildcardTodoAMultivariatePolynomial> ideal)
         {
             return ideal.Stream().Map(AMultivariatePolynomial.Lt()).Collect(Collectors.ToList());
         }
 
 
-        public static HilbertSeries HilbertSeriesOfLeadingTermsSet(IList<TWildcardTodoAMultivariatePolynomial> ideal)
+        public static HilbertSeries HilbertSeriesOfLeadingTermsSet(List<TWildcardTodoAMultivariatePolynomial> ideal)
         {
             if (!IsHomogeneousIdeal(ideal) && !IsGradedOrder(ideal[0].ordering))
                 throw new ArgumentException(
@@ -3491,7 +3448,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         }
 
 
-        static void ReduceMonomialIdeal(IList<DegreeVector> basis)
+        static void ReduceMonomialIdeal(List<DegreeVector> basis)
         {
             outer:
             for (int i = basis.size() - 1; i >= 1; --i)
@@ -3516,7 +3473,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         }
 
 
-        public static HilbertSeries HilbertSeries(IList<DegreeVector> ideal)
+        public static HilbertSeries HilbertSeries(List<DegreeVector> ideal)
         {
             ideal = new List(ideal);
             ReduceMonomialIdeal(ideal);
@@ -3526,7 +3483,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         }
 
 
-        private static UnivariatePolynomial<BigInteger> HilbertSeriesNumerator(IList<DegreeVector> ideal)
+        private static UnivariatePolynomial<BigInteger> HilbertSeriesNumerator(List<DegreeVector> ideal)
         {
             UnivariateRing<UnivariatePolynomial<BigInteger>> uniRing = Rings.UnivariateRing(Z);
             if (ideal.IsEmpty())
@@ -3554,12 +3511,12 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             DegreeVector varMonomial = new DegreeVector(varExponents, 1);
 
             // sum J + <x_i>
-            IList<DegreeVector> sum = ideal.Stream().Filter((m) => m.exponents[variable] == 0)
+            List<DegreeVector> sum = ideal.Stream().Filter((m) => m.exponents[variable] == 0)
                 .Collect(Collectors.ToList());
             sum.Add(varMonomial);
 
             // quotient J : <x_i>
-            IList<DegreeVector> quot = ideal.Stream()
+            List<DegreeVector> quot = ideal.Stream()
                 .Map((m) => m.exponents[variable] > 0 ? m.DvDivideOrNull(variable, 1) : m).Collect(Collectors.ToList());
             ReduceMonomialIdeal(quot);
             return HilbertSeriesNumerator(sum).Add(HilbertSeriesNumerator(quot).ShiftRight(1));
@@ -3736,14 +3693,14 @@ namespace Cc.Redberry.Rings.Poly.Multivar
 
 
         public static GBResult<Monomial<BigInteger>, MultivariatePolynomial<BigInteger>> ModularGB(
-            IList<MultivariatePolynomial<BigInteger>> ideal, Comparator<DegreeVector> monomialOrder)
+            List<MultivariatePolynomial<BigInteger>> ideal, IComparer<DegreeVector> monomialOrder)
         {
             return ModularGB(ideal, monomialOrder, null, false);
         }
 
 
         public static GBResult<Monomial<BigInteger>, MultivariatePolynomial<BigInteger>> ModularGB(
-            IList<MultivariatePolynomial<BigInteger>> ideal, Comparator<DegreeVector> monomialOrder,
+            List<MultivariatePolynomial<BigInteger>> ideal, IComparer<DegreeVector> monomialOrder,
             HilbertSeries hilbertSeries)
         {
             return ModularGB(ideal, monomialOrder, hilbertSeries, false);
@@ -3751,7 +3708,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
 
 
         public static GBResult<Monomial<BigInteger>, MultivariatePolynomial<BigInteger>> ModularGB(
-            IList<MultivariatePolynomial<BigInteger>> ideal, Comparator<DegreeVector> monomialOrder,
+            List<MultivariatePolynomial<BigInteger>> ideal, IComparer<DegreeVector> monomialOrder,
             HilbertSeries hilbertSeries, bool trySparse)
         {
             return ModularGB(ideal, monomialOrder, GroebnerBases.GroebnerBasisInGF(),
@@ -3764,7 +3721,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
 
         private static readonly int N_MOD_STEPS_THRESHOLD = 4, N_BUCHBERGER_STEPS_REDUNDANCY_DELTA = 9;
 
-        static IList<MultivariatePolynomialZp64> Mod(IList<MultivariatePolynomial<BigInteger>> polys, long modulus)
+        static List<MultivariatePolynomialZp64> Mod(List<MultivariatePolynomial<BigInteger>> polys, long modulus)
         {
             IntegersZp64 ring = Zp64(modulus);
             IntegersZp gRing = ring.AsGenericRing();
@@ -3774,7 +3731,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
 
 
         public static GBResult<Monomial<BigInteger>, MultivariatePolynomial<BigInteger>> ModularGB(
-            IList<MultivariatePolynomial<BigInteger>> ideal, Comparator<DegreeVector> monomialOrder,
+            List<MultivariatePolynomial<BigInteger>> ideal, IComparer<DegreeVector> monomialOrder,
             GroebnerAlgorithm modularAlgorithm, GroebnerAlgorithm defaultAlgorithm, BigInteger firstPrime,
             HilbertSeries hilbertSeries, bool trySparse)
         {
@@ -3785,9 +3742,9 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             GBResult baseResult = null;
             BigInteger basePrime = null;
             HilbertSeries baseSeries = hilbertSeries;
-            IList<MultivariatePolynomial<BigInteger>> baseBasis = null;
+            List<MultivariatePolynomial<BigInteger>> baseBasis = null;
             PrimesIterator0 primes = new PrimesIterator0(firstPrime); // start with a large enough prime
-            IList<MultivariatePolynomial<BigInteger>> previousGBCandidate = null;
+            List<MultivariatePolynomial<BigInteger>> previousGBCandidate = null;
 
             // number of CRT liftings
             int nModIterations = 0;
@@ -3809,25 +3766,25 @@ namespace Cc.Redberry.Rings.Poly.Multivar
                 IntegersZp ring = Zp(prime);
 
                 // number of traditional "Buchberger" steps
-                IList<MultivariatePolynomial<BigInteger>> bModBasis;
+                List<MultivariatePolynomial<BigInteger>> bModBasis;
                 GBResult modResult;
                 if (prime.IsLong())
                 {
                     // generators mod prime
-                    IList<MultivariatePolynomialZp64> modGenerators = Mod(ideal, prime.LongValueExact());
+                    List<MultivariatePolynomialZp64> modGenerators = Mod(ideal, prime.LongValueExact());
 
                     // Groebner basis mod prime
                     GBResult<MonomialZp64, MultivariatePolynomialZp64> r =
-                        modularAlgorithm.GroebnerBasis((IList)modGenerators, monomialOrder, null);
+                        modularAlgorithm.GroebnerBasis((List)modGenerators, monomialOrder, null);
                     bModBasis = r.Stream().Map(MultivariatePolynomialZp64.ToBigPoly()).Collect(Collectors.ToList());
                     modResult = r;
                 }
                 else
                 {
-                    IList<MultivariatePolynomial<BigInteger>> modGenerators =
+                    List<MultivariatePolynomial<BigInteger>> modGenerators =
                         ideal.Stream().Map((p) => p.SetRing(ring)).Collect(Collectors.ToList());
                     GBResult<Monomial<BigInteger>, MultivariatePolynomial<BigInteger>> r =
-                        modularAlgorithm.GroebnerBasis((IList)modGenerators, monomialOrder, null);
+                        modularAlgorithm.GroebnerBasis((List)modGenerators, monomialOrder, null);
                     bModBasis = r.list;
                     modResult = r;
                 }
@@ -3850,7 +3807,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
                         if (nSparseUnknowns < N_UNKNOWNS_THRESHOLD &&
                             modResult.nProcessedPolynomials > N_BUCHBERGER_STEPS_THRESHOLD)
                         {
-                            IList<MultivariatePolynomial<BigInteger>> solvedGB = SolveGB(ideal,
+                            List<MultivariatePolynomial<BigInteger>> solvedGB = SolveGB(ideal,
                                 bModBasis.Stream().Map(AMultivariatePolynomial.GetSkeleton())
                                     .Collect(Collectors.ToList()), monomialOrder);
                             if (solvedGB != null && IsGroebnerBasis(ideal, solvedGB, monomialOrder))
@@ -3868,7 +3825,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
 
 
                 // check for Hilbert luckiness
-                int c = ModHilbertSeriesComparator.Compare(baseSeries, modSeries);
+                int c = ModHilbertSeriesIComparer.Compare(baseSeries, modSeries);
                 if (c < 0)
 
                     // current prime is unlucky
@@ -3921,7 +3878,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
                     continue;
 
                 ++nModIterations;
-                ChineseRemaindersMagic<BigInteger> magic = CreateMagic(Z, basePrime, prime);
+                ChineseRemainders.ChineseRemaindersMagic<BigInteger> magic = CreateMagic(Z, basePrime, prime);
 
                 // prime is probably lucky, we can do Chinese Remainders
                 for (int iGenerator = 0; iGenerator < baseBasis.Count; ++iGenerator)
@@ -3943,7 +3900,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
                 }
 
                 basePrime = basePrime.Multiply(prime);
-                IList<MultivariatePolynomial<Rational<BigInteger>>> gbCandidateFrac = new List();
+                List<MultivariatePolynomial<Rational<BigInteger>>> gbCandidateFrac = new List();
                 foreach (MultivariatePolynomial<BigInteger> gen in baseBasis)
                 {
                     MultivariatePolynomial<Rational<BigInteger>> gbGen = ReconstructPoly(gen, basePrime);
@@ -3952,7 +3909,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
                     gbCandidateFrac.Add(gbGen);
                 }
 
-                IList<MultivariatePolynomial<BigInteger>> gbCandidate = ToIntegral(gbCandidateFrac);
+                List<MultivariatePolynomial<BigInteger>> gbCandidate = ToIntegral(gbCandidateFrac);
                 if (gbCandidate.Equals(previousGBCandidate) && IsGroebnerBasis(ideal, gbCandidate, monomialOrder))
                     return GBResult.NotBuchberger(Canonicalize(gbCandidate));
                 previousGBCandidate = gbCandidate;
@@ -4002,7 +3959,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             return result;
         }
 
-        private static Comparator<HilbertSeries> ModHilbertSeriesComparator = (a, b) =>
+        private static IComparer<HilbertSeries> ModHilbertSeriesIComparer = (a, b) =>
         {
             UnivariatePolynomial<Rational<BigInteger>> aHilbert = a.HilbertPolynomial(),
                 bHilbert = b.HilbertPolynomial();
@@ -4017,9 +3974,8 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         };
 
 
-        public static IList<Poly> SolveGB<Term extends AMonomial<Term>, Poly
-            extends AMultivariatePolynomial<Term, Poly>>(IList<Poly> generators, IList<Collection<DegreeVector>>
-            gbSkeleton, Comparator<DegreeVector> monomialOrder)
+        public static List<Poly> SolveGB<E>(List<Poly> generators, List<Collection<DegreeVector>>
+            gbSkeleton, IComparer<DegreeVector> monomialOrder)
         {
             return SolveGB0(generators, gbSkeleton.Stream().Map((c) =>
             {
@@ -4034,17 +3990,16 @@ namespace Cc.Redberry.Rings.Poly.Multivar
 
 
         private static readonly double DROP_SOLVED_VARIABLES_RELATIVE_THRESHOLD = 0.1;
-        private static IList<Poly> SolveGB0<Term extends AMonomial<Term>, Poly
-            extends AMultivariatePolynomial<Term, Poly>>(IList<Poly> generators, IList<SortedSet<DegreeVector>>
-            gbSkeleton, Comparator<DegreeVector> monomialOrder)
+        private static List<Poly> SolveGB0<E>(List<Poly> generators, List<SortedSet<DegreeVector>>
+            gbSkeleton, IComparer<DegreeVector> monomialOrder)
         {
             Poly factory = generators[0].CreateZero();
             if (!factory.IsOverField())
             {
-                IList gb = SolveGB0(ToFractions((IList)generators), gbSkeleton, monomialOrder);
+                List gb = SolveGB0(ToFractions((List)generators), gbSkeleton, monomialOrder);
                 if (gb == null)
                     return null;
-                return Canonicalize((IList<Poly>)ToIntegral(gb));
+                return Canonicalize((List<Poly>)ToIntegral(gb));
             }
 
 
@@ -4070,13 +4025,13 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             Term uTerm = factory.monomialAlgebra.GetUnitTerm(nUnknowns);
 
             // initial ideal viewed as R[u0, u1, ..., uM][x0, ..., xN]
-            IList<MultivariatePolynomial<Poly>> initialIdeal = generators.Stream()
+            List<MultivariatePolynomial<Poly>> initialIdeal = generators.Stream()
                 .Map((p) => pRing.Factory().Create(p.Collection().Stream()
                     .Map((t) => new Monomial(t, cfRing.Factory().Create(uTerm.SetCoefficientFrom(t))))
                     .Collect(Collectors.ToList()))).Collect(Collectors.ToList());
 
             // build set of all syzygies
-            IList<MultivariatePolynomial<Poly>> _tmp_gb_ = new List(initialIdeal);
+            List<MultivariatePolynomial<Poly>> _tmp_gb_ = new List(initialIdeal);
 
             // list of all non trivial S-pairs
             SyzygySet<Monomial<Poly>, MultivariatePolynomial<Poly>> sPairsSet =
@@ -4084,7 +4039,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             Arrays.Stream(gbCandidate).ForEach((gb) => UpdateBasis(_tmp_gb_, sPairsSet, gb));
 
             // source of equations
-            IList<EqSupplier<Term, Poly>> source = new List();
+            List<EqSupplier<Term, Poly>> source = new List();
 
             // initial ideal must reduce to zero
             initialIdeal.ForEach((p) => source.Add(new EqSupplierPoly(p)));
@@ -4094,7 +4049,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
 
             // iterate from "simplest" to "hardest" equations
             source.Sort((a, b) => monomialOrder.Compare(a.Signature(), b.Signature()));
-            IList<Equation<Term, Poly>> nonLinearEquations = new List();
+            List<Equation<Term, Poly>> nonLinearEquations = new List();
             EquationSolver<Term, Poly> solver = CreateSolver(factory);
             TIntHashSet solvedVariables = new TIntHashSet();
             foreach (EqSupplier<Term, Poly> eqSupplier in source)
@@ -4104,7 +4059,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
                     // system is solved
                     return GbSolution(factory, gbCandidate);
                 MultivariatePolynomial<Poly> next = eqSupplier.Poly();
-                SystemInfo result = ReduceAndSolve(next, gbCandidate, solver, nonLinearEquations);
+                LinearSolver.SystemInfo result = ReduceAndSolve(next, gbCandidate, solver, nonLinearEquations);
                 if (result == Inconsistent)
                     return null;
                 solvedVariables.AddAll(solver.solvedVariables);
@@ -4159,11 +4114,11 @@ namespace Cc.Redberry.Rings.Poly.Multivar
 
         sealed class EqSupplierSyzygy<Term, Poly> : EqSupplier<Term, Poly>
         {
-            readonly IList<MultivariatePolynomial<Poly>> initialIdeal;
+            readonly List<MultivariatePolynomial<Poly>> initialIdeal;
             readonly MultivariatePolynomial<Poly>[] gbCandidate;
             readonly SyzygyPair<Monomial<Poly>, MultivariatePolynomial<Poly>> sPair;
 
-            EqSupplierSyzygy(IList<MultivariatePolynomial<Poly>> initialIdeal,
+            EqSupplierSyzygy(List<MultivariatePolynomial<Poly>> initialIdeal,
                 MultivariatePolynomial<Poly>[] gbCandidate,
                 SyzygyPair<Monomial<Poly>, MultivariatePolynomial<Poly>> sPair)
             {
@@ -4194,17 +4149,16 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             return usedVars.ToArray();
         }
 
-        static MultivariatePolynomial<Poly> GetFi<Term extends AMonomial<Term>, Poly
-            extends AMultivariatePolynomial<Term, Poly>>(int i, IList<MultivariatePolynomial<Poly>> initialIdeal,
+        static MultivariatePolynomial<Poly> GetFi<E>(int i, List<MultivariatePolynomial<Poly>> initialIdeal,
             MultivariatePolynomial<Poly>[] gbCandidate)
         {
             return i < initialIdeal.Count ? initialIdeal[i] : gbCandidate[i - initialIdeal.Count];
         }
 
 
-        static void DropSolvedVariables<Term extends AMonomial<Term>, Poly extends AMultivariatePolynomial<Term, Poly>>(
-            TIntHashSet solvedVariables, IList<MultivariatePolynomial<Poly>> initialIdeal, MultivariatePolynomial<Poly>
-            [] gbCandidate, IList<Equation<Term, Poly>> nonLinearEquations, EquationSolver<Term, Poly> solver)
+        static void DropSolvedVariables<E>(
+            TIntHashSet solvedVariables, List<MultivariatePolynomial<Poly>> initialIdeal, MultivariatePolynomial<Poly>
+            [] gbCandidate, List<Equation<Term, Poly>> nonLinearEquations, EquationSolver<Term, Poly> solver)
         {
             if (solver.NSolved() != 0)
                 throw new ArgumentException();
@@ -4238,10 +4192,10 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             solver.equations.ForEach((eq) => eq.DropVariables(vMapping));
         }
 
-        static IList<Poly> GbSolution<Term extends AMonomial<Term>, Poly extends AMultivariatePolynomial<Term, Poly>>(
+        static List<Poly> GbSolution<E>(
             Poly factory, MultivariatePolynomial<Poly>[] gbCandidate)
         {
-            IList<Poly> result = new List();
+            List<Poly> result = new List();
             foreach (MultivariatePolynomial<Poly> gbElement in gbCandidate)
             {
                 if (!gbElement.Stream().AllMatch(Poly.IsConstant()))
@@ -4254,9 +4208,8 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         }
 
 
-        static SystemInfo ReduceAndSolve<Term extends AMonomial<Term>, Poly
-            extends AMultivariatePolynomial<Term, Poly>>(MultivariatePolynomial<Poly> toReduce,
-            MultivariatePolynomial<Poly>[] gbCandidate, EquationSolver<Term, Poly> solver, IList<Equation<Term, Poly>>
+        static LinearSolver.SystemInfo ReduceAndSolve<E>(MultivariatePolynomial<Poly> toReduce,
+            MultivariatePolynomial<Poly>[] gbCandidate, EquationSolver<Term, Poly> solver, List<Equation<Term, Poly>>
             nonLinearEquations)
         {
             // reduce poly with GB candidate
@@ -4303,7 +4256,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             while (true)
             {
                 // try to find and solve some subset of linear equations
-                SystemInfo result = solver.Solve();
+                LinearSolver.SystemInfo result = solver.Solve();
                 if (result == Inconsistent)
                     return Inconsistent;
                 else if (result == UnderDetermined)
@@ -4314,8 +4267,7 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             }
         }
 
-        private static void UpdateNonLinear<Term extends AMonomial<Term>, Poly
-            extends AMultivariatePolynomial<Term, Poly>>(EquationSolver<Term, Poly> solver, IList<Equation<Term, Poly>>
+        private static void UpdateNonLinear<E>(EquationSolver<Term, Poly> solver, List<Equation<Term, Poly>>
             nonLinearEquations)
         {
             while (true)
@@ -4342,43 +4294,43 @@ namespace Cc.Redberry.Rings.Poly.Multivar
         }
 
 
-        static bool IsLinear(AMultivariatePolynomial<TWildcardTodoAMonomial, TWildcardTodo> poly)
+        static bool IsLinear<E>(MultivariatePolynomial<E> poly)
         {
-            return poly.Collection().Stream().AllMatch((t) => t.totalDegree <= 1);
+            return poly.Collection().All((t) => t.totalDegree <= 1);
         }
 
 
-        private class Equation<Term, Poly>
+        private class Equation<E>
         {
-            readonly int[] usedVars;
+            public readonly int[] usedVars;
 
 
-            readonly TIntIntHashMap mapping;
+            public readonly Dictionary<int, int> mapping;
 
 
-            readonly Poly reducedEquation;
+            public readonly MultivariatePolynomial<E> reducedEquation;
 
 
             readonly bool isLinear;
 
 
-            Equation(Poly equation)
+            Equation(MultivariatePolynomial<E> equation)
             {
                 int[] degrees = equation.Degrees();
-                TIntArrayList usedVars = new TIntArrayList();
+                List<int> usedVars = new List<int>();
                 for (int i = 0; i < degrees.Length; ++i)
                     if (degrees[i] > 0)
                         usedVars.Add(i);
                 this.usedVars = usedVars.ToArray();
                 this.reducedEquation = equation.DropSelectVariables(this.usedVars);
-                this.mapping = new TIntIntHashMap(Constants.DEFAULT_CAPACITY, Constants.DEFAULT_LOAD_FACTOR, -1, -1);
+                this.mapping = new Dictionary<int, int>(Constants.DEFAULT_CAPACITY, Constants.DEFAULT_LOAD_FACTOR, -1, -1);
                 for (int i = 0; i < this.usedVars.Length; ++i)
-                    mapping.Put(this.usedVars[i], i);
+                    mapping.Add(this.usedVars[i], i);
                 this.isLinear = IsLinear(equation);
             }
 
 
-            Equation(int[] usedVars, TIntIntHashMap mapping, Poly reducedEquation)
+            Equation(int[] usedVars, Dictionary<int, int> mapping, MultivariatePolynomial<E> reducedEquation)
             {
                 this.usedVars = usedVars;
                 this.mapping = mapping;
@@ -4387,19 +4339,19 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             }
 
 
-            virtual void DropVariables(int[] vMapping)
+            public virtual void DropVariables(int[] vMapping)
             {
                 for (int i = 0; i < usedVars.Length; ++i)
                     usedVars[i] = vMapping[usedVars[i]];
                 mapping.Clear();
                 for (int i = 0; i < this.usedVars.Length; ++i)
-                    mapping.Put(this.usedVars[i], i);
+                    mapping.Add(this.usedVars[i], i);
             }
 
 
-            virtual bool HasVariable(int variable)
+            public virtual bool HasVariable(int variable)
             {
-                return Arrays.BinarySearch(usedVars, variable) >= 0;
+                return Array.BinarySearch(usedVars, variable) >= 0;
             }
 
 
@@ -4409,35 +4361,31 @@ namespace Cc.Redberry.Rings.Poly.Multivar
                     return true;
                 if (o == null || GetType() != o.GetType())
                     return false;
-                Equation < ?, ?> equation1 = (Equation < ?,  ?>)o;
-                return Arrays.Equals(usedVars, equation1.usedVars) && reducedEquation.Equals(equation1.reducedEquation);
+                Equation < E> equation1 = (Equation <E>)o;
+                return Enumerable.SequenceEqual(usedVars, equation1.usedVars) && reducedEquation.Equals(equation1.reducedEquation);
             }
 
 
             public virtual int GetHashCode()
             {
-                int result = Arrays.GetHashCode(usedVars);
+                int result = usedVars.GetHashCode();
                 result = 31 * result + reducedEquation.GetHashCode();
                 return result;
             }
         }
 
-        static EquationSolver<Term, Poly> CreateSolver<Term extends AMonomial<Term>, Poly
-            extends AMultivariatePolynomial<Term, Poly>>(Poly factory)
+        static EquationSolver<E> CreateSolver<E>(MultivariatePolynomial<E> factory)
         {
-            if (factory is MultivariatePolynomial)
-                return (EquationSolver<Term, Poly>)new EquationSolverE(((MultivariatePolynomial)factory).ring);
-            else
-                throw new Exception();
+            return new EquationSolverE<E>(factory.ring);
         }
 
 
-        private abstract class EquationSolver<Term, Poly>
+        private abstract class EquationSolver<E>
         {
-            readonly IList<Equation<Term, Poly>> equations = new List();
+            public readonly List<Equation<E>> equations = new List<Equation<E>>();
 
 
-            readonly TIntArrayList solvedVariables = new TIntArrayList();
+            public readonly List<int> solvedVariables = new List<int>();
 
 
             EquationSolver()
@@ -4451,28 +4399,28 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             }
 
 
-            abstract bool AddEquation(Equation<Term, Poly> eq);
+            public abstract bool AddEquation(Equation<E> eq);
 
 
-            abstract SystemInfo Solve();
+            public abstract LinearSolver.SystemInfo Solve();
 
 
-            abstract Equation<Term, Poly> Simplify(Equation<Term, Poly> eq);
+            public abstract Equation<E> Simplify(Equation<E> eq);
 
 
-            abstract Poly Simplify(Poly poly);
+            public abstract MultivariatePolynomial<E> Simplify(MultivariatePolynomial<E> poly);
 
 
-            abstract void Clear();
+            public abstract void Clear();
 
 
-            MultivariatePolynomial<Poly> SimplifyGB(MultivariatePolynomial<Poly> poly)
+            MultivariatePolynomial<MultivariatePolynomial<E>> SimplifyGB(MultivariatePolynomial<MultivariatePolynomial<E>> poly)
             {
-                return poly.MapCoefficients(poly.ring, this.Simplify());
+                return poly.MapCoefficients(poly.ring, this.Simplify);
             }
 
 
-            void SimplifyGB(MultivariatePolynomial<Poly>[] gbCandidate)
+            void SimplifyGB(MultivariatePolynomial<MultivariatePolynomial<E>>[] gbCandidate)
             {
                 for (int i = 0; i < gbCandidate.Length; i++)
                     gbCandidate[i] = SimplifyGB(gbCandidate[i]);
@@ -4485,28 +4433,28 @@ namespace Cc.Redberry.Rings.Poly.Multivar
             }
         }
 
-        private sealed class EquationSolverE<E> : EquationSolver<Monomial<E>, MultivariatePolynomial<E>>
+        private sealed class EquationSolverE<E> : EquationSolver<E>
         {
-            private readonly IList<E> solutions = new List();
+            private readonly List<E> solutions = new List<E>();
 
 
             private readonly Ring<E> ring;
 
 
-            EquationSolverE(Ring<E> ring)
+            public EquationSolverE(Ring<E> ring)
             {
                 this.ring = ring;
             }
 
 
-            override void Clear()
+            public override void Clear()
             {
                 solvedVariables.Clear();
                 solutions.Clear();
             }
 
 
-            override bool AddEquation(Equation<Monomial<E>, MultivariatePolynomial<E>> equation)
+            public override bool AddEquation(Equation<E> equation)
             {
                 equation = Simplify(equation);
                 MultivariatePolynomial<E> eq = equation.reducedEquation;
@@ -4530,17 +4478,17 @@ namespace Cc.Redberry.Rings.Poly.Multivar
                     solutions.Add(ring.DivideExact(ring.Negate(eq.Cc()), eq.Lc()));
 
                     // list of equations that can be updated
-                    IList<Equation<Monomial<E>, MultivariatePolynomial<E>>> needUpdate = new List();
-                    for (int i = equations.size() - 1; i >= 0; --i)
+                    List<Equation<E>> needUpdate = new List<Equation<E>>();
+                    for (int i = equations.Count - 1; i >= 0; --i)
                     {
-                        Equation<Monomial<E>, MultivariatePolynomial<E>> oldEq = equations[i];
+                        Equation<E> oldEq = equations[i];
                         if (!oldEq.HasVariable(solvedVar))
                             continue;
-                        equations.Remove(i);
+                        equations.RemoveAt(i);
                         needUpdate.Add(oldEq);
                     }
 
-                    needUpdate.ForEach(this.AddEquation());
+                    needUpdate.ForEach(eq => this.AddEquation(eq));
                     return true;
                 }
 
@@ -4551,29 +4499,29 @@ namespace Cc.Redberry.Rings.Poly.Multivar
 
             private void SelfUpdate()
             {
-                IList<Equation<Monomial<E>, MultivariatePolynomial<E>>> needUpdate = new List();
-                for (int i = equations.size() - 1; i >= 0; --i)
+                List<Equation<E>> needUpdate = new List<Equation<E>>();
+                for (int i = equations.Count - 1; i >= 0; --i)
                 {
-                    Equation<Monomial<E>, MultivariatePolynomial<E>> oldEq = equations[i];
-                    Equation<Monomial<E>, MultivariatePolynomial<E>> newEq = Simplify(oldEq);
+                    Equation<E> oldEq = equations[i];
+                    Equation<E> newEq = Simplify(oldEq);
                     if (oldEq.Equals(newEq))
                         continue;
-                    equations.Remove(i);
+                    equations.RemoveAt(i);
                     needUpdate.Add(newEq);
                 }
 
-                needUpdate.ForEach(this.AddEquation());
+                needUpdate.ForEach(eq => this.AddEquation(eq));
             }
 
 
-            override Equation<Monomial<E>, MultivariatePolynomial<E>> Simplify(
-                Equation<Monomial<E>, MultivariatePolynomial<E>> eq)
+            public override Equation<E> Simplify(
+                Equation<E> eq)
             {
                 // eliminated variables
-                TIntArrayList eliminated = new TIntArrayList();
+                List<int> eliminated = new List<int>();
 
                 // eliminated variables in eq.reducedEquation
-                TIntHashSet rEliminated = new TIntHashSet();
+                HashSet<int> rEliminated = new HashSet<int>();
 
                 // reduced equation
                 MultivariatePolynomial<E> rPoly = eq.reducedEquation;
@@ -4588,23 +4536,23 @@ namespace Cc.Redberry.Rings.Poly.Multivar
                     rPoly = rPoly.Evaluate(rVar, solutions[i]);
                 }
 
-                if (eliminated.IsEmpty())
+                if (eliminated.Count == 0)
                     return eq;
                 eliminated.Sort();
                 int[] eliminatedArray = eliminated.ToArray();
-                int[] usedVars = ArraysUtil.IntSetDifference(eq.usedVars, eliminatedArray);
-                TIntIntHashMap mapping = new TIntIntHashMap();
+                int[] usedVars = Utils.Utils.IntSetDifference(eq.usedVars, eliminatedArray);
+                var mapping = new Dictionary<int, int>();
                 for (int i = 0; i < usedVars.Length; ++i)
-                    mapping.Put(usedVars[i], i);
-                return new Equation(usedVars, mapping, rPoly.DropVariables(rEliminated.ToArray()));
+                    mapping.Add(usedVars[i], i);
+                return new Equation<E>(usedVars, mapping, rPoly.DropVariables(rEliminated.ToArray()));
             }
 
 
-            override MultivariatePolynomial<E> Simplify(MultivariatePolynomial<E> poly)
+            public override MultivariatePolynomial<E> Simplify(MultivariatePolynomial<E> poly)
             {
                 int[] degs = poly.Degrees();
-                TIntArrayList subsVariables = new TIntArrayList();
-                IList<E> subsValues = new List();
+                List<int> subsVariables = new List<int>();
+                List<E> subsValues = new List<E>();
                 for (int i = 0; i < solvedVariables.Count; ++i)
                     if (degs[solvedVariables[i]] > 0)
                     {
@@ -4612,30 +4560,30 @@ namespace Cc.Redberry.Rings.Poly.Multivar
                         subsValues.Add(solutions[i]);
                     }
 
-                if (subsVariables.IsEmpty())
+                if (subsVariables.Count == 0)
                     return poly;
-                return poly.Evaluate(subsVariables.ToArray(), subsValues.ToArray(ring.CreateArray(subsValues.Count)));
+                return poly.Evaluate(subsVariables.ToArray(), subsValues.ToArray());
             }
 
 
-            override SystemInfo Solve()
+            public override LinearSolver.SystemInfo Solve()
             {
                 // sort equations from "simplest" to "hardest"
-                equations.Sort(Comparator.ComparingInt((eq) => eq.usedVars.Length));
+                equations.Sort((a, b) => a.usedVars.Length.CompareTo(b.usedVars.Length));
                 for (int i = 0; i < equations.Count; ++i)
                 {
                     // some base equation
-                    Equation<Monomial<E>, MultivariatePolynomial<E>> baseEq = equations[i];
-                    TIntHashSet baseVars = new TIntHashSet(baseEq.usedVars);
+                    Equation<E> baseEq = equations[i];
+                    HashSet<int> baseVars = new HashSet<int>(baseEq.usedVars);
 
                     // search equations compatible with base equation
-                    IList<Equation<Monomial<E>, MultivariatePolynomial<E>>> block =
-                        new List(Collections.SingletonList(baseEq));
+                    List<Equation<E>> block =
+                        new List<Equation<E>>([baseEq]);
                     for (int j = 0; j < equations.Count; ++j)
                     {
                         if (i == j)
                             continue;
-                        Equation<Monomial<E>, MultivariatePolynomial<E>> jEq = equations[j];
+                        Equation<E> jEq = equations[j];
                         if (jEq.usedVars.Length > baseVars.Count)
                             break;
                         if (baseVars.ContainsAll(jEq.usedVars))
@@ -4646,57 +4594,56 @@ namespace Cc.Redberry.Rings.Poly.Multivar
 
                         // block can't be solved
                         continue;
-                    SystemInfo solve = Solve(block, baseVars.ToArray());
-                    if (solve == Inconsistent)
+                    LinearSolver.SystemInfo solve = Solve(block, baseVars.ToArray());
+                    if (solve == LinearSolver.SystemInfo.Inconsistent)
                         return solve;
-                    if (solve == UnderDetermined)
+                    if (solve == LinearSolver.SystemInfo.UnderDetermined)
                         continue;
                     equations.RemoveAll(block);
                     SelfUpdate();
-                    return Consistent;
+                    return LinearSolver.SystemInfo.Consistent;
                 }
 
-                return UnderDetermined;
+                return LinearSolver.SystemInfo.UnderDetermined;
             }
 
 
-            SystemInfo Solve(IList<Equation<Monomial<E>, MultivariatePolynomial<E>>> equations, int[] usedVariables)
+            LinearSolver.SystemInfo Solve(List<Equation<E>> equations, int[] usedVariables)
             {
                 int nUsedVariables = usedVariables.Length;
-                TIntIntHashMap mapping = new TIntIntHashMap();
+                Dictionary<int, int> mapping = new Dictionary<int, int>();
                 int[] linalgVariables = new int[nUsedVariables];
                 int c = 0;
                 foreach (int i in usedVariables)
                 {
-                    mapping.Put(i, c);
+                    mapping.Add(i, c);
                     linalgVariables[c] = i;
                     ++c;
                 }
 
                 E[,] lhs = ring.CreateZeroesArray2d(equations.Count, nUsedVariables);
-                E[] rhs = ring.CreateArray(equations.Count);
+                E[] rhs = new E[equations.Count];
                 for (int i = 0; i < equations.Count; ++i)
                 {
-                    Equation<Monomial<E>, MultivariatePolynomial<E>> eq = equations[i];
+                    Equation<E> eq = equations[i];
                     rhs[i] = ring.Negate(eq.reducedEquation.Cc());
-                    foreach (Monomial<E> term in eq.reducedEquation)
+                    foreach (Monomial<E> term in eq.reducedEquation.terms)
                     {
                         if (term.IsZeroVector())
                             continue;
-                        lhs[i][mapping[eq.usedVars[term.FirstNonZeroVariable()]]] = term.coefficient;
+                        lhs[i, mapping[eq.usedVars[term.FirstNonZeroVariable()]]] = term.coefficient;
                     }
                 }
 
-                E[] linalgSolution = ring.CreateArray(nUsedVariables);
-                SystemInfo solve = LinearSolver.Solve(ring, lhs, rhs, linalgSolution);
-                if (solve == SystemInfo.Consistent)
+                E[] linalgSolution = new E[nUsedVariables];
+                LinearSolver.SystemInfo solve = LinearSolver.Solve(ring, lhs, rhs, linalgSolution);
+                if (solve == LinearSolver.SystemInfo.Consistent)
                 {
-                    this.solvedVariables.AddAll(linalgVariables);
-                    this.solutions.AddAll(Arrays.AsList(linalgSolution));
+                    this.solvedVariables.AddRange(linalgVariables);
+                    this.solutions.AddRange(linalgSolution.ToList());
                 }
 
                 return solve;
             }
         }
     }
-}

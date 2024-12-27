@@ -35,6 +35,11 @@ public static class Rings
     {
         return new MultivariateRing<E>(factory);
     }
+    
+    public static MultivariateRing<E> MultivariateRing<E>(int nVars, Ring<E> ring)
+    {
+        return new MultivariateRing<E>(new MultivariatePolynomial<E>(nVars, ring, MonomialOrder.DEFAULT, new MonomialSet<E>(MonomialOrder.DEFAULT)));
+    }
 
     public static SimpleFieldExtension<E> SimpleFieldExtension<E>(UnivariatePolynomial<E> minimalPolynomial)
     {
