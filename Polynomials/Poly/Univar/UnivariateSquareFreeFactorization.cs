@@ -1,3 +1,4 @@
+using Polynomials.Poly.Multivar;
 using static Polynomials.Poly.Univar.Conversions64bit;
 
 namespace Polynomials.Poly.Univar;
@@ -16,12 +17,13 @@ public static class UnivariateSquareFreeFactorization
     {
         if (poly.IsOverFiniteField())
             return SquareFreeFactorizationMusser(poly);
-        // else if (UnivariateFactorization.IsOverMultivariate(poly)) TODO
-        //     return (PolynomialFactorDecomposition<T>)UnivariateFactorization.FactorOverMultivariate(
-        //         (UnivariatePolynomial)poly, MultivariateSquareFreeFactorization.SquareFreeFactorization());
-        // else if (UnivariateFactorization.IsOverUnivariate(poly)) TODO
-        //     return (PolynomialFactorDecomposition<T>)UnivariateFactorization.FactorOverUnivariate(
-        //         (UnivariatePolynomial)poly, MultivariateSquareFreeFactorization.SquareFreeFactorization());
+        else if (UnivariateFactorization.IsOverMultivariate(poly))
+            return (PolynomialFactorDecomposition<UnivariatePolynomial<E>>)
+                UnivariateFactorization.FactorOverMultivariate(poly, MultivariateSquareFreeFactorization.SquareFreeFactorization);
+        else if (UnivariateFactorization.IsOverUnivariate(poly))
+            return (PolynomialFactorDecomposition<UnivariatePolynomial<E>>)
+                UnivariateFactorization.FactorOverUnivariate(
+                poly, MultivariateSquareFreeFactorization.SquareFreeFactorization);
         else if (poly.CoefficientRingCharacteristic().IsZero)
             return SquareFreeFactorizationYunZeroCharacteristics(poly);
         else

@@ -1,4 +1,5 @@
 using System.Numerics;
+using Polynomials.Poly.Multivar;
 using Polynomials.Primes;
 using Polynomials.Utils;
 using UnivariatePolynomialZp64 = Polynomials.Poly.Univar.UnivariatePolynomial<long>;
@@ -32,18 +33,22 @@ public static class UnivariateResultants
 
     public static E Resultant<E>(UnivariatePolynomial<E> a, UnivariatePolynomial<E> b)
     {
-        // if (Util.IsOverMultipleFieldExtension(a))
-        //     return (E)ResultantInMultipleFieldExtension((UnivariatePolynomial)a, (UnivariatePolynomial)b);
+        if (Util.IsOverMultipleFieldExtension(a))
+            return (E)GenericHandler.InvokeForGeneric<E>(typeof(MultivariatePolynomial<>), nameof(ResultantInMultipleFieldExtension), typeof(UnivariateResultants), a, b);//ResultantInMultipleFieldExtension(a, b);
         if (a.IsOverFiniteField())
             return ClassicalPRS(a, b).Resultant();
         if (Util.IsOverRationals(a))
             return (E)GenericHandler.InvokeForGeneric<E>(typeof(Rational<>), nameof(ResultantInQ), typeof(UnivariateResultants), a, b);//ResultantInQ(a, b);
         if (a.IsOverZ())
             return (E)(object)ModularResultant(a.AsZ(), b.AsZ());
-        // if (Util.IsOverSimpleNumberField(a))
-        //     return (E)ModularResultantInNumberField((UnivariatePolynomial)a, (UnivariatePolynomial)b);
-        // if (Util.IsOverRingOfIntegersOfSimpleNumberField(a))
-        //     return (E)ModularResultantInRingOfIntegersOfNumberField((UnivariatePolynomial)a, (UnivariatePolynomial)b);
+        if (Util.IsOverSimpleNumberField(a))
+            return (E)(object)ModularResultantInNumberField(
+                a.AsT<UnivariatePolynomial<Rational<BigInteger>>>(), 
+                b.AsT<UnivariatePolynomial<Rational<BigInteger>>>());
+        if (Util.IsOverRingOfIntegersOfSimpleNumberField(a))
+            return (E)(object)ModularResultantInRingOfIntegersOfNumberField(
+                a.AsT<UnivariatePolynomial<BigInteger>>(), 
+                b.AsT<UnivariatePolynomial<BigInteger>>());
         else
             return PrimitiveResultant(a, b, (p, q) => SubresultantPRS(p, q).Resultant());
     }
@@ -58,16 +63,14 @@ public static class UnivariateResultants
         return new Rational<E>(ring, resultant, den);
     }
 
-    // TODO
-    // private static mPoly ResultantInMultipleFieldExtension<Term extends AMonomial<Term>, mPoly
-    //     extends AMultivariatePolynomial<Term, mPoly>, sPoly extends IUnivariatePolynomial<sPoly>>(
-    //     UnivariatePolynomial<mPoly> a, UnivariatePolynomial<mPoly> b)
-    // {
-    //     MultipleFieldExtension<Term, mPoly, sPoly> ring = (MultipleFieldExtension<Term, mPoly, sPoly>)a.ring;
-    //     SimpleFieldExtension<sPoly> simpleExtension = ring.GetSimpleExtension();
-    //     return ring.Image(Resultant(a.MapCoefficients(simpleExtension, ring.Inverse()),
-    //         b.MapCoefficients(simpleExtension, ring.Inverse())));
-    // }
+    private static MultivariatePolynomial<E> ResultantInMultipleFieldExtension<E>(
+        UnivariatePolynomial<MultivariatePolynomial<E>> a, UnivariatePolynomial<MultivariatePolynomial<E>> b)
+    {
+        MultipleFieldExtension<E> ring = (MultipleFieldExtension<E>)a.ring;
+        SimpleFieldExtension<E> simpleExtension = ring.GetSimpleExtension();
+        return ring.Image(Resultant(a.MapCoefficients(simpleExtension, ring.Inverse),
+            b.MapCoefficients(simpleExtension, ring.Inverse)));
+    }
 
 
     public static List<E> Subresultants<E>(UnivariatePolynomial<E> a, UnivariatePolynomial<E> b)
@@ -133,58 +136,56 @@ public static class UnivariateResultants
         }
     }
     
-    // TODO
-    // private static UnivariatePolynomial<E> TrivialResultantInNumberField<E>(
-    //     UnivariatePolynomial<UnivariatePolynomial<E>> a, UnivariatePolynomial<UnivariatePolynomial<E>> b)
-    // {
-    //     AlgebraicNumberField<UnivariatePolynomial<E>> ring = (AlgebraicNumberField<UnivariatePolynomial<E>>)a.ring;
-    //     if (!a.Stream().AllMatch(ring.IsInTheBaseField) || !b.Stream().AllMatch(ring.IsInTheBaseField))
-    //         return null;
-    //     UnivariatePolynomial<E> ar = a.MapCoefficients(ring.GetMinimalPolynomial().ring, p => p.Cc()),
-    //         br = b.MapCoefficients(ring.GetMinimalPolynomial().ring, p => p.Cc());
-    //     return UnivariatePolynomial<E>.Constant(ring.GetMinimalPolynomial().ring, Resultant(ar, br));
-    // }
+    private static UnivariatePolynomial<E> TrivialResultantInNumberField<E>(
+        UnivariatePolynomial<UnivariatePolynomial<E>> a, UnivariatePolynomial<UnivariatePolynomial<E>> b)
+    {
+        AlgebraicNumberField<E> ring = (AlgebraicNumberField<E>)a.ring;
+        if (!a.Stream().All(ring.IsInTheBaseField) || !b.Stream().All(ring.IsInTheBaseField))
+            return null;
+        UnivariatePolynomial<E> ar = a.MapCoefficients(ring.GetMinimalPolynomial().ring, p => p.Cc()),
+            br = b.MapCoefficients(ring.GetMinimalPolynomial().ring, p => p.Cc());
+        return UnivariatePolynomial<E>.Constant(ring.GetMinimalPolynomial().ring, Resultant(ar, br));
+    }
 
-    // TODO
-    // public static UnivariatePolynomial<Rational<BigInteger>> ModularResultantInNumberField(
-    //     UnivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> a,
-    //     UnivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> b)
-    // {
-    //     UnivariatePolynomial<Rational<BigInteger>> r = TrivialResultantInNumberField(a, b);
-    //     if (r != null)
-    //         return r;
-    //     AlgebraicNumberField<UnivariatePolynomial<Rational<BigInteger>>> numberField =
-    //         (AlgebraicNumberField<UnivariatePolynomial<Rational<BigInteger>>>)a.ring;
-    //     UnivariatePolynomial<Rational<BigInteger>> minimalPoly = numberField.GetMinimalPolynomial();
-    //     a = a.Clone();
-    //     b = b.Clone();
-    //
-    //     // reduce problem to the case with integer monic minimal polynomial
-    //     if (minimalPoly.Stream().All(x => x.IsIntegral()))
-    //     {
-    //         // minimal poly is already monic & integer
-    //         UnivariatePolynomial<BigInteger> minimalPolyZ = minimalPoly.MapCoefficients(Z, r_ => r_.Numerator());
-    //         var numberFieldZ = new AlgebraicNumberField<UnivariatePolynomial<BigInteger>>(minimalPolyZ);
-    //         BigInteger aDen = RemoveDenominators(a),
-    //             bDen = RemoveDenominators(b),
-    //             den = aDen.Pow(b.degree).Multiply(bDen.Pow(a.degree));
-    //         return ModularResultantInRingOfIntegersOfNumberField(
-    //                 a.MapCoefficients(numberFieldZ, (cf) => cf.MapCoefficients(Z, Rational.Numerator())),
-    //                 b.MapCoefficients(numberFieldZ, (cf) => cf.MapCoefficients(Z, Rational.Numerator())))
-    //             .MapCoefficients(Q, (cf) => Q.Mk(cf, den));
-    //     }
-    //     else
-    //     {
-    //         // replace s -> s / lc(minPoly)
-    //         BigInteger minPolyLeadCoeff = ToCommonDenominator(minimalPoly)._1.Lc();
-    //         Rational<BigInteger> scale = new Rational(Z, Z.GetOne(), minPolyLeadCoeff),
-    //             scaleReciprocal = scale.Reciprocal();
-    //         AlgebraicNumberField<UnivariatePolynomial<Rational<BigInteger>>> scaledNumberField =
-    //             new AlgebraicNumberField(minimalPoly.Scale(scale).Monic());
-    //         return ModularResultantInNumberField(a.MapCoefficients(scaledNumberField, (cf) => cf.Scale(scale)),
-    //             b.MapCoefficients(scaledNumberField, (cf) => cf.Scale(scale))).Scale(scaleReciprocal);
-    //     }
-    // }
+    public static UnivariatePolynomial<Rational<BigInteger>> ModularResultantInNumberField(
+        UnivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> a,
+        UnivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> b)
+    {
+        UnivariatePolynomial<Rational<BigInteger>> r = TrivialResultantInNumberField(a, b);
+        if (r != null)
+            return r;
+        AlgebraicNumberField<Rational<BigInteger>> numberField =
+            (AlgebraicNumberField<Rational<BigInteger>>)a.ring;
+        UnivariatePolynomial<Rational<BigInteger>> minimalPoly = numberField.GetMinimalPolynomial();
+        a = a.Clone();
+        b = b.Clone();
+    
+        // reduce problem to the case with integer monic minimal polynomial
+        if (minimalPoly.Stream().All(x => x.IsIntegral()))
+        {
+            // minimal poly is already monic & integer
+            UnivariatePolynomial<BigInteger> minimalPolyZ = minimalPoly.MapCoefficients(Rings.Z, r_ => r_.Numerator());
+            var numberFieldZ = new AlgebraicNumberField<BigInteger>(minimalPolyZ);
+            BigInteger aDen = RemoveDenominators(a),
+                bDen = RemoveDenominators(b),
+                den = BigInteger.Pow(aDen, b.degree) * BigInteger.Pow(bDen, a.degree);
+            return ModularResultantInRingOfIntegersOfNumberField(
+                    a.MapCoefficients(numberFieldZ, (cf) => cf.MapCoefficients(Rings.Z, r => r.Numerator())),
+                    b.MapCoefficients(numberFieldZ, (cf) => cf.MapCoefficients(Rings.Z, r => r.Numerator())))
+                .MapCoefficients(Rings.Q, (cf) => Rings.Q.Mk(cf, den));
+        }
+        else
+        {
+            // replace s -> s / lc(minPoly)
+            BigInteger minPolyLeadCoeff = Util.ToCommonDenominator(minimalPoly).Item1.Lc();
+            Rational<BigInteger> scale = new Rational<BigInteger>(Rings.Z, Rings.Z.GetOne(), minPolyLeadCoeff),
+                scaleReciprocal = scale.Reciprocal();
+            AlgebraicNumberField<Rational<BigInteger>> scaledNumberField =
+                new AlgebraicNumberField<Rational<BigInteger>>(minimalPoly.Scale(scale).Monic());
+            return ModularResultantInNumberField(a.MapCoefficients(scaledNumberField, (cf) => cf.Scale(scale)),
+                b.MapCoefficients(scaledNumberField, (cf) => cf.Scale(scale))).Scale(scaleReciprocal);
+        }
+    }
 
     public static BigInteger PolyPowNumFieldCfBound(BigInteger maxCf, BigInteger maxMinPolyCf, int minPolyDeg,
         int exponent)
@@ -193,69 +194,68 @@ public static class UnivariateResultants
             BigInteger.Pow(maxMinPolyCf + 1, (exponent - 1) * (minPolyDeg + 1));
     }
 
-    // TODO
-    // public static UnivariatePolynomial<BigInteger> ModularResultantInRingOfIntegersOfNumberField(
-    //     UnivariatePolynomial<UnivariatePolynomial<BigInteger>> a,
-    //     UnivariatePolynomial<UnivariatePolynomial<BigInteger>> b)
-    // {
-    //     return PrimitiveResultant(a, b, UnivariateResultants.ModularResultantInRingOfIntegersOfNumberField0);
-    // }
-    //
-    // private static UnivariatePolynomial<BigInteger> ModularResultantInRingOfIntegersOfNumberField0(
-    //     UnivariatePolynomial<UnivariatePolynomial<BigInteger>> a,
-    //     UnivariatePolynomial<UnivariatePolynomial<BigInteger>> b)
-    // {
-    //     UnivariatePolynomial<BigInteger> r = TrivialResultantInNumberField(a, b);
-    //     if (r != null)
-    //         return r;
-    //     AlgebraicNumberField<UnivariatePolynomial<BigInteger>> numberField =
-    //         (AlgebraicNumberField<UnivariatePolynomial<BigInteger>>)a.ring;
-    //     UnivariatePolynomial<BigInteger> minimalPoly = numberField.GetMinimalPolynomial();
-    //     BigInteger aMax =
-    //             a.Stream().FlatMap(UnivariatePolynomial.Stream()).Map(Rings.Z.Abs()).Max(Rings.Z)
-    //                 .OrElse(BigInteger.Zero),
-    //         bMax =
-    //             b.Stream().FlatMap(UnivariatePolynomial.Stream()).Map(Rings.Z.Abs()).Max(Rings.Z)
-    //                 .OrElse(BigInteger.ZERO),
-    //         mMax = minimalPoly.MaxAbsCoefficient();
-    //
-    //     // bound on the value of resultant coefficients
-    //     BigInteger bound = PolyPowNumFieldCfBound(aMax, mMax, minimalPoly.degree, b.degree)
-    //         .Multiply(PolyPowNumFieldCfBound(bMax, mMax, minimalPoly.degree, a.degree));
-    //
-    //     // aggregated CRT modulus
-    //     BigInteger bModulus = null;
-    //     UnivariatePolynomial<BigInteger> resultant = null;
-    //     PrimesIterator primes = new PrimesIterator(1 << 25);
-    //     while (true)
-    //     {
-    //         long prime = primes.Take();
-    //         IntegersZp64 zpRing = Rings.Zp64(prime);
-    //         UnivariatePolynomialZp64 minimalPolyMod = AsOverZp64(minimalPoly, zpRing);
-    //         FiniteField<UnivariatePolynomialZp64> numberFieldMod =
-    //             new FiniteField<UnivariatePolynomialZp64>(minimalPolyMod);
-    //         UnivariatePolynomial<UnivariatePolynomialZp64> aMod =
-    //                 a.MapCoefficients(numberFieldMod, (cf) => AsOverZp64(cf, zpRing)),
-    //             bMod = b.MapCoefficients(numberFieldMod, (cf) => AsOverZp64(cf, zpRing));
-    //         if (aMod.degree != a.degree || bMod.degree != b.degree)
-    //             continue; // unlucky prime
-    //         UnivariatePolynomialZp64 resultantMod = ClassicalPRS(aMod, bMod).Resultant();
-    //         if (bModulus == null)
-    //         {
-    //             bModulus = new BigInteger(prime);
-    //             resultant = resultantMod.ToBigPoly();
-    //             continue;
-    //         }
-    //
-    //         if (!resultant.IsZero() && resultantMod.IsZero())
-    //             continue; // unlucky prime
-    //         UnivariateGCD.UpdateCRT(ChineseRemainders.CreateMagic(Rings.Z, bModulus, new BigInteger(prime)), resultant,
-    //             resultantMod);
-    //         bModulus = bModulus.Multiply(new BigInteger(prime));
-    //         if (bModulus.CompareTo(bound) > 0)
-    //             return UnivariatePolynomial<BigInteger>.AsPolyZSymmetric(resultant.SetRingUnsafe(Rings.Zp(bModulus)));
-    //     }
-    // }
+    public static UnivariatePolynomial<BigInteger> ModularResultantInRingOfIntegersOfNumberField(
+        UnivariatePolynomial<UnivariatePolynomial<BigInteger>> a,
+        UnivariatePolynomial<UnivariatePolynomial<BigInteger>> b)
+    {
+        return PrimitiveResultant(a, b, UnivariateResultants.ModularResultantInRingOfIntegersOfNumberField0);
+    }
+    
+    private static UnivariatePolynomial<BigInteger> ModularResultantInRingOfIntegersOfNumberField0(
+        UnivariatePolynomial<UnivariatePolynomial<BigInteger>> a,
+        UnivariatePolynomial<UnivariatePolynomial<BigInteger>> b)
+    {
+        UnivariatePolynomial<BigInteger> r = TrivialResultantInNumberField(a, b);
+        if (r != null)
+            return r;
+        AlgebraicNumberField<BigInteger> numberField =
+            (AlgebraicNumberField<BigInteger>)a.ring;
+        UnivariatePolynomial<BigInteger> minimalPoly = numberField.GetMinimalPolynomial();
+        BigInteger aMax =
+                a.Stream().SelectMany(u => u.Stream()).Select(Rings.Z.Abs).Max(Rings.Z)
+                    ,//.OrElse(BigInteger.Zero),
+            bMax =
+                b.Stream().SelectMany(u => u.Stream()).Select(Rings.Z.Abs).Max(Rings.Z)
+                    , //.OrElse(BigInteger.ZERO),
+            mMax = minimalPoly.MaxAbsCoefficient();
+    
+        // bound on the value of resultant coefficients
+        BigInteger bound = PolyPowNumFieldCfBound(aMax, mMax, minimalPoly.degree, b.degree)
+            * PolyPowNumFieldCfBound(bMax, mMax, minimalPoly.degree, a.degree);
+    
+        // aggregated CRT modulus
+        BigInteger? bModulus = null;
+        UnivariatePolynomial<BigInteger> resultant = null;
+        PrimesIterator primes = new PrimesIterator(1 << 25);
+        while (true)
+        {
+            long prime = primes.Take();
+            IntegersZp64 zpRing = Rings.Zp64(prime);
+            UnivariatePolynomialZp64 minimalPolyMod = AsOverZp64(minimalPoly, zpRing);
+            FiniteField<long> numberFieldMod =
+                new FiniteField<long>(minimalPolyMod);
+            UnivariatePolynomial<UnivariatePolynomialZp64> aMod =
+                    a.MapCoefficients(numberFieldMod, (cf) => AsOverZp64(cf, zpRing)),
+                bMod = b.MapCoefficients(numberFieldMod, (cf) => AsOverZp64(cf, zpRing));
+            if (aMod.degree != a.degree || bMod.degree != b.degree)
+                continue; // unlucky prime
+            UnivariatePolynomialZp64 resultantMod = ClassicalPRS(aMod, bMod).Resultant();
+            if (bModulus == null)
+            {
+                bModulus = new BigInteger(prime);
+                resultant = resultantMod.ToBigPoly();
+                continue;
+            }
+    
+            if (!resultant.IsZero() && resultantMod.IsZero())
+                continue; // unlucky prime
+            UnivariateGCD.UpdateCRT(ChineseRemainders.CreateMagic(Rings.Z, bModulus.Value, new BigInteger(prime)), resultant,
+                resultantMod);
+            bModulus = bModulus.Value * new BigInteger(prime);
+            if (bModulus.Value.CompareTo(bound) > 0)
+                return UnivariatePolynomial<BigInteger>.AsPolyZSymmetric(resultant.SetRingUnsafe(Rings.Zp(bModulus.Value)));
+        }
+    }
 
 
     public static PolynomialRemainderSequenceZp64 ClassicalPRS(UnivariatePolynomialZp64 a, UnivariatePolynomialZp64 b)
