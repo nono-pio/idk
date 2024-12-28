@@ -78,51 +78,46 @@ public abstract class SimpleFieldExtension<E> : PolynomialRing<UnivariatePolynom
         return DivideExact(Norm(element), element);
     }
 
-    // TODO
-    // public virtual UnivariatePolynomial<E> Trace(UnivariatePolynomial<E> element)
-    // {
-    //     var minimalPoly = MinimalPolynomial(element);
-    //     return Negate(DivideExact(minimalPoly.GetAsPoly(minimalPoly.Degree() - 1), minimalPoly.LcAsPoly()));
-    // }
+    public virtual UnivariatePolynomial<E> Trace(UnivariatePolynomial<E> element)
+    {
+        var minimalPoly = MinimalPolynomial(element);
+        return Negate(DivideExact(minimalPoly.GetAsPoly(minimalPoly.Degree() - 1), minimalPoly.LcAsPoly()));
+    }
 
 
-    // TODO
-    // public virtual UnivariatePolynomial<E> NormOfPolynomial(UnivariatePolynomial<UnivariatePolynomial<E>> poly)
-    // {
-    //     if (!poly.ring.Equals(this))
-    //         throw new ArgumentException();
-    //     
-    //     return MultivariateResultants.Resultant(minimalPoly.AsMultivariate(MonomialOrder.DEFAULT).SetNVariables(2),
-    //         MultivariatePolynomial<E>.AsNormalMultivariate(poly.AsMultivariate(), 0), 0).AsUnivariate();
-    // }
-    //
-    //
-    // public virtual MultivariatePolynomial<E> NormOfPolynomial(MultivariatePolynomial<UnivariatePolynomial<E>> poly)
-    // {
-    //     if (!poly.ring.Equals(this))
-    //         throw new ArgumentException();
-    //    
-    //     return MultivariateResultants
-    //         .Resultant(minimalPoly.AsMultivariate(MonomialOrder.DEFAULT).SetNVariables(poly.nVariables + 1),
-    //             MultivariatePolynomial<E>.AsNormalMultivariate(poly, 0), 0).DropVariable(0);
-    // }
+    public virtual UnivariatePolynomial<E> NormOfPolynomial(UnivariatePolynomial<UnivariatePolynomial<E>> poly)
+    {
+        if (!poly.ring.Equals(this))
+            throw new ArgumentException();
+        
+        return MultivariateResultants.Resultant(minimalPoly.AsMultivariate(MonomialOrder.DEFAULT).SetNVariables(2),
+            MultivariatePolynomial<E>.AsNormalMultivariate(poly.AsMultivariate(), 0), 0).AsUnivariate();
+    }
+    
+    
+    public virtual MultivariatePolynomial<E> NormOfPolynomial(MultivariatePolynomial<UnivariatePolynomial<E>> poly)
+    {
+        if (!poly.ring.Equals(this))
+            throw new ArgumentException();
+       
+        return MultivariateResultants
+            .Resultant(minimalPoly.AsMultivariate(MonomialOrder.DEFAULT).SetNVariables(poly.nVariables + 1),
+                MultivariatePolynomial<E>.AsNormalMultivariate(poly, 0), 0).DropVariable(0);
+    }
 
-    // TODO
-    // public virtual UnivariatePolynomial<E> MinimalPolynomial(UnivariatePolynomial<E> element)
-    // {
-    //     //if (element.equals(getOne()))
-    //     //    return getMinimalPolynomial();
-    //     var es = UnivariatePolynomial<UnivariatePolynomial<E>>.Create(this, [Negate(element), GetOne()]);
-    //     return UnivariateSquareFreeFactorization.SquareFreePart(NormOfPolynomial(es));
-    // }
+    public virtual UnivariatePolynomial<E> MinimalPolynomial(UnivariatePolynomial<E> element)
+    {
+        //if (element.equals(getOne()))
+        //    return getMinimalPolynomial();
+        var es = UnivariatePolynomial<UnivariatePolynomial<E>>.Create(this, [Negate(element), GetOne()]);
+        return UnivariateSquareFreeFactorization.SquareFreePart(NormOfPolynomial(es));
+    }
 
 
-    // TODO
-    // public virtual MultipleFieldExtension<Term, mPoly, E> AsMultipleExtension<Term extends AMonomial<Term>, mPoly
-    //     extends AMultivariatePolynomial<Term, mPoly>>()
-    // {
-    //     return MultipleFieldExtension.MkMultipleExtension(this);
-    // }
+    public virtual MultipleFieldExtension<E> AsMultipleExtension()
+    {
+        return MultipleFieldExtension<E>.MkMultipleExtension(this);
+    }
 
 
     public override int NVariables()

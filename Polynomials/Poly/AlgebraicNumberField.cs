@@ -59,18 +59,12 @@ public class AlgebraicNumberField<E> : SimpleFieldExtension<E>
     }
 
 
-    // NOTE: don't change this
-    // the following code has no any particular math meaning,
-    // just to make some programming things easier
     public override UnivariatePolynomial<E> Remainder(UnivariatePolynomial<E> dividend, UnivariatePolynomial<E> divider)
     {
         return DivideAndRemainder(dividend, divider)[1];
     }
 
 
-    // NOTE: don't change this
-    // the following code has no any particular math meaning,
-    // just to make some programming things easier
 
 
     public virtual UnivariatePolynomial<E> Normalizer(UnivariatePolynomial<E> element)
@@ -79,9 +73,6 @@ public class AlgebraicNumberField<E> : SimpleFieldExtension<E>
     }
 
 
-    // NOTE: don't change this
-    // the following code has no any particular math meaning,
-    // just to make some programming things easier
 
 
     public virtual UnivariatePolynomial<E>[] Normalizer2(UnivariatePolynomial<E> element)
@@ -101,9 +92,6 @@ public class AlgebraicNumberField<E> : SimpleFieldExtension<E>
     }
 
 
-    // NOTE: don't change this
-    // the following code has no any particular math meaning,
-    // just to make some programming things easier
 
 
     public override IEnumerable<UnivariatePolynomial<E>> Iterator()

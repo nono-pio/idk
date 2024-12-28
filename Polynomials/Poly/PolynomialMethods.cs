@@ -6,19 +6,12 @@ namespace Polynomials.Poly;
 
 public sealed class PolynomialMethods
 {
-    // TODO
-    // public static PolynomialFactorDecomposition<Poly> Factor<Poly>(Poly poly)
-    //     where Poly : Polynomial<Poly>
-    // {
-    //     return UnivariateFactorization.Factor<Poly>(poly);
-    // // }
-    //
-    //
-    // public static PolynomialFactorDecomposition<Poly> Factor<Term, Poly>(Poly poly)
-    //     where Term : AMonomial<Term> where Poly : AMultivariatePolynomial<Term, Poly>
-    // {
-    //     return MultivariateFactorization.Factor(poly);
-    // }
+    
+    
+    public static PolynomialFactorDecomposition<MultivariatePolynomial<E>> Factor<E>(MultivariatePolynomial<E> poly)
+    {
+        return MultivariateFactorization.Factor(poly);
+    }
 
 
     public static PolynomialFactorDecomposition<UnivariatePolynomial<E>> FactorSquareFree<E>(UnivariatePolynomial<E> poly)
@@ -26,12 +19,10 @@ public sealed class PolynomialMethods
         return UnivariateSquareFreeFactorization.SquareFreeFactorization(poly);
     }
 
-    // TODO
-    // public static PolynomialFactorDecomposition<Poly> FactorSquareFree<Term, Poly>(Poly poly)
-    //     where Term : AMonomial<Term> where Poly : AMultivariatePolynomial<Term, Poly>
-    // {
-    //     return MultivariateSquareFreeFactorization.SquareFreeFactorization<Term, Poly>(poly);
-    // }
+    public static PolynomialFactorDecomposition<MultivariatePolynomial<E>> FactorSquareFree<E>(MultivariatePolynomial<E> poly)
+    {
+        return MultivariateSquareFreeFactorization.SquareFreeFactorization(poly);
+    }
 
 
     public static UnivariatePolynomial<E> PolynomialGCD<E>(UnivariatePolynomial<E> a, UnivariatePolynomial<E> b)
@@ -65,58 +56,9 @@ public sealed class PolynomialMethods
         return UnivariateGCD.PolynomialGCD(array);
     }
 
-    //
-    // public static Poly PolynomialGCD<Term, Poly>(IEnumerable<Poly> array) where Term : AMonomial<Term>
-    //     where Poly : AMultivariatePolynomial<Term, Poly>
-    // {
-    //     return MultivariateGCD.PolynomialGCD(array);
-    // }
-    //
-    //
-    // public static T[] PolynomialExtendedGCD<T>(T a, T b) where T : IUnivariatePolynomial<T>
-    // {
-    //     if (a.IsOverField())
-    //         return UnivariateGCD.PolynomialExtendedGCD(a, b);
-    //     else
-    //         throw new ArgumentException("Polynomial over field is expected");
-    // }
-
-    //
-    // public static Poly[] DivideAndRemainder<Poly>(Poly a, Poly b) where Poly : IUnivariatePolynomial<Poly>
-    // {
-    //     return UnivariateDivision.DivideAndRemainder(a, b, true);
-    // }
-    //
-    // public static Poly[] DivideAndRemainder<Term, Poly>(Poly a, Poly b) where Term : AMonomial<Term>
-    //     where Poly : AMultivariatePolynomial<Term, Poly>
-    // {
-    //     return MultivariateDivision.DivideAndRemainder<Term, Poly>(a, b);
-    // }
-
-    //
-    // public static Poly Remainder<Poly>(Poly a, Poly b) where Poly : IPolynomial<Poly>
-    // {
-    //     if (a is IUnivariatePolynomial)
-    //         return (Poly)UnivariateDivision.Remainder((IUnivariatePolynomial)a, (IUnivariatePolynomial)b, true);
-    //     else if (a is AMultivariatePolynomial)
-    //         return (Poly)MultivariateDivision.DivideAndRemainder((AMultivariatePolynomial)a, (AMultivariatePolynomial)b)
-    //             [1];
-    //     else
-    //         throw new Exception();
-    // }
-    //
-    //
-    // public static Poly DivideOrNull<Poly>(Poly a, Poly b) where Poly : IPolynomial<Poly>
-    // {
-    //     if (a is IUnivariatePolynomial)
-    //         return (Poly)UnivariateDivision.DivideOrNull((IUnivariatePolynomial)a, (IUnivariatePolynomial)b, true);
-    //     else if (a is AMultivariatePolynomial)
-    //         return (Poly)MultivariateDivision.DivideOrNull((AMultivariatePolynomial)a, (AMultivariatePolynomial)b);
-    //     else
-    //         throw new Exception();
-    // }
-    //
-    //
+    
+    
+    
     public static Poly DivideExact<Poly>(Poly a, Poly b) where Poly : Polynomial<Poly>
     {
         return a.DivideExact(b);
@@ -153,15 +95,16 @@ public sealed class PolynomialMethods
         return CoprimeQ(polynomials.ToArray());
     }
     
-    // public static bool IrreducibleQ<Poly>(Poly poly) where Poly : IPolynomial<Poly>
-    // {
-    //     if (poly is IUnivariatePolynomial)
-    //         return IrreduciblePolynomials.IrreducibleQ((IUnivariatePolynomial)poly);
-    //     else
-    //         return MultivariateFactorization.Factor((AMultivariatePolynomial)poly).IsTrivial();
-    // }
+    public static bool IrreducibleQ<E>(UnivariatePolynomial<E> poly)
+    {
+        return IrreduciblePolynomials.IrreducibleQ(poly);
+    }
 
-
+    public static bool IrreducibleQ<E>(MultivariatePolynomial<E> poly)
+    {
+        return MultivariateFactorization.Factor(poly).IsTrivial();
+    }
+    
     public static T PolyPow<T>(T @base, BigInteger exponent, bool copy) where T : Polynomial<T>
     {
         if (exponent.Sign < 0)

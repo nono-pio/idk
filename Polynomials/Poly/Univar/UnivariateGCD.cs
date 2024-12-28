@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Numerics;
+using Polynomials.Poly.Multivar;
 using Polynomials.Primes;
 using Polynomials.Utils;
 using UnivariatePolynomialZ64 = Polynomials.Poly.Univar.UnivariatePolynomial<long>;
@@ -13,8 +14,9 @@ public static class UnivariateGCD
     public static UnivariatePolynomial<E> PolynomialGCD<E>(UnivariatePolynomial<E> a, UnivariatePolynomial<E> b)
     {
         a.AssertSameCoefficientRingWith(b);
-        // if (Util.IsOverMultipleFieldExtension(a)) TODO
-        //     return PolynomialGCDInMultipleFieldExtension(a, b);
+        if (Util.IsOverMultipleFieldExtension(a))
+            return (UnivariatePolynomial<E>)GenericHandler.InvokeForGeneric<E>(typeof(MultivariatePolynomial<>),
+                nameof(PolynomialGCDInMultipleFieldExtension), typeof(UnivariateGCD), a, b); //PolynomialGCDInMultipleFieldExtension(a, b);
         if (a.IsOverFiniteField())
             return HalfGCD(a, b);
         if (a.ring is Integers64)
@@ -24,10 +26,16 @@ public static class UnivariateGCD
         if (Util.IsOverRationals(a))
             return (UnivariatePolynomial<E>)GenericHandler.InvokeForGeneric<E>(typeof(Rational<>),
                 nameof(PolynomialGCDInQ), typeof(UnivariateGCD), a, b); // PolynomialGCDInQ(a, b);
-        // if (Util.IsOverRingOfIntegersOfSimpleNumberField(a)) TODO
-        //     return (T)PolynomialGCDInRingOfIntegersOfNumberField((UnivariatePolynomial)a, (UnivariatePolynomial)b);
-        // if (Util.IsOverSimpleNumberField(a)) TODO
-        //     return (T)PolynomialGCDInNumberField((UnivariatePolynomial)a, (UnivariatePolynomial)b);
+        if (Util.IsOverRingOfIntegersOfSimpleNumberField(a))
+            return PolynomialGCDInRingOfIntegersOfNumberField(
+                a.AsT<UnivariatePolynomial<BigInteger>>(), 
+                b.AsT<UnivariatePolynomial<BigInteger>>())
+                .AsT<E>();
+        if (Util.IsOverSimpleNumberField(a))
+            return PolynomialGCDInNumberField(
+                a.AsT<UnivariatePolynomial<Rational<BigInteger>>>(), 
+                b.AsT<UnivariatePolynomial<Rational<BigInteger>>>())
+                .AsT<E>();
         if (a.IsOverField())
             return HalfGCD(a, b);
 
@@ -38,9 +46,7 @@ public static class UnivariateGCD
         if (t != null)
             return t;
 
-        throw new NotImplementedException();
-        // TODO
-        // return (T)UnivariateResultants.SubresultantPRS((UnivariatePolynomial)a, (UnivariatePolynomial)b).Gcd();
+        return UnivariateResultants.SubresultantPRS(a, b).Gcd();
     }
 
     private static UnivariatePolynomial<E>? trivialGCD<E>(UnivariatePolynomial<E> a, UnivariatePolynomial<E> b)
@@ -75,19 +81,18 @@ public static class UnivariateGCD
 
     private static UnivariatePolynomial<E>? TryNested<E>(UnivariatePolynomial<E> a, UnivariatePolynomial<E> b)
     {
-        // if (a.ring is MultivariateRing) TODO
-        //     return PolynomialGCDOverMultivariate(a, b);
+        if (a.ring is IMultivariateRing)
+            return (UnivariatePolynomial<E>?)GenericHandler.InvokeForGeneric<E>(typeof(MultivariatePolynomial<>),
+                nameof(PolynomialGCDOverMultivariate), typeof(UnivariateGCD), a, b);// PolynomialGCDOverMultivariate(a, b);
         return null;
     }
 
-    // TODO
-    // private static UnivariatePolynomial<Poly> PolynomialGCDOverMultivariate<Term extends AMonomial<Term>, Poly
-    //     extends AMultivariatePolynomial<Term, Poly>>(UnivariatePolynomial<Poly> a, UnivariatePolynomial<Poly> b)
-    // {
-    //     return MultivariateGCD.PolynomialGCD(AMultivariatePolynomial.AsMultivariate(a, 0, true),
-    //         AMultivariatePolynomial.AsMultivariate(b, 0, true)).AsUnivariateEliminate(0);
-    // }
-    //
+    private static UnivariatePolynomial<MultivariatePolynomial<E>> PolynomialGCDOverMultivariate<E>(UnivariatePolynomial<MultivariatePolynomial<E>> a, UnivariatePolynomial<MultivariatePolynomial<E>> b)
+    {
+        return MultivariateGCD.PolynomialGCD(MultivariatePolynomial<E>.AsMultivariate(a, 0, true),
+            MultivariatePolynomial<E>.AsMultivariate(b, 0, true)).AsUnivariateEliminate(0);
+    }
+    
     private static UnivariatePolynomial<Rational<E>> PolynomialGCDInQ<E>(UnivariatePolynomial<Rational<E>> a,
         UnivariatePolynomial<Rational<E>> b)
     {
@@ -95,25 +100,26 @@ public static class UnivariateGCD
         var bRat = Util.ToCommonDenominator(b);
         return Util.AsOverRationals(a.ring, PolynomialGCD(aRat.Item1, bRat.Item1)).Monic();
     }
-    //
-    // private static UnivariatePolynomial<mPoly> PolynomialGCDInMultipleFieldExtension<Term extends AMonomial<Term>, mPoly
-    //     extends AMultivariatePolynomial<Term, mPoly>, sPoly extends IUnivariatePolynomial<sPoly>>(
-    //     UnivariatePolynomial<mPoly> a, UnivariatePolynomial<mPoly> b)
-    // {
-    //     MultipleFieldExtension<Term, mPoly, sPoly> ring = (MultipleFieldExtension<Term, mPoly, sPoly>)a.ring;
-    //     SimpleFieldExtension<sPoly> simpleExtension = ring.GetSimpleExtension();
-    //     return PolynomialGCD(a.MapCoefficients(simpleExtension, ring.Inverse()),
-    //         b.MapCoefficients(simpleExtension, ring.Inverse())).MapCoefficients(ring, ring.Image());
-    // }
+    
+    private static UnivariatePolynomial<MultivariatePolynomial<E>> PolynomialGCDInMultipleFieldExtension<E>(
+        UnivariatePolynomial<MultivariatePolynomial<E>> a, UnivariatePolynomial<MultivariatePolynomial<E>> b)
+    {
+        MultipleFieldExtension<E> ring = (MultipleFieldExtension<E>)a.ring;
+        SimpleFieldExtension<E> simpleExtension = ring.GetSimpleExtension();
+        return PolynomialGCD(a.MapCoefficients(simpleExtension, ring.Inverse),
+            b.MapCoefficients(simpleExtension, ring.Inverse)).MapCoefficients(ring, ring.Image);
+    }
 
 
     public static UnivariatePolynomial<E>[] PolynomialExtendedGCD<E>(UnivariatePolynomial<E> a,
         UnivariatePolynomial<E> b)
     {
-        // if (Util.IsOverQ(a)) TODO
-        //     return ModularExtendedResultantGCDInQ(a, b);
-        // if (a.IsOverZ()) TODO
-        //     return ModularExtendedResultantGCDInZ(a, b);
+        if (Util.IsOverQ(a)) 
+            return ModularExtendedResultantGCDInQ(
+                a.AsT<Rational<BigInteger>>(), 
+                b.AsT<Rational<BigInteger>>()) as UnivariatePolynomial<E>[];
+        if (a.IsOverZ()) 
+            return ModularExtendedResultantGCDInZ(a.AsZ(), b.AsZ()) as UnivariatePolynomial<E>[];
         if (a.IsOverField())
             return ExtendedHalfGCD(a, b);
         else
@@ -133,23 +139,22 @@ public static class UnivariateGCD
         return [exGcd[0], exGcd[1]];
     }
 
-    // TODO
-    // static UnivariatePolynomial<BigInteger>[] PolynomialExtendedGCDInZbyQ(UnivariatePolynomial<BigInteger> a,
-    //     UnivariatePolynomial<BigInteger> b)
-    // {
-    //     UnivariatePolynomial<Rational<BigInteger>>[] xgcd = PolynomialExtendedGCD(a.MapCoefficients(Q, Q.MkNumerator()),
-    //         b.MapCoefficients(Q, Q.MkNumerator()));
-    //     Tuple2<UnivariatePolynomial<BigInteger>, BigInteger> gcd = ToCommonDenominator(xgcd[0]),
-    //         s = ToCommonDenominator(xgcd[1]),
-    //         t = ToCommonDenominator(xgcd[2]);
-    //     BigInteger lcm = Z.Lcm(gcd._2, s._2, t._2);
-    //     return new UnivariatePolynomial<BigInteger>[]
-    //     {
-    //         gcd._1.Multiply(lcm.DivideExact(gcd._2)),
-    //         s._1.Multiply(lcm.DivideExact(s._2)),
-    //         t._1.Multiply(lcm.DivideExact(t._2))
-    //     };
-    // }
+    static UnivariatePolynomial<BigInteger>[] PolynomialExtendedGCDInZbyQ(UnivariatePolynomial<BigInteger> a,
+        UnivariatePolynomial<BigInteger> b)
+    {
+        var xgcd = PolynomialExtendedGCD(a.MapCoefficients(Rings.Q, Rings.Q.MkNumerator),
+            b.MapCoefficients(Rings.Q, Rings.Q.MkNumerator));
+        var gcd = Util.ToCommonDenominator(xgcd[0]);
+        var s = Util.ToCommonDenominator(xgcd[1]);
+        var t = Util.ToCommonDenominator(xgcd[2]);
+        var lcm = Rings.Z.Lcm(gcd.Item2, s.Item2, t.Item2);
+        return new UnivariatePolynomial<BigInteger>[]
+        {
+            gcd.Item1.Multiply(lcm / gcd.Item2),
+            s.Item1.Multiply(lcm / s.Item2),
+            t.Item1.Multiply(lcm / t.Item2)
+        };
+    }
 
 
     public static UnivariatePolynomial<E> PolynomialGCD<E>(params UnivariatePolynomial<E>[] polynomials)
@@ -297,7 +302,7 @@ public static class UnivariateGCD
             b = UnivariateDivision.Remainder(b, a, true) ?? throw new UnreachableException();
         while (a.Degree() > SWITCH_TO_HALF_GCD_ALGORITHM_DEGREE && !b.IsZero())
         {
-            UnivariatePolynomial<E>[] col = ReduceHalfGCD(a, b);
+            var col = ReduceHalfGCD(a, b);
             a = col[0];
             b = col[1];
             if (!b.IsZero())
@@ -835,371 +840,370 @@ public static class UnivariateGCD
         }
     }
 
-    // TODO
-    // public static UnivariatePolynomial<Rational<BigInteger>>[] ModularExtendedRationalGCD(
-    //     UnivariatePolynomial<Rational<BigInteger>> a, UnivariatePolynomial<Rational<BigInteger>> b)
-    // {
-    //     if (a == b || a.Equals(b))
-    //         return new UnivariatePolynomial<Rational<BigInteger>>[]
-    //         {
-    //             a.Clone(),
-    //             a.CreateZero(),
-    //             a.CreateOne()
-    //         };
-    //     if (a.Degree() < b.Degree())
-    //     {
-    //         UnivariatePolynomial<Rational<BigInteger>>[] r = ModularExtendedRationalGCD(b, a);
-    //         ArraysUtil.Swap(r, 1, 2);
-    //         return r;
-    //     }
-    //
-    //     if (b.IsZero())
-    //     {
-    //         UnivariatePolynomial<Rational<BigInteger>>[] result = a.CreateArray(3);
-    //         result[0] = a.Clone();
-    //         result[1] = a.CreateOne();
-    //         result[2] = a.CreateZero();
-    //         return NormalizeExtendedGCD(result);
-    //     }
-    //
-    //     Tuple2<UnivariatePolynomial<BigInteger>, BigInteger> ac = ToCommonDenominator(a), bc = ToCommonDenominator(b);
-    //     UnivariatePolynomial<BigInteger> az = ac._1, bz = bc._1;
-    //     BigInteger aContent = az.Content(), bContent = bz.Content();
-    //     UnivariatePolynomial<Rational<BigInteger>>[] xgcd =
-    //         ModularExtendedRationalGCD0(az.Clone().DivideOrNull(aContent), bz.Clone().DivideOrNull(bContent));
-    //     xgcd[1].Multiply(new Rational<BigInteger>(Z, ac._2, aContent));
-    //     xgcd[2].Multiply(new Rational<BigInteger>(Z, bc._2, bContent));
-    //     return xgcd;
-    // }
+    public static UnivariatePolynomial<Rational<BigInteger>>[] ModularExtendedRationalGCD(
+        UnivariatePolynomial<Rational<BigInteger>> a, UnivariatePolynomial<Rational<BigInteger>> b)
+    {
+        if (a == b || a.Equals(b))
+            return new UnivariatePolynomial<Rational<BigInteger>>[]
+            {
+                a.Clone(),
+                a.CreateZero(),
+                a.CreateOne()
+            };
+        if (a.Degree() < b.Degree())
+        {
+            var r = ModularExtendedRationalGCD(b, a);
+            Utils.Utils.Swap(r, 1, 2);
+            return r;
+        }
 
-    // TODO
-    // static UnivariatePolynomial<Rational<BigInteger>>[] ModularExtendedRationalGCD0(UnivariatePolynomial<BigInteger> a,
-    //     UnivariatePolynomial<BigInteger> b)
-    // {
-    //     BigInteger lcGCD = BigIntegerUtil.Gcd(a.Lc(), b.Lc());
-    //     UnivariatePolynomial<Rational<BigInteger>> aRat = a.MapCoefficients(Rings.Q, (c) => new Rational(Z, c)),
-    //         bRat = b.MapCoefficients(Rings.Q, (c) => new Rational(Z, c));
-    //     int degreeMax = Math.Max(a.degree, b.degree);
-    //     BigInteger bound2 = new BigInteger(degreeMax).Increment().Pow(degreeMax)
-    //         .Multiply(BigIntegerUtil.Max(a.NormMax(), b.NormMax()).Pow(a.degree + b.degree)).Multiply(lcGCD)
-    //         .ShiftLeft(1);
-    //     PrimesIterator primesLoop = new PrimesIterator(1031); //SmallPrimes.nextPrime(1 << 25));
-    //     List<BigInteger> primes = [];
-    //     List<UnivariatePolynomial<BigInteger>>[] gst =
-    //     [
-    //         [],
-    //         [],
-    //         []
-    //     ];
-    //     BigInteger primesMul = BigInteger.One;
-    //     main:
-    //     while (true)
-    //     {
-    //         while (primesMul.CompareTo(bound2) < 0)
-    //         {
-    //             long prime = primesLoop.Take();
-    //             BigInteger bPrime = new BigInteger(prime);
-    //             if (a.Lc().Remainder(bPrime).IsZero || b.Lc().Remainder(bPrime).IsZero)
-    //                 continue;
-    //             IntegersZp bPrimeDomain = new IntegersZp(bPrime);
-    //             UnivariatePolynomialZp64 aMod = AsOverZp64(a.SetRing(bPrimeDomain)),
-    //                 bMod = AsOverZp64(b.SetRing(bPrimeDomain));
-    //             UnivariatePolynomialZp64[] modularXGCD = ExtendedHalfGCD(aMod, bMod);
-    //
-    //             //skip unlucky prime
-    //             if (!gst[0].IsEmpty() && modularXGCD[0].degree > gst[0][0].degree)
-    //                 continue;
-    //             if (!gst[0].IsEmpty() && modularXGCD[0].degree < gst[0][0].degree)
-    //             {
-    //                 primes.Clear();
-    //                 primesMul = BigInteger.One;
-    //                 foreach (var g in gst)
-    //                     g.Clear();
-    //             }
-    //
-    //             long lLcGCD = lcGCD.Mod(bPrime).LongValueExact();
-    //             long lc = modularXGCD[0].Lc();
-    //             for (int i = 0; i < modularXGCD.Length; i++)
-    //                 gst[i].Add(modularXGCD[i].Multiply(lLcGCD).Divide(lc).ToBigPoly());
-    //             primes.Add(bPrime);
-    //             primesMul = primesMul.Multiply(bPrime);
-    //         }
-    //
-    //
-    //         // CRT
-    //         UnivariatePolynomial<BigInteger>[] xgcdBase = new UnivariatePolynomial<BigInteger>[3];
-    //         BigInteger[] primesArray = primes.ToArray(new BigInteger[primes.Count]);
-    //         for (int i = 0; i < 3; ++i)
-    //         {
-    //             xgcdBase[i] = UnivariatePolynomial<BigInteger>.Zero(Z);
-    //             int deg = gst[i].Stream().MapToInt(UnivariatePolynomial.Degree()).Max().GetAsInt();
-    //             xgcdBase[i].EnsureCapacity(deg);
-    //             for (int j = 0; j <= deg; ++j)
-    //             {
-    //                 int jf = j;
-    //                 BigInteger[] cfs = gst[i].Stream().Map((p) => p[jf]).ToArray(BigInteger[].New());
-    //                 xgcdBase[i].data[j] = ChineseRemainders.ChineseRemainders(primesArray, cfs);
-    //             }
-    //
-    //             xgcdBase[i].FixDegree();
-    //         }
-    //
-    //         while (true)
-    //         {
-    //             // do rational reconstruction
-    //             UnivariatePolynomial<Rational<BigInteger>>[] xgcd = ReconstructXGCD(aRat, bRat, xgcdBase, primesMul,
-    //                 bound2);
-    //             if (xgcd != null)
-    //                 return xgcd;
-    //
-    //             // continue with CRT
-    //             long prime = primesLoop.Take();
-    //             BigInteger bPrime = new BigInteger(prime);
-    //             if (a.Lc().Remainder(bPrime).IsZero || b.Lc().Remainder(bPrime).IsZero)
-    //                 continue;
-    //             IntegersZp bPrimeDomain = new IntegersZp(bPrime);
-    //             UnivariatePolynomialZp64 aMod = AsOverZp64(a.SetRing(bPrimeDomain)),
-    //                 bMod = AsOverZp64(b.SetRing(bPrimeDomain));
-    //             UnivariatePolynomialZp64[] modularXGCD = ExtendedHalfGCD(aMod, bMod);
-    //
-    //             //skip unlucky prime
-    //             if (modularXGCD[0].degree > xgcdBase[0].degree)
-    //                 continue;
-    //             if (modularXGCD[0].degree < xgcdBase[0].degree)
-    //             {
-    //                 primes.Clear();
-    //                 foreach (var g in gst)
-    //                     g.Clear();
-    //                 long lLcGCD = lcGCD.Mod(bPrime).LongValueExact();
-    //                 long lc = modularXGCD[0].Lc();
-    //                 for (int i = 0; i < modularXGCD.Length; i++)
-    //                     gst[i].Add(modularXGCD[i].Multiply(lLcGCD).Divide(lc).ToBigPoly());
-    //                 primes.Add(bPrime);
-    //                 primesMul = bPrime;
-    //                 continue; // <- extremely rare
-    //             }
-    //
-    //             long lLcGCD = lcGCD.Mod(bPrime).LongValueExact();
-    //             long lc = modularXGCD[0].Lc();
-    //             foreach (UnivariatePolynomialZp64 m in modularXGCD)
-    //                 m.Multiply(lLcGCD).Divide(lc);
-    //             ChineseRemainders.ChineseRemaindersMagic<BigInteger> magic = CreateMagic(Z, primesMul, bPrime);
-    //             for (int i = 0; i < 3; i++)
-    //             {
-    //                 modularXGCD[i].EnsureCapacity(xgcdBase[i].degree);
-    //                 for (int j = 0; j <= xgcdBase[i].degree; ++j)
-    //                     xgcdBase[i].data[j] = ChineseRemainders.ChineseRemainders(Z, magic, xgcdBase[i].data[j],
-    //                         new BigInteger(modularXGCD[i].data[j]));
-    //             }
-    //
-    //             primes.Add(bPrime);
-    //             primesMul = primesMul.Multiply(bPrime);
-    //         }
-    //     }
-    // }
+        if (b.IsZero())
+        {
+            UnivariatePolynomial<Rational<BigInteger>>[] result = [null, null, null];
+            result[0] = a.Clone();
+            result[1] = a.CreateOne();
+            result[2] = a.CreateZero();
+            return NormalizeExtendedGCD(result);
+        }
 
-    // TODO
-    // private static UnivariatePolynomial<Rational<BigInteger>>[] ReconstructXGCD(
-    //     UnivariatePolynomial<Rational<BigInteger>> aRat, UnivariatePolynomial<Rational<BigInteger>> bRat,
-    //     UnivariatePolynomial<BigInteger>[] xgcdBase, BigInteger prime, BigInteger bound2)
-    // {
-    //     UnivariatePolynomial<Rational<BigInteger>>[] candidate = new UnivariatePolynomial<Rational<BigInteger>>[3];
-    //     for (int i = 0; i < 3; i++)
-    //     {
-    //         candidate[i] = UnivariatePolynomial<Rational<BigInteger>>.Zero(Rings.Q);
-    //         candidate[i].EnsureCapacity(xgcdBase[i].degree);
-    //         for (int j = 0; j <= xgcdBase[i].degree; ++j)
-    //         {
-    //             BigInteger[] numDen = RationalReconstruction.Reconstruct(xgcdBase[i].data[j], prime, bound2, bound2);
-    //             if (numDen == null)
-    //                 return null;
-    //             candidate[i].data[j] = new Rational<BigInteger>(Z, numDen[0], numDen[1]);
-    //         }
-    //
-    //         candidate[i].FixDegree();
-    //     }
-    //
-    //     BigInteger content = candidate[0].MapCoefficients(Z, r => r.Numerator()).Content();
-    //     Rational<BigInteger> corr = new Rational<BigInteger>(Z, Z.GetOne(), content);
-    //     UnivariatePolynomial<Rational<BigInteger>> sCandidate = candidate[1].Multiply(corr),
-    //         tCandidate = candidate[2].Multiply(corr),
-    //         gCandidate = candidate[0].Multiply(corr);
-    //
-    //     //first check b since b is less degree
-    //     UnivariatePolynomial<Rational<BigInteger>>[] bDiv;
-    //     bDiv = UnivariateDivision.DivideAndRemainder(bRat, gCandidate, true);
-    //     if (!bDiv[1].IsZero())
-    //         return null;
-    //     UnivariatePolynomial<Rational<BigInteger>>[] aDiv;
-    //     aDiv = UnivariateDivision.DivideAndRemainder(aRat, gCandidate, true);
-    //     if (!aDiv[1].IsZero())
-    //         return null;
-    //     if (!SatisfiesXGCD(aDiv[0], sCandidate, bDiv[0], tCandidate))
-    //         return null;
-    //     return candidate;
-    // }
+        var ac = Util.ToCommonDenominator(a);
+        var bc = Util.ToCommonDenominator(b);
+        UnivariatePolynomial<BigInteger> az = ac.Item1, bz = bc.Item1;
+        BigInteger aContent = az.Content(), bContent = bz.Content();
+        UnivariatePolynomial<Rational<BigInteger>>[] xgcd =
+            ModularExtendedRationalGCD0(az.Clone().DivideOrNull(aContent), bz.Clone().DivideOrNull(bContent));
+        xgcd[1].Multiply(new Rational<BigInteger>(Rings.Z, ac.Item2, aContent));
+        xgcd[2].Multiply(new Rational<BigInteger>(Rings.Z, bc.Item2, bContent));
+        return xgcd;
+    }
 
-    // TODO
-    // private static bool SatisfiesXGCD(UnivariatePolynomial<Rational<BigInteger>> a,
-    //     UnivariatePolynomial<Rational<BigInteger>> s, UnivariatePolynomial<Rational<BigInteger>> b,
-    //     UnivariatePolynomial<Rational<BigInteger>> t)
-    // {
-    //     Rational<BigInteger> zero = Rational<BigInteger>.Zero(Z), one = Rational<BigInteger>.One(Z);
-    //     foreach (Rational<BigInteger> subs in new Rational<BigInteger>[]
-    //              {
-    //                  zero,
-    //                  one
-    //              }
-    //             )
-    //     {
-    //         Rational<BigInteger> ea = a.Evaluate(subs),
-    //             es = s.Evaluate(subs),
-    //             eb = b.Evaluate(subs),
-    //             et = t.Evaluate(subs);
-    //         if (!ea.Multiply(es).Add(eb.Multiply(et)).IsOne())
-    //             return false;
-    //     }
-    //
-    //     return a.Multiply(s).Add(b.Multiply(t)).IsOne();
-    // }
+    static UnivariatePolynomial<Rational<BigInteger>>[] ModularExtendedRationalGCD0(UnivariatePolynomial<BigInteger> a,
+        UnivariatePolynomial<BigInteger> b)
+    {
+        var lcGCD = BigInteger.GreatestCommonDivisor(a.Lc(), b.Lc());
+        UnivariatePolynomial<Rational<BigInteger>> aRat =
+                a.MapCoefficients(Rings.Q, (c) => new Rational<BigInteger>(Rings.Z, c)),
+            bRat = b.MapCoefficients(Rings.Q, (c) => new Rational<BigInteger>(Rings.Z, c));
+        var degreeMax = Math.Max(a.degree, b.degree);
+        var bound2 = (BigInteger.Pow(new BigInteger(degreeMax) + 1, degreeMax)
+                      * BigInteger.Pow(BigInteger.Max(a.NormMax(), b.NormMax()), a.degree + b.degree))
+                     * lcGCD
+                     << 1;
+        var primesLoop = new PrimesIterator(1031); //SmallPrimes.nextPrime(1 << 25));
+        List<BigInteger> primes = [];
+        List<UnivariatePolynomial<BigInteger>>[] gst =
+        [
+            [],
+            [],
+            []
+        ];
+        var primesMul = BigInteger.One;
+        main:
+        while (true)
+        {
+            while (primesMul.CompareTo(bound2) < 0)
+            {
+                var prime = primesLoop.Take();
+                var bPrime = new BigInteger(prime);
+                if ((a.Lc() % bPrime).IsZero || (b.Lc() % bPrime).IsZero)
+                    continue;
+                var bPrimeDomain = new IntegersZp(bPrime);
+                UnivariatePolynomialZp64 aMod = AsOverZp64(a.SetRing(bPrimeDomain)),
+                    bMod = AsOverZp64(b.SetRing(bPrimeDomain));
+                UnivariatePolynomialZp64[] modularXGCD = ExtendedHalfGCD(aMod, bMod);
 
-    // TODO
-    // public static UnivariatePolynomial<Rational<BigInteger>>[] ModularExtendedResultantGCDInQ(
-    //     UnivariatePolynomial<Rational<BigInteger>> a, UnivariatePolynomial<Rational<BigInteger>> b)
-    // {
-    //     Tuple2<UnivariatePolynomial<BigInteger>, BigInteger> ra = ToCommonDenominator(a), rb = ToCommonDenominator(b);
-    //     UnivariatePolynomial<BigInteger>[] xgcdZ = ModularExtendedResultantGCDInZ(ra._1, rb._1);
-    //     BigInteger content = Z.Gcd(xgcdZ[0].Content(), ra._2, rb._2);
-    //     xgcdZ[0].DivideExact(content);
-    //     UnivariatePolynomial<Rational<BigInteger>>[] xgcd = Arrays.Stream(xgcdZ)
-    //         .Map((p) => p.MapCoefficients(Q, Q.MkNumerator())).ToArray(UnivariatePolynomial[].New());
-    //     xgcd[1].Multiply(Q.MkNumerator(ra._2.DivideExact(content)));
-    //     xgcd[2].Multiply(Q.MkNumerator(rb._2.DivideExact(content)));
-    //     return xgcd;
-    // }
+                //skip unlucky prime
+                if (gst[0].Count != 0 && modularXGCD[0].degree > gst[0][0].degree)
+                    continue;
+                if (gst[0].Count != 0 && modularXGCD[0].degree < gst[0][0].degree)
+                {
+                    primes.Clear();
+                    primesMul = BigInteger.One;
+                    foreach (var g in gst)
+                        g.Clear();
+                }
 
-    // TODO
-    // public static UnivariatePolynomial<BigInteger>[] ModularExtendedResultantGCDInZ(UnivariatePolynomial<BigInteger> a,
-    //     UnivariatePolynomial<BigInteger> b)
-    // {
-    //     if (a == b || a.Equals(b))
-    //         return new UnivariatePolynomial<BigInteger>[]
-    //         {
-    //             a.Clone(),
-    //             a.CreateZero(),
-    //             a.CreateOne()
-    //         };
-    //     if (a.Degree() < b.Degree())
-    //     {
-    //         UnivariatePolynomial<BigInteger>[] r = ModularExtendedResultantGCDInZ(b, a);
-    //         ArraysUtil.Swap(r, 1, 2);
-    //         return r;
-    //     }
-    //
-    //     if (b.IsZero())
-    //     {
-    //         UnivariatePolynomial<BigInteger>[] result = a.CreateArray(3);
-    //         result[0] = a.Clone();
-    //         result[1] = a.CreateOne();
-    //         result[2] = a.CreateZero();
-    //         return NormalizeExtendedGCD(result);
-    //     }
-    //
-    //     BigInteger aContent = a.Content(), bContent = b.Content();
-    //     a = a.Clone().DivideExact(aContent);
-    //     b = b.Clone().DivideExact(bContent);
-    //     UnivariatePolynomial<BigInteger> gcd = PolynomialGCD(a, b);
-    //     a = UnivariateDivision.DivideExact(a, gcd, false);
-    //     b = UnivariateDivision.DivideExact(b, gcd, false);
-    //     UnivariatePolynomial<BigInteger>[] xgcd = ModularExtendedResultantGCD0(a, b);
-    //     xgcd[0].Multiply(gcd);
-    //     UnivariatePolynomial<BigInteger> g = xgcd[0], s = xgcd[1], t = xgcd[2];
-    //     BigInteger @as = Z.Gcd(aContent, s.Content()), bt = Z.Gcd(bContent, t.Content());
-    //     aContent = aContent.DivideExact(@as);
-    //     bContent = bContent.DivideExact(bt);
-    //     s.DivideExact(@as);
-    //     t.DivideExact(bt);
-    //     t.Multiply(aContent);
-    //     g.Multiply(aContent);
-    //     s.Multiply(bContent);
-    //     g.Multiply(bContent);
-    //     return xgcd;
-    // }
+                var lLcGCD = (long)(lcGCD % bPrime);
+                var lc = modularXGCD[0].Lc();
+                for (var i = 0; i < modularXGCD.Length; i++)
+                    gst[i].Add(modularXGCD[i].Multiply(lLcGCD).DivideExact(lc).ToBigPoly());
+                primes.Add(bPrime);
+                primesMul = primesMul * (bPrime);
+            }
 
-    // TODO
-    // private static UnivariatePolynomial<BigInteger>[] ModularExtendedResultantGCD0(UnivariatePolynomial<BigInteger> a,
-    //     UnivariatePolynomial<BigInteger> b)
-    // {
-    //     BigInteger gcd = UnivariateResultants.ModularResultant(a, b);
-    //     UnivariatePolynomial<BigInteger>[] previousBase = null, @base = null;
-    //     BigInteger basePrime = null;
-    //     PrimesIterator primesLoop = new PrimesIterator(SmallPrimes.NextPrime(1 << 28));
-    //     while (true)
-    //     {
-    //         long prime = primesLoop.Take();
-    //         BigInteger bPrime = new BigInteger(prime);
-    //         if (a.Lc().Remainder(bPrime).IsZero || b.Lc().Remainder(bPrime).IsZero)
-    //             continue;
-    //         IntegersZp ring = new IntegersZp(bPrime);
-    //         UnivariatePolynomialZp64 aMod = AsOverZp64(a.SetRing(ring)), bMod = AsOverZp64(b.SetRing(ring));
-    //         UnivariatePolynomialZp64[] modularXGCD = PolynomialExtendedGCD(aMod, bMod);
-    //         if (modularXGCD[0].degree != 0)
-    //             continue;
-    //
-    //         // resultant correction
-    //         long correction = gcd.Mod(bPrime).LongValueExact();
-    //         Arrays.Stream(modularXGCD).ForEach((p) => p.Multiply(correction));
-    //
-    //         //save the base
-    //         if (@base == null)
-    //         {
-    //             //make base monic and multiply lcGCD
-    //             @base = Arrays.Stream(modularXGCD).Map(UnivariatePolynomialZp64.ToBigPoly())
-    //                 .ToArray(UnivariatePolynomial[].New());
-    //             basePrime = bPrime;
-    //             continue;
-    //         }
-    //
-    //
-    //         //CRT lifting
-    //         ChineseRemainders.ChineseRemaindersMagic<BigInteger> magic = CreateMagic(Z, basePrime, bPrime);
-    //         BigInteger newBasePrime = basePrime.Multiply(bPrime);
-    //         for (int e = 0; e < 3; ++e)
-    //         {
-    //             @base[e] = @base[e].SetRingUnsafe(new IntegersZp(newBasePrime));
-    //             if (@base[e].degree < modularXGCD[e].degree)
-    //                 @base[e].EnsureCapacity(modularXGCD[e].degree);
-    //             for (int i = 0; i <= @base[e].degree; ++i)
-    //                 @base[e].data[i] = ChineseRemainders.ChineseRemainders(Z, magic, @base[e][i],
-    //                     BigInteger.ValueOf(modularXGCD[e][i]));
-    //             @base[e].FixDegree();
-    //         }
-    //
-    //         basePrime = newBasePrime;
-    //
-    //         // compute candidate
-    //         UnivariatePolynomial<BigInteger>[] candidate = Arrays.Stream(@base)
-    //             .Map(UnivariatePolynomial.AsPolyZSymmetric()).ToArray(UnivariatePolynomial[].New());
-    //         BigInteger content = Z.Gcd(candidate[0].Content(), candidate[1].Content(), candidate[2].Content());
-    //         Arrays.Stream(candidate).ForEach((p) => p.DivideExact(content));
-    //
-    //         // two trials didn't change the result, probably we are done
-    //         if ((previousBase != null && Arrays.Equals(candidate, previousBase)))
-    //         {
-    //             previousBase = candidate;
-    //             if (!SatisfiesXGCD(a, b, candidate))
-    //                 continue;
-    //             return candidate;
-    //         }
-    //
-    //         previousBase = candidate;
-    //     }
-    // }
+
+            // CRT
+            UnivariatePolynomial<BigInteger>[] xgcdBase = new UnivariatePolynomial<BigInteger>[3];
+            var primesArray = primes.ToArray();
+            for (var i = 0; i < 3; ++i)
+            {
+                xgcdBase[i] = UnivariatePolynomial<BigInteger>.Zero(Rings.Z);
+                var deg = gst[i].Select(u => u.Degree()).Max();
+                xgcdBase[i].EnsureCapacity(deg);
+                for (var j = 0; j <= deg; ++j)
+                {
+                    var jf = j;
+                    var cfs = gst[i].Select((p) => p[jf]).ToArray();
+                    xgcdBase[i].data[j] = ChineseRemainders.ChineseRemainder(primesArray, cfs);
+                }
+
+                xgcdBase[i].FixDegree();
+            }
+
+            while (true)
+            {
+                // do rational reconstruction
+                UnivariatePolynomial<Rational<BigInteger>>[] xgcd = ReconstructXGCD(aRat, bRat, xgcdBase, primesMul,
+                    bound2);
+                if (xgcd != null)
+                    return xgcd;
+
+                // continue with CRT
+                var prime = primesLoop.Take();
+                var bPrime = new BigInteger(prime);
+                if ((a.Lc() % bPrime).IsZero || (b.Lc() % bPrime).IsZero)
+                    continue;
+                var bPrimeDomain = new IntegersZp(bPrime);
+                UnivariatePolynomialZp64 aMod = AsOverZp64(a.SetRing(bPrimeDomain)),
+                    bMod = AsOverZp64(b.SetRing(bPrimeDomain));
+                UnivariatePolynomialZp64[] modularXGCD = ExtendedHalfGCD(aMod, bMod);
+
+                //skip unlucky prime
+                if (modularXGCD[0].degree > xgcdBase[0].degree)
+                    continue;
+                if (modularXGCD[0].degree < xgcdBase[0].degree)
+                {
+                    primes.Clear();
+                    foreach (var g in gst)
+                        g.Clear();
+                    var lLcGCD = (long)(lcGCD % bPrime);
+                    var lc = modularXGCD[0].Lc();
+                    for (var i = 0; i < modularXGCD.Length; i++)
+                        gst[i].Add(modularXGCD[i].Multiply(lLcGCD).DivideExact(lc).ToBigPoly());
+                    primes.Add(bPrime);
+                    primesMul = bPrime;
+                    continue; // <- extremely rare
+                }
+
+                var lLcGCD_ = (long)(lcGCD % bPrime);
+                var lc_ = modularXGCD[0].Lc();
+                foreach (var m in modularXGCD)
+                    m.Multiply(lLcGCD_).DivideExact(lc_);
+                var magic =
+                    ChineseRemainders.CreateMagic(Rings.Z, primesMul, bPrime);
+                for (var i = 0; i < 3; i++)
+                {
+                    modularXGCD[i].EnsureCapacity(xgcdBase[i].degree);
+                    for (var j = 0; j <= xgcdBase[i].degree; ++j)
+                        xgcdBase[i].data[j] = ChineseRemainders.ChineseRemainder(Rings.Z, magic, xgcdBase[i].data[j],
+                            new BigInteger(modularXGCD[i].data[j]));
+                }
+
+                primes.Add(bPrime);
+                primesMul = primesMul * (bPrime);
+            }
+        }
+    }
+
+    private static UnivariatePolynomial<Rational<BigInteger>>[] ReconstructXGCD(
+        UnivariatePolynomial<Rational<BigInteger>> aRat, UnivariatePolynomial<Rational<BigInteger>> bRat,
+        UnivariatePolynomial<BigInteger>[] xgcdBase, BigInteger prime, BigInteger bound2)
+    {
+        var candidate = new UnivariatePolynomial<Rational<BigInteger>>[3];
+        for (var i = 0; i < 3; i++)
+        {
+            candidate[i] = UnivariatePolynomial<Rational<BigInteger>>.Zero(Rings.Q);
+            candidate[i].EnsureCapacity(xgcdBase[i].degree);
+            for (var j = 0; j <= xgcdBase[i].degree; ++j)
+            {
+                var numDen = RationalReconstruction.Reconstruct(xgcdBase[i].data[j], prime, bound2, bound2);
+                if (numDen == null)
+                    return null;
+                candidate[i].data[j] = new Rational<BigInteger>(Rings.Z, numDen[0], numDen[1]);
+            }
+
+            candidate[i].FixDegree();
+        }
+
+        var content = candidate[0].MapCoefficients(Rings.Z, r => r.Numerator()).Content();
+        var corr = new Rational<BigInteger>(Rings.Z, Rings.Z.GetOne(), content);
+        UnivariatePolynomial<Rational<BigInteger>> sCandidate = candidate[1].Multiply(corr),
+            tCandidate = candidate[2].Multiply(corr),
+            gCandidate = candidate[0].Multiply(corr);
+
+        //first check b since b is less degree
+        UnivariatePolynomial<Rational<BigInteger>>[] bDiv;
+        bDiv = UnivariateDivision.DivideAndRemainder(bRat, gCandidate, true);
+        if (!bDiv[1].IsZero())
+            return null;
+        UnivariatePolynomial<Rational<BigInteger>>[] aDiv;
+        aDiv = UnivariateDivision.DivideAndRemainder(aRat, gCandidate, true);
+        if (!aDiv[1].IsZero())
+            return null;
+        if (!SatisfiesXGCD(aDiv[0], sCandidate, bDiv[0], tCandidate))
+            return null;
+        return candidate;
+    }
+
+    private static bool SatisfiesXGCD(UnivariatePolynomial<Rational<BigInteger>> a,
+        UnivariatePolynomial<Rational<BigInteger>> s, UnivariatePolynomial<Rational<BigInteger>> b,
+        UnivariatePolynomial<Rational<BigInteger>> t)
+    {
+        Rational<BigInteger> zero = Rational<BigInteger>.Zero(Rings.Z), one = Rational<BigInteger>.One(Rings.Z);
+        foreach (var subs in new Rational<BigInteger>[]
+                 {
+                     zero,
+                     one
+                 }
+                )
+        {
+            Rational<BigInteger> ea = a.Evaluate(subs),
+                es = s.Evaluate(subs),
+                eb = b.Evaluate(subs),
+                et = t.Evaluate(subs);
+            if (!ea.Multiply(es).Add(eb.Multiply(et)).IsOne())
+                return false;
+        }
+
+        return a.Multiply(s).Add(b.Multiply(t)).IsOne();
+    }
+
+    public static UnivariatePolynomial<Rational<BigInteger>>[] ModularExtendedResultantGCDInQ(
+        UnivariatePolynomial<Rational<BigInteger>> a, UnivariatePolynomial<Rational<BigInteger>> b)
+    {
+        (UnivariatePolynomial<BigInteger>, BigInteger) ra = Util.ToCommonDenominator(a),
+            rb = Util.ToCommonDenominator(b);
+        var xgcdZ = ModularExtendedResultantGCDInZ(ra.Item1, rb.Item1);
+        var content = Rings.Z.Gcd(xgcdZ[0].Content(), ra.Item2, rb.Item2);
+        xgcdZ[0].DivideExact(content);
+        UnivariatePolynomial<Rational<BigInteger>>[] xgcd = xgcdZ
+            .Select((p) => p.MapCoefficients(Rings.Q, Rings.Q.MkNumerator)).ToArray();
+        xgcd[1].Multiply(Rings.Q.MkNumerator(ra.Item2 / content));
+        xgcd[2].Multiply(Rings.Q.MkNumerator(rb.Item2 / content));
+        return xgcd;
+    }
+
+    public static UnivariatePolynomial<BigInteger>[] ModularExtendedResultantGCDInZ(UnivariatePolynomial<BigInteger> a,
+        UnivariatePolynomial<BigInteger> b)
+    {
+        if (a == b || a.Equals(b))
+            return new UnivariatePolynomial<BigInteger>[]
+            {
+                a.Clone(),
+                a.CreateZero(),
+                a.CreateOne()
+            };
+        if (a.Degree() < b.Degree())
+        {
+            var r = ModularExtendedResultantGCDInZ(b, a);
+            Utils.Utils.Swap(r, 1, 2);
+            return r;
+        }
+
+        if (b.IsZero())
+        {
+            UnivariatePolynomial<BigInteger>[] result = new UnivariatePolynomial<BigInteger>[3];
+            result[0] = a.Clone();
+            result[1] = a.CreateOne();
+            result[2] = a.CreateZero();
+            return NormalizeExtendedGCD(result);
+        }
+
+        BigInteger aContent = a.Content(), bContent = b.Content();
+        a = a.Clone().DivideExact(aContent);
+        b = b.Clone().DivideExact(bContent);
+        var gcd = PolynomialGCD(a, b);
+        a = UnivariateDivision.DivideExact(a, gcd, false);
+        b = UnivariateDivision.DivideExact(b, gcd, false);
+        UnivariatePolynomial<BigInteger>[] xgcd = ModularExtendedResultantGCD0(a, b);
+        xgcd[0].Multiply(gcd);
+        UnivariatePolynomial<BigInteger> g = xgcd[0], s = xgcd[1], t = xgcd[2];
+        BigInteger @as = Rings.Z.Gcd(aContent, s.Content()), bt = Rings.Z.Gcd(bContent, t.Content());
+        aContent = aContent / (@as);
+        bContent = bContent / (bt);
+        s.DivideExact(@as);
+        t.DivideExact(bt);
+        t.Multiply(aContent);
+        g.Multiply(aContent);
+        s.Multiply(bContent);
+        g.Multiply(bContent);
+        return xgcd;
+    }
+
+    private static UnivariatePolynomial<BigInteger>[] ModularExtendedResultantGCD0(UnivariatePolynomial<BigInteger> a,
+        UnivariatePolynomial<BigInteger> b)
+    {
+        var gcd = UnivariateResultants.ModularResultant(a, b);
+        UnivariatePolynomial<BigInteger>[] previousBase = null, @base = null;
+        BigInteger? basePrime = null;
+        var primesLoop = new PrimesIterator(SmallPrimes.NextPrime(1 << 28));
+        while (true)
+        {
+            var prime = primesLoop.Take();
+            var bPrime = new BigInteger(prime);
+            if ((a.Lc() % bPrime).IsZero || (b.Lc() % bPrime).IsZero)
+                continue;
+            var ring = new IntegersZp(bPrime);
+            UnivariatePolynomialZp64 aMod = AsOverZp64(a.SetRing(ring)), bMod = AsOverZp64(b.SetRing(ring));
+            UnivariatePolynomialZp64[] modularXGCD = PolynomialExtendedGCD(aMod, bMod);
+            if (modularXGCD[0].degree != 0)
+                continue;
+
+            // resultant correction
+            var correction = (long)(gcd % bPrime);
+            modularXGCD.ForEach((p) => p.Multiply(correction));
+
+            //save the base
+            if (@base == null)
+            {
+                //make base monic and multiply lcGCD
+                @base = modularXGCD.Select(u => u.ToBigPoly())
+                    .ToArray();
+                basePrime = bPrime;
+                continue;
+            }
+
+
+            //CRT lifting
+            var magic =
+                ChineseRemainders.CreateMagic(Rings.Z, basePrime.Value, bPrime);
+            var newBasePrime = basePrime.Value * (bPrime);
+            for (var e = 0; e < 3; ++e)
+            {
+                @base[e] = @base[e].SetRingUnsafe(new IntegersZp(newBasePrime));
+                if (@base[e].degree < modularXGCD[e].degree)
+                    @base[e].EnsureCapacity(modularXGCD[e].degree);
+                for (var i = 0; i <= @base[e].degree; ++i)
+                    @base[e].data[i] = ChineseRemainders.ChineseRemainder(Rings.Z, magic, @base[e][i],
+                        new BigInteger(modularXGCD[e][i]));
+                @base[e].FixDegree();
+            }
+
+            basePrime = newBasePrime;
+
+            // compute candidate
+            UnivariatePolynomial<BigInteger>[] candidate = @base
+                .Select(u => UnivariatePolynomialZp64.AsPolyZSymmetric(u)).ToArray();
+            var content = Rings.Z.Gcd(candidate[0].Content(), candidate[1].Content(), candidate[2].Content());
+            candidate.ForEach((p) => p.DivideExact(content));
+
+            // two trials didn't change the result, probably we are done
+            if ((previousBase != null && Enumerable.SequenceEqual(candidate, previousBase)))
+            {
+                previousBase = candidate;
+                if (!SatisfiesXGCD(a, b, candidate))
+                    continue;
+                return candidate;
+            }
+
+            previousBase = candidate;
+        }
+    }
 
     private static bool SatisfiesXGCD<E>(UnivariatePolynomial<E> a, UnivariatePolynomial<E> b,
         UnivariatePolynomial<E>[] xgcd)
     {
-        Ring<E> ring = xgcd[0].ring;
+        var ring = xgcd[0].ring;
         foreach (var subs in (E[]) [ring.GetZero(), ring.GetOne()])
         {
             E ea = a.Evaluate(subs),
@@ -1214,117 +1218,113 @@ public static class UnivariateGCD
         return a.Clone().Multiply(xgcd[1]).Add(b.Clone().Multiply(xgcd[2])).Equals(xgcd[0]);
     }
 
-    // TODO
-    // private static UnivariatePolynomial<UnivariatePolynomial<E>> TrivialGCDInNumberField<E>(
-    //     UnivariatePolynomial<UnivariatePolynomial<E>> a, UnivariatePolynomial<UnivariatePolynomial<E>> b)
-    // {
-    //     UnivariatePolynomial<UnivariatePolynomial<E>> trivialGCD = TrivialGCD(a, b);
-    //     if (trivialGCD != null)
-    //         return trivialGCD;
-    //     AlgebraicNumberField<UnivariatePolynomial<E>> ring = (AlgebraicNumberField<UnivariatePolynomial<E>>)a.ring;
-    //     if (!a.Stream().AllMatch(ring.IsInTheBaseField()) || !b.Stream().AllMatch(ring.IsInTheBaseField()))
-    //         return null;
-    //     UnivariatePolynomial<E> ar = a.MapCoefficients(ring.GetMinimalPolynomial().ring, UnivariatePolynomial.Cc()),
-    //         br = b.MapCoefficients(ring.GetMinimalPolynomial().ring, UnivariatePolynomial.Cc());
-    //     return PolynomialGCD(ar, br).MapCoefficients(ring,
-    //         (cf) => UnivariatePolynomial.Constant(ring.GetMinimalPolynomial().ring, cf));
-    // }
+    private static UnivariatePolynomial<UnivariatePolynomial<E>> TrivialGCDInNumberField<E>(
+        UnivariatePolynomial<UnivariatePolynomial<E>> a, UnivariatePolynomial<UnivariatePolynomial<E>> b)
+    {
+        var trivialGCD = TrivialGCD(a, b);
+        if (trivialGCD != null)
+            return trivialGCD;
+        AlgebraicNumberField<E> ring = (AlgebraicNumberField<E>)a.ring;
+        if (!a.Stream().All(ring.IsInTheBaseField) || !b.Stream().All(ring.IsInTheBaseField))
+            return null;
+        UnivariatePolynomial<E> ar = a.MapCoefficients(ring.GetMinimalPolynomial().ring, u => u.Cc()),
+            br = b.MapCoefficients(ring.GetMinimalPolynomial().ring, u => u.Cc());
+        return PolynomialGCD(ar, br).MapCoefficients(ring,
+            (cf) => UnivariatePolynomial<E>.Constant(ring.GetMinimalPolynomial().ring, cf));
+    }
 
-    //TODO
-    // public static UnivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> PolynomialGCDInNumberField(
-    //     UnivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> a,
-    //     UnivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> b)
-    // {
-    //     UnivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> simpleGCD = TrivialGCDInNumberField(a, b);
-    //     if (simpleGCD != null)
-    //         return simpleGCD;
-    //     AlgebraicNumberField<UnivariatePolynomial<Rational<BigInteger>>> numberField =
-    //         (AlgebraicNumberField<UnivariatePolynomial<Rational<BigInteger>>>)a.ring;
-    //     UnivariatePolynomial<Rational<BigInteger>> minimalPoly = numberField.GetMinimalPolynomial();
-    //     a = a.Clone();
-    //     b = b.Clone();
-    //
-    //     // reduce problem to the case with integer monic minimal polynomial
-    //     if (minimalPoly.Stream().AllMatch(Rational.IsIntegral()))
-    //     {
-    //         // minimal poly is already monic & integer
-    //         UnivariatePolynomial<BigInteger> minimalPolyZ = minimalPoly.MapCoefficients(Z, Rational.Numerator());
-    //         AlgebraicNumberField<UnivariatePolynomial<BigInteger>>
-    //             numberFieldZ = new AlgebraicNumberField(minimalPolyZ);
-    //         RemoveDenominators(a);
-    //         RemoveDenominators(b);
-    //         UnivariatePolynomial<UnivariatePolynomial<BigInteger>> gcdZ =
-    //             GcdAssociateInNumberField(
-    //                 a.MapCoefficients(numberFieldZ, (cf) => cf.MapCoefficients(Z, Rational.Numerator())),
-    //                 b.MapCoefficients(numberFieldZ, (cf) => cf.MapCoefficients(Z, Rational.Numerator())));
-    //         return gcdZ.MapCoefficients(numberField, (p) => p.MapCoefficients(Q, (cf) => new Rational(Z, cf))).Monic();
-    //     }
-    //     else
-    //     {
-    //         // replace s -> s / lc(minPoly)
-    //         BigInteger minPolyLeadCoeff = CommonDenominator(minimalPoly);
-    //         Rational<BigInteger> scale = new Rational(Z, Z.GetOne(), minPolyLeadCoeff),
-    //             scaleReciprocal = scale.Reciprocal();
-    //         AlgebraicNumberField<UnivariatePolynomial<Rational<BigInteger>>> scaledNumberField =
-    //             new AlgebraicNumberField(minimalPoly.Scale(scale).Monic());
-    //         return PolynomialGCDInNumberField(a.MapCoefficients(scaledNumberField, (cf) => cf.Scale(scale)),
-    //                 b.MapCoefficients(scaledNumberField, (cf) => cf.Scale(scale)))
-    //             .MapCoefficients(numberField, (cf) => cf.Scale(scaleReciprocal));
-    //     }
-    // }
+    public static UnivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> PolynomialGCDInNumberField(
+        UnivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> a,
+        UnivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> b)
+    {
+        var simpleGCD = TrivialGCDInNumberField(a, b);
+        if (simpleGCD != null)
+            return simpleGCD;
+        AlgebraicNumberField<Rational<BigInteger>> numberField =
+            (AlgebraicNumberField<Rational<BigInteger>>)a.ring;
+        UnivariatePolynomial<Rational<BigInteger>> minimalPoly = numberField.GetMinimalPolynomial();
+        a = a.Clone();
+        b = b.Clone();
 
-    // TODO
-    // private static void PseudoMonicize(UnivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> a)
-    // {
-    //     UnivariatePolynomial<Rational<BigInteger>> inv = a.ring.Reciprocal(a.Lc());
-    //     a.Multiply(Util.ToCommonDenominator(inv)._1.MapCoefficients(Q, Q.MkNumerator()));
-    // }
+        // reduce problem to the case with integer monic minimal polynomial
+        if (minimalPoly.Stream().All(r => r.IsIntegral()))
+        {
+            // minimal poly is already monic & integer
+            var minimalPolyZ = minimalPoly.MapCoefficients(Rings.Z, r => r.Numerator());
+            var
+                numberFieldZ = new AlgebraicNumberField<BigInteger>(minimalPolyZ);
+            RemoveDenominators(a);
+            RemoveDenominators(b);
+            UnivariatePolynomial<UnivariatePolynomial<BigInteger>> gcdZ =
+                GcdAssociateInNumberField(
+                    a.MapCoefficients(numberFieldZ, (cf) => cf.MapCoefficients(Rings.Z, r => r.Numerator())),
+                    b.MapCoefficients(numberFieldZ, (cf) => cf.MapCoefficients(Rings.Z, r => r.Numerator())));
+            return gcdZ.MapCoefficients(numberField,
+                (p) => p.MapCoefficients(Rings.Q, (cf) => new Rational<BigInteger>(Rings.Z, cf))).Monic();
+        }
+        else
+        {
+            // replace s -> s / lc(minPoly)
+            var minPolyLeadCoeff = Util.CommonDenominator(minimalPoly);
+            Rational<BigInteger> scale = new Rational<BigInteger>(Rings.Z, Rings.Z.GetOne(), minPolyLeadCoeff),
+                scaleReciprocal = scale.Reciprocal();
+            AlgebraicNumberField<Rational<BigInteger>> scaledNumberField =
+                new AlgebraicNumberField<Rational<BigInteger>>(minimalPoly.Scale(scale).Monic());
+            return PolynomialGCDInNumberField(a.MapCoefficients(scaledNumberField, (cf) => cf.Scale(scale)),
+                    b.MapCoefficients(scaledNumberField, (cf) => cf.Scale(scale)))
+                .MapCoefficients(numberField, (cf) => cf.Scale(scaleReciprocal));
+        }
+    }
 
-    // TODO
-    // static BigInteger RemoveDenominators(UnivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> a)
-    // {
-    //     BigInteger denominator = Rings.Z.Lcm(() => a.Stream().Select(Util.CommonDenominator()).Iterator());
-    //     a.Multiply(a.ring.ValueOfBigInteger(denominator));
-    //     return denominator;
-    // }
+    private static void PseudoMonicize(UnivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> a)
+    {
+        var inv = a.ring.Reciprocal(a.Lc());
+        a.Multiply(Util.ToCommonDenominator(inv).Item1.MapCoefficients(Rings.Q, Rings.Q.MkNumerator));
+    }
 
-    // TODO
-    // public static UnivariatePolynomial<UnivariatePolynomial<BigInteger>> PolynomialGCDInRingOfIntegersOfNumberField(
-    //     UnivariatePolynomial<UnivariatePolynomial<BigInteger>> a,
-    //     UnivariatePolynomial<UnivariatePolynomial<BigInteger>> b)
-    // {
-    //     if (!a.Lc().IsConstant() || !b.Lc().IsConstant())
-    //         throw new ArgumentException(
-    //             "Univariate GCD in non-field extensions requires polynomials have integer leading coefficients.");
-    //     UnivariatePolynomial<BigInteger> aContent = a.Content(), bContent = b.Content();
-    //     UnivariatePolynomial<BigInteger> contentGCD = aContent.CreateConstant(BigInteger.GreatestCommonDivisor(aContent.Cc(), bContent.Cc()));
-    //     a = a.Clone().DivideExact(aContent);
-    //     b = b.Clone().DivideExact(bContent);
-    //     return GcdAssociateInNumberField0(a, b).Multiply(contentGCD);
-    // }
+    static BigInteger RemoveDenominators(UnivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> a)
+    {
+        var denominator = Rings.Z.Lcm(a.Stream().Select(Util.CommonDenominator));
+        a.Multiply(a.ring.ValueOfBigInteger(denominator));
+        return denominator;
+    }
 
-    // TODO
-    // static UnivariatePolynomial<UnivariatePolynomial<BigInteger>> GcdAssociateInNumberField(
-    //     UnivariatePolynomial<UnivariatePolynomial<BigInteger>> a,
-    //     UnivariatePolynomial<UnivariatePolynomial<BigInteger>> b)
-    // {
-    //     AlgebraicNumberField<UnivariatePolynomial<BigInteger>> numberField =
-    //         (AlgebraicNumberField<UnivariatePolynomial<BigInteger>>)a.ring;
-    //     IntegerPrimitivePart(a);
-    //     IntegerPrimitivePart(b);
-    //     if (!a.Lc().IsConstant())
-    //         a.Multiply(numberField.Normalizer(a.Lc()));
-    //     if (!b.Lc().IsConstant())
-    //         b.Multiply(numberField.Normalizer(b.Lc()));
-    //     IntegerPrimitivePart(a);
-    //     IntegerPrimitivePart(b);
-    //
-    //     // if all coefficients are simple numbers (no algebraic elements)
-    //     UnivariatePolynomial<UnivariatePolynomial<BigInteger>> simpleGCD = TrivialGCDInNumberField(a, b);
-    //     if (simpleGCD != null)
-    //         return simpleGCD;
-    //     return GcdAssociateInNumberField0(a, b);
-    // }
+    public static UnivariatePolynomial<UnivariatePolynomial<BigInteger>> PolynomialGCDInRingOfIntegersOfNumberField(
+        UnivariatePolynomial<UnivariatePolynomial<BigInteger>> a,
+        UnivariatePolynomial<UnivariatePolynomial<BigInteger>> b)
+    {
+        if (!a.Lc().IsConstant() || !b.Lc().IsConstant())
+            throw new ArgumentException(
+                "Univariate GCD in non-field extensions requires polynomials have integer leading coefficients.");
+        UnivariatePolynomial<BigInteger> aContent = a.Content(), bContent = b.Content();
+        var contentGCD =
+            aContent.CreateConstant(BigInteger.GreatestCommonDivisor(aContent.Cc(), bContent.Cc()));
+        a = a.Clone().DivideExact(aContent);
+        b = b.Clone().DivideExact(bContent);
+        return GcdAssociateInNumberField0(a, b).Multiply(contentGCD);
+    }
+
+    static UnivariatePolynomial<UnivariatePolynomial<BigInteger>> GcdAssociateInNumberField(
+        UnivariatePolynomial<UnivariatePolynomial<BigInteger>> a,
+        UnivariatePolynomial<UnivariatePolynomial<BigInteger>> b)
+    {
+        var numberField =
+            (AlgebraicNumberField<BigInteger>)a.ring;
+        IntegerPrimitivePart(a);
+        IntegerPrimitivePart(b);
+        if (!a.Lc().IsConstant())
+            a.Multiply(numberField.Normalizer(a.Lc()));
+        if (!b.Lc().IsConstant())
+            b.Multiply(numberField.Normalizer(b.Lc()));
+        IntegerPrimitivePart(a);
+        IntegerPrimitivePart(b);
+
+        // if all coefficients are simple numbers (no algebraic elements)
+        UnivariatePolynomial<UnivariatePolynomial<BigInteger>> simpleGCD = TrivialGCDInNumberField(a, b);
+        if (simpleGCD != null)
+            return simpleGCD;
+        return GcdAssociateInNumberField0(a, b);
+    }
 
     static BigInteger IntegerPrimitivePart(UnivariatePolynomial<UnivariatePolynomial<BigInteger>> p)
     {
@@ -1333,114 +1333,114 @@ public static class UnivariateGCD
         return gcd;
     }
 
-    // TODO
-    // static UnivariatePolynomial<UnivariatePolynomial<BigInteger>> GcdAssociateInNumberField0(
-    //     UnivariatePolynomial<UnivariatePolynomial<BigInteger>> a,
-    //     UnivariatePolynomial<UnivariatePolynomial<BigInteger>> b)
-    // {
-    //     AlgebraicNumberField<UnivariatePolynomial<BigInteger>> numberField =
-    //         (AlgebraicNumberField<UnivariatePolynomial<BigInteger>>)a.ring;
-    //     UnivariateRing<UnivariatePolynomial<BigInteger>> auxRing = Rings.UnivariateRing(Z);
-    //     UnivariatePolynomial<BigInteger> minimalPoly = numberField.GetMinimalPolynomial();
-    //
-    //     // Weinberger & Rothschild (1976) correction denominator
-    //     BigInteger lcGCD = Z.Gcd(a.Lc().Cc(), b.Lc().Cc()),
-    //         disc = UnivariateResultants.Discriminant(minimalPoly),
-    //         correctionFactor = disc.Multiply(lcGCD);
-    //     BigInteger crtPrime = null;
-    //     UnivariatePolynomial<UnivariatePolynomial<BigInteger>> gcd = null, prevCandidate = null;
-    //     PrimesIterator primes = new PrimesIterator(1 << 20);
-    //     while (true)
-    //     {
-    //         long prime = primes.Take();
-    //         IntegersZp64 zpRing = new IntegersZp64(prime);
-    //         UnivariatePolynomialZp64 minimalPolyMod = AsOverZp64(minimalPoly, zpRing);
-    //         if (minimalPolyMod.NNonZeroTerms() != minimalPoly.NNonZeroTerms())
-    //
-    //             // bad prime
-    //             continue;
-    //         FiniteField<UnivariatePolynomialZp64> modRing = new FiniteField<UnivariatePolynomialZp64>(minimalPolyMod);
-    //         UnivariatePolynomial<UnivariatePolynomialZp64> aMod =
-    //                 a.MapCoefficients(modRing, (cf) => AsOverZp64(cf, zpRing)),
-    //             bMod = b.MapCoefficients(modRing, (cf) => AsOverZp64(cf, zpRing));
-    //         UnivariatePolynomial<UnivariatePolynomialZp64> gcdMod;
-    //         try
-    //         {
-    //             gcdMod = PolynomialGCD(aMod, bMod);
-    //         }
-    //         catch (Exception e)
-    //         {
-    //             // bad prime
-    //             continue;
-    //         }
-    //
-    //         if (gcdMod.IsConstant())
-    //             return a.CreateOne();
-    //         gcdMod.Multiply(correctionFactor.Mod(prime).LongValue());
-    //         BigInteger bPrime = BigInteger.ValueOf(prime);
-    //         if (crtPrime == null || gcdMod.degree < gcd.degree)
-    //         {
-    //             crtPrime = bPrime;
-    //             gcd = gcdMod.MapCoefficients(auxRing, (cf) => cf.ToBigPoly().SetRing(Z));
-    //             continue;
-    //         }
-    //
-    //         if (gcdMod.degree > gcd.degree)
-    //
-    //             // bad prime
-    //             continue;
-    //         ChineseRemainders.ChineseRemaindersMagic<BigInteger> magic = CreateMagic(Z, crtPrime, bPrime);
-    //         bool updated = false;
-    //         for (int i = gcd.degree; i >= 0; --i)
-    //         {
-    //             bool u = UpdateCRT(magic, gcd.data[i], gcdMod.data[i]);
-    //             if (u)
-    //                 updated = true;
-    //         }
-    //
-    //         crtPrime = crtPrime.Multiply(bPrime);
-    //
-    //         // do trial division
-    //         IntegersZp crtRing = new IntegersZp(crtPrime);
-    //         UnivariatePolynomial<UnivariatePolynomial<BigInteger>> candidate = gcd.MapCoefficients(numberField,
-    //                 (cf) => numberField.ValueOf(UnivariatePolynomial.AsPolyZSymmetric(cf.SetRingUnsafe(crtRing))))
-    //             .PrimitivePart();
-    //         if (prevCandidate == null)
-    //         {
-    //             prevCandidate = candidate;
-    //             continue;
-    //         }
-    //
-    //         if (!updated || prevCandidate.Equals(candidate))
-    //         {
-    //             UnivariatePolynomial<UnivariatePolynomial<BigInteger>> rem;
-    //             rem = UnivariateDivision.PseudoRemainderAdaptive(b, candidate, true);
-    //             if (rem == null || !rem.IsZero())
-    //                 continue;
-    //             rem = UnivariateDivision.PseudoRemainderAdaptive(a, candidate, true);
-    //             if (rem == null || !rem.IsZero())
-    //                 continue;
-    //             return candidate;
-    //         }
-    //
-    //         prevCandidate = candidate;
-    //     }
-    // }
+    static UnivariatePolynomial<UnivariatePolynomial<BigInteger>> GcdAssociateInNumberField0(
+        UnivariatePolynomial<UnivariatePolynomial<BigInteger>> a,
+        UnivariatePolynomial<UnivariatePolynomial<BigInteger>> b)
+    {
+        var numberField =
+            (AlgebraicNumberField<BigInteger>)a.ring;
+        var auxRing = Rings.UnivariateRing(Rings.Z);
+        var minimalPoly = numberField.GetMinimalPolynomial();
+
+        // Weinberger & Rothschild (1976) correction denominator
+        BigInteger lcGCD = Rings.Z.Gcd(a.Lc().Cc(), b.Lc().Cc()),
+            disc = UnivariateResultants.Discriminant(minimalPoly),
+            correctionFactor = disc * lcGCD;
+        BigInteger? crtPrime = null;
+        UnivariatePolynomial<UnivariatePolynomial<BigInteger>> gcd = null, prevCandidate = null;
+        var primes = new PrimesIterator(1 << 20);
+        while (true)
+        {
+            var prime = primes.Take();
+            var zpRing = new IntegersZp64(prime);
+            var minimalPolyMod = AsOverZp64(minimalPoly, zpRing);
+            if (minimalPolyMod.NNonZeroTerms() != minimalPoly.NNonZeroTerms())
+
+                // bad prime
+                continue;
+            var modRing = new FiniteField<long>(minimalPolyMod);
+            UnivariatePolynomial<UnivariatePolynomialZp64> aMod =
+                    a.MapCoefficients(modRing, (cf) => AsOverZp64(cf, zpRing)),
+                bMod = b.MapCoefficients(modRing, (cf) => AsOverZp64(cf, zpRing));
+            UnivariatePolynomial<UnivariatePolynomialZp64> gcdMod;
+            try
+            {
+                gcdMod = PolynomialGCD(aMod, bMod);
+            }
+            catch (Exception e)
+            {
+                // bad prime
+                continue;
+            }
+
+            if (gcdMod.IsConstant())
+                return a.CreateOne();
+            gcdMod.Multiply((long)(correctionFactor % prime));
+            var bPrime = new BigInteger(prime);
+            if (crtPrime == null || gcdMod.degree < gcd.degree)
+            {
+                crtPrime = bPrime;
+                gcd = gcdMod.MapCoefficients(auxRing, (cf) => cf.ToBigPoly().SetRing(Rings.Z));
+                continue;
+            }
+
+            if (gcdMod.degree > gcd.degree)
+
+                // bad prime
+                continue;
+            var magic =
+                ChineseRemainders.CreateMagic(Rings.Z, crtPrime.Value, bPrime);
+            var updated = false;
+            for (var i = gcd.degree; i >= 0; --i)
+            {
+                var u = UpdateCRT(magic, gcd.data[i], gcdMod.data[i]);
+                if (u)
+                    updated = true;
+            }
+
+            crtPrime = crtPrime.Value * bPrime;
+
+            // do trial division
+            var crtRing = new IntegersZp(crtPrime.Value);
+            UnivariatePolynomial<UnivariatePolynomial<BigInteger>> candidate = gcd.MapCoefficients(numberField,
+                    (cf) => numberField.ValueOf(UnivariatePolynomialZp64.AsPolyZSymmetric(cf.SetRingUnsafe(crtRing))))
+                .PrimitivePart();
+            if (prevCandidate == null)
+            {
+                prevCandidate = candidate;
+                continue;
+            }
+
+            if (!updated || prevCandidate.Equals(candidate))
+            {
+                UnivariatePolynomial<UnivariatePolynomial<BigInteger>> rem;
+                rem = UnivariateDivision.PseudoRemainderAdaptive(b, candidate, true);
+                if (rem == null || !rem.IsZero())
+                    continue;
+                rem = UnivariateDivision.PseudoRemainderAdaptive(a, candidate, true);
+                if (rem == null || !rem.IsZero())
+                    continue;
+                return candidate;
+            }
+
+            prevCandidate = candidate;
+        }
+    }
 
     public static bool UpdateCRT(ChineseRemainders.ChineseRemaindersMagic<BigInteger> magic,
         UnivariatePolynomial<BigInteger> accumulated, UnivariatePolynomialZp64 update)
     {
-        bool updated = false;
+        var updated = false;
         accumulated.EnsureCapacity(update.degree);
-        for (int i = Math.Max(accumulated.degree, update.degree); i >= 0; --i)
+        for (var i = Math.Max(accumulated.degree, update.degree); i >= 0; --i)
         {
-            BigInteger oldCf = accumulated[i];
-            BigInteger newCf = ChineseRemainders.ChineseRemainder(Rings.Z, magic, oldCf, new BigInteger(update[i]));
+            var oldCf = accumulated[i];
+            var newCf = ChineseRemainders.ChineseRemainder(Rings.Z, magic, oldCf, new BigInteger(update[i]));
             if (!oldCf.Equals(newCf))
                 updated = true;
             accumulated.data[i] = newCf;
         }
-    
+
         accumulated.FixDegree();
         return updated;
     }

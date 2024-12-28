@@ -2130,35 +2130,34 @@ public class MultivariatePolynomial<E> : Polynomial<MultivariatePolynomial<E>>, 
     //         p.MapCoefficients(newRing, MultivariatePolynomial.ToSparseRecursiveForm()));
     // }
 
-    // TODO
-    // public sealed class HornerForm
-    // {
-    //     private readonly Ring<E> ring;
-    //     private readonly int nEvalVariables;
-    //     private readonly int[] evalDegrees;
-    //     private readonly MultivariatePolynomial<AMultivariatePolynomial> recForm;
-    //
-    //     private HornerForm(Ring<E> ring, int[] evalDegrees, int nEvalVariables,
-    //         MultivariatePolynomial<AMultivariatePolynomial> recForm)
-    //     {
-    //         this.ring = ring;
-    //         this.evalDegrees = evalDegrees;
-    //         this.nEvalVariables = nEvalVariables;
-    //         this.recForm = recForm;
-    //     }
-    //
-    //
-    //     public MultivariatePolynomial<E> Evaluate(E[] values)
-    //     {
-    //         if (values.Length != nEvalVariables)
-    //             throw new ArgumentException();
-    //         PrecomputedPowers[] pp = new PrecomputedPowers[nEvalVariables];
-    //         for (int i = 0; i < nEvalVariables; ++i)
-    //             pp[i] = new PrecomputedPowers(Math.Min(evalDegrees[i], MAX_POWERS_CACHE_SIZE), values[i], ring);
-    //         return recForm.MapCoefficients(ring,
-    //             (p) => EvaluateSparseRecursiveForm(p, new PrecomputedPowersHolder(ring, pp), nEvalVariables - 1));
-    //     }
-    // }
+    public sealed class HornerForm
+    {
+        private readonly Ring<E> ring;
+        private readonly int nEvalVariables;
+        private readonly int[] evalDegrees;
+        private readonly MultivariatePolynomial<IMultivariatePolynomial> recForm;
+    
+        private HornerForm(Ring<E> ring, int[] evalDegrees, int nEvalVariables,
+            MultivariatePolynomial<IMultivariatePolynomial> recForm)
+        {
+            this.ring = ring;
+            this.evalDegrees = evalDegrees;
+            this.nEvalVariables = nEvalVariables;
+            this.recForm = recForm;
+        }
+    
+    
+        public MultivariatePolynomial<E> Evaluate(E[] values)
+        {
+            if (values.Length != nEvalVariables)
+                throw new ArgumentException();
+            PrecomputedPowers[] pp = new PrecomputedPowers[nEvalVariables];
+            for (int i = 0; i < nEvalVariables; ++i)
+                pp[i] = new PrecomputedPowers(Math.Min(evalDegrees[i], MAX_POWERS_CACHE_SIZE), values[i], ring);
+            return recForm.MapCoefficients(ring,
+                (p) => EvaluateSparseRecursiveForm(p, new PrecomputedPowersHolder(ring, pp), nEvalVariables - 1));
+        }
+    }
 
 
     public MultivariatePolynomial<E> Evaluate(int variable, E value)
