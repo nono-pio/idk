@@ -239,6 +239,74 @@ public static class UnivariateDivision
 
         return remainder;
     }
+    
+    public static UnivariatePolynomial<E> PseudoRemainderAdaptive<E>(UnivariatePolynomial<E> dividend, UnivariatePolynomial<E> divider, bool copy)
+    {
+        CheckZeroDivider(divider);
+        if (dividend.IsZero())
+            return UnivariatePolynomial<E>.Zero(dividend.ring);
+        if (dividend.degree < divider.degree)
+            return copy ? dividend.Clone() : dividend;
+        if (divider.degree == 0)
+            return UnivariatePolynomial<E>.Zero(dividend.ring);
+        if (divider.degree == 1)
+            return PseudoRemainderLinearDividerAdaptive(dividend, divider, copy);
+        return PseudoRemainderAdaptive0(dividend, divider, copy);
+    }
+
+
+    static UnivariatePolynomial<E> PseudoRemainderAdaptive0<E>(UnivariatePolynomial<E> dividend, UnivariatePolynomial<E> divider, bool copy)
+    {
+        Ring<E> ring = dividend.ring;
+        UnivariatePolynomial<E> remainder = copy ? dividend.Clone() : dividend;
+        E dlc = divider.Lc();
+        for (int i = dividend.degree - divider.degree; i >= 0; --i)
+        {
+            if (remainder.degree == divider.degree + i)
+            {
+                var quot = ring.DivideOrNull(remainder.Lc(), dlc);
+                if (quot.IsNull)
+                {
+                    E gcd = ring.Gcd(remainder.Lc(), divider.Lc());
+                    E factor = ring.DivideExact(divider.Lc(), gcd);
+                    remainder.Multiply(factor);
+                    quot = ring.DivideExact(remainder.Lc(), dlc);
+                }
+
+                remainder.Subtract(divider, quot.Value, i);
+            }
+        }
+
+        return remainder;
+    }
+    
+    static UnivariatePolynomial<E> PseudoRemainderLinearDividerAdaptive<E>(UnivariatePolynomial<E> dividend, UnivariatePolynomial<E> divider, bool copy)
+    {
+
+        //apply Horner's method
+        Ring<E> ring = dividend.ring;
+        E cc = ring.Negate(divider.Cc()), lc = divider.Lc(), factor = ring.GetOne();
+        E res = ring.GetZero();
+        for (int i = dividend.degree;; --i)
+        {
+            E tmp = dividend.data[i];
+            res = ring.Add(ring.Multiply(res, cc), ring.Multiply(factor, tmp));
+            if (i == 0)
+                break;
+            var quot = ring.DivideOrNull(res, lc);
+            if (quot.IsNull)
+            {
+                E gcd = ring.Gcd(res, lc), f = ring.DivideExact(lc, gcd);
+                factor = ring.Multiply(factor, f);
+                res = ring.Multiply(res, f);
+                quot = ring.DivideExact(res, lc);
+            }
+
+            res = quot.Value;
+        }
+
+        return UnivariatePolynomial<E>.Create(ring, res);
+    }
 
     #region Fast
 

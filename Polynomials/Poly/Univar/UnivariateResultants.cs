@@ -166,8 +166,8 @@ public static class UnivariateResultants
             // minimal poly is already monic & integer
             UnivariatePolynomial<BigInteger> minimalPolyZ = minimalPoly.MapCoefficients(Rings.Z, r_ => r_.Numerator());
             var numberFieldZ = new AlgebraicNumberField<BigInteger>(minimalPolyZ);
-            BigInteger aDen = RemoveDenominators(a),
-                bDen = RemoveDenominators(b),
+            BigInteger aDen = UnivariateGCD.RemoveDenominators(a),
+                bDen = UnivariateGCD.RemoveDenominators(b),
                 den = BigInteger.Pow(aDen, b.degree) * BigInteger.Pow(bDen, a.degree);
             return ModularResultantInRingOfIntegersOfNumberField(
                     a.MapCoefficients(numberFieldZ, (cf) => cf.MapCoefficients(Rings.Z, r => r.Numerator())),
@@ -231,12 +231,12 @@ public static class UnivariateResultants
         {
             long prime = primes.Take();
             IntegersZp64 zpRing = Rings.Zp64(prime);
-            UnivariatePolynomialZp64 minimalPolyMod = AsOverZp64(minimalPoly, zpRing);
+            UnivariatePolynomialZp64 minimalPolyMod = UnivariatePolynomial<BigInteger>.AsOverZp64(minimalPoly, zpRing);
             FiniteField<long> numberFieldMod =
                 new FiniteField<long>(minimalPolyMod);
             UnivariatePolynomial<UnivariatePolynomialZp64> aMod =
-                    a.MapCoefficients(numberFieldMod, (cf) => AsOverZp64(cf, zpRing)),
-                bMod = b.MapCoefficients(numberFieldMod, (cf) => AsOverZp64(cf, zpRing));
+                    a.MapCoefficients(numberFieldMod, (cf) => UnivariatePolynomial<BigInteger>.AsOverZp64(cf, zpRing)),
+                bMod = b.MapCoefficients(numberFieldMod, (cf) => UnivariatePolynomial<BigInteger>.AsOverZp64(cf, zpRing));
             if (aMod.degree != a.degree || bMod.degree != b.degree)
                 continue; // unlucky prime
             UnivariatePolynomialZp64 resultantMod = ClassicalPRS(aMod, bMod).Resultant();

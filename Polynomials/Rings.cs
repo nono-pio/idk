@@ -199,11 +199,5 @@ public static class Rings
         => MultivariateRing(factory);
 
 
-
-
-    public static QuotientRing<E> QuotientRing<E>(MultivariateRing<E> baseRing,
-        Ideal<E> ideal)
-    {
-        return new QuotientRing<E>(baseRing, ideal);
-    }
+    
 }

@@ -1,33 +1,50 @@
 using Polynomials.Poly.Multivar;
+using Polynomials.Utils;
 using static Polynomials.Poly.Univar.Conversions64bit;
 
 namespace Polynomials.Poly.Univar;
 
 public static class UnivariateSquareFreeFactorization
 {
-
-
     public static bool IsSquareFree<E>(UnivariatePolynomial<E> poly)
     {
         return UnivariateGCD.PolynomialGCD(poly, poly.Derivative()).IsConstant();
     }
 
 
-    public static PolynomialFactorDecomposition<UnivariatePolynomial<E>> SquareFreeFactorization<E>(UnivariatePolynomial<E> poly)
+    public static PolynomialFactorDecomposition<UnivariatePolynomial<E>> SquareFreeFactorization<E>(
+        UnivariatePolynomial<E> poly)
     {
         if (poly.IsOverFiniteField())
             return SquareFreeFactorizationMusser(poly);
         else if (UnivariateFactorization.IsOverMultivariate(poly))
-            return (PolynomialFactorDecomposition<UnivariatePolynomial<E>>)
-                UnivariateFactorization.FactorOverMultivariate(poly, MultivariateSquareFreeFactorization.SquareFreeFactorization);
+            return (PolynomialFactorDecomposition<UnivariatePolynomial<E>>)GenericHandler.InvokeForGeneric<E>(
+                typeof(MultivariatePolynomial<>),
+                nameof(SquareFreeFactorizationOverMultivariate), typeof(UnivariateSquareFreeFactorization),
+                poly); // UnivariateFactorization.FactorOverMultivariate(poly, MultivariateSquareFreeFactorization.SquareFreeFactorization);
         else if (UnivariateFactorization.IsOverUnivariate(poly))
-            return (PolynomialFactorDecomposition<UnivariatePolynomial<E>>)
-                UnivariateFactorization.FactorOverUnivariate(
-                poly, MultivariateSquareFreeFactorization.SquareFreeFactorization);
+            return (PolynomialFactorDecomposition<UnivariatePolynomial<E>>)GenericHandler.InvokeForGeneric<E>(
+                typeof(UnivariatePolynomial<>),
+                nameof(SquareFreeFactorizationOverUnivariate), typeof(UnivariateSquareFreeFactorization),
+                poly); // UnivariateFactorization.FactorOverUnivariate(poly, MultivariateSquareFreeFactorization.SquareFreeFactorization);
         else if (poly.CoefficientRingCharacteristic().IsZero)
             return SquareFreeFactorizationYunZeroCharacteristics(poly);
         else
             return SquareFreeFactorizationMusser(poly);
+    }
+
+    public static PolynomialFactorDecomposition<UnivariatePolynomial<MultivariatePolynomial<E>>>
+        SquareFreeFactorizationOverMultivariate<E>(UnivariatePolynomial<MultivariatePolynomial<E>> poly)
+    {
+        return UnivariateFactorization.FactorOverMultivariate(poly,
+            MultivariateSquareFreeFactorization.SquareFreeFactorization);
+    }
+
+    public static PolynomialFactorDecomposition<UnivariatePolynomial<UnivariatePolynomial<E>>>
+        SquareFreeFactorizationOverUnivariate<E>(UnivariatePolynomial<UnivariatePolynomial<E>> poly)
+    {
+        return UnivariateFactorization.FactorOverUnivariate(poly,
+            MultivariateSquareFreeFactorization.SquareFreeFactorization);
     }
 
 
@@ -38,7 +55,8 @@ public static class UnivariateSquareFreeFactorization
     }
 
 
-    public static PolynomialFactorDecomposition<UnivariatePolynomial<E>> SquareFreeFactorizationYunZeroCharacteristics<E>(UnivariatePolynomial<E> poly)
+    public static PolynomialFactorDecomposition<UnivariatePolynomial<E>>
+        SquareFreeFactorizationYunZeroCharacteristics<E>(UnivariatePolynomial<E> poly)
     {
         if (!poly.CoefficientRingCharacteristic().IsZero)
             throw new ArgumentException("Characteristics 0 expected");
@@ -54,7 +72,7 @@ public static class UnivariateSquareFreeFactorization
 
         if (exponent == 0)
             return SquareFreeFactorizationYun0(poly);
-        
+
         var expFree = poly.GetRange(exponent, poly.Degree() + 1);
         var fd = SquareFreeFactorizationYun0(expFree);
         fd.AddFactor(poly.CreateMonomial(1), exponent);
@@ -62,7 +80,8 @@ public static class UnivariateSquareFreeFactorization
     }
 
 
-    static PolynomialFactorDecomposition<UnivariatePolynomial<E>> SquareFreeFactorizationYun0<E>(UnivariatePolynomial<E> poly)
+    static PolynomialFactorDecomposition<UnivariatePolynomial<E>> SquareFreeFactorizationYun0<E>(
+        UnivariatePolynomial<E> poly)
     {
         if (poly.IsConstant())
             return PolynomialFactorDecomposition<UnivariatePolynomial<E>>.Of(poly);
@@ -77,7 +96,8 @@ public static class UnivariateSquareFreeFactorization
         return factorization;
     }
 
-    private static void SquareFreeFactorizationYun0<E>(UnivariatePolynomial<E> poly, PolynomialFactorDecomposition<UnivariatePolynomial<E>> factorization)
+    private static void SquareFreeFactorizationYun0<E>(UnivariatePolynomial<E> poly,
+        PolynomialFactorDecomposition<UnivariatePolynomial<E>> factorization)
     {
         var derivative = poly.Derivative();
         var gcd = UnivariateGCD.PolynomialGCD(poly, derivative);
@@ -88,7 +108,8 @@ public static class UnivariateSquareFreeFactorization
         }
 
         var quot = UnivariateDivision.DivideAndRemainder(poly, gcd, false)[0];
-        var dQuot = UnivariateDivision.DivideAndRemainder(derivative, gcd, false)[0]; // safely destroy (cloned) derivative (not used further)
+        var dQuot = UnivariateDivision.DivideAndRemainder(derivative, gcd,
+            false)[0]; // safely destroy (cloned) derivative (not used further)
         var i = 0;
         while (!quot.IsConstant())
         {
@@ -105,7 +126,8 @@ public static class UnivariateSquareFreeFactorization
     }
 
 
-    public static PolynomialFactorDecomposition<UnivariatePolynomial<E>> SquareFreeFactorizationMusserZeroCharacteristics<E>(UnivariatePolynomial<E> poly)
+    public static PolynomialFactorDecomposition<UnivariatePolynomial<E>>
+        SquareFreeFactorizationMusserZeroCharacteristics<E>(UnivariatePolynomial<E> poly)
     {
         if (!poly.CoefficientRingCharacteristic().IsZero)
             throw new ArgumentException("Characteristics 0 expected");
@@ -152,7 +174,8 @@ public static class UnivariateSquareFreeFactorization
     }
 
 
-    public static PolynomialFactorDecomposition<UnivariatePolynomial<E>> SquareFreeFactorizationMusser<E>(UnivariatePolynomial<E> poly)
+    public static PolynomialFactorDecomposition<UnivariatePolynomial<E>> SquareFreeFactorizationMusser<E>(
+        UnivariatePolynomial<E> poly)
     {
         if (CanConvertToZp64(poly))
             return SquareFreeFactorizationMusser(AsOverZp64(poly)).MapTo(Convert<E>);
@@ -187,7 +210,8 @@ public static class UnivariateSquareFreeFactorization
     }
 
 
-    private static PolynomialFactorDecomposition<UnivariatePolynomial<E>> SquareFreeFactorizationMusser0<E>(UnivariatePolynomial<E> poly)
+    private static PolynomialFactorDecomposition<UnivariatePolynomial<E>> SquareFreeFactorizationMusser0<E>(
+        UnivariatePolynomial<E> poly)
     {
         poly.Monic();
         if (poly.IsConstant())

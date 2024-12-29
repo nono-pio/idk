@@ -259,6 +259,14 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>, IUni
     {
         return Set(degree, lc);
     }
+    
+    public int NNonZeroTerms() {
+        int c = 0;
+        for (int i = Degree(); i >= 0; --i)
+            if (!IsZeroAt(i))
+                ++c;
+        return c;
+    }
 
 
     public int FirstNonZeroCoefficientPosition()

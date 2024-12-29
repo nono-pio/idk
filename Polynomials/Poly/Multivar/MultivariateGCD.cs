@@ -19,7 +19,8 @@ public static class MultivariateGCD
         return PolynomialGCD(arr, MultivariateGCD.PolynomialGCD);
     }
 
-    public static MultivariatePolynomial<E> PolynomialGCD<E>(MultivariatePolynomial<E> poly, MultivariatePolynomial<E>[] arr)
+    public static MultivariatePolynomial<E> PolynomialGCD<E>(MultivariatePolynomial<E> poly,
+        MultivariatePolynomial<E>[] arr)
     {
         var all = new MultivariatePolynomial<E>[arr.Length + 1];
         all[0] = poly;
@@ -79,7 +80,7 @@ public static class MultivariateGCD
 
         if (maxSize / minSize > 20)
         {
-            int split = 1;
+            var split = 1;
             for (; split < arr.Length && arr[split].Size() < maxSize / 3; ++split) ;
             // use "divide and conqueror" strategy
             if (split > 1)
@@ -95,9 +96,9 @@ public static class MultivariateGCD
 
         //choose poly of minimal total Degree
         int iMin = 0, degSum = arr[0].DegreeSum();
-        for (int i = 1; i < arr.Length; ++i)
+        for (var i = 1; i < arr.Length; ++i)
         {
-            int t = arr[i].DegreeSum();
+            var t = arr[i].DegreeSum();
             if (t < degSum)
             {
                 iMin = i;
@@ -120,19 +121,19 @@ public static class MultivariateGCD
 
         polysInSum.Add(arr[1]);
 
-        Random rnd = PrivateRandom.GetRandom();
-        int[] sumDegrees = sum.DegreesRef();
-        int nFails = 0; // #tries to add a poly
-        for (int i = 2; i < arr.Length; i++)
+        var rnd = PrivateRandom.GetRandom();
+        var sumDegrees = sum.DegreesRef();
+        var nFails = 0; // #tries to add a poly
+        for (var i = 2; i < arr.Length; i++)
         {
             MultivariatePolynomial<E> tmp;
             do
             {
-                tmp = arr[i].Clone().Multiply(rnd.Next(2048)); 
+                tmp = arr[i].Clone().Multiply(rnd.Next(2048));
             } while (tmp.IsZero());
 
-            bool shouldHaveCC = !arr[i].CcAsPoly().IsZero() || !sum.CcAsPoly().IsZero();
-            int[] expectedDegrees = Utils.Utils.Max(sumDegrees, tmp.DegreesRef());
+            var shouldHaveCC = !arr[i].CcAsPoly().IsZero() || !sum.CcAsPoly().IsZero();
+            var expectedDegrees = Utils.Utils.Max(sumDegrees, tmp.DegreesRef());
             sum = sum.Add(tmp);
             if (!Enumerable.SequenceEqual(expectedDegrees, sum.DegreesRef()) ||
                 (shouldHaveCC && sum.CcAsPoly().IsZero()))
@@ -166,7 +167,7 @@ public static class MultivariateGCD
         if (gcd.IsConstant())
         {
             // Content gcd
-            for (int i = 1; i < arr.Length; i++)
+            for (var i = 1; i < arr.Length; i++)
                 gcd = algorithm(gcd, arr[i].ContentAsPoly());
             Utils.Utils.Swap(arr, 0, iMin); // <-restore
             return gcd;
@@ -197,7 +198,7 @@ public static class MultivariateGCD
 
     private static MultivariatePolynomial<E> ContentGCD0<E>(MultivariatePolynomial<E>[] arr)
     {
-        MultivariatePolynomial<E> factory = arr[0];
+        var factory = arr[0];
         return factory.CreateConstant(factory.ring.Gcd(arr.Select(m => m.Content()).ToList()));
     }
 
@@ -228,11 +229,16 @@ public static class MultivariateGCD
                 nameof(PolynomialGCD),
                 typeof(MultivariateGCD), a, b); // PolynomialGCDInQ( a,  b);
         if (Util.IsOverSimpleNumberField(a))
-            return  PolynomialGCDinNumberField( a,  b);
+            return PolynomialGCDinNumberField(
+                a.AsT<UnivariatePolynomial<Rational<BigInteger>>>(),
+                b.AsT<UnivariatePolynomial<Rational<BigInteger>>>()).AsT<E>();
         if (Util.IsOverRingOfIntegersOfSimpleNumberField(a))
-            return  PolynomialGCDinRingOfIntegersOfNumberField( a,  b);
+            return PolynomialGCDinRingOfIntegersOfNumberField(a.AsT<UnivariatePolynomial<BigInteger>>(),
+                b.AsT<UnivariatePolynomial<BigInteger>>()).AsT<E>();
         if (Util.IsOverMultipleFieldExtension(a))
-            return  PolynomialGCDinMultipleFieldExtension( a,  b);
+            return (MultivariatePolynomial<E>)GenericHandler.InvokeForGeneric<E>(typeof(MultivariatePolynomial<>),
+                nameof(PolynomialGCDinMultipleFieldExtension), typeof(MultivariateGCD), a,
+                b); // PolynomialGCDinMultipleFieldExtension( a,  b);
         var r = tryNested(a, b);
         if (r != null)
             return r;
@@ -275,8 +281,9 @@ public static class MultivariateGCD
     }
 
     public static MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>>
-    PolynomialGCDinNumberField(MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> a,
-                               MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> b) {
+        PolynomialGCDinNumberField(MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> a,
+            MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> b)
+    {
         a.AssertSameCoefficientRingWith(b);
         if (isDenseGCDProblem(a, b))
             // use EEZGCD with ModularGCD for dense problems
@@ -285,21 +292,25 @@ public static class MultivariateGCD
             // use ZippelGCD for sparse problems
             return ZippelGCDInNumberFieldViaRationalReconstruction(a, b);
     }
+
     public static MultivariatePolynomial<UnivariatePolynomial<BigInteger>>
-    PolynomialGCDinRingOfIntegersOfNumberField(MultivariatePolynomial<UnivariatePolynomial<BigInteger>> a,
-                                               MultivariatePolynomial<UnivariatePolynomial<BigInteger>> b) {
+        PolynomialGCDinRingOfIntegersOfNumberField(MultivariatePolynomial<UnivariatePolynomial<BigInteger>> a,
+            MultivariatePolynomial<UnivariatePolynomial<BigInteger>> b)
+    {
         a.AssertSameCoefficientRingWith(b);
         if (!a.Lc().IsConstant() || !b.Lc().IsConstant())
             throw new ArgumentException("lc must be constant");
-        AlgebraicNumberField<BigInteger> ring = (AlgebraicNumberField<BigInteger>) a.ring;
-        AlgebraicNumberField<Rational<BigInteger>> field = new AlgebraicNumberField<Rational<BigInteger>>(ring.GetMinimalPolynomial().MapCoefficients(Rings.Q, Rings.Q.MkNumerator));
+        var ring = (AlgebraicNumberField<BigInteger>)a.ring;
+        AlgebraicNumberField<Rational<BigInteger>> field =
+            new AlgebraicNumberField<Rational<BigInteger>>(ring.GetMinimalPolynomial()
+                .MapCoefficients(Rings.Q, Rings.Q.MkNumerator));
         MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> gcd =
-                PolynomialGCDinNumberField(
-                        a.MapCoefficients(field, cf => cf.MapCoefficients(Rings.Q, Rings.Q.MkNumerator)),
-                        b.MapCoefficients(field, cf => cf.MapCoefficients(Rings.Q, Rings.Q.MkNumerator)));
+            PolynomialGCDinNumberField(
+                a.MapCoefficients(field, cf => cf.MapCoefficients(Rings.Q, Rings.Q.MkNumerator)),
+                b.MapCoefficients(field, cf => cf.MapCoefficients(Rings.Q, Rings.Q.MkNumerator)));
         return gcd.Multiply(field.ValueOfBigInteger(iDenominator(gcd)))
-                .MapCoefficients(ring, cf => cf.MapCoefficients(Rings.Z, r=>r.NumeratorExact()))
-                .PrimitivePart();
+            .MapCoefficients(ring, cf => cf.MapCoefficients(Rings.Z, r => r.NumeratorExact()))
+            .PrimitivePart();
     }
 
     private const double SPARSITY_THRESHOLD_NVARS_4 = 0.2;
@@ -372,8 +383,8 @@ public static class MultivariateGCD
         PolynomialGCDOverMultivariate<E>(MultivariatePolynomial<MultivariatePolynomial<E>> a,
             MultivariatePolynomial<MultivariatePolynomial<E>> b)
     {
-        int[] cfVars = Utils.Utils.Sequence(a.Lc().nVariables);
-        int[] mainVars = Utils.Utils.Sequence(a.Lc().nVariables, a.Lc().nVariables + a.nVariables);
+        var cfVars = Utils.Utils.Sequence(a.Lc().nVariables);
+        var mainVars = Utils.Utils.Sequence(a.Lc().nVariables, a.Lc().nVariables + a.nVariables);
         return PolynomialGCD(
                 MultivariatePolynomial<E>.AsNormalMultivariate(a, cfVars, mainVars),
                 MultivariatePolynomial<E>.AsNormalMultivariate(b, cfVars, mainVars))
@@ -403,8 +414,8 @@ public static class MultivariateGCD
         PolynomialGCDOverMultivariateZp64(MultivariatePolynomial<MultivariatePolynomialZp64> a,
             MultivariatePolynomial<MultivariatePolynomialZp64> b)
     {
-        int[] cfVars = Utils.Utils.Sequence(a.Lc().nVariables);
-        int[] mainVars = Utils.Utils.Sequence(a.Lc().nVariables, a.Lc().nVariables + a.nVariables);
+        var cfVars = Utils.Utils.Sequence(a.Lc().nVariables);
+        var mainVars = Utils.Utils.Sequence(a.Lc().nVariables, a.Lc().nVariables + a.nVariables);
         return PolynomialGCD(
             MultivariatePolynomialZp64.AsNormalMultivariate(a, cfVars, mainVars),
             MultivariatePolynomialZp64.AsNormalMultivariate(b, cfVars, mainVars)).AsOverMultivariateEliminate(cfVars);
@@ -421,19 +432,22 @@ public static class MultivariateGCD
     }
 
     private static MultivariatePolynomial<MultivariatePolynomial<E>>
-    PolynomialGCDinMultipleFieldExtension<E>(MultivariatePolynomial<MultivariatePolynomial<E>> a, MultivariatePolynomial<MultivariatePolynomial<E>> b) {
-        MultipleFieldExtension<E> ring = (MultipleFieldExtension<E>) a.ring;
+        PolynomialGCDinMultipleFieldExtension<E>(MultivariatePolynomial<MultivariatePolynomial<E>> a,
+            MultivariatePolynomial<MultivariatePolynomial<E>> b)
+    {
+        var ring = (MultipleFieldExtension<E>)a.ring;
         SimpleFieldExtension<E> simpleExtension = ring.GetSimpleExtension();
         return PolynomialGCD(
                 a.MapCoefficients(simpleExtension, ring.Inverse),
                 b.MapCoefficients(simpleExtension, ring.Inverse))
-                .MapCoefficients(ring, ring.Image);
+            .MapCoefficients(ring, ring.Image);
     }
+
     /* ============================================== Auxiliary methods ============================================= */
     public static int[] inversePermutation(int[] permutation)
     {
-        int[] inv = new int[permutation.Length];
-        for (int i = permutation.Length - 1; i >= 0; --i)
+        var inv = new int[permutation.Length];
+        for (var i = permutation.Length - 1; i >= 0; --i)
             inv[permutation[i]] = i;
         return inv;
     }
@@ -541,13 +555,13 @@ public static class MultivariateGCD
             return null;
         using var aIt = a.terms.Values.GetEnumerator();
         using var bIt = b.terms.Values.GetEnumerator();
-        Ring<E> ring = a.ring;
+        var ring = a.ring;
         MonomialSet<E> result = new MonomialSet<E>(a.ordering);
-        E c = ring.Gcd(a.Lc(), b.Lc());
+        var c = ring.Gcd(a.Lc(), b.Lc());
         if (ring.Signum(a.Lc()) != ring.Signum(c))
             c = ring.Negate(c);
-        E aCorrection = ring.DivideExact(a.Lc(), c);
-        E bCorrection = ring.DivideExact(b.Lc(), c);
+        var aCorrection = ring.DivideExact(a.Lc(), c);
+        var bCorrection = ring.DivideExact(b.Lc(), c);
         while (aIt.MoveNext())
         {
             Monomial<E>
@@ -583,8 +597,8 @@ public static class MultivariateGCD
             aIt = a.terms.Values.GetEnumerator();
         using var
             bIt = b.terms.Values.GetEnumerator();
-        IntegersZp64 ring = (IntegersZp64)a.ring;
-        long bCorrection = ring.Divide(b.Lc(), a.Lc());
+        var ring = (IntegersZp64)a.ring;
+        var bCorrection = ring.Divide(b.Lc(), a.Lc());
         while (aIt.MoveNext())
         {
             var
@@ -594,7 +608,7 @@ public static class MultivariateGCD
             if (!aTerm.DvEquals(bTerm))
                 return null;
 
-            long bc = ring.Divide(bTerm.coefficient, aTerm.coefficient);
+            var bc = ring.Divide(bTerm.coefficient, aTerm.coefficient);
             if (bc != bCorrection)
                 return null;
         }
@@ -619,9 +633,9 @@ public static class MultivariateGCD
     private static MultivariatePolynomial<E> linearGCDe<E>(MultivariatePolynomial<E> poly,
         MultivariatePolynomial<E> linear)
     {
-        E lContent = linear.Content();
-        E pContent = poly.Content();
-        E cGCD = poly.ring.Gcd(lContent, pContent);
+        var lContent = linear.Content();
+        var pContent = poly.Content();
+        var cGCD = poly.ring.Gcd(lContent, pContent);
 
         linear = linear.Clone().DivideExact(lContent);
         if (MultivariateDivision.DividesQ(poly, linear))
@@ -644,7 +658,7 @@ public static class MultivariateGCD
 
         var ringSize = a.CoefficientRingCardinality();
         // ring cardinality, i.e. number of possible random choices
-        int evaluationStackLimit = ringSize == null ? -1 : (ringSize.Value.IsInt() ? (int)ringSize.Value : -1);
+        var evaluationStackLimit = ringSize == null ? -1 : (ringSize.Value.IsInt() ? (int)ringSize.Value : -1);
 
         // find monomial GCD
         // and remove monomial Content from a and b
@@ -655,15 +669,15 @@ public static class MultivariateGCD
         trivialGCD = MultivariateGCD.trivialGCD(a, b);
         if (trivialGCD != null)
             return new GCDInput<E>(trivialGCD.Multiply(monomialGCD));
-        int
+        var
             nVariables = a.nVariables;
         int[] aDegrees = a.DegreesRef(),
             bDegrees = b.DegreesRef(),
             DegreeBounds = new int[nVariables]; // Degree bounds for gcd
 
         // populate initial gcd Degree bounds
-        int nUnused = 0;
-        for (int i = 0; i < nVariables; i++)
+        var nUnused = 0;
+        for (var i = 0; i < nVariables; i++)
         {
             DegreeBounds[i] = Math.Min(aDegrees[i], bDegrees[i]);
             if (DegreeBounds[i] == 0)
@@ -674,7 +688,7 @@ public static class MultivariateGCD
             // all variables are unused
             return new GCDInput<E>(a.Create(monomialGCD));
 
-        bool adjusted = false;
+        var adjusted = false;
         int
             maxSize = Math.Max(a.Size(), b.Size()),
             minSize = Math.Min(a.Size(), b.Size());
@@ -719,12 +733,12 @@ public static class MultivariateGCD
         // now swap variables so that the first variable will have the maximal Degree (univariate gcd is fast),
         // and all non-used variables are at the end of poly's
 
-        int[] variables = Utils.Utils.Sequence(nVariables);
+        var variables = Utils.Utils.Sequence(nVariables);
         //sort in descending order
         Array.Sort(Utils.Utils.Negate(DegreeBounds), variables);
         Utils.Utils.Negate(DegreeBounds); //recover DegreeBounds
 
-        int lastGCDVariable = 0; //recalculate lastPresentVariable
+        var lastGCDVariable = 0; //recalculate lastPresentVariable
         for (; lastGCDVariable < DegreeBounds.Length; ++lastGCDVariable)
             if (DegreeBounds[lastGCDVariable] == 0)
                 break;
@@ -734,13 +748,13 @@ public static class MultivariateGCD
         b = MultivariatePolynomial<E>.RenameVariables(b, variables);
 
         // check whether coefficient ring cardinality is large enough
-        int finiteExtensionDegree = 1;
-        int cardinalityBound = 9 * DegreeBounds.Max();
+        var finiteExtensionDegree = 1;
+        var cardinalityBound = 9 * DegreeBounds.Max();
         if (ringSize != null && ringSize.Value.IsInt() && (int)ringSize.Value < cardinalityBound)
         {
-            long ds = (long)ringSize;
+            var ds = (long)ringSize;
             finiteExtensionDegree = 2;
-            long tmp = ds;
+            var tmp = ds;
             for (; tmp < cardinalityBound; ++finiteExtensionDegree)
                 tmp = tmp * ds;
         }
@@ -758,7 +772,7 @@ public static class MultivariateGCD
             nUsedVariables = 0, // number of really present variables in gcd
             lastGCDVariable = -1; // last variable that present in both input polynomials
 
-        for (int i = 0; i < nVariables; i++)
+        for (var i = 0; i < nVariables; i++)
             if (DegreeBounds[i] != 0)
             {
                 ++nUsedVariables;
@@ -787,9 +801,9 @@ public static class MultivariateGCD
             // => then we can consider polynomials as over R[{used}][{dummies}] and calculate
             // gcd via recursive call as GCD[Content(a) in R[{used}], Content(b) in R[{used}]]
 
-            int[] usedVariables = new int[nUsedVariables];
-            int counter = 0;
-            for (int i = 0; i < nVariables; ++i)
+            var usedVariables = new int[nUsedVariables];
+            var counter = 0;
+            for (var i = 0; i < nVariables; ++i)
                 if (DegreeBounds[i] != 0)
                     usedVariables[counter++] = i;
 
@@ -819,7 +833,7 @@ public static class MultivariateGCD
             // variables that present in poly, but don't
             // present in GCD numerated as after invocation of dropVariables
             unused = new List<int>();
-        for (int i = 0; i < poly.nVariables; ++i)
+        for (var i = 0; i < poly.nVariables; ++i)
         {
             if (poly.Degree(i) == 0)
                 drop.Add(i);
@@ -843,7 +857,7 @@ public static class MultivariateGCD
             return reduced.AsUnivariateEliminate(unused[0]).GetDataReferenceUnsafe().Where(p => !p.IsZero()).ToArray();
 
         // used variables in transformed poly
-        int[] usedVariables =
+        var usedVariables =
             Utils.Utils.IntSetDifference(Utils.Utils.Sequence(0, reduced.nVariables), unused.ToArray());
         return reduced.AsOverMultivariateEliminate(usedVariables).CoefficientsArray();
     }
@@ -854,7 +868,8 @@ public static class MultivariateGCD
         if (a.IsOverZ())
             adjustDegreeBoundsZ(a.AsZ(), b.AsZ(), gcdDegreeBounds);
         else if (Util.IsOverSimpleNumberField(a))
-            adjustDegreeBoundsNumberField( a,  b, gcdDegreeBounds);
+            adjustDegreeBoundsNumberField(a.AsT<UnivariatePolynomial<Rational<BigInteger>>>(),
+                b.AsT<UnivariatePolynomial<Rational<BigInteger>>>(), gcdDegreeBounds);
         else if (a.IsOverFiniteField())
             adjustDegreeBoundsFiniteField(a, b, gcdDegreeBounds);
     }
@@ -863,7 +878,7 @@ public static class MultivariateGCD
         MultivariatePolynomial<E> b,
         int[] gcdDegreeBounds)
     {
-        int nVariables = a.nVariables;
+        var nVariables = a.nVariables;
         // for (int i = 0; i < nVariables; i++)
         //     if (gcdDegreeBounds[i] == 0) {
         //         if (a.Degree(i) != 0)
@@ -873,13 +888,13 @@ public static class MultivariateGCD
         //     }
 
         E[] subs = new E[nVariables];
-        Random rnd = PrivateRandom.GetRandom();
+        var rnd = PrivateRandom.GetRandom();
         if (a.CoefficientRingCardinality() != null
             && a.CoefficientRingCardinality().Value.GetBitLength() <= 10)
         {
             // in case of small cardinality we have to do clever
-            int cardinality = (int)a.CoefficientRingCardinality().Value;
-            for (int i = 0; i < nVariables; i++)
+            var cardinality = (int)a.CoefficientRingCardinality().Value;
+            for (var i = 0; i < nVariables; i++)
             {
                 HashSet<E> seen = new HashSet<E>();
                 do
@@ -899,13 +914,13 @@ public static class MultivariateGCD
             }
         }
         else
-            for (int i = 0; i < nVariables; i++)
+            for (var i = 0; i < nVariables; i++)
                 subs[i] = randomElement(a.ring, rnd);
 
         UnivariatePolynomial<E>[]
             uaImages = univariateImages(a, subs),
             ubImages = univariateImages(b, subs);
-        for (int i = 0; i < nVariables; i++)
+        for (var i = 0; i < nVariables; i++)
         {
             UnivariatePolynomial<E> ua = uaImages[i], ub = ubImages[i];
             if (ua.Degree() != a.Degree(i) || ub.Degree() != b.Degree(i))
@@ -916,8 +931,8 @@ public static class MultivariateGCD
 
     static UnivariatePolynomial<E>[] univariateImages<E>(MultivariatePolynomial<E> poly, E[] subs)
     {
-        E[][] univariate = new E[poly.nVariables][];
-        for (int i = 0; i < univariate.Length; ++i)
+        var univariate = new E[poly.nVariables][];
+        for (var i = 0; i < univariate.Length; ++i)
             univariate[i] = poly.ring.CreateZeroesArray(poly.Degree(i) + 1);
 
         E[] tmp = new E[poly.nVariables];
@@ -925,21 +940,21 @@ public static class MultivariateGCD
         foreach (var term in poly.terms)
         {
             Array.Fill(tmp, term.coefficient);
-            for (int i = 0; i < poly.nVariables; ++i)
+            for (var i = 0; i < poly.nVariables; ++i)
             {
-                E val = powers.Pow(i, term.exponents[i]);
-                for (int j = 0; j < i; ++j)
+                var val = powers.Pow(i, term.exponents[i]);
+                for (var j = 0; j < i; ++j)
                     tmp[j] = poly.ring.Multiply(tmp[j], val);
-                for (int j = i + 1; j < poly.nVariables; ++j)
+                for (var j = i + 1; j < poly.nVariables; ++j)
                     tmp[j] = poly.ring.Multiply(tmp[j], val);
             }
 
-            for (int i = 0; i < poly.nVariables; ++i)
+            for (var i = 0; i < poly.nVariables; ++i)
                 univariate[i][term.exponents[i]] = poly.ring.Add(univariate[i][term.exponents[i]], tmp[i]);
         }
 
         UnivariatePolynomial<E>[] result = new UnivariatePolynomial<E>[poly.nVariables];
-        for (int i = 0; i < poly.nVariables; ++i)
+        for (var i = 0; i < poly.nVariables; ++i)
         {
             result[i] = UnivariatePolynomial<E>.CreateUnsafe(poly.ring, univariate[i]);
             Debug.Assert(result[i].Equals(
@@ -958,7 +973,7 @@ public static class MultivariateGCD
         MultivariatePolynomialZp64 aMod, bMod;
         //do {
         // some random prime number
-        IntegersZp64 zpRing = Rings.Zp64(SmallPrimes.NextPrime((1 << 20) + PrivateRandom.GetRandom().Next(1 << 10)));
+        var zpRing = Rings.Zp64(SmallPrimes.NextPrime((1 << 20) + PrivateRandom.GetRandom().Next(1 << 10)));
         aMod = MultivariatePolynomial<BigInteger>.AsOverZp64(a, zpRing);
         bMod = MultivariatePolynomial<BigInteger>.AsOverZp64(b, zpRing);
         //} while (!a.sameSkeletonQ(aMod) || !b.sameSkeletonQ(bMod));
@@ -967,7 +982,7 @@ public static class MultivariateGCD
         if (gcdDegreeBounds.Sum() == 0)
             return;
 
-        int nVariables = a.nVariables;
+        var nVariables = a.nVariables;
         // for (int i = 0; i < nVariables; i++)
         //     if (gcdDegreeBounds[i] == 0) {
         //         if (a.Degree(i) != 0)
@@ -976,13 +991,13 @@ public static class MultivariateGCD
         //             b = b.EvaluateAtRandomPreservingSkeleton(i, PrivateRandom.GetRandom());
         //     }
 
-        BigInteger[] subs = new BigInteger[a.nVariables];
+        var subs = new BigInteger[a.nVariables];
         Array.Fill(subs, BigInteger.One);
 
         UnivariatePolynomial<BigInteger>[]
             uaImages = univariateImagesZ(a, subs),
             ubImages = univariateImagesZ(b, subs);
-        for (int i = 0; i < nVariables; i++)
+        for (var i = 0; i < nVariables; i++)
         {
             UnivariatePolynomial<BigInteger> ua = uaImages[i], ub = ubImages[i];
             if (ua.Degree() != a.Degree(i) || ub.Degree() != b.Degree(i))
@@ -992,42 +1007,45 @@ public static class MultivariateGCD
     }
 
     static void adjustDegreeBoundsNumberField(MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> a,
-                                              MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> b,
-                                              int[] gcdDegreeBounds) {
+        MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> b,
+        int[] gcdDegreeBounds)
+    {
         // perform some test modulo prime
         MultivariatePolynomial<UnivariatePolynomialZp64> aMod, bMod;
         //do {
         // some random prime number
-        IntegersZp64 zpRing = Rings.Zp64(SmallPrimes.NextPrime((1 << 20) + PrivateRandom.GetRandom().Next(1 << 10)));
-        AlgebraicNumberField<Rational<BigInteger>> ring = (AlgebraicNumberField<Rational<BigInteger>>) a.ring;
-        FiniteField<long> numberFieldMod = new FiniteField<long>(UnivariatePolynomialZp64.AsOverZp64Q(ring.GetMinimalPolynomial(), zpRing));
+        var zpRing = Rings.Zp64(SmallPrimes.NextPrime((1 << 20) + PrivateRandom.GetRandom().Next(1 << 10)));
+        AlgebraicNumberField<Rational<BigInteger>> ring = (AlgebraicNumberField<Rational<BigInteger>>)a.ring;
+        var numberFieldMod =
+            new FiniteField<long>(UnivariatePolynomialZp64.AsOverZp64Q(ring.GetMinimalPolynomial(), zpRing));
         aMod = a.MapCoefficients(numberFieldMod, cf => UnivariatePolynomialZp64.AsOverZp64Q(cf, zpRing));
         bMod = b.MapCoefficients(numberFieldMod, cf => UnivariatePolynomialZp64.AsOverZp64Q(cf, zpRing));
         //} while (!a.sameSkeletonQ(aMod) || !b.sameSkeletonQ(bMod));
-    
+
         adjustDegreeBounds(aMod, bMod, gcdDegreeBounds);
     }
+
     static UnivariatePolynomial<BigInteger>[] univariateImagesZ(MultivariatePolynomial<BigInteger> poly,
         BigInteger[] subs)
     {
         Debug.Assert(subs.All(e => e.IsOne));
-        BigInteger[][] univariate = new BigInteger[poly.nVariables][];
-        for (int i = 0; i < univariate.Length; ++i)
+        var univariate = new BigInteger[poly.nVariables][];
+        for (var i = 0; i < univariate.Length; ++i)
         {
             univariate[i] = new BigInteger[poly.Degree(i) + 1];
             Array.Fill(univariate[i], BigInteger.Zero);
         }
 
-        BigInteger[] tmp = new BigInteger[poly.nVariables];
+        var tmp = new BigInteger[poly.nVariables];
         foreach (var term in poly.terms)
         {
             Array.Fill(tmp, term.coefficient);
-            for (int i = 0; i < poly.nVariables; ++i)
+            for (var i = 0; i < poly.nVariables; ++i)
                 univariate[i][term.exponents[i]] = poly.ring.Add(univariate[i][term.exponents[i]], tmp[i]);
         }
 
         UnivariatePolynomial<BigInteger>[] result = new UnivariatePolynomial<BigInteger>[poly.nVariables];
-        for (int i = 0; i < poly.nVariables; ++i)
+        for (var i = 0; i < poly.nVariables; ++i)
         {
             result[i] = UnivariatePolynomial<BigInteger>.CreateUnsafe(poly.ring, univariate[i]);
             Debug.Assert(result[i].Equals(poly.Evaluate(Utils.Utils.Remove(Utils.Utils.Sequence(0, poly.nVariables), i),
@@ -1045,7 +1063,7 @@ public static class MultivariateGCD
     static Monomial<E> reduceMonomialContent<E>(MultivariatePolynomial<E> a, MultivariatePolynomial<E> b)
     {
         var aMonomialContent = a.MonomialContent();
-        int[] exponentsGCD = b.MonomialContent().exponents;
+        var exponentsGCD = b.MonomialContent().exponents;
         MultivariatePolynomial<E>.SetMin(aMonomialContent.exponents, exponentsGCD);
         var monomialGCD = a.monomialAlgebra.Create(exponentsGCD);
 
@@ -1088,7 +1106,7 @@ public static class MultivariateGCD
     {
         //convert poly to Zp[var][x...]
 
-        MultivariatePolynomial<UnivariatePolynomial<E>> conv = AsOverUnivariate(poly, variable);
+        var conv = AsOverUnivariate(poly, variable);
         //univariate Content
         var uContent = UnivariateGCD.PolynomialGCD(conv.Coefficients());
         var mContent = MultivariatePolynomial<E>.AsMultivariate(uContent, poly.nVariables, variable, poly.ordering);
@@ -1177,7 +1195,7 @@ public static class MultivariateGCD
         if (a.Degree() < b.Degree())
             return ZippelGCDInZ(b, a);
         BigInteger aContent = a.Content(), bContent = b.Content();
-        BigInteger ContentGCD = BigInteger.GreatestCommonDivisor(aContent, bContent);
+        var ContentGCD = BigInteger.GreatestCommonDivisor(aContent, bContent);
         if (a.IsConstant() || b.IsConstant())
             return a.CreateConstant(ContentGCD);
 
@@ -1190,7 +1208,7 @@ public static class MultivariateGCD
         MultivariatePolynomial<BigInteger> a,
         MultivariatePolynomial<BigInteger> b)
     {
-        GCDInput<BigInteger>
+        var
             gcdInput = preparedGCDInput(a, b, MultivariateGCD.ZippelGCDInZ);
         if (gcdInput.earlyGCD != null)
             return gcdInput.earlyGCD;
@@ -1198,7 +1216,7 @@ public static class MultivariateGCD
         a = gcdInput.aReduced;
         b = gcdInput.bReduced;
 
-        MultivariatePolynomial<BigInteger> pContentGCD = ContentGCD(a, b, 0, MultivariateGCD.ZippelGCDInZ);
+        var pContentGCD = ContentGCD(a, b, 0, MultivariateGCD.ZippelGCDInZ);
         if (!pContentGCD.IsConstant())
         {
             a = MultivariateDivision.DivideExact(a, pContentGCD);
@@ -1216,19 +1234,19 @@ public static class MultivariateGCD
             startingPrime = 1L << 30;
         else
             startingPrime = 1L << 60;
-        PrimesIterator primesLoop = new PrimesIterator(startingPrime - (1 << 12));
-        Random random = PrivateRandom.GetRandom();
+        var primesLoop = new PrimesIterator(startingPrime - (1 << 12));
+        var random = PrivateRandom.GetRandom();
 
         while (true)
         {
             main_loop : ;
             // prepare the skeleton
-            long basePrime = primesLoop.Take();
-            BigInteger bPrime = new BigInteger(basePrime);
+            var basePrime = primesLoop.Take();
+            var bPrime = new BigInteger(basePrime);
             // TODO assert basePrime != -1 : "long overflow";
 
-            IntegersZp ring = new IntegersZp(basePrime);
-            // reduce Z -> Zp
+            var ring = new IntegersZp(basePrime);
+            // reduce Z => Zp
             MultivariatePolynomial<BigInteger>
                 abMod = a.SetRing(ring),
                 bbMod = b.SetRing(ring);
@@ -1241,8 +1259,8 @@ public static class MultivariateGCD
 
             // the base image
             // accumulator to update coefficients via Chineese remainding
-            MultivariatePolynomialZp64 @base = PolynomialGCD(aMod, bMod);
-            long lLcGCD = (long)(lcGCD % bPrime);
+            var @base = PolynomialGCD(aMod, bMod);
+            var lLcGCD = (long)(lcGCD % bPrime);
             // scale to correct l.c.
             @base = @base.Monic(lLcGCD);
 
@@ -1255,7 +1273,7 @@ public static class MultivariateGCD
             // over all primes
             while (true)
             {
-                long prime = primesLoop.Take();
+                var prime = primesLoop.Take();
                 if (MachineArithmetic.IsOverflowMultiply(basePrime, prime) ||
                     basePrime * prime > MachineArithmetic.MAX_SUPPORTED_MODULUS)
                     break;
@@ -1263,7 +1281,7 @@ public static class MultivariateGCD
                 bPrime = new BigInteger(prime);
                 ring = new IntegersZp(bPrime);
 
-                // reduce Z -> Zp
+                // reduce Z => Zp
                 abMod = a.SetRing(ring);
                 bbMod = b.SetRing(ring);
                 if (!abMod.SameSkeletonQ(a) || !bbMod.SameSkeletonQ(b))
@@ -1272,10 +1290,10 @@ public static class MultivariateGCD
                 aMod = MultivariatePolynomial<BigInteger>.AsOverZp64(abMod);
                 bMod = MultivariatePolynomial<BigInteger>.AsOverZp64(bbMod);
 
-                IntegersZp64 lDomain = new IntegersZp64(prime);
+                var lDomain = new IntegersZp64(prime);
 
                 // calculate new GCD using previously calculated skeleton via sparse interpolation
-                MultivariatePolynomialZp64
+                var
                     modularGCD = interpolateGCD(aMod, bMod, @base.SetRingUnsafe(lDomain), random);
                 if (modularGCD == null)
                 {
@@ -1294,7 +1312,7 @@ public static class MultivariateGCD
                 if (modularGCD.IsConstant())
                     return gcdInput.restoreGCD(a.CreateOne());
 
-                // better Degree bound found -> start over
+                // better Degree bound found => start over
                 if (modularGCD.Degree(0) < @base.Degree(0))
                 {
                     lLcGCD = (long)(lcGCD % bPrime);
@@ -1310,13 +1328,13 @@ public static class MultivariateGCD
                     continue;
 
                 //lifting
-                long newBasePrime = basePrime * prime;
-                long MonicFactor = modularGCD.ring.Multiply(
+                var newBasePrime = basePrime * prime;
+                var MonicFactor = modularGCD.ring.Multiply(
                     MachineArithmetic.ModInverse(modularGCD.Lc(), prime),
                     (long)(lcGCD % bPrime));
 
-                ChineseRemainders.ChineseRemaindersMagicZp64 magic = ChineseRemainders.CreateMagic(basePrime, prime);
-                PairedIterator<long, long> iterator = new PairedIterator<long, long>(@base, modularGCD);
+                var magic = ChineseRemainders.CreateMagic(basePrime, prime);
+                var iterator = new PairedIterator<long, long>(@base, modularGCD);
                 while (iterator.MoveNext())
                 {
                     Monomial<long>
@@ -1335,10 +1353,10 @@ public static class MultivariateGCD
                         continue;
                     }
 
-                    long oth = lDomain.Multiply(imageTerm.coefficient, MonicFactor);
+                    var oth = lDomain.Multiply(imageTerm.coefficient, MonicFactor);
 
                     // update base term
-                    long newCoeff = ChineseRemainders.ChineseRemainder(magic, baseTerm.coefficient, oth);
+                    var newCoeff = ChineseRemainders.ChineseRemainder(magic, baseTerm.coefficient, oth);
                     @base.Put(baseTerm.SetCoefficient(newCoeff));
                 }
 
@@ -1346,7 +1364,7 @@ public static class MultivariateGCD
                 basePrime = newBasePrime;
 
                 // two trials didn't change the result, probably we are done
-                MultivariatePolynomial<BigInteger> candidate =
+                var candidate =
                     MultivariatePolynomial<BigInteger>.AsPolyZSymmetric(@base).PrimitivePart();
                 if (previousBase != null && candidate.Equals(previousBase))
                 {
@@ -1365,16 +1383,16 @@ public static class MultivariateGCD
             }
 
             //continue lifting with multi-precision integers
-            MultivariatePolynomial<BigInteger> bBase = @base.ToBigPoly();
-            BigInteger bBasePrime = new BigInteger(basePrime);
+            var bBase = @base.ToBigPoly();
+            var bBasePrime = new BigInteger(basePrime);
             // over all primes
             while (true)
             {
-                long prime = primesLoop.Take();
+                var prime = primesLoop.Take();
                 bPrime = new BigInteger(prime);
                 ring = new IntegersZp(bPrime);
 
-                // reduce Z -> Zp
+                // reduce Z => Zp
                 abMod = a.SetRing(ring);
                 bbMod = b.SetRing(ring);
                 if (!abMod.SameSkeletonQ(a) || !bbMod.SameSkeletonQ(b))
@@ -1383,10 +1401,10 @@ public static class MultivariateGCD
                 aMod = MultivariatePolynomial<BigInteger>.AsOverZp64(abMod);
                 bMod = MultivariatePolynomial<BigInteger>.AsOverZp64(bbMod);
 
-                IntegersZp64 lDomain = new IntegersZp64(prime);
+                var lDomain = new IntegersZp64(prime);
 
                 // calculate new GCD using previously calculated skeleton via sparse interpolation
-                MultivariatePolynomialZp64
+                var
                     modularGCD = interpolateGCD(aMod, bMod, @base.SetRingUnsafe(lDomain), random);
                 if (modularGCD == null)
                 {
@@ -1400,7 +1418,7 @@ public static class MultivariateGCD
                 if (modularGCD.IsConstant())
                     return gcdInput.restoreGCD(a.CreateOne());
 
-                // better Degree bound found -> start over
+                // better Degree bound found => start over
                 if (modularGCD.Degree(0) < bBase.Degree(0))
                 {
                     lLcGCD = (long)(lcGCD % bPrime);
@@ -1417,18 +1435,18 @@ public static class MultivariateGCD
                     continue;
 
                 //lifting
-                BigInteger newBasePrime = bBasePrime * (bPrime);
-                long MonicFactor = lDomain.Multiply(
+                var newBasePrime = bBasePrime * (bPrime);
+                var MonicFactor = lDomain.Multiply(
                     lDomain.Reciprocal(modularGCD.Lc()),
                     (long)(lcGCD % bPrime));
 
-                PairedIterator<BigInteger, long> iterator = new PairedIterator<BigInteger, long>(bBase, modularGCD);
-                ChineseRemainders.ChineseRemaindersMagic<BigInteger> magic =
+                var iterator = new PairedIterator<BigInteger, long>(bBase, modularGCD);
+                var magic =
                     ChineseRemainders.CreateMagic(Rings.Z, bBasePrime, bPrime);
                 while (iterator.MoveNext())
                 {
-                    Monomial<BigInteger> baseTerm = iterator.aTerm;
-                    Monomial<long> imageTerm = iterator.bTerm;
+                    var baseTerm = iterator.aTerm;
+                    var imageTerm = iterator.bTerm;
 
                     if (baseTerm.coefficient.IsZero)
                         // term is absent in the base
@@ -1442,10 +1460,10 @@ public static class MultivariateGCD
                         continue;
                     }
 
-                    long oth = lDomain.Multiply(imageTerm.coefficient, MonicFactor);
+                    var oth = lDomain.Multiply(imageTerm.coefficient, MonicFactor);
 
                     // update base term
-                    BigInteger newCoeff =
+                    var newCoeff =
                         ChineseRemainders.ChineseRemainder(Rings.Z, magic, baseTerm.coefficient, new BigInteger(oth));
                     bBase.Put(baseTerm.SetCoefficient(newCoeff));
                 }
@@ -1454,7 +1472,7 @@ public static class MultivariateGCD
                 bBasePrime = newBasePrime;
 
                 // two trials didn't change the result, probably we are done
-                MultivariatePolynomial<BigInteger> candidate =
+                var candidate =
                     MultivariatePolynomial<BigInteger>.AsPolyZSymmetric(bBase).PrimitivePart();
                 if (previousBase != null && candidate.Equals(previousBase))
                 {
@@ -1517,7 +1535,7 @@ public static class MultivariateGCD
         if (b.IsZero()) return a.Clone();
 
         BigInteger aContent = a.Content(), bContent = b.Content();
-        BigInteger ContentGCD = BigInteger.GreatestCommonDivisor(aContent, bContent);
+        var ContentGCD = BigInteger.GreatestCommonDivisor(aContent, bContent);
         if (a.IsConstant() || b.IsConstant())
             return a.CreateConstant(ContentGCD);
 
@@ -1532,7 +1550,7 @@ public static class MultivariateGCD
         Func<MultivariatePolynomialZp64, MultivariatePolynomialZp64, MultivariatePolynomialZp64> gcdInZp,
         bool switchToSparse)
     {
-        GCDInput<BigInteger>
+        var
             gcdInput = preparedGCDInput(a, b, MultivariateGCD.ZippelGCDInZ);
         if (gcdInput.earlyGCD != null)
             return gcdInput.earlyGCD;
@@ -1543,21 +1561,21 @@ public static class MultivariateGCD
         if (switchToSparse && !isDenseGCDProblem(a, b))
             gcdInput.restoreGCD(PolynomialGCD(a, b));
 
-        BigInteger lcGCD = BigInteger.GreatestCommonDivisor(a.Lc(), b.Lc());
+        var lcGCD = BigInteger.GreatestCommonDivisor(a.Lc(), b.Lc());
 
         // the base polynomial
         MultivariatePolynomial<BigInteger> @base = null;
-        PrimesIterator primesLoop = new PrimesIterator((1 << 16) - (1 << 12));
+        var primesLoop = new PrimesIterator((1 << 16) - (1 << 12));
         BigInteger? bBasePrime = null;
 
         main_loop:
         while (true)
         {
             // prepare the skeleton
-            BigInteger bPrime = new BigInteger(primesLoop.Take());
-            IntegersZp bRing = new IntegersZp(bPrime);
+            var bPrime = new BigInteger(primesLoop.Take());
+            var bRing = new IntegersZp(bPrime);
 
-            // reduce Z -> Zp
+            // reduce Z => Zp
             MultivariatePolynomial<BigInteger>
                 abMod = a.SetRing(bRing),
                 bbMod = b.SetRing(bRing);
@@ -1569,11 +1587,11 @@ public static class MultivariateGCD
                 bMod = MultivariatePolynomial<BigInteger>.AsOverZp64(bbMod);
 
             // gcd in Zp
-            MultivariatePolynomialZp64 modGCD = gcdInZp(aMod, bMod);
+            var modGCD = gcdInZp(aMod, bMod);
             if (modGCD.IsConstant())
                 return gcdInput.restoreGCD(a.CreateOne());
 
-            long lLcGCD = (long)(lcGCD % bPrime);
+            var lLcGCD = (long)(lcGCD % bPrime);
             // scale to correct l.c.
             modGCD = modGCD.Monic(lLcGCD);
 
@@ -1584,22 +1602,22 @@ public static class MultivariateGCD
                 continue;
             }
 
-            IntegersZp64 pRing = bRing.AsMachineRing();
+            var pRing = bRing.AsMachineRing();
 
             //lifting
-            BigInteger newBasePrime = bBasePrime.Value * (bPrime);
-            long MonicFactor = pRing.Multiply(
+            var newBasePrime = bBasePrime.Value * (bPrime);
+            var MonicFactor = pRing.Multiply(
                 pRing.Reciprocal(modGCD.Lc()),
                 (long)(lcGCD % bPrime));
 
 
-            PairedIterator<BigInteger, long> iterator = new PairedIterator<BigInteger, long>(@base, modGCD);
-            ChineseRemainders.ChineseRemaindersMagic<BigInteger> magic =
+            var iterator = new PairedIterator<BigInteger, long>(@base, modGCD);
+            var magic =
                 ChineseRemainders.CreateMagic(Rings.Z, bBasePrime.Value, bPrime);
             while (iterator.MoveNext())
             {
-                Monomial<BigInteger> baseTerm = iterator.aTerm;
-                Monomial<long> imageTerm = iterator.bTerm;
+                var baseTerm = iterator.aTerm;
+                var imageTerm = iterator.bTerm;
 
                 if (baseTerm.coefficient.IsZero)
                     // term is absent in the base
@@ -1613,10 +1631,10 @@ public static class MultivariateGCD
                     continue;
                 }
 
-                long oth = pRing.Multiply(imageTerm.coefficient, MonicFactor);
+                var oth = pRing.Multiply(imageTerm.coefficient, MonicFactor);
 
                 // update base term
-                BigInteger newCoeff =
+                var newCoeff =
                     ChineseRemainders.ChineseRemainder(Rings.Z, magic, baseTerm.coefficient, new BigInteger(oth));
                 @base.Put(baseTerm.SetCoefficient(newCoeff));
             }
@@ -1625,7 +1643,7 @@ public static class MultivariateGCD
             bBasePrime = newBasePrime;
 
             // two trials didn't change the result, probably we are done
-            MultivariatePolynomial<BigInteger> candidate =
+            var candidate =
                 MultivariatePolynomial<BigInteger>.AsPolyZSymmetric(@base).PrimitivePart();
             //first check b since b is less Degree
             if (!isGCDTriplet(b, a, candidate))
@@ -1635,903 +1653,999 @@ public static class MultivariateGCD
         }
     }
 
-     /* =============================== Multivariate GCD over algebraic number fields ================================= */
-
-     
-     private static  MultivariatePolynomial<UnivariatePolynomial<E>>
-     TrivialGCDInExtension<E>(MultivariatePolynomial<UnivariatePolynomial<E>> a, MultivariatePolynomial<UnivariatePolynomial<E>> b) {
-         AlgebraicNumberField<E> ring
-                 = (AlgebraicNumberField<E>) a.ring;
-
-         if (!a.Stream().All(ring.IsInTheBaseField)
-                 || !b.Stream().All(ring.IsInTheBaseField))
-             return null;
-
-         Ring<E> cfRing = ring.GetMinimalPolynomial().ring;
-         MultivariatePolynomial<E>
-                 ar = a.MapCoefficients(cfRing, u => u.Cc()),
-                 br = b.MapCoefficients(cfRing, u => u.Cc());
-         return PolynomialGCD(ar, br)
-                 .MapCoefficients(ring, cf => UnivariatePolynomial<E>.Constant(cfRing, cf));
-     }
-
-     
-     static BigInteger iContent(MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> a) {
-         return Rings.Z.Gcd(a.Stream().SelectMany(u=>u.Stream()).Select(r=>r.Numerator()).ToList());
-     }
-
-     
-     static BigInteger iDenominator(MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> a) {
-         return Rings.Z.Gcd(a.Stream().SelectMany(u=>u.Stream()).Select(r=>r.Denominator()).ToList());
-
-     }
-
-     
-     static BigInteger iMax(MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> a) {
-         return a.Stream()
-                 .SelectMany(p => p.Stream().SelectMany(cf => (BigInteger[])[cf.Numerator(), cf.Denominator()]))
-                 .Select(Rings.Z.Abs).Max(Rings.Z); //.orElse(Z.getZero());
-     }
-
-     
-     static BigInteger iMaxZ(MultivariatePolynomial<UnivariatePolynomial<BigInteger>> a)
-     {
-         return a.Stream()
-             .SelectMany(u => u.Stream())
-             .Select(Rings.Z.Abs).Max(Rings.Z); //.orElse(Z.getZero());
-     }
-
-     /**
-      * Modular algorithm for polynomials over simple field extensions, which switches to "integer" associates of input
-      * polynomials and number field (by applying substitution to minimal polynomial)
-      *
-      * @param a               first poly
-      * @param b               second poly
-      * @param algorithmInRing the algorithm for ring of integers
-      */
-     private static MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>>
-     PolynomialGCDInNumberFieldSwitchToRingOfInteger(
-             MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> a,
-             MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> b,
-             Func<MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>>,
-                     MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>>,
-                     MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>>> algorithmInRing) {
-
-         // if there is a trivial case
-         MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> simpleGCD = TrivialGCDInExtension(a, b);
-         if (simpleGCD != null)
-             return simpleGCD;
-
-         AlgebraicNumberField<Rational<BigInteger>> numberField
-                 = (AlgebraicNumberField<Rational<BigInteger>>) a.ring;
-         UnivariatePolynomial<Rational<BigInteger>> minimalPoly = numberField.GetMinimalPolynomial();
-
-         if (minimalPoly.Stream().All(r=>r.IsIntegral())) {
-             // minimal polynomial is integral (Monic)
-
-             a = a.Clone(); b = b.Clone();
-             // remove integer Content (to facilitate rational reconstruction)
-             BigInteger aiCont = iContent(a), biCont = iContent(b);
-             a.Multiply(UnivariatePolynomial<Rational<BigInteger>>.Constant(Rings.Q, Rings.Q.MkDenominator(aiCont)));
-             b.Multiply(UnivariatePolynomial<Rational<BigInteger>>.Constant(Rings.Q, Rings.Q.MkDenominator(biCont)));
-             // to common denominator
-             BigInteger aiDen = iDenominator(a), biDen = iDenominator(b);
-             a.Multiply(UnivariatePolynomial<Rational<BigInteger>>.Constant(Rings.Q, Rings.Q.MkNumerator(aiDen)));
-             b.Multiply(UnivariatePolynomial<Rational<BigInteger>>.Constant(Rings.Q, Rings.Q.MkNumerator(biDen)));
-
-             return algorithmInRing(a, b);
-         } else {
-             // scaling of minimal poly is practically faster than working with rationals
-
-             // replace s -> s / lc(minPoly)
-             BigInteger minPolyLeadCoeff = Util.CommonDenominator(minimalPoly);
-             Rational<BigInteger>
-                     scale = new Rational<BigInteger>(Rings.Z, Rings.Z.GetOne(), minPolyLeadCoeff),
-                     scaleReciprocal = scale.Reciprocal();
-
-             // scaled number field
-             AlgebraicNumberField<Rational<BigInteger>>
-                     numberFieldScaled = new AlgebraicNumberField<Rational<BigInteger>>(minimalPoly.Scale(scale).Monic());
-
-             return PolynomialGCDInNumberFieldSwitchToRingOfInteger(
-                     a.MapCoefficients(numberFieldScaled, cf => cf.Scale(scale)),
-                     b.MapCoefficients(numberFieldScaled, cf => cf.Scale(scale)),
-                     algorithmInRing)
-                     .MapCoefficients(numberField, cf => cf.Scale(scaleReciprocal));
-         }
-     }
-
-     /**
-      * Modular interpolation algorithm for polynomials over simple field extensions by integer with integer
-      * coefficients
-      */
-     private static MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>>
-     PolynomialGCDAssociateInRingOfIntegerOfNumberField(
-             MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> a,
-             MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> b,
-             Func<
-                     MultivariatePolynomial<UnivariatePolynomial<BigInteger>>,
-                     MultivariatePolynomial<UnivariatePolynomial<BigInteger>>,
-                     MultivariatePolynomial<UnivariatePolynomial<BigInteger>>
-                     > algorithmForGcdAssociate) {
-         // assert a.stream().allMatch(cf -> cf.stream().allMatch(Rational::isIntegral));
-         // assert b.stream().allMatch(cf -> cf.stream().allMatch(Rational::isIntegral));
-
-         GCDInput<
-                 UnivariatePolynomial<Rational<BigInteger>>
-                 > gcdInput = preparedGCDInput(a, b, (l, r) => PolynomialGCDAssociateInRingOfIntegerOfNumberField(l, r, algorithmForGcdAssociate));
-         if (gcdInput.earlyGCD != null)
-             return gcdInput.earlyGCD;
-
-         a = gcdInput.aReduced;
-         b = gcdInput.bReduced;
-
-         // remove Content (required by Zippel algorithm)
-         MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> pContentGCD =
-                 ContentGCD(a, b, 0, (l, r) => PolynomialGCDAssociateInRingOfIntegerOfNumberField(l, r, algorithmForGcdAssociate));
-         if (!pContentGCD.IsConstant()) {
-             a = MultivariateDivision.DivideExact(a, pContentGCD);
-             b = MultivariateDivision.DivideExact(b, pContentGCD);
-             return gcdInput.restoreGCD(
-                     PolynomialGCDInNumberFieldSwitchToRingOfInteger(a, b,
-                             (l, r) => PolynomialGCDAssociateInRingOfIntegerOfNumberField(l, r, algorithmForGcdAssociate).Multiply(pContentGCD)));
-         }
-
-         AlgebraicNumberField<Rational<BigInteger>> numberField
-                 = (AlgebraicNumberField<Rational<BigInteger>>) a.ring;
-         UnivariatePolynomial<BigInteger> minimalPolyZ = numberField.GetMinimalPolynomial().MapCoefficients(Rings.Z, r=>r.NumeratorExact());
-         AlgebraicNumberField<BigInteger> numberRingZ = new AlgebraicNumberField<BigInteger>(minimalPolyZ);
-
-         return gcdInput.restoreGCD(algorithmForGcdAssociate(
-                 a.MapCoefficients(numberRingZ, cf => cf.MapCoefficients(Rings.Z, r=>r.NumeratorExact())),
-                 b.MapCoefficients(numberRingZ, cf => cf.MapCoefficients(Rings.Z, r=>r.NumeratorExact())))
-                 .MapCoefficients(numberField, cf => cf.MapCoefficients(Rings.Q, Rings.Q.MkNumerator)));
-     }
-
-     /**
-      * Zippel's sparse modular interpolation algorithm for polynomials over simple field extensions with the use of
-      * rational reconstruction to reconstruct the result
-      */
-     public static MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>>
-     ZippelGCDInNumberFieldViaRationalReconstruction(
-             MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> a,
-             MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> b) {
-         return PolynomialGCDInNumberFieldSwitchToRingOfInteger(a, b,
-                 (l, r) => PolynomialGCDAssociateInRingOfIntegerOfNumberField(l, r, MultivariateGCD.ZippelGCDInNumberFieldViaRationalReconstruction0));
-     }
-
-     /**
-      * Zippel's sparse modular interpolation algorithm for computing GCD associate for polynomials over simple field
-      * extensions with the use of rational reconstruction to reconstruct the result
-      */
-     private static MultivariatePolynomial<UnivariatePolynomial<BigInteger>>
-     ZippelGCDInNumberFieldViaRationalReconstruction0(
-             MultivariatePolynomial<UnivariatePolynomial<BigInteger>> a,
-             MultivariatePolynomial<UnivariatePolynomial<BigInteger>> b) {
-         // choose better prime to start
-         long startingPrime;
-         if (Math.max(iMaxZ(a).bitLength(), iMaxZ(b).bitLength()) < 256)
-             startingPrime = 1L << 30;
-         else
-             startingPrime = 1L << 60;
-
-         // for efficient division test we prepare polynomials with integer coefficients
-         AlgebraicNumberField<UnivariatePolynomial<BigInteger>>
-                 numberField = (AlgebraicNumberField<UnivariatePolynomial<BigInteger>>) a.ring;
-         UnivariatePolynomial<BigInteger> minimalPoly = numberField.getMinimalPolynomial();
-
-         // auxiliary ring
-         UnivariateRing<UnivariatePolynomial<BigInteger>> auxRing = UnivariateRing(Z);
-         PrimesIEnumerable primesLoop = new PrimesIEnumerable(startingPrime - (1 << 12));
-         Random random = PrivateRandom.GetRandom();
-         main_loop:
-         while (true) {
-             long basePrime = primesLoop.take();
-             assert basePrime != -1 : "long overflow";
-
-             IntegersZp64 baseRing = new IntegersZp64(basePrime);
-             UnivariatePolynomialZp64 minimalPolyMod = UnivariatePolynomial.asOverZp64(minimalPoly, baseRing);
-             FiniteField<UnivariatePolynomialZp64> numberFieldMod = new FiniteField<>(minimalPolyMod);
-
-             // reduce mod p
-             MultivariatePolynomial<UnivariatePolynomialZp64>
-                     aMod = a.mapCoefficients(numberFieldMod, cf -> UnivariatePolynomial.asOverZp64(cf, baseRing)),
-                     bMod = b.mapCoefficients(numberFieldMod, cf -> UnivariatePolynomial.asOverZp64(cf, baseRing));
-             if (!aMod.sameSkeletonQ(a) || !bMod.sameSkeletonQ(b))
-                 continue;
-
-             // the base image
-             MultivariatePolynomial<UnivariatePolynomialZp64> baseMod;
-             try {
-                 baseMod = PolynomialGCD(aMod, bMod).Monic();
-             } catch (Throwable t) { continue; } // bad prime
-
-             // accumulator to update coefficients via Chineese remainding
-             MultivariatePolynomial<UnivariatePolynomial<BigInteger>> base = baseMod
-                     .mapCoefficients(auxRing, cf -> cf.asPolyZ(false).toBigPoly());
-
-             if (base.IsConstant())
-                 return a.CreateOne();
-
-             // accumulated CRT prime
-             BigInteger crtPrime = Z.valueOf(basePrime);
-             // number of already generated primes
-             int nPrimes = 0;
-             // Fibonacci numbers for testing of rational reconstruction
-             int prevFibonacci = 1, nextFibonacci = 2;
-             // over all primes
-             inner_loop:
-             while (true) {
-                 long prime = primesLoop.take();
-                 IntegersZp64 ring = new IntegersZp64(prime);
-
-                 minimalPolyMod = UnivariatePolynomial.asOverZp64(minimalPoly, ring);
-                 numberFieldMod = new FiniteField<>(minimalPolyMod);
-                 // reduce Z -> Zp
-                 aMod = a.mapCoefficients(numberFieldMod, cf -> UnivariatePolynomial.asOverZp64(cf, ring));
-                 bMod = b.mapCoefficients(numberFieldMod, cf -> UnivariatePolynomial.asOverZp64(cf, ring));
-                 if (!aMod.sameSkeletonQ(a) || !bMod.sameSkeletonQ(b))
-                     continue;
-
-                 // calculate new GCD using previously calculated skeleton via sparse interpolation
-                 MultivariatePolynomial<UnivariatePolynomialZp64> modularGCD;
-                 try {
-                     modularGCD = interpolateGCD(aMod, bMod, baseMod.mapCoefficients(numberFieldMod, cf -> cf.setModulusUnsafe(prime)), random);
-                 } catch (Throwable t) {continue;} // unlucky prime
-
-                 if (modularGCD == null) {
-                     // interpolation failed => assumed form is wrong => start over
-                     continue;
-                 }
-
-                 if (modularGCD.IsConstant())
-                     return a.CreateOne();
-
-                 // Monicize modular gcd
-                 modularGCD.Monic();
-
-                 assert MultivariateDivision.DividesQ(aMod, modularGCD);
-                 assert MultivariateDivision.DividesQ(bMod, modularGCD);
-
-                 // better Degree bound found -> start over
-                 if (modularGCD.Degree(0) < base.Degree(0)) {
-                     baseMod = modularGCD;
-                     base = baseMod.mapCoefficients(auxRing, cf -> cf.asPolyZ(false).toBigPoly());
-                     basePrime = prime;
-                     crtPrime = Z.valueOf(basePrime);
-                     continue;
-                 }
-
-                 //skip unlucky prime
-                 if (modularGCD.Degree(0) > base.Degree(0))
-                     continue;
-
-                 // applying CRT
-                 PairedIEnumerable<
-                         Monomial<UnivariatePolynomial<BigInteger>>, MultivariatePolynomial<UnivariatePolynomial<BigInteger>>,
-                         Monomial<UnivariatePolynomialZp64>, MultivariatePolynomial<UnivariatePolynomialZp64>
-                         > iterator = new PairedIEnumerable<>(base, modularGCD);
-                 ChineseRemaindersMagic<BigInteger> magic = CreateMagic(Z, crtPrime, Z.valueOf(prime));
-                 while (iterator.hasNext()) {
-                     iterator.advance();
-
-                     Monomial<UnivariatePolynomial<BigInteger>> baseTerm = iterator.aTerm;
-                     Monomial<UnivariatePolynomialZp64> imageTerm = iterator.bTerm;
-
-                     if (baseTerm.coefficient.IsZero())
-                         // term is absent in the base
-                         continue;
-
-                     if (imageTerm.coefficient.IsZero()) {
-                         // term is absent in the modularGCD => remove it from the base
-                         // bBase.subtract(baseTerm);
-                         iterator.aIEnumerable.remove();
-                         continue;
-                     }
-                     UnivariatePolynomial<BigInteger> baseCf = baseTerm.coefficient;
-                     UnivariatePolynomialZp64 imageCf = imageTerm.coefficient;
-
-                     assert baseCf.ring == Z;
-                     UnivariateGCD.updateCRT(magic, baseCf, imageCf);
-                 }
-                 crtPrime = crtPrime.Multiply(Z.valueOf(prime));
-                 ++nPrimes;
-
-                 // attempt to apply rational reconstruction (quite costly) only for
-                 // sufficiently large number of prime homomorphisms,
-                 // since we don't know a priori any coefficient bounds
-                 //
-                 // We use Fibonacci numbers as in van Hoeij & Monagan "A Modular GCD
-                 // algorithm over Number Fields presented with Multiple Extensions."
-                 if (nPrimes == nextFibonacci) {
-                     int nextNextFibonacci = (prevFibonacci + 1) / 2 + nextFibonacci;
-                     prevFibonacci = nextFibonacci;
-                     nextFibonacci = nextNextFibonacci;
-
-                     // rational reconstruction
-                     BigInteger lcm = Z.getOne();
-                     List<Monomial<UnivariatePolynomial<Rational<BigInteger>>>> candidateTerms = new ArrayList<>();
-                     for (Monomial<UnivariatePolynomial<BigInteger>> term : base.terms) {
-                         UnivariatePolynomial<Rational<BigInteger>> rrCf = rationalReconstruction(term.coefficient, crtPrime);
-                         if (rrCf == null)
-                             continue inner_loop; // rational reconstruction failed
-                         candidateTerms.add(new Monomial<>(term, rrCf));
-                         lcm = Z.lcm(lcm, Z.lcm(rrCf.stream().map(Rational::denominator).collect(Collectors.toList())));
-                     }
-                     final BigInteger lcm0 = lcm;
-                     MultivariatePolynomial<UnivariatePolynomial<BigInteger>> candidate = a.Create(candidateTerms
-                             .stream()
-                             .map(m -> new Monomial<>(m, m.coefficient.mapCoefficients(Z, cf -> cf.Multiply(lcm0).numeratorExact())))
-                             .collect(Collectors.toList()));
-
-
-                     // test candidate with pseudoD division
-                     if (pseudoRemainder(a, candidate).IsZero()
-                             && pseudoRemainder(b, candidate).IsZero())
-                         return candidate;
-                 }
-             }
-         }
-     }
-
-     
-     private static UnivariatePolynomial<Rational<BigInteger>>
-     rationalReconstruction(UnivariatePolynomial<BigInteger> @base, BigInteger crtPrime) {
-         UnivariatePolynomial<Rational<BigInteger>> candidate = UnivariatePolynomial<Rational<BigInteger>>.Zero(Rings.Q);
-         for (int j = 0; j <= @base.Degree(); ++j) {
-             BigInteger[] numDen = RationalReconstruction.ReconstructFarey(@base[j], crtPrime);
-             if (numDen == null)
-                 return null;
-             candidate.Set(j, new Rational<BigInteger>(Rings.Z, numDen[0], numDen[1]));
-         }
-         return candidate;
-     }
-
-     /**
-      * Zippel's sparse modular interpolation algorithm for computing GCD associate for polynomials over simple field
-      * extensions with the use of Langemyr & McCallum approach to avoid rational reconstruction
-      */
-     public static MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>>
-     ZippelGCDInNumberFieldViaLangemyrMcCallum(
-             MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> a,
-             MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> b) {
-         return PolynomialGCDInNumberFieldSwitchToRingOfInteger(a, b,
-                 (l, r) => PolynomialGCDAssociateInRingOfIntegerOfNumberField(l, r,
-                         (u, v) => PolynomialGCDAssociateInNumberFieldViaLangemyrMcCallum(u, v,
-                                 MultivariateGCD.ZippelGCDAssociateInNumberFieldViaLangemyrMcCallum0)));
-     }
-
-     
-     private static MultivariatePolynomial<UnivariatePolynomial<BigInteger>>
-     PolynomialGCDAssociateInNumberFieldViaLangemyrMcCallum(
-             MultivariatePolynomial<UnivariatePolynomial<BigInteger>> a,
-             MultivariatePolynomial<UnivariatePolynomial<BigInteger>> b,
-             Func<
-                     MultivariatePolynomial<UnivariatePolynomial<BigInteger>>,
-                     MultivariatePolynomial<UnivariatePolynomial<BigInteger>>,
-                     MultivariatePolynomial<UnivariatePolynomial<BigInteger>>
-                     > baseAlgorithm) {
-
-         AlgebraicNumberField<BigInteger> numberField
-                 = (AlgebraicNumberField<BigInteger>) a.ring;
-
-         integerPrimitivePart(a);
-         integerPrimitivePart(b);
-
-         if (!a.Lc().IsConstant())
-             a.Multiply(numberField.Normalizer(a.Lc()));
-
-         if (!b.Lc().IsConstant())
-             b.Multiply(numberField.Normalizer(b.Lc()));
-
-         integerPrimitivePart(a);
-         integerPrimitivePart(b);
-
-         // if all coefficients are simple numbers (no algebraic elements)
-         MultivariatePolynomial<UnivariatePolynomial<BigInteger>> simpleGCD = TrivialGCDInExtension(a, b);
-         if (simpleGCD != null)
-             return simpleGCD;
-
-         return baseAlgorithm(a, b);
-     }
-
-     static void integerPrimitivePart(MultivariatePolynomial<UnivariatePolynomial<BigInteger>> p) {
-         BigInteger gcd = Rings.Z.Gcd(p.Stream().SelectMany(u=>u.Stream()).Order().ToList());
-         p.Stream().ForEach(cf => cf.DivideExact(gcd));
-     }
-
-     /**
-      * Zippel's sparse modular interpolation algorithm for polynomials over simple field extensions with Langemyr &
-      * McCallum correction for lead coefficients to avoid rational reconstruction
-      */
-     private static MultivariatePolynomial<UnivariatePolynomial<BigInteger>>
-     ZippelGCDAssociateInNumberFieldViaLangemyrMcCallum0(
-             MultivariatePolynomial<UnivariatePolynomial<BigInteger>> a,
-             MultivariatePolynomial<UnivariatePolynomial<BigInteger>> b) {
-
-         // assert a.Lc().IsConstant();
-         // assert b.Lc().IsConstant();
-         // choose better prime for start
-         long startingPrime;
-         if (Math.Max(iMaxZ(a).GetBitLength(), iMaxZ(b).GetBitLength()) < 2 * 256)
-             startingPrime = 1L << 30;
-         else
-             startingPrime = 1L << 60;
-
-         AlgebraicNumberField<BigInteger> numberField
-                 = (AlgebraicNumberField<BigInteger>) a.ring;
-         UnivariatePolynomial<BigInteger> minimalPoly = numberField.getMinimalPolynomial();
-
-         // Weinberger & Rothschild (1976) correction denominator
-         BigInteger
-                 lcGCD = Z.gcd(a.Lc().cc(), b.Lc().cc()),
-                 disc = UnivariateResultants.Discriminant(minimalPoly),
-                 correctionFactor = disc.pow(1).Multiply(lcGCD);
-
-         UnivariateRing<UnivariatePolynomial<BigInteger>> auxRing = UnivariateRing(Z);
-         PrimesIEnumerable primesLoop = new PrimesIEnumerable(startingPrime - (1 << 12));
-         Random random = PrivateRandom.GetRandom();
-         while (true) {
-             // prepare the skeleton
-             long basePrime = primesLoop.take();
-             assert basePrime != -1 : "long overflow";
-
-             IntegersZp64 baseRing = new IntegersZp64(basePrime);
-             UnivariatePolynomialZp64 minimalPolyMod = UnivariatePolynomial.asOverZp64(minimalPoly, baseRing);
-             FiniteField<UnivariatePolynomialZp64> numberFieldMod = new FiniteField<>(minimalPolyMod);
-
-             // reduce Z -> Zp
-             MultivariatePolynomial<UnivariatePolynomialZp64>
-                     aMod = a.mapCoefficients(numberFieldMod, cf -> UnivariatePolynomial.asOverZp64(cf, baseRing)),
-                     bMod = b.mapCoefficients(numberFieldMod, cf -> UnivariatePolynomial.asOverZp64(cf, baseRing));
-             if (!aMod.sameSkeletonQ(a) || !bMod.sameSkeletonQ(b))
-                 continue;
-
-             // the base image
-             MultivariatePolynomial<UnivariatePolynomialZp64> baseMod;
-             try {
-                 baseMod = PolynomialGCD(aMod, bMod).Monic();
-             } catch (Throwable t) { continue;} // bad prime
-
-             // correction
-             baseMod.Monic(numberFieldMod.valueOf(correctionFactor.mod(basePrime).longValueExact()));
-             // accumulator to update coefficients via Chineese remainding
-             MultivariatePolynomial<UnivariatePolynomial<BigInteger>> base = baseMod
-                     .mapCoefficients(auxRing, cf -> cf.asPolyZ(false).toBigPoly());
-
-             if (base.IsConstant())
-                 return a.CreateOne();
-
-             // accumulated CRT prime
-             BigInteger crtPrime = Z.valueOf(basePrime);
-             // previous candidate to test
-             MultivariatePolynomial<UnivariatePolynomial<BigInteger>> prevCandidate = null;
-             // over all primes
-             inner_loop:
-             while (true) {
-                 long prime = primesLoop.take();
-                 IntegersZp64 ring = new IntegersZp64(prime);
-
-                 minimalPolyMod = UnivariatePolynomial.asOverZp64(minimalPoly, ring);
-                 numberFieldMod = new FiniteField<>(minimalPolyMod);
-                 // reduce Z -> Zp
-                 aMod = a.mapCoefficients(numberFieldMod, cf -> UnivariatePolynomial.asOverZp64(cf, ring));
-                 bMod = b.mapCoefficients(numberFieldMod, cf -> UnivariatePolynomial.asOverZp64(cf, ring));
-                 if (!aMod.sameSkeletonQ(a) || !bMod.sameSkeletonQ(b))
-                     continue;
-
-                 // calculate new GCD using previously calculated skeleton via sparse interpolation
-                 MultivariatePolynomial<UnivariatePolynomialZp64> modularGCD;
-                 try {
-                     modularGCD = interpolateGCD(aMod, bMod, baseMod.mapCoefficients(numberFieldMod, cf -> cf.setModulusUnsafe(prime)), random);
-                 } catch (Throwable t) {continue;} // unlucky prime
-
-                 if (modularGCD == null) {
-                     // interpolation failed => assumed form is wrong => start over
-                     continue;
-                 }
-
-                 // correction
-                 modularGCD.Monic(numberFieldMod.valueOf(correctionFactor.mod(prime).longValueExact()));
-
-                 assert MultivariateDivision.DividesQ(aMod, modularGCD);
-                 assert MultivariateDivision.DividesQ(bMod, modularGCD);
-
-                 if (modularGCD.IsConstant())
-                     return a.CreateOne();
-
-                 // better Degree bound found -> start over
-                 if (modularGCD.Degree(0) < base.Degree(0)) {
-                     baseMod = modularGCD;
-                     prevCandidate = null;
-                     base = baseMod.mapCoefficients(auxRing, cf -> cf.asPolyZ(false).toBigPoly());
-                     basePrime = prime;
-                     crtPrime = Z.valueOf(basePrime);
-                     continue;
-                 }
-
-                 //skip unlucky prime
-                 if (modularGCD.Degree(0) > base.Degree(0))
-                     continue;
-
-                 ChineseRemaindersMagic<BigInteger> magic = CreateMagic(Z, crtPrime, Z.valueOf(prime));
-                 //lifting
-                 PairedIEnumerable<
-                         Monomial<UnivariatePolynomial<BigInteger>>, MultivariatePolynomial<UnivariatePolynomial<BigInteger>>,
-                         Monomial<UnivariatePolynomialZp64>, MultivariatePolynomial<UnivariatePolynomialZp64>
-                         > iterator = new PairedIEnumerable<>(base, modularGCD);
-                 while (iterator.hasNext()) {
-                     iterator.advance();
-
-                     Monomial<UnivariatePolynomial<BigInteger>> baseTerm = iterator.aTerm;
-                     Monomial<UnivariatePolynomialZp64> imageTerm = iterator.bTerm;
-
-                     if (baseTerm.coefficient.IsZero())
-                         // term is absent in the base
-                         continue;
-
-                     if (imageTerm.coefficient.IsZero()) {
-                         // term is absent in the modularGCD => remove it from the base
-                         // bBase.subtract(baseTerm);
-                         iterator.aIEnumerable.remove();
-                         continue;
-                     }
-                     UnivariatePolynomial<BigInteger> baseCf = baseTerm.coefficient;
-                     UnivariatePolynomialZp64 imageCf = imageTerm.coefficient;
-
-                     assert baseCf.ring == Z;
-                     UnivariateGCD.updateCRT(magic, baseCf, imageCf);
-                 }
-                 crtPrime = crtPrime.Multiply(Z.valueOf(prime));
-
-                 IntegersZp crtRing = new IntegersZp(crtPrime);
-                 MultivariatePolynomial<UnivariatePolynomial<BigInteger>>
-                         candidate = base.mapCoefficients(numberField,
-                         cf -> numberField.valueOf(UnivariatePolynomial.asPolyZSymmetric(cf.setRingUnsafe(crtRing))));
-
-                 if (prevCandidate == null) {
-                     prevCandidate = candidate;
-                     continue;
-                 }
-
-                 if (prevCandidate.equals(candidate)) {
-                     // division test
-                     if (pseudoRemainder(a, candidate).IsZero() && pseudoRemainder(b, candidate).IsZero())
-                         return candidate;
-                 }
-                 prevCandidate = candidate;
-             }
-         }
-     }
-
-     /**
-      * Modular interpolation algorithm for polynomials over simple field extensions with the use of Langemyr & McCallum
-      * approach to avoid rational reconstruction
-      */
-     public static MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>>
-     ModularGCDInNumberFieldViaRationalReconstruction(
-             MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> a,
-             MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> b,
-             Func<
-                     MultivariatePolynomial<UnivariatePolynomialZp64>,
-                     MultivariatePolynomial<UnivariatePolynomialZp64>,
-                     MultivariatePolynomial<UnivariatePolynomialZp64>
-                     > modularAlgorithm) {
-         return PolynomialGCDInNumberFieldSwitchToRingOfInteger(a, b,
-                 (l, r) => PolynomialGCDAssociateInRingOfIntegerOfNumberField(l, r,
-                         (u, v) => ModularGCDInNumberFieldViaRationalReconstruction0(u, v, modularAlgorithm)));
-     }
-
-     /**
-      * <=odular interpolation algorithm for polynomials over simple field extensions with the use of rational
-      * reconstruction to reconstruct the result
-      */
-     private static MultivariatePolynomial<UnivariatePolynomial<BigInteger>>
-     ModularGCDInNumberFieldViaRationalReconstruction0(
-             MultivariatePolynomial<UnivariatePolynomial<BigInteger>> a,
-             MultivariatePolynomial<UnivariatePolynomial<BigInteger>> b,
-             Func<
-                     MultivariatePolynomial<UnivariatePolynomialZp64>,
-                     MultivariatePolynomial<UnivariatePolynomialZp64>,
-                     MultivariatePolynomial<UnivariatePolynomialZp64>
-                     > modularAlgorithm) {
-         // choose better prime to start
-         long startingPrime;
-         if (Math.max(iMaxZ(a).bitLength(), iMaxZ(b).bitLength()) < 256)
-             startingPrime = 1L << 30;
-         else
-             startingPrime = 1L << 60;
-
-         // for efficient division test we prepare polynomials with integer coefficients
-         AlgebraicNumberField<UnivariatePolynomial<BigInteger>>
-                 numberField = (AlgebraicNumberField<UnivariatePolynomial<BigInteger>>) a.ring;
-         UnivariatePolynomial<BigInteger> minimalPoly = numberField.getMinimalPolynomial();
-
-         // auxiliary ring
-         UnivariateRing<UnivariatePolynomial<BigInteger>> auxRing = UnivariateRing(Z);
-         PrimesIEnumerable primesLoop = new PrimesIEnumerable(startingPrime - (1 << 12));
-
-         // accumulator to update coefficients via Chineese remainding
-         MultivariatePolynomial<UnivariatePolynomial<BigInteger>> base = null;
-         // accumulated CRT prime
-         BigInteger crtPrime = null;
-         // number of already generated primes
-         int nPrimes = 0;
-         // Fibonacci numbers for testing of rational reconstruction
-         int prevFibonacci = 1, nextFibonacci = 2;
-         // over all primes
-         main_loop:
-         while (true) {
-             long prime = primesLoop.take();
-             IntegersZp64 ring = new IntegersZp64(prime);
-             UnivariatePolynomialZp64 minimalPolyMod = UnivariatePolynomial.asOverZp64(minimalPoly, ring);
-             FiniteField<UnivariatePolynomialZp64> numberFieldMod = new FiniteField<>(minimalPolyMod);
-
-             // reduce Z -> Zp
-             MultivariatePolynomial<UnivariatePolynomialZp64>
-                     aMod = a.mapCoefficients(numberFieldMod, cf -> UnivariatePolynomial.asOverZp64(cf, ring)),
-                     bMod = b.mapCoefficients(numberFieldMod, cf -> UnivariatePolynomial.asOverZp64(cf, ring));
-             if (!aMod.sameSkeletonQ(a) || !bMod.sameSkeletonQ(b))
-                 continue;
-
-             // calculate new GCD using previously calculated skeleton via sparse interpolation
-             MultivariatePolynomial<UnivariatePolynomialZp64> modularGCD;
-             try {
-                 modularGCD = modularAlgorithm.apply(aMod, bMod);
-             } catch (Throwable t) {continue;} // unlucky prime
-
-             if (modularGCD == null) {
-                 // interpolation failed => assumed form is wrong => start over
-                 continue;
-             }
-
-             if (modularGCD.IsConstant())
-                 return a.CreateOne();
-
-             // Monicize modular gcd
-             modularGCD.Monic();
-
-             assert MultivariateDivision.DividesQ(aMod, modularGCD);
-             assert MultivariateDivision.DividesQ(bMod, modularGCD);
-
-             // better Degree bound found -> start over
-             if (base == null || modularGCD.Degree(0) < base.Degree(0)) {
-                 base = modularGCD.mapCoefficients(auxRing, cf -> cf.asPolyZ(false).toBigPoly());
-                 crtPrime = Z.valueOf(prime);
-                 continue;
-             }
-
-             //skip unlucky prime
-             if (modularGCD.Degree(0) > base.Degree(0))
-                 continue;
-
-             // applying CRT
-             PairedIEnumerable<
-                     Monomial<UnivariatePolynomial<BigInteger>>, MultivariatePolynomial<UnivariatePolynomial<BigInteger>>,
-                     Monomial<UnivariatePolynomialZp64>, MultivariatePolynomial<UnivariatePolynomialZp64>
-                     > iterator = new PairedIEnumerable<>(base, modularGCD);
-             ChineseRemaindersMagic<BigInteger> magic = CreateMagic(Z, crtPrime, Z.valueOf(prime));
-             while (iterator.hasNext()) {
-                 iterator.advance();
-
-                 Monomial<UnivariatePolynomial<BigInteger>> baseTerm = iterator.aTerm;
-                 Monomial<UnivariatePolynomialZp64> imageTerm = iterator.bTerm;
-
-                 if (baseTerm.coefficient.IsZero())
-                     // term is absent in the base
-                     continue;
-
-                 if (imageTerm.coefficient.IsZero()) {
-                     // term is absent in the modularGCD => remove it from the base
-                     // bBase.subtract(baseTerm);
-                     iterator.aIEnumerable.remove();
-                     continue;
-                 }
-                 UnivariatePolynomial<BigInteger> baseCf = baseTerm.coefficient;
-                 UnivariatePolynomialZp64 imageCf = imageTerm.coefficient;
-
-                 assert baseCf.ring == Z;
-                 UnivariateGCD.updateCRT(magic, baseCf, imageCf);
-             }
-             crtPrime = crtPrime.Multiply(Z.valueOf(prime));
-             ++nPrimes;
-
-             // attempt to apply rational reconstruction (quite costly) only for
-             // sufficiently large number of prime homomorphisms,
-             // since we don't know a priori any coefficient bounds
-             //
-             // We use Fibonacci numbers as in van Hoeij & Monagan "A Modular GCD
-             // algorithm over Number Fields presented with Multiple Extensions."
-             if (nPrimes == nextFibonacci) {
-                 int nextNextFibonacci = (prevFibonacci + 1) / 2 + nextFibonacci;
-                 prevFibonacci = nextFibonacci;
-                 nextFibonacci = nextNextFibonacci;
-
-                 // rational reconstruction
-                 BigInteger lcm = Z.getOne();
-                 List<Monomial<UnivariatePolynomial<Rational<BigInteger>>>> candidateTerms = new ArrayList<>();
-                 for (Monomial<UnivariatePolynomial<BigInteger>> term : base.terms) {
-                     UnivariatePolynomial<Rational<BigInteger>> rrCf = rationalReconstruction(term.coefficient, crtPrime);
-                     if (rrCf == null)
-                         continue main_loop; // rational reconstruction failed
-                     candidateTerms.add(new Monomial<>(term, rrCf));
-                     lcm = Z.lcm(lcm, Z.lcm(rrCf.stream().map(Rational::denominator).collect(Collectors.toList())));
-                 }
-                 final BigInteger lcm0 = lcm;
-                 MultivariatePolynomial<UnivariatePolynomial<BigInteger>> candidate = a.Create(candidateTerms
-                         .stream()
-                         .map(m -> new Monomial<>(m, m.coefficient.mapCoefficients(Z, cf -> cf.Multiply(lcm0).numeratorExact())))
-                         .collect(Collectors.toList()));
-
-
-                 // test candidate with pseudoD division
-                 if (pseudoRemainder(a, candidate).IsZero()
-                         && pseudoRemainder(b, candidate).IsZero())
-                     return candidate;
-             }
-         }
-     }
-
-     /**
-      * Zippel's sparse modular interpolation algorithm for polynomials over simple field extensions with the use of
-      * Langemyr & McCallum approach to avoid rational reconstruction
-      */
-     public static MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>>
-     ModularGCDInNumberFieldViaLangemyrMcCallum(
-             MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> a,
-             MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> b,
-             Func<
-                     MultivariatePolynomial<UnivariatePolynomialZp64>,
-                     MultivariatePolynomial<UnivariatePolynomialZp64>,
-                     MultivariatePolynomial<UnivariatePolynomialZp64>
-                     > modularAlgorithm) {
-         return PolynomialGCDInNumberFieldSwitchToRingOfInteger(a, b,
-                 (l, r) => PolynomialGCDAssociateInRingOfIntegerOfNumberField(l, r,
-                         (u, v) => PolynomialGCDAssociateInNumberFieldViaLangemyrMcCallum(u, v,
-                                 (s, t) => ModularGCDAssociateInNumberFieldViaLangemyrMcCallum0(s, t, modularAlgorithm))));
-     }
-
-     /**
-      * Zippel's sparse modular interpolation algorithm for polynomials over simple field extensions with Langemyr &
-      * McCallum correction for lead coefficients to avoid rational reconstruction
-      */
-     private static MultivariatePolynomial<UnivariatePolynomial<BigInteger>>
-     ModularGCDAssociateInNumberFieldViaLangemyrMcCallum0(
-             MultivariatePolynomial<UnivariatePolynomial<BigInteger>> a,
-             MultivariatePolynomial<UnivariatePolynomial<BigInteger>> b,
-             Func<
-                     MultivariatePolynomial<UnivariatePolynomialZp64>,
-                     MultivariatePolynomial<UnivariatePolynomialZp64>,
-                     MultivariatePolynomial<UnivariatePolynomialZp64>
-                     > modularAlgorithm) {
-
-         assert a.Lc().IsConstant();
-         assert b.Lc().IsConstant();
-         // choose better prime for start
-         long startingPrime;
-         if (Math.max(iMaxZ(a).bitLength(), iMaxZ(b).bitLength()) < 2 * 256)
-             startingPrime = 1L << 30;
-         else
-             startingPrime = 1L << 60;
-
-         AlgebraicNumberField<UnivariatePolynomial<BigInteger>> numberField
-                 = (AlgebraicNumberField<UnivariatePolynomial<BigInteger>>) a.ring;
-         UnivariatePolynomial<BigInteger> minimalPoly = numberField.getMinimalPolynomial();
-
-         // Weinberger & Rothschild (1976) correction denominator
-         BigInteger
-                 lcGCD = Z.gcd(a.Lc().cc(), b.Lc().cc()),
-                 disc = UnivariateResultants.Discriminant(minimalPoly),
-                 correctionFactor = disc.pow(1).Multiply(lcGCD);
-
-         UnivariateRing<UnivariatePolynomial<BigInteger>> auxRing = UnivariateRing(Z);
-         PrimesIEnumerable primesLoop = new PrimesIEnumerable(startingPrime - (1 << 12));
-
-         // accumulator to update coefficients via Chineese remainding
-         MultivariatePolynomial<UnivariatePolynomial<BigInteger>> base = null;
-         // accumulated CRT prime
-         BigInteger crtPrime = null;
-         // previous candidate to test
-         MultivariatePolynomial<UnivariatePolynomial<BigInteger>> prevCandidate = null;
-         // over all primes
-         while (true) {
-             long prime = primesLoop.take();
-             IntegersZp64 ring = new IntegersZp64(prime);
-             UnivariatePolynomialZp64 minimalPolyMod = UnivariatePolynomial.asOverZp64(minimalPoly, ring);
-             FiniteField<UnivariatePolynomialZp64> numberFieldMod = new FiniteField<>(minimalPolyMod);
-
-             minimalPolyMod = UnivariatePolynomial.asOverZp64(minimalPoly, ring);
-             numberFieldMod = new FiniteField<>(minimalPolyMod);
-             // reduce Z -> Zp
-             MultivariatePolynomial<UnivariatePolynomialZp64>
-                     aMod = a.mapCoefficients(numberFieldMod, cf -> UnivariatePolynomial.asOverZp64(cf, ring)),
-                     bMod = b.mapCoefficients(numberFieldMod, cf -> UnivariatePolynomial.asOverZp64(cf, ring));
-             if (!aMod.sameSkeletonQ(a) || !bMod.sameSkeletonQ(b))
-                 continue;
-
-             // calculate new GCD using previously calculated skeleton via sparse interpolation
-             MultivariatePolynomial<UnivariatePolynomialZp64> modularGCD;
-             try {
-                 modularGCD = modularAlgorithm.apply(aMod, bMod).Monic();
-             } catch (Throwable t) {continue;} // unlucky prime
-
-             if (modularGCD == null) {
-                 // interpolation failed => assumed form is wrong => start over
-                 continue;
-             }
-
-             // correction
-             modularGCD.Monic(numberFieldMod.valueOf(correctionFactor.mod(prime).longValueExact()));
-
-             assert MultivariateDivision.DividesQ(aMod, modularGCD);
-             assert MultivariateDivision.DividesQ(bMod, modularGCD);
-
-             if (modularGCD.IsConstant())
-                 return a.CreateOne();
-
-             // better Degree bound found -> start over
-             if (base == null || modularGCD.Degree(0) < base.Degree(0)) {
-                 prevCandidate = null;
-                 base = modularGCD.mapCoefficients(auxRing, cf -> cf.asPolyZ(false).toBigPoly());
-                 crtPrime = Z.valueOf(prime);
-                 continue;
-             }
-
-             //skip unlucky prime
-             if (modularGCD.Degree(0) > base.Degree(0))
-                 continue;
-
-             ChineseRemaindersMagic<BigInteger> magic = CreateMagic(Z, crtPrime, Z.valueOf(prime));
-             //lifting
-             PairedIEnumerable<
-                     Monomial<UnivariatePolynomial<BigInteger>>, MultivariatePolynomial<UnivariatePolynomial<BigInteger>>,
-                     Monomial<UnivariatePolynomialZp64>, MultivariatePolynomial<UnivariatePolynomialZp64>
-                     > iterator = new PairedIEnumerable<>(base, modularGCD);
-             while (iterator.hasNext()) {
-                 iterator.advance();
-
-                 Monomial<UnivariatePolynomial<BigInteger>> baseTerm = iterator.aTerm;
-                 Monomial<UnivariatePolynomialZp64> imageTerm = iterator.bTerm;
-
-                 if (baseTerm.coefficient.IsZero())
-                     // term is absent in the base
-                     continue;
-
-                 if (imageTerm.coefficient.IsZero()) {
-                     // term is absent in the modularGCD => remove it from the base
-                     // bBase.subtract(baseTerm);
-                     iterator.aIEnumerable.remove();
-                     continue;
-                 }
-                 UnivariatePolynomial<BigInteger> baseCf = baseTerm.coefficient;
-                 UnivariatePolynomialZp64 imageCf = imageTerm.coefficient;
-
-                 assert baseCf.ring == Z;
-                 UnivariateGCD.updateCRT(magic, baseCf, imageCf);
-             }
-             crtPrime = crtPrime.Multiply(Z.valueOf(prime));
-
-             IntegersZp crtRing = new IntegersZp(crtPrime);
-             MultivariatePolynomial<UnivariatePolynomial<BigInteger>>
-                     candidate = base.mapCoefficients(numberField,
-                     cf -> numberField.valueOf(UnivariatePolynomial.asPolyZSymmetric(cf.setRingUnsafe(crtRing))));
-
-             if (prevCandidate == null) {
-                 prevCandidate = candidate;
-                 continue;
-             }
-
-             if (prevCandidate.equals(candidate)) {
-                 // division test
-                 if (pseudoRemainder(a, candidate).IsZero() && pseudoRemainder(b, candidate).IsZero())
-                     return candidate;
-             }
-             prevCandidate = candidate;
-         }
-     }
-
-
-     /* ======================== Multivariate GCD over finite fields with small cardinality ========================== */
+    /* =============================== Multivariate GCD over algebraic number fields ================================= */
+
+
+    private static MultivariatePolynomial<UnivariatePolynomial<E>>
+        TrivialGCDInExtension<E>(MultivariatePolynomial<UnivariatePolynomial<E>> a,
+            MultivariatePolynomial<UnivariatePolynomial<E>> b)
+    {
+        var ring
+            = (AlgebraicNumberField<E>)a.ring;
+
+        if (!a.Stream().All(ring.IsInTheBaseField)
+            || !b.Stream().All(ring.IsInTheBaseField))
+            return null;
+
+        Ring<E> cfRing = ring.GetMinimalPolynomial().ring;
+        MultivariatePolynomial<E>
+            ar = a.MapCoefficients(cfRing, u => u.Cc()),
+            br = b.MapCoefficients(cfRing, u => u.Cc());
+        return PolynomialGCD(ar, br)
+            .MapCoefficients(ring, cf => UnivariatePolynomial<E>.Constant(cfRing, cf));
+    }
+
+
+    static BigInteger iContent(MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> a)
+    {
+        return Rings.Z.Gcd(a.Stream().SelectMany(u => u.Stream()).Select(r => r.Numerator()).ToList());
+    }
+
+
+    static BigInteger iDenominator(MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> a)
+    {
+        return Rings.Z.Gcd(a.Stream().SelectMany(u => u.Stream()).Select(r => r.Denominator()).ToList());
+    }
+
+
+    static BigInteger iMax(MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> a)
+    {
+        return a.Stream()
+            .SelectMany(p => p.Stream().SelectMany(cf => (BigInteger[]) [cf.Numerator(), cf.Denominator()]))
+            .Select(Rings.Z.Abs).Max(Rings.Z); //.orElse(Z.getZero());
+    }
+
+
+    static BigInteger iMaxZ(MultivariatePolynomial<UnivariatePolynomial<BigInteger>> a)
+    {
+        return a.Stream()
+            .SelectMany(u => u.Stream())
+            .Select(Rings.Z.Abs).Max(Rings.Z); //.orElse(Z.getZero());
+    }
+
+    /**
+     * Modular algorithm for polynomials over simple field extensions, which switches to "integer" associates of input
+     * polynomials and number field (by applying substitution to minimal polynomial)
+     *
+     * @param a               first poly
+     * @param b               second poly
+     * @param algorithmInRing the algorithm for ring of integers
+     */
+    private static MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>>
+        PolynomialGCDInNumberFieldSwitchToRingOfInteger(
+            MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> a,
+            MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> b,
+            Func<MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>>,
+                MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>>,
+                MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>>> algorithmInRing)
+    {
+        // if there is a trivial case
+        var simpleGCD = TrivialGCDInExtension(a, b);
+        if (simpleGCD != null)
+            return simpleGCD;
+
+        AlgebraicNumberField<Rational<BigInteger>> numberField
+            = (AlgebraicNumberField<Rational<BigInteger>>)a.ring;
+        UnivariatePolynomial<Rational<BigInteger>> minimalPoly = numberField.GetMinimalPolynomial();
+
+        if (minimalPoly.Stream().All(r => r.IsIntegral()))
+        {
+            // minimal polynomial is integral (Monic)
+
+            a = a.Clone();
+            b = b.Clone();
+            // remove integer Content (to facilitate rational reconstruction)
+            BigInteger aiCont = iContent(a), biCont = iContent(b);
+            a.Multiply(UnivariatePolynomial<Rational<BigInteger>>.Constant(Rings.Q, Rings.Q.MkDenominator(aiCont)));
+            b.Multiply(UnivariatePolynomial<Rational<BigInteger>>.Constant(Rings.Q, Rings.Q.MkDenominator(biCont)));
+            // to common denominator
+            BigInteger aiDen = iDenominator(a), biDen = iDenominator(b);
+            a.Multiply(UnivariatePolynomial<Rational<BigInteger>>.Constant(Rings.Q, Rings.Q.MkNumerator(aiDen)));
+            b.Multiply(UnivariatePolynomial<Rational<BigInteger>>.Constant(Rings.Q, Rings.Q.MkNumerator(biDen)));
+
+            return algorithmInRing(a, b);
+        }
+        else
+        {
+            // scaling of minimal poly is practically faster than working with rationals
+
+            // replace s => s / lc(minPoly)
+            var minPolyLeadCoeff = Util.CommonDenominator(minimalPoly);
+            Rational<BigInteger>
+                scale = new Rational<BigInteger>(Rings.Z, Rings.Z.GetOne(), minPolyLeadCoeff),
+                scaleReciprocal = scale.Reciprocal();
+
+            // scaled number field
+            AlgebraicNumberField<Rational<BigInteger>>
+                numberFieldScaled = new AlgebraicNumberField<Rational<BigInteger>>(minimalPoly.Scale(scale).Monic());
+
+            return PolynomialGCDInNumberFieldSwitchToRingOfInteger(
+                    a.MapCoefficients(numberFieldScaled, cf => cf.Scale(scale)),
+                    b.MapCoefficients(numberFieldScaled, cf => cf.Scale(scale)),
+                    algorithmInRing)
+                .MapCoefficients(numberField, cf => cf.Scale(scaleReciprocal));
+        }
+    }
+
+    /**
+     * Modular interpolation algorithm for polynomials over simple field extensions by integer with integer
+     * coefficients
+     */
+    private static MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>>
+        PolynomialGCDAssociateInRingOfIntegerOfNumberField(
+            MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> a,
+            MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> b,
+            Func<
+                MultivariatePolynomial<UnivariatePolynomial<BigInteger>>,
+                MultivariatePolynomial<UnivariatePolynomial<BigInteger>>,
+                MultivariatePolynomial<UnivariatePolynomial<BigInteger>>
+            > algorithmForGcdAssociate)
+    {
+        // assert a.stream().allMatch(cf => cf.stream().allMatch(Rational::isIntegral));
+        // assert b.stream().allMatch(cf => cf.stream().allMatch(Rational::isIntegral));
+
+        var gcdInput = preparedGCDInput(a, b,
+            (l, r) => PolynomialGCDAssociateInRingOfIntegerOfNumberField(l, r, algorithmForGcdAssociate));
+        if (gcdInput.earlyGCD != null)
+            return gcdInput.earlyGCD;
+
+        a = gcdInput.aReduced;
+        b = gcdInput.bReduced;
+
+        // remove Content (required by Zippel algorithm)
+        MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> pContentGCD =
+            ContentGCD(a, b, 0,
+                (l, r) => PolynomialGCDAssociateInRingOfIntegerOfNumberField(l, r, algorithmForGcdAssociate));
+        if (!pContentGCD.IsConstant())
+        {
+            a = MultivariateDivision.DivideExact(a, pContentGCD);
+            b = MultivariateDivision.DivideExact(b, pContentGCD);
+            return gcdInput.restoreGCD(
+                PolynomialGCDInNumberFieldSwitchToRingOfInteger(a, b,
+                    (l, r) => PolynomialGCDAssociateInRingOfIntegerOfNumberField(l, r, algorithmForGcdAssociate)
+                        .Multiply(pContentGCD)));
+        }
+
+        AlgebraicNumberField<Rational<BigInteger>> numberField
+            = (AlgebraicNumberField<Rational<BigInteger>>)a.ring;
+        var minimalPolyZ =
+            numberField.GetMinimalPolynomial().MapCoefficients(Rings.Z, r => r.NumeratorExact());
+        var numberRingZ = new AlgebraicNumberField<BigInteger>(minimalPolyZ);
+
+        return gcdInput.restoreGCD(algorithmForGcdAssociate(
+                a.MapCoefficients(numberRingZ, cf => cf.MapCoefficients(Rings.Z, r => r.NumeratorExact())),
+                b.MapCoefficients(numberRingZ, cf => cf.MapCoefficients(Rings.Z, r => r.NumeratorExact())))
+            .MapCoefficients(numberField, cf => cf.MapCoefficients(Rings.Q, Rings.Q.MkNumerator)));
+    }
+
+    /**
+     * Zippel's sparse modular interpolation algorithm for polynomials over simple field extensions with the use of
+     * rational reconstruction to reconstruct the result
+     */
+    public static MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>>
+        ZippelGCDInNumberFieldViaRationalReconstruction(
+            MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> a,
+            MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> b)
+    {
+        return PolynomialGCDInNumberFieldSwitchToRingOfInteger(a, b,
+            (l, r) => PolynomialGCDAssociateInRingOfIntegerOfNumberField(l, r,
+                MultivariateGCD.ZippelGCDInNumberFieldViaRationalReconstruction0));
+    }
+
+    /**
+     * Zippel's sparse modular interpolation algorithm for computing GCD associate for polynomials over simple field
+     * extensions with the use of rational reconstruction to reconstruct the result
+     */
+    private static MultivariatePolynomial<UnivariatePolynomial<BigInteger>>
+        ZippelGCDInNumberFieldViaRationalReconstruction0(
+            MultivariatePolynomial<UnivariatePolynomial<BigInteger>> a,
+            MultivariatePolynomial<UnivariatePolynomial<BigInteger>> b)
+    {
+        // choose better prime to start
+        long startingPrime;
+        if (Math.Max(iMaxZ(a).GetBitLength(), iMaxZ(b).GetBitLength()) < 256)
+            startingPrime = 1L << 30;
+        else
+            startingPrime = 1L << 60;
+
+        // for efficient division test we prepare polynomials with integer coefficients
+        var
+            numberField = (AlgebraicNumberField<BigInteger>)a.ring;
+        var minimalPoly = numberField.GetMinimalPolynomial();
+
+        // auxiliary ring
+        var auxRing = Rings.UnivariateRing(Rings.Z);
+        var primesLoop = new PrimesIterator(startingPrime - (1 << 12));
+        var random = PrivateRandom.GetRandom();
+        main_loop:
+        while (true)
+        {
+            var basePrime = primesLoop.Take();
+            // assert basePrime != -1 : "long overflow";
+
+            var baseRing = new IntegersZp64(basePrime);
+            var minimalPolyMod = UnivariatePolynomialZp64.AsOverZp64(minimalPoly, baseRing);
+            var numberFieldMod = new FiniteField<long>(minimalPolyMod);
+
+            // reduce mod p
+            MultivariatePolynomial<UnivariatePolynomialZp64>
+                aMod = a.MapCoefficients(numberFieldMod, cf => UnivariatePolynomialZp64.AsOverZp64(cf, baseRing)),
+                bMod = b.MapCoefficients(numberFieldMod, cf => UnivariatePolynomialZp64.AsOverZp64(cf, baseRing));
+            if (!aMod.SameSkeletonQ(a) || !bMod.SameSkeletonQ(b))
+                continue;
+
+            // the base image
+            MultivariatePolynomial<UnivariatePolynomialZp64> baseMod;
+            try
+            {
+                baseMod = PolynomialGCD(aMod, bMod).Monic();
+            }
+            catch (Exception t)
+            {
+                continue;
+            } // bad prime
+
+            // accumulator to update coefficients via Chineese remainding
+            MultivariatePolynomial<UnivariatePolynomial<BigInteger>> @base = baseMod
+                .MapCoefficients(auxRing, cf => cf.AsPolyZ(false).ToBigPoly());
+
+            if (@base.IsConstant())
+                return a.CreateOne();
+
+            // accumulated CRT prime
+            var crtPrime = Rings.Z.ValueOf(basePrime);
+            // number of already generated primes
+            var nPrimes = 0;
+            // Fibonacci numbers for testing of rational reconstruction
+            int prevFibonacci = 1, nextFibonacci = 2;
+            // over all primes
+            inner_loop:
+            while (true)
+            {
+                var prime = primesLoop.Take();
+                var ring = new IntegersZp64(prime);
+
+                minimalPolyMod = UnivariatePolynomialZp64.AsOverZp64(minimalPoly, ring);
+                numberFieldMod = new FiniteField<long>(minimalPolyMod);
+                // reduce Z => Zp
+                aMod = a.MapCoefficients(numberFieldMod, cf => UnivariatePolynomialZp64.AsOverZp64(cf, ring));
+                bMod = b.MapCoefficients(numberFieldMod, cf => UnivariatePolynomialZp64.AsOverZp64(cf, ring));
+                if (!aMod.SameSkeletonQ(a) || !bMod.SameSkeletonQ(b))
+                    continue;
+
+                // calculate new GCD using previously calculated skeleton via sparse interpolation
+                MultivariatePolynomial<UnivariatePolynomialZp64> modularGCD;
+                try
+                {
+                    modularGCD = interpolateGCD(aMod, bMod,
+                        baseMod.MapCoefficients(numberFieldMod, cf => cf.SetModulusUnsafe(prime)), random);
+                }
+                catch (Exception t)
+                {
+                    continue;
+                } // unlucky prime
+
+                if (modularGCD == null)
+                {
+                    // interpolation failed => assumed form is wrong => start over
+                    continue;
+                }
+
+                if (modularGCD.IsConstant())
+                    return a.CreateOne();
+
+                // Monicize modular gcd
+                modularGCD.Monic();
+
+                // assert MultivariateDivision.DividesQ(aMod, modularGCD);
+                // assert MultivariateDivision.DividesQ(bMod, modularGCD);
+
+                // better Degree bound found => start over
+                if (modularGCD.Degree(0) < @base.Degree(0))
+                {
+                    baseMod = modularGCD;
+                    @base = baseMod.MapCoefficients(auxRing, cf => cf.AsPolyZ(false).ToBigPoly());
+                    basePrime = prime;
+                    crtPrime = Rings.Z.ValueOf(basePrime);
+                    continue;
+                }
+
+                //skip unlucky prime
+                if (modularGCD.Degree(0) > @base.Degree(0))
+                    continue;
+
+                // applying CRT
+                PairedIterator<
+                    UnivariatePolynomial<BigInteger>, UnivariatePolynomialZp64
+                > iterator =
+                    new PairedIterator<UnivariatePolynomial<BigInteger>, UnivariatePolynomialZp64>(@base, modularGCD);
+                var magic =
+                    ChineseRemainders.CreateMagic(Rings.Z, crtPrime, Rings.Z.ValueOf(prime));
+                while (iterator.MoveNext())
+                {
+                    Monomial<UnivariatePolynomial<BigInteger>> baseTerm = iterator.aTerm;
+                    Monomial<UnivariatePolynomialZp64> imageTerm = iterator.bTerm;
+
+                    if (baseTerm.coefficient.IsZero())
+                        // term is absent in the base
+                        continue;
+
+                    if (imageTerm.coefficient.IsZero())
+                    {
+                        // term is absent in the modularGCD => remove it from the base
+                        @base.Subtract(baseTerm);
+                        continue;
+                    }
+
+                    var baseCf = baseTerm.coefficient;
+                    var imageCf = imageTerm.coefficient;
+
+                    // assert baseCf.ring == Z;
+                    UnivariateGCD.UpdateCRT(magic, baseCf, imageCf);
+                }
+
+                crtPrime = crtPrime * (Rings.Z.ValueOf(prime));
+                ++nPrimes;
+
+                // attempt to apply rational reconstruction (quite costly) only for
+                // sufficiently large number of prime homomorphisms,
+                // since we don't know a priori any coefficient bounds
+                //
+                // We use Fibonacci numbers as in van Hoeij & Monagan "A Modular GCD
+                // algorithm over Number Fields presented with Multiple Extensions."
+                if (nPrimes == nextFibonacci)
+                {
+                    var nextNextFibonacci = (prevFibonacci + 1) / 2 + nextFibonacci;
+                    prevFibonacci = nextFibonacci;
+                    nextFibonacci = nextNextFibonacci;
+
+                    // rational reconstruction
+                    var lcm = Rings.Z.GetOne();
+                    List<Monomial<UnivariatePolynomial<Rational<BigInteger>>>> candidateTerms =
+                        new List<Monomial<UnivariatePolynomial<Rational<BigInteger>>>>();
+                    foreach (var term in @base.terms)
+                    {
+                        UnivariatePolynomial<Rational<BigInteger>> rrCf =
+                            rationalReconstruction(term.coefficient, crtPrime);
+                        if (rrCf == null)
+                            goto inner_loop; // rational reconstruction failed
+                        candidateTerms.Add(new Monomial<UnivariatePolynomial<Rational<BigInteger>>>(term, rrCf));
+                        lcm = Rings.Z.Lcm(lcm, Rings.Z.Lcm(rrCf.Stream().Select(r => r.Denominator()).ToList()));
+                    }
+
+                    var lcm0 = lcm;
+                    MultivariatePolynomial<UnivariatePolynomial<BigInteger>> candidate = a.Create(candidateTerms
+                        .Select(m => new Monomial<UnivariatePolynomial<BigInteger>>(m,
+                            m.coefficient.MapCoefficients(Rings.Z, cf => cf.Multiply(lcm0).NumeratorExact())))
+                        .ToList());
+
+
+                    // test candidate with pseudoD division
+                    if (MultivariateDivision.PseudoRemainder(a, candidate).IsZero()
+                        && MultivariateDivision.PseudoRemainder(b, candidate).IsZero())
+                        return candidate;
+                }
+            }
+        }
+    }
+
+
+    private static UnivariatePolynomial<Rational<BigInteger>>
+        rationalReconstruction(UnivariatePolynomial<BigInteger> @base, BigInteger crtPrime)
+    {
+        var candidate = UnivariatePolynomial<Rational<BigInteger>>.Zero(Rings.Q);
+        for (var j = 0; j <= @base.Degree(); ++j)
+        {
+            var numDen = RationalReconstruction.ReconstructFarey(@base[j], crtPrime);
+            if (numDen == null)
+                return null;
+            candidate.Set(j, new Rational<BigInteger>(Rings.Z, numDen[0], numDen[1]));
+        }
+
+        return candidate;
+    }
+
+    /**
+     * Zippel's sparse modular interpolation algorithm for computing GCD associate for polynomials over simple field
+     * extensions with the use of Langemyr & McCallum approach to avoid rational reconstruction
+     */
+    public static MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>>
+        ZippelGCDInNumberFieldViaLangemyrMcCallum(
+            MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> a,
+            MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> b)
+    {
+        return PolynomialGCDInNumberFieldSwitchToRingOfInteger(a, b,
+            (l, r) => PolynomialGCDAssociateInRingOfIntegerOfNumberField(l, r,
+                (u, v) => PolynomialGCDAssociateInNumberFieldViaLangemyrMcCallum(u, v,
+                    MultivariateGCD.ZippelGCDAssociateInNumberFieldViaLangemyrMcCallum0)));
+    }
+
+
+    private static MultivariatePolynomial<UnivariatePolynomial<BigInteger>>
+        PolynomialGCDAssociateInNumberFieldViaLangemyrMcCallum(
+            MultivariatePolynomial<UnivariatePolynomial<BigInteger>> a,
+            MultivariatePolynomial<UnivariatePolynomial<BigInteger>> b,
+            Func<
+                MultivariatePolynomial<UnivariatePolynomial<BigInteger>>,
+                MultivariatePolynomial<UnivariatePolynomial<BigInteger>>,
+                MultivariatePolynomial<UnivariatePolynomial<BigInteger>>
+            > baseAlgorithm)
+    {
+        var numberField
+            = (AlgebraicNumberField<BigInteger>)a.ring;
+
+        integerPrimitivePart(a);
+        integerPrimitivePart(b);
+
+        if (!a.Lc().IsConstant())
+            a.Multiply(numberField.Normalizer(a.Lc()));
+
+        if (!b.Lc().IsConstant())
+            b.Multiply(numberField.Normalizer(b.Lc()));
+
+        integerPrimitivePart(a);
+        integerPrimitivePart(b);
+
+        // if all coefficients are simple numbers (no algebraic elements)
+        MultivariatePolynomial<UnivariatePolynomial<BigInteger>> simpleGCD = TrivialGCDInExtension(a, b);
+        if (simpleGCD != null)
+            return simpleGCD;
+
+        return baseAlgorithm(a, b);
+    }
+
+    static void integerPrimitivePart(MultivariatePolynomial<UnivariatePolynomial<BigInteger>> p)
+    {
+        var gcd = Rings.Z.Gcd(p.Stream().SelectMany(u => u.Stream()).Order().ToList());
+        p.Stream().ForEach(cf => cf.DivideExact(gcd));
+    }
+
+    /**
+     * Zippel's sparse modular interpolation algorithm for polynomials over simple field extensions with Langemyr &
+     * McCallum correction for lead coefficients to avoid rational reconstruction
+     */
+    private static MultivariatePolynomial<UnivariatePolynomial<BigInteger>>
+        ZippelGCDAssociateInNumberFieldViaLangemyrMcCallum0(
+            MultivariatePolynomial<UnivariatePolynomial<BigInteger>> a,
+            MultivariatePolynomial<UnivariatePolynomial<BigInteger>> b)
+    {
+        // assert a.Lc().IsConstant();
+        // assert b.Lc().IsConstant();
+        // choose better prime for start
+        long startingPrime;
+        if (Math.Max(iMaxZ(a).GetBitLength(), iMaxZ(b).GetBitLength()) < 2 * 256)
+            startingPrime = 1L << 30;
+        else
+            startingPrime = 1L << 60;
+
+        var numberField
+            = (AlgebraicNumberField<BigInteger>)a.ring;
+        var minimalPoly = numberField.GetMinimalPolynomial();
+
+        // Weinberger & Rothschild (1976) correction denominator
+        BigInteger
+            lcGCD = Rings.Z.Gcd(a.Lc().Cc(), b.Lc().Cc()),
+            disc = UnivariateResultants.Discriminant(minimalPoly),
+            correctionFactor = BigInteger.Pow(disc, 1) * lcGCD;
+
+        var auxRing = Rings.UnivariateRing(Rings.Z);
+        var primesLoop = new PrimesIterator(startingPrime - (1 << 12));
+        var random = PrivateRandom.GetRandom();
+        while (true)
+        {
+            // prepare the skeleton
+            var basePrime = primesLoop.Take();
+            // assert basePrime != -1 : "long overflow";
+
+            var baseRing = new IntegersZp64(basePrime);
+            var minimalPolyMod = UnivariatePolynomialZp64.AsOverZp64(minimalPoly, baseRing);
+            var numberFieldMod = new FiniteField<long>(minimalPolyMod);
+
+            // reduce Z => Zp
+            MultivariatePolynomial<UnivariatePolynomialZp64>
+                aMod = a.MapCoefficients(numberFieldMod, cf => UnivariatePolynomialZp64.AsOverZp64(cf, baseRing)),
+                bMod = b.MapCoefficients(numberFieldMod, cf => UnivariatePolynomialZp64.AsOverZp64(cf, baseRing));
+            if (!aMod.SameSkeletonQ(a) || !bMod.SameSkeletonQ(b))
+                continue;
+
+            // the base image
+            MultivariatePolynomial<UnivariatePolynomialZp64> baseMod;
+            try
+            {
+                baseMod = PolynomialGCD(aMod, bMod).Monic();
+            }
+            catch (Exception t)
+            {
+                continue;
+            } // bad prime
+
+            // correction
+            baseMod.Monic(numberFieldMod.ValueOfLong((long)(correctionFactor % basePrime)));
+            // accumulator to update coefficients via Chineese remainding
+            MultivariatePolynomial<UnivariatePolynomial<BigInteger>> @base = baseMod
+                .MapCoefficients(auxRing, cf => cf.AsPolyZ(false).ToBigPoly());
+
+            if (@base.IsConstant())
+                return a.CreateOne();
+
+            // accumulated CRT prime
+            var crtPrime = Rings.Z.ValueOf(basePrime);
+            // previous candidate to test
+            MultivariatePolynomial<UnivariatePolynomial<BigInteger>> prevCandidate = null;
+            // over all primes
+            inner_loop:
+            while (true)
+            {
+                var prime = primesLoop.Take();
+                var ring = new IntegersZp64(prime);
+
+                minimalPolyMod = UnivariatePolynomialZp64.AsOverZp64(minimalPoly, ring);
+                numberFieldMod = new FiniteField<long>(minimalPolyMod);
+                // reduce Z => Zp
+                aMod = a.MapCoefficients(numberFieldMod, cf => UnivariatePolynomialZp64.AsOverZp64(cf, ring));
+                bMod = b.MapCoefficients(numberFieldMod, cf => UnivariatePolynomialZp64.AsOverZp64(cf, ring));
+                if (!aMod.SameSkeletonQ(a) || !bMod.SameSkeletonQ(b))
+                    continue;
+
+                // calculate new GCD using previously calculated skeleton via sparse interpolation
+                MultivariatePolynomial<UnivariatePolynomialZp64> modularGCD;
+                try
+                {
+                    modularGCD = interpolateGCD(aMod, bMod,
+                        baseMod.MapCoefficients(numberFieldMod, cf => cf.SetModulusUnsafe(prime)), random);
+                }
+                catch (Exception t)
+                {
+                    continue;
+                } // unlucky prime
+
+                if (modularGCD == null)
+                {
+                    // interpolation failed => assumed form is wrong => start over
+                    continue;
+                }
+
+                // correction
+                modularGCD.Monic(numberFieldMod.ValueOfLong((long)(correctionFactor % prime)));
+
+                // assert MultivariateDivision.DividesQ(aMod, modularGCD);
+                // assert MultivariateDivision.DividesQ(bMod, modularGCD);
+
+                if (modularGCD.IsConstant())
+                    return a.CreateOne();
+
+                // better Degree bound found => start over
+                if (modularGCD.Degree(0) < @base.Degree(0))
+                {
+                    baseMod = modularGCD;
+                    prevCandidate = null;
+                    @base = baseMod.MapCoefficients(auxRing, cf => cf.AsPolyZ(false).ToBigPoly());
+                    basePrime = prime;
+                    crtPrime = Rings.Z.ValueOf(basePrime);
+                    continue;
+                }
+
+                //skip unlucky prime
+                if (modularGCD.Degree(0) > @base.Degree(0))
+                    continue;
+
+                var magic =
+                    ChineseRemainders.CreateMagic(Rings.Z, crtPrime, Rings.Z.ValueOf(prime));
+                //lifting
+                PairedIterator<
+                    UnivariatePolynomial<BigInteger>, UnivariatePolynomialZp64
+                > iterator =
+                    new PairedIterator<UnivariatePolynomial<BigInteger>, UnivariatePolynomialZp64>(@base, modularGCD);
+                while (iterator.MoveNext())
+                {
+                    Monomial<UnivariatePolynomial<BigInteger>> baseTerm = iterator.aTerm;
+                    Monomial<UnivariatePolynomialZp64> imageTerm = iterator.bTerm;
+
+                    if (baseTerm.coefficient.IsZero())
+                        // term is absent in the base
+                        continue;
+
+                    if (imageTerm.coefficient.IsZero())
+                    {
+                        // term is absent in the modularGCD => remove it from the base
+                        @base.Subtract(baseTerm);
+                        continue;
+                    }
+
+                    var baseCf = baseTerm.coefficient;
+                    var imageCf = imageTerm.coefficient;
+
+                    // assert baseCf.ring == Z;
+                    UnivariateGCD.UpdateCRT(magic, baseCf, imageCf);
+                }
+
+                crtPrime = crtPrime * Rings.Z.ValueOf(prime);
+
+                var crtRing = new IntegersZp(crtPrime);
+                MultivariatePolynomial<UnivariatePolynomial<BigInteger>>
+                    candidate = @base.MapCoefficients(numberField,
+                        cf => numberField.ValueOf(
+                            UnivariatePolynomialZp64.AsPolyZSymmetric(cf.SetRingUnsafe(crtRing))));
+
+                if (prevCandidate == null)
+                {
+                    prevCandidate = candidate;
+                    continue;
+                }
+
+                if (prevCandidate.Equals(candidate))
+                {
+                    // division test
+                    if (MultivariateDivision.PseudoRemainder(a, candidate).IsZero() &&
+                        MultivariateDivision.PseudoRemainder(b, candidate).IsZero())
+                        return candidate;
+                }
+
+                prevCandidate = candidate;
+            }
+        }
+    }
+
+    /**
+     * Modular interpolation algorithm for polynomials over simple field extensions with the use of Langemyr & McCallum
+     * approach to avoid rational reconstruction
+     */
+    public static MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>>
+        ModularGCDInNumberFieldViaRationalReconstruction(
+            MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> a,
+            MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> b,
+            Func<
+                MultivariatePolynomial<UnivariatePolynomialZp64>,
+                MultivariatePolynomial<UnivariatePolynomialZp64>,
+                MultivariatePolynomial<UnivariatePolynomialZp64>
+            > modularAlgorithm)
+    {
+        return PolynomialGCDInNumberFieldSwitchToRingOfInteger(a, b,
+            (l, r) => PolynomialGCDAssociateInRingOfIntegerOfNumberField(l, r,
+                (u, v) => ModularGCDInNumberFieldViaRationalReconstruction0(u, v, modularAlgorithm)));
+    }
+
+    /**
+     * <=odular interpolation algorithm for polynomials over simple field extensions with the use of rational
+     * reconstruction to reconstruct the result
+     */
+    private static MultivariatePolynomial<UnivariatePolynomial<BigInteger>>
+        ModularGCDInNumberFieldViaRationalReconstruction0(
+            MultivariatePolynomial<UnivariatePolynomial<BigInteger>> a,
+            MultivariatePolynomial<UnivariatePolynomial<BigInteger>> b,
+            Func<
+                MultivariatePolynomial<UnivariatePolynomialZp64>,
+                MultivariatePolynomial<UnivariatePolynomialZp64>,
+                MultivariatePolynomial<UnivariatePolynomialZp64>
+            > modularAlgorithm)
+    {
+        // choose better prime to start
+        long startingPrime;
+        if (Math.Max(iMaxZ(a).GetBitLength(), iMaxZ(b).GetBitLength()) < 256)
+            startingPrime = 1L << 30;
+        else
+            startingPrime = 1L << 60;
+
+        // for efficient division test we prepare polynomials with integer coefficients
+        var
+            numberField = (AlgebraicNumberField<BigInteger>)a.ring;
+        var minimalPoly = numberField.GetMinimalPolynomial();
+
+        // auxiliary ring
+        var auxRing = Rings.UnivariateRing(Rings.Z);
+        var primesLoop = new PrimesIterator(startingPrime - (1 << 12));
+
+        // accumulator to update coefficients via Chineese remainding
+        MultivariatePolynomial<UnivariatePolynomial<BigInteger>> @base = null;
+        // accumulated CRT prime
+        BigInteger? crtPrime = null;
+        // number of already generated primes
+        var nPrimes = 0;
+        // Fibonacci numbers for testing of rational reconstruction
+        int prevFibonacci = 1, nextFibonacci = 2;
+        // over all primes
+        main_loop:
+        while (true)
+        {
+            var prime = primesLoop.Take();
+            var ring = new IntegersZp64(prime);
+            var minimalPolyMod = UnivariatePolynomialZp64.AsOverZp64(minimalPoly, ring);
+            var numberFieldMod = new FiniteField<long>(minimalPolyMod);
+
+            // reduce Z => Zp
+            MultivariatePolynomial<UnivariatePolynomialZp64>
+                aMod = a.MapCoefficients(numberFieldMod, cf => UnivariatePolynomialZp64.AsOverZp64(cf, ring)),
+                bMod = b.MapCoefficients(numberFieldMod, cf => UnivariatePolynomialZp64.AsOverZp64(cf, ring));
+            if (!aMod.SameSkeletonQ(a) || !bMod.SameSkeletonQ(b))
+                continue;
+
+            // calculate new GCD using previously calculated skeleton via sparse interpolation
+            MultivariatePolynomial<UnivariatePolynomialZp64> modularGCD;
+            try
+            {
+                modularGCD = modularAlgorithm(aMod, bMod);
+            }
+            catch (Exception t)
+            {
+                continue;
+            } // unlucky prime
+
+            if (modularGCD == null)
+            {
+                // interpolation failed => assumed form is wrong => start over
+                continue;
+            }
+
+            if (modularGCD.IsConstant())
+                return a.CreateOne();
+
+            // Monicize modular gcd
+            modularGCD.Monic();
+
+            // assert MultivariateDivision.DividesQ(aMod, modularGCD);
+            // assert MultivariateDivision.DividesQ(bMod, modularGCD);
+
+            // better Degree bound found => start over
+            if (@base == null || modularGCD.Degree(0) < @base.Degree(0))
+            {
+                @base = modularGCD.MapCoefficients(auxRing, cf => cf.AsPolyZ(false).ToBigPoly());
+                crtPrime = Rings.Z.ValueOf(prime);
+                continue;
+            }
+
+            //skip unlucky prime
+            if (modularGCD.Degree(0) > @base.Degree(0))
+                continue;
+
+            // applying CRT
+            PairedIterator<
+                UnivariatePolynomial<BigInteger>, UnivariatePolynomialZp64
+            > iterator =
+                new PairedIterator<UnivariatePolynomial<BigInteger>, UnivariatePolynomialZp64>(@base, modularGCD);
+            var magic =
+                ChineseRemainders.CreateMagic(Rings.Z, crtPrime.Value, Rings.Z.ValueOf(prime));
+            while (iterator.MoveNext())
+            {
+                Monomial<UnivariatePolynomial<BigInteger>> baseTerm = iterator.aTerm;
+                Monomial<UnivariatePolynomialZp64> imageTerm = iterator.bTerm;
+
+                if (baseTerm.coefficient.IsZero())
+                    // term is absent in the base
+                    continue;
+
+                if (imageTerm.coefficient.IsZero())
+                {
+                    // term is absent in the modularGCD => remove it from the base
+                    @base.Subtract(baseTerm);
+                    continue;
+                }
+
+                var baseCf = baseTerm.coefficient;
+                var imageCf = imageTerm.coefficient;
+
+                // assert baseCf.ring == Z;
+                UnivariateGCD.UpdateCRT(magic, baseCf, imageCf);
+            }
+
+            crtPrime = crtPrime * (Rings.Z.ValueOf(prime));
+            ++nPrimes;
+
+            // attempt to apply rational reconstruction (quite costly) only for
+            // sufficiently large number of prime homomorphisms,
+            // since we don't know a priori any coefficient bounds
+            //
+            // We use Fibonacci numbers as in van Hoeij & Monagan "A Modular GCD
+            // algorithm over Number Fields presented with Multiple Extensions."
+            if (nPrimes == nextFibonacci)
+            {
+                var nextNextFibonacci = (prevFibonacci + 1) / 2 + nextFibonacci;
+                prevFibonacci = nextFibonacci;
+                nextFibonacci = nextNextFibonacci;
+
+                // rational reconstruction
+                var lcm = Rings.Z.GetOne();
+                List<Monomial<UnivariatePolynomial<Rational<BigInteger>>>> candidateTerms =
+                    new List<Monomial<UnivariatePolynomial<Rational<BigInteger>>>>();
+                foreach (Monomial<UnivariatePolynomial<BigInteger>> term in @base.terms)
+                {
+                    UnivariatePolynomial<Rational<BigInteger>> rrCf =
+                        rationalReconstruction(term.coefficient, crtPrime.Value);
+                    if (rrCf == null)
+                        goto main_loop; // rational reconstruction failed
+                    candidateTerms.Add(new Monomial<UnivariatePolynomial<Rational<BigInteger>>>(term, rrCf));
+                    lcm = Rings.Z.Lcm(lcm, Rings.Z.Lcm(rrCf.Stream().Select(r => r.Denominator()).ToList()));
+                }
+
+                var lcm0 = lcm;
+                MultivariatePolynomial<UnivariatePolynomial<BigInteger>> candidate = a.Create(candidateTerms
+                    .Select(m => new Monomial<UnivariatePolynomial<BigInteger>>(m,
+                        m.coefficient.MapCoefficients(Rings.Z, cf => cf.Multiply(lcm0).NumeratorExact())))
+                    .ToList());
+
+
+                // test candidate with pseudoD division
+                if (MultivariateDivision.PseudoRemainder(a, candidate).IsZero()
+                    && MultivariateDivision.PseudoRemainder(b, candidate).IsZero())
+                    return candidate;
+            }
+        }
+    }
+
+    /**
+     * Zippel's sparse modular interpolation algorithm for polynomials over simple field extensions with the use of
+     * Langemyr & McCallum approach to avoid rational reconstruction
+     */
+    public static MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>>
+        ModularGCDInNumberFieldViaLangemyrMcCallum(
+            MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> a,
+            MultivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> b,
+            Func<
+                MultivariatePolynomial<UnivariatePolynomialZp64>,
+                MultivariatePolynomial<UnivariatePolynomialZp64>,
+                MultivariatePolynomial<UnivariatePolynomialZp64>
+            > modularAlgorithm)
+    {
+        return PolynomialGCDInNumberFieldSwitchToRingOfInteger(a, b,
+            (l, r) => PolynomialGCDAssociateInRingOfIntegerOfNumberField(l, r,
+                (u, v) => PolynomialGCDAssociateInNumberFieldViaLangemyrMcCallum(u, v,
+                    (s, t) => ModularGCDAssociateInNumberFieldViaLangemyrMcCallum0(s, t, modularAlgorithm))));
+    }
+
+    /**
+     * Zippel's sparse modular interpolation algorithm for polynomials over simple field extensions with Langemyr &
+     * McCallum correction for lead coefficients to avoid rational reconstruction
+     */
+    private static MultivariatePolynomial<UnivariatePolynomial<BigInteger>>
+        ModularGCDAssociateInNumberFieldViaLangemyrMcCallum0(
+            MultivariatePolynomial<UnivariatePolynomial<BigInteger>> a,
+            MultivariatePolynomial<UnivariatePolynomial<BigInteger>> b,
+            Func<
+                MultivariatePolynomial<UnivariatePolynomialZp64>,
+                MultivariatePolynomial<UnivariatePolynomialZp64>,
+                MultivariatePolynomial<UnivariatePolynomialZp64>
+            > modularAlgorithm)
+    {
+        // assert a.Lc().IsConstant();
+        // assert b.Lc().IsConstant();
+        // choose better prime for start
+        long startingPrime;
+        if (Math.Max(iMaxZ(a).GetBitLength(), iMaxZ(b).GetBitLength()) < 2 * 256)
+            startingPrime = 1L << 30;
+        else
+            startingPrime = 1L << 60;
+
+        var numberField
+            = (AlgebraicNumberField<BigInteger>)a.ring;
+        var minimalPoly = numberField.GetMinimalPolynomial();
+
+        // Weinberger & Rothschild (1976) correction denominator
+        BigInteger
+            lcGCD = Rings.Z.Gcd(a.Lc().Cc(), b.Lc().Cc()),
+            disc = UnivariateResultants.Discriminant(minimalPoly),
+            correctionFactor = BigInteger.Pow(disc, 1) * lcGCD;
+
+        var auxRing = Rings.UnivariateRing(Rings.Z);
+        var primesLoop = new PrimesIterator(startingPrime - (1 << 12));
+
+        // accumulator to update coefficients via Chineese remainding
+        MultivariatePolynomial<UnivariatePolynomial<BigInteger>> @base = null;
+        // accumulated CRT prime
+        BigInteger? crtPrime = null;
+        // previous candidate to test
+        MultivariatePolynomial<UnivariatePolynomial<BigInteger>> prevCandidate = null;
+        // over all primes
+        while (true)
+        {
+            var prime = primesLoop.Take();
+            var ring = new IntegersZp64(prime);
+            var minimalPolyMod = UnivariatePolynomialZp64.AsOverZp64(minimalPoly, ring);
+            var numberFieldMod = new FiniteField<long>(minimalPolyMod);
+
+            minimalPolyMod = UnivariatePolynomialZp64.AsOverZp64(minimalPoly, ring);
+            numberFieldMod = new FiniteField<long>(minimalPolyMod);
+            // reduce Z => Zp
+            MultivariatePolynomial<UnivariatePolynomialZp64>
+                aMod = a.MapCoefficients(numberFieldMod, cf => UnivariatePolynomialZp64.AsOverZp64(cf, ring)),
+                bMod = b.MapCoefficients(numberFieldMod, cf => UnivariatePolynomialZp64.AsOverZp64(cf, ring));
+            if (!aMod.SameSkeletonQ(a) || !bMod.SameSkeletonQ(b))
+                continue;
+
+            // calculate new GCD using previously calculated skeleton via sparse interpolation
+            MultivariatePolynomial<UnivariatePolynomialZp64> modularGCD;
+            try
+            {
+                modularGCD = modularAlgorithm(aMod, bMod).Monic();
+            }
+            catch (Exception t)
+            {
+                continue;
+            } // unlucky prime
+
+            if (modularGCD == null)
+            {
+                // interpolation failed => assumed form is wrong => start over
+                continue;
+            }
+
+            // correction
+            modularGCD.Monic(numberFieldMod.ValueOfLong((long)(correctionFactor % prime)));
+
+            // assert MultivariateDivision.DividesQ(aMod, modularGCD);
+            // assert MultivariateDivision.DividesQ(bMod, modularGCD);
+
+            if (modularGCD.IsConstant())
+                return a.CreateOne();
+
+            // better Degree bound found => start over
+            if (@base == null || modularGCD.Degree(0) < @base.Degree(0))
+            {
+                prevCandidate = null;
+                @base = modularGCD.MapCoefficients(auxRing, cf => cf.AsPolyZ(false).ToBigPoly());
+                crtPrime = Rings.Z.ValueOf(prime);
+                continue;
+            }
+
+            //skip unlucky prime
+            if (modularGCD.Degree(0) > @base.Degree(0))
+                continue;
+
+            var magic =
+                ChineseRemainders.CreateMagic(Rings.Z, crtPrime.Value, Rings.Z.ValueOf(prime));
+            //lifting
+            PairedIterator<
+                UnivariatePolynomial<BigInteger>, UnivariatePolynomialZp64
+            > iterator =
+                new PairedIterator<UnivariatePolynomial<BigInteger>, UnivariatePolynomialZp64>(@base, modularGCD);
+            while (iterator.MoveNext())
+            {
+                Monomial<UnivariatePolynomial<BigInteger>> baseTerm = iterator.aTerm;
+                Monomial<UnivariatePolynomialZp64> imageTerm = iterator.bTerm;
+
+                if (baseTerm.coefficient.IsZero())
+                    // term is absent in the base
+                    continue;
+
+                if (imageTerm.coefficient.IsZero())
+                {
+                    // term is absent in the modularGCD => remove it from the base
+                    @base.Subtract(baseTerm);
+                    continue;
+                }
+
+                var baseCf = baseTerm.coefficient;
+                var imageCf = imageTerm.coefficient;
+
+                // assert baseCf.ring == Z;
+                UnivariateGCD.UpdateCRT(magic, baseCf, imageCf);
+            }
+
+            crtPrime = crtPrime * Rings.Z.ValueOf(prime);
+
+            var crtRing = new IntegersZp(crtPrime.Value);
+            MultivariatePolynomial<UnivariatePolynomial<BigInteger>>
+                candidate = @base.MapCoefficients(numberField,
+                    cf => numberField.ValueOf(UnivariatePolynomialZp64.AsPolyZSymmetric(cf.SetRingUnsafe(crtRing))));
+
+            if (prevCandidate == null)
+            {
+                prevCandidate = candidate;
+                continue;
+            }
+
+            if (prevCandidate.Equals(candidate))
+            {
+                // division test
+                if (MultivariateDivision.PseudoRemainder(a, candidate).IsZero() &&
+                    MultivariateDivision.PseudoRemainder(b, candidate).IsZero())
+                    return candidate;
+            }
+
+            prevCandidate = candidate;
+        }
+    }
+
+
+    /* ======================== Multivariate GCD over finite fields with small cardinality ========================== */
 
 
     public static MultivariatePolynomial<E> KaltofenMonaganSparseModularGCDInGF<E>(
@@ -2573,7 +2687,7 @@ public static class MultivariateGCD
         if (a.Degree() < b.Degree())
             return KaltofenMonaganModularGCDInGF(b, a, algorithm);
 
-        GCDInput<E>
+        var
             gcdInput = preparedGCDInput(a, b, (u, v) => KaltofenMonaganModularGCDInGF(u, v, algorithm));
         if (gcdInput.earlyGCD != null)
             return gcdInput.earlyGCD;
@@ -2592,7 +2706,7 @@ public static class MultivariateGCD
         GCDInput<E> gcdInput,
         KaltofenMonaganAlgorithm<E> algorithm)
     {
-        MultivariatePolynomial<E> a = gcdInput.aReduced;
+        var a = gcdInput.aReduced;
         MultivariatePolynomial<E> b = gcdInput.bReduced;
 
         MultivariatePolynomial<E> pContentGCD =
@@ -2606,7 +2720,7 @@ public static class MultivariateGCD
 
         var algorithmZp = algorithm as KaltofenMonaganAlgorithm<long>;
 
-        for (int uVariable = a.nVariables - 1; uVariable >= 0; --uVariable)
+        for (var uVariable = a.nVariables - 1; uVariable >= 0; --uVariable)
             if (a.ring is IntegersZp && a.CoefficientRingCardinality().Value.IsLong())
             {
                 // use machine integers
@@ -2616,7 +2730,7 @@ public static class MultivariateGCD
                     ub = AsOverUnivariate0(b as MultivariatePolynomial<BigInteger>, uVariable);
 
                 UnivariatePolynomialZp64 aContent = ua.Content(), bContent = ub.Content();
-                UnivariatePolynomialZp64 ContentGCD = ua.ring.Gcd(aContent, bContent);
+                var ContentGCD = ua.ring.Gcd(aContent, bContent);
 
                 ua = ua.DivideOrNull(aContent);
                 ub = ub.DivideOrNull(bContent);
@@ -2660,11 +2774,11 @@ public static class MultivariateGCD
     private static MultivariatePolynomial<UnivariatePolynomialZp64> AsOverUnivariate0(
         MultivariatePolynomial<BigInteger> poly, int variable)
     {
-        IntegersZp64 ring = new IntegersZp64((long)((IntegersZp)poly.ring).modulus);
-        UnivariatePolynomialZp64 factory = UnivariatePolynomialZp64.Zero(ring);
-        UnivariateRing<long> pDomain = new UnivariateRing<long>(factory);
+        var ring = new IntegersZp64((long)((IntegersZp)poly.ring).modulus);
+        var factory = UnivariatePolynomialZp64.Zero(ring);
+        var pDomain = new UnivariateRing<long>(factory);
         MonomialSet<UnivariatePolynomialZp64> newData = new MonomialSet<UnivariatePolynomialZp64>(poly.ordering);
-        foreach (Monomial<BigInteger> e in poly.terms)
+        foreach (var e in poly.terms)
         {
             MultivariatePolynomial<UnivariatePolynomialZp64>.Add(newData, new Monomial<UnivariatePolynomialZp64>(
                     e.Without(variable),
@@ -2680,14 +2794,14 @@ public static class MultivariateGCD
         MultivariatePolynomial<UnivariatePolynomialZp64> poly, int variable)
     {
         Ring<BigInteger> ring = ((IntegersZp64)poly.ring.GetZero().ring).AsGenericRing();
-        int nVariables = poly.nVariables + 1;
-        MultivariatePolynomial<BigInteger> result =
+        var nVariables = poly.nVariables + 1;
+        var result =
             MultivariatePolynomial<BigInteger>.Zero(nVariables, ring, poly.ordering);
         foreach (Monomial<UnivariatePolynomialZp64> entry in poly.terms)
         {
-            UnivariatePolynomialZp64 uPoly = entry.coefficient;
-            DegreeVector dv = entry.DvInsert(variable);
-            for (int i = 0; i <= uPoly.Degree(); ++i)
+            var uPoly = entry.coefficient;
+            var dv = entry.DvInsert(variable);
+            for (var i = 0; i <= uPoly.Degree(); ++i)
             {
                 if (uPoly.IsZeroAt(i))
                     continue;
@@ -2697,7 +2811,7 @@ public static class MultivariateGCD
 
         return result;
     }
-    
+
 
     private const int MAX_OVER_ITERATIONS = 18;
 
@@ -2709,8 +2823,8 @@ public static class MultivariateGCD
     {
         var lcGCD = UnivariateGCD.PolynomialGCD(a.Lc(), b.Lc());
 
-        Ring<UnivariatePolynomial<uE>> univariateRing = a.ring;
-        Random random = PrivateRandom.GetRandom();
+        var univariateRing = a.ring;
+        var random = PrivateRandom.GetRandom();
         IrreduciblePolynomialsIEnumerable<uE> primesLoop =
             new IrreduciblePolynomialsIEnumerable<uE>(univariateRing.GetOne(), finiteExtensionDegree);
         while (true)
@@ -2722,7 +2836,7 @@ public static class MultivariateGCD
 
             FiniteField<uE> fField = new FiniteField<uE>(basePrime);
 
-            // reduce Zp[x] -> GF
+            // reduce Zp[x] => GF
             MultivariatePolynomial<UnivariatePolynomial<uE>>
                 aMod = a.SetRing(fField),
                 bMod = b.SetRing(fField);
@@ -2759,7 +2873,7 @@ public static class MultivariateGCD
                 UnivariatePolynomial<uE> prime = primesLoop.next();
                 fField = new FiniteField<uE>(prime);
 
-                // reduce Zp[x] -> GF
+                // reduce Zp[x] => GF
                 aMod = a.SetRing(fField);
                 bMod = b.SetRing(fField);
                 if (!aMod.SameSkeletonQ(a) || !bMod.SameSkeletonQ(b))
@@ -2789,7 +2903,7 @@ public static class MultivariateGCD
                 if (modularGCD.IsConstant())
                     return a.CreateOne();
 
-                // better Degree bound found -> start over
+                // better Degree bound found => start over
                 if (modularGCD.Degree(0) < @base.Degree(0))
                 {
                     lLcGCD = fField.ValueOf(lcGCD);
@@ -2863,7 +2977,7 @@ public static class MultivariateGCD
         int uDegreeBound,
         int finiteExtensionDegree)
     {
-        UnivariatePolynomial<uE> lcGCD = UnivariateGCD.PolynomialGCD(a.Lc(), b.Lc());
+        var lcGCD = UnivariateGCD.PolynomialGCD(a.Lc(), b.Lc());
 
         Ring<UnivariatePolynomial<uE>> univariateRing = a.ring;
 
@@ -2891,7 +3005,7 @@ public static class MultivariateGCD
 
             FiniteField<uE> fField = new FiniteField<uE>(prime);
 
-            // reduce Zp[x] -> GF
+            // reduce Zp[x] => GF
             MultivariatePolynomial<UnivariatePolynomial<uE>>
                 aMod = a.SetRing(fField),
                 bMod = b.SetRing(fField);
@@ -2994,7 +3108,7 @@ public static class MultivariateGCD
 //        b = divideExact(b, Content);
 //        skeleton = divideSkeletonExact(skeleton, Content);
 
-        SparseInterpolation<E> interpolation = CreateInterpolation(-1, a, b, skeleton, 1, rnd);
+        var interpolation = CreateInterpolation(-1, a, b, skeleton, 1, rnd);
         if (interpolation == null)
             return null;
         MultivariatePolynomial<E> gcd = interpolation.evaluate();
@@ -3004,30 +3118,31 @@ public static class MultivariateGCD
         return gcd; //.Multiply(Content);
     }
 
-     /* ===================================== Multivariate GCD over finite fields ==================================== */
+    /* ===================================== Multivariate GCD over finite fields ==================================== */
 
 
-    public static  MultivariatePolynomial<E> BrownGCD<E>(
-            MultivariatePolynomial<E> a,
-            MultivariatePolynomial<E> b) {
+    public static MultivariatePolynomial<E> BrownGCD<E>(
+        MultivariatePolynomial<E> a,
+        MultivariatePolynomial<E> b)
+    {
         Util.EnsureOverField(a, b);
         a.AssertSameCoefficientRingWith(b);
-    
+
         // prepare input and test for early termination
-        GCDInput<E> gcdInput = preparedGCDInput(a, b, MultivariateGCD.BrownGCD);
+        var gcdInput = preparedGCDInput(a, b, MultivariateGCD.BrownGCD);
         if (gcdInput.earlyGCD != null)
             return gcdInput.earlyGCD;
-    
+
         if (gcdInput.finiteExtensionDegree > 1)
             return KaltofenMonaganSparseModularGCDInGF(gcdInput);
-    
+
         MultivariatePolynomial<E> result = BrownGCD(
-                gcdInput.aReduced, gcdInput.bReduced, PrivateRandom.GetRandom(),
-                gcdInput.lastPresentVariable, gcdInput.DegreeBounds, gcdInput.evaluationStackLimit);
+            gcdInput.aReduced, gcdInput.bReduced, PrivateRandom.GetRandom(),
+            gcdInput.lastPresentVariable, gcdInput.DegreeBounds, gcdInput.evaluationStackLimit);
         if (result == null)
             // ground fill is too small for modular algorithm
             return KaltofenMonaganSparseModularGCDInGF(gcdInput);
-    
+
         return gcdInput.restoreGCD(result);
     }
 
@@ -3038,24 +3153,23 @@ public static class MultivariateGCD
      * @param DegreeBounds         Degree bounds for gcd
      * @param evaluationStackLimit ring cardinality
      */
-    
-    private static  MultivariatePolynomial<E> BrownGCD<E>(
-            MultivariatePolynomial<E> a,
-            MultivariatePolynomial<E> b,
-            Random rnd,
-            int variable,
-            int[] DegreeBounds,
-            int evaluationStackLimit) {
-
+    private static MultivariatePolynomial<E> BrownGCD<E>(
+        MultivariatePolynomial<E> a,
+        MultivariatePolynomial<E> b,
+        Random rnd,
+        int variable,
+        int[] DegreeBounds,
+        int evaluationStackLimit)
+    {
         //check for trivial gcd
-        MultivariatePolynomial<E> trivialGCD = MultivariateGCD.trivialGCD(a, b);
+        var trivialGCD = MultivariateGCD.trivialGCD(a, b);
         if (trivialGCD != null)
             return trivialGCD;
 
         MultivariatePolynomial<E> factory = a;
-        int nVariables = factory.nVariables;
+        var nVariables = factory.nVariables;
         if (variable == 0)
-        // switch to univariate gcd
+            // switch to univariate gcd
         {
             UnivariatePolynomial<E> gcd = UnivariateGCD.PolynomialGCD(a.AsUnivariate(), b.AsUnivariate());
             if (gcd.Degree() == 0)
@@ -3069,19 +3183,21 @@ public static class MultivariateGCD
         b = primitiveInput.bPrimitive;
         // gcd of Zp[x_k] Content and lc
         UnivariatePolynomial<E>
-                ContentGCD = primitiveInput.contentGCD,
-                lcGCD = primitiveInput.lcGCD;
+            ContentGCD = primitiveInput.contentGCD,
+            lcGCD = primitiveInput.lcGCD;
 
         //check again for trivial gcd
         trivialGCD = MultivariateGCD.trivialGCD(a, b);
-        if (trivialGCD != null) {
-            MultivariatePolynomial<E> poly = MultivariatePolynomial<E>.AsMultivariate(ContentGCD, a.nVariables, variable, a.ordering);
+        if (trivialGCD != null)
+        {
+            MultivariatePolynomial<E> poly =
+                MultivariatePolynomial<E>.AsMultivariate(ContentGCD, a.nVariables, variable, a.ordering);
             return trivialGCD.Multiply(poly);
         }
 
         Ring<E> ring = factory.ring;
         //Degree bound for the previous variable
-        int prevVarExponent = DegreeBounds[variable - 1];
+        var prevVarExponent = DegreeBounds[variable - 1];
         //dense interpolation
         MultivariateInterpolation.Interpolation<E> interpolation = null;
         //previous interpolation (used to detect whether update doesn't change the result)
@@ -3091,40 +3207,42 @@ public static class MultivariateGCD
 
         int[] aDegrees = a.Degrees(), bDegrees = b.Degrees();
         main: ;
-        while (true) {
+        while (true)
+        {
             if (evaluationStackLimit == evaluationStack.Count)
                 // all elements of the ring are tried
                 // do division check (last chance) and return
                 return doDivisionCheck(a, b, ContentGCD, interpolation, variable);
 
             //pickup the next random element for variable
-            E randomPoint = randomElement(ring, rnd);
+            var randomPoint = randomElement(ring, rnd);
             if (evaluationStack.Contains(randomPoint))
                 continue;
             evaluationStack.Add(randomPoint);
 
-            E lcVal = lcGCD.Evaluate(randomPoint);
+            var lcVal = lcGCD.Evaluate(randomPoint);
             if (ring.IsZero(lcVal))
                 continue;
 
             // evaluate a and b at variable = randomPoint
             MultivariatePolynomial<E>
-                    aVal = a.Evaluate(variable, randomPoint),
-                    bVal = b.Evaluate(variable, randomPoint);
+                aVal = a.Evaluate(variable, randomPoint),
+                bVal = b.Evaluate(variable, randomPoint);
 
             // check for unlucky substitution
             int[] aValDegrees = aVal.Degrees(), bValDegrees = bVal.Degrees();
-            for (int i = variable - 1; i >= 0; --i)
+            for (var i = variable - 1; i >= 0; --i)
                 if (aDegrees[i] != aValDegrees[i] || bDegrees[i] != bValDegrees[i])
                     goto main;
 
             // calculate gcd of the result by the recursive call
-            MultivariatePolynomial<E> cVal = BrownGCD(aVal, bVal, rnd, variable - 1, DegreeBounds, evaluationStackLimit);
+            MultivariatePolynomial<E> cVal = BrownGCD(aVal, bVal, rnd, variable - 1, DegreeBounds,
+                evaluationStackLimit);
             if (cVal == null)
                 //unlucky homomorphism
                 continue;
 
-            int currExponent = cVal.Degree(variable - 1);
+            var currExponent = cVal.Degree(variable - 1);
             if (currExponent > prevVarExponent)
                 //unlucky homomorphism
                 continue;
@@ -3133,14 +3251,16 @@ public static class MultivariateGCD
             cVal = cVal.Multiply(ring.Multiply(ring.Reciprocal(cVal.Lc()), lcVal));
             // assert cVal.Lc().equals(lcVal);
 
-            if (currExponent < prevVarExponent) {
+            if (currExponent < prevVarExponent)
+            {
                 //better Degree bound detected => start over
                 interpolation = new MultivariateInterpolation.Interpolation<E>(variable, randomPoint, cVal);
                 DegreeBounds[variable - 1] = prevVarExponent = currExponent;
                 continue;
             }
 
-            if (interpolation == null) {
+            if (interpolation == null)
+            {
                 //first successful homomorphism
                 interpolation = new MultivariateInterpolation.Interpolation<E>(variable, randomPoint, cVal);
                 continue;
@@ -3153,7 +3273,8 @@ public static class MultivariateGCD
 
             // do division test
             if (DegreeBounds[variable] <= interpolation.NumberOfPoints()
-                    || previousInterpolation.Equals(interpolation.GetInterpolatingPolynomial())) {
+                || previousInterpolation.Equals(interpolation.GetInterpolatingPolynomial()))
+            {
                 MultivariatePolynomial<E> result = doDivisionCheck(a, b, ContentGCD, interpolation, variable);
                 if (result != null)
                     return result;
@@ -3161,14 +3282,14 @@ public static class MultivariateGCD
         }
     }
 
-    
+
     private static MultivariatePolynomial<E> doDivisionCheck<E>(
         MultivariatePolynomial<E> a, MultivariatePolynomial<E> b,
         UnivariatePolynomial<E> ContentGCD, MultivariateInterpolation.Interpolation<E> interpolation, int variable)
     {
         if (interpolation == null)
             return null;
-        MultivariatePolynomial<E> interpolated =
+        var interpolated =
             MultivariatePolynomial<E>.AsNormalMultivariate(
                 interpolation.GetInterpolatingPolynomial().AsOverUnivariateEliminate(variable).PrimitivePart(),
                 variable);
@@ -3192,9 +3313,9 @@ public static class MultivariateGCD
     {
         if (Math.Max(a.Size(), b.Size()) > LARGE_SIZE_USE_FAST_DIV_TEST)
         {
-            Ring<E> ring = a.ring;
+            var ring = a.ring;
             E[] subs = new E[a.nVariables - 1];
-            for (int i = 0; i < subs.Length; ++i)
+            for (var i = 0; i < subs.Length; ++i)
                 subs[i] = ring.RandomNonZeroElement(PrivateRandom.GetRandom());
 
             MultivariatePolynomial<E>.PrecomputedPowersHolder powers =
@@ -3217,11 +3338,11 @@ public static class MultivariateGCD
     private static UnivariatePolynomial<E> subsToUnivariate<E>(MultivariatePolynomial<E> a,
         MultivariatePolynomial<E>.PrecomputedPowersHolder powers)
     {
-        E[] aUni = a.ring.CreateZeroesArray(a.Degree(a.nVariables - 1) + 1);
+        var aUni = a.ring.CreateZeroesArray(a.Degree(a.nVariables - 1) + 1);
         foreach (Monomial<E> t in a.terms)
         {
-            E val = t.coefficient;
-            for (int i = 0; i < a.nVariables - 1; ++i)
+            var val = t.coefficient;
+            for (var i = 0; i < a.nVariables - 1; ++i)
                 val = a.ring.Multiply(val, powers.Pow(i, t.exponents[i]));
             aUni[t.exponents[a.nVariables - 1]] = a.ring.Add(aUni[t.exponents[a.nVariables - 1]], val);
         }
@@ -3240,7 +3361,7 @@ public static class MultivariateGCD
             return ConvertFromZp64<E>(ZippelGCD(AsOverZp64(a), AsOverZp64(b)));
 
         // prepare input and test for early termination
-        GCDInput<E> gcdInput = preparedGCDInput(a, b, MultivariateGCD.ZippelGCD);
+        var gcdInput = preparedGCDInput(a, b, MultivariateGCD.ZippelGCD);
         if (gcdInput.earlyGCD != null)
             return gcdInput.earlyGCD;
 
@@ -3281,12 +3402,12 @@ public static class MultivariateGCD
         int evaluationStackLimit)
     {
         //check for trivial gcd
-        MultivariatePolynomial<E> trivialGCD = MultivariateGCD.trivialGCD(a, b);
+        var trivialGCD = MultivariateGCD.trivialGCD(a, b);
         if (trivialGCD != null)
             return trivialGCD;
 
         MultivariatePolynomial<E> factory = a;
-        int nVariables = factory.nVariables;
+        var nVariables = factory.nVariables;
         if (variable == 0)
             // switch to univariate gcd
         {
@@ -3323,9 +3444,9 @@ public static class MultivariateGCD
         HashSet<E> globalEvaluationStack = new HashSet<E>();
 
         int[] aDegrees = a.DegreesRef(), bDegrees = b.DegreesRef();
-        int failedSparseInterpolations = 0;
+        var failedSparseInterpolations = 0;
 
-        int[] tmpDegreeBounds = (int[])DegreeBounds.Clone();
+        var tmpDegreeBounds = (int[])DegreeBounds.Clone();
 
         while (true)
         {
@@ -3333,13 +3454,13 @@ public static class MultivariateGCD
             if (evaluationStackLimit == globalEvaluationStack.Count)
                 return null;
 
-            E seedPoint = randomElement(ring, rnd);
+            var seedPoint = randomElement(ring, rnd);
             if (globalEvaluationStack.Contains(seedPoint))
                 continue;
 
             globalEvaluationStack.Add(seedPoint);
 
-            E lcVal = lcGCD.Evaluate(seedPoint);
+            var lcVal = lcGCD.Evaluate(seedPoint);
             if (ring.IsZero(lcVal))
                 continue;
 
@@ -3351,7 +3472,7 @@ public static class MultivariateGCD
 
             // check for unlucky substitution
             int[] aValDegrees = aVal.DegreesRef(), bValDegrees = bVal.DegreesRef();
-            for (int i = variable - 1; i >= 0; --i)
+            for (var i = variable - 1; i >= 0; --i)
                 if (aDegrees[i] != aValDegrees[i] || bDegrees[i] != bValDegrees[i])
                     goto main;
 
@@ -3361,7 +3482,7 @@ public static class MultivariateGCD
                 //unlucky homomorphism
                 continue;
 
-            int currExponent = cVal.Degree(variable - 1);
+            var currExponent = cVal.Degree(variable - 1);
             if (currExponent > tmpDegreeBounds[variable - 1])
                 //unlucky homomorphism
                 continue;
@@ -3386,7 +3507,7 @@ public static class MultivariateGCD
                 new MultivariateInterpolation.Interpolation<E>(variable, seedPoint, cVal);
             //previous interpolation (used to detect whether update doesn't change the result)
             MultivariatePolynomial<E> previousInterpolation;
-            //local evaluation stack for points that are calculated via sparse interpolation (but not gcd evaluation) -> always same skeleton
+            //local evaluation stack for points that are calculated via sparse interpolation (but not gcd evaluation) => always same skeleton
             HashSet<E> localEvaluationStack = new HashSet<E>(globalEvaluationStack);
             while (true)
             {
@@ -3401,7 +3522,7 @@ public static class MultivariateGCD
                     goto main;
                 }
 
-                E randomPoint = randomElement(ring, rnd);
+                var randomPoint = randomElement(ring, rnd);
                 if (localEvaluationStack.Contains(randomPoint))
                     continue;
                 localEvaluationStack.Add(randomPoint);
@@ -3458,26 +3579,26 @@ public static class MultivariateGCD
         if (skeleton.Size() == 1)
             return new TrivialSparseInterpolation<E>(skeleton);
 
-        bool Monic = a.CoefficientOf(0, a.Degree(0)).IsConstant() && b.CoefficientOf(0, a.Degree(0)).IsConstant();
+        var Monic = a.CoefficientOf(0, a.Degree(0)).IsConstant() && b.CoefficientOf(0, a.Degree(0)).IsConstant();
         var globalSkeleton = skeleton.GetSkeleton();
         Dictionary<int, MultivariatePolynomial<E>> univarSkeleton = getSkeleton(skeleton);
-        int[] sparseUnivarDegrees = univarSkeleton.Keys.ToArray();
+        var sparseUnivarDegrees = univarSkeleton.Keys.ToArray();
 
         Ring<E> ring = a.ring;
 
-        int lastVariable = variable == -1 ? a.nVariables - 1 : variable;
-        int[] evaluationVariables = Utils.Utils.Sequence(1, lastVariable + 1); //variable inclusive
+        var lastVariable = variable == -1 ? a.nVariables - 1 : variable;
+        var evaluationVariables = Utils.Utils.Sequence(1, lastVariable + 1); //variable inclusive
         E[] evaluationPoint = new E[evaluationVariables.Length];
 
         MultivariatePolynomial<E>.PrecomputedPowersHolder powers;
-        int fails = 0;
+        var fails = 0;
         while (true)
         {
             search_for_good_evaluation_point: ;
             if (fails >= MAX_FAILED_SUBSTITUTIONS)
                 return null;
             //avoid zero evaluation points
-            for (int i = lastVariable - 1; i >= 0; --i)
+            for (var i = lastVariable - 1; i >= 0; --i)
                 do
                 {
                     evaluationPoint[i] = randomElement(ring, rnd);
@@ -3526,10 +3647,10 @@ public static class MultivariateGCD
         MultivariatePolynomial<E> a, MultivariatePolynomial<E> b,
         int[] evaluationVariables, E[] evaluationPoint)
     {
-        int[] Degrees = Utils.Utils.Max(a.DegreesRef(), b.DegreesRef());
+        var Degrees = Utils.Utils.Max(a.DegreesRef(), b.DegreesRef());
         MultivariatePolynomial<E>.PrecomputedPowers[]
             pp = new MultivariatePolynomial<E>.PrecomputedPowers[a.nVariables];
-        for (int i = 0; i < evaluationVariables.Length; ++i)
+        for (var i = 0; i < evaluationVariables.Length; ++i)
             pp[evaluationVariables[i]] = new MultivariatePolynomial<E>.PrecomputedPowers(
                 Math.Min(Degrees[evaluationVariables[i]], MultivariatePolynomialZp64.MAX_POWERS_CACHE_SIZE),
                 evaluationPoint[i], a.ring);
@@ -3539,7 +3660,7 @@ public static class MultivariateGCD
 
     public static Dictionary<int, MultivariatePolynomial<E>> getSkeleton<E>(MultivariatePolynomial<E> poly)
     {
-        Dictionary<int, MultivariatePolynomial<E>> skeleton = new Dictionary<int, MultivariatePolynomial<E>>();
+        var skeleton = new Dictionary<int, MultivariatePolynomial<E>>();
         foreach (Monomial<E> term in poly.terms)
         {
             Monomial<E> newDV = term.SetZero(0);
@@ -3706,12 +3827,12 @@ public static class MultivariateGCD
         {
             basePowers.Set(evaluationVariables[evaluationVariables.Length - 1], value);
 
-            MultivariatePolynomial<E>.PrecomputedPowersHolder powers = powersCache.GetValueOrDefault(raiseFactor, null);
+            var powers = powersCache.GetValueOrDefault(raiseFactor, null);
             Ring<E> ring = poly.ring;
             if (powers == null)
             {
                 powers = basePowers.Clone();
-                for (int i = 0; i < (evaluationVariables.Length - 1); ++i)
+                for (var i = 0; i < (evaluationVariables.Length - 1); ++i)
                     powers.Set(evaluationVariables[i], ring.Pow(evaluationPoint[i], raiseFactor));
                 powersCache.Add(raiseFactor, powers);
             }
@@ -3721,10 +3842,10 @@ public static class MultivariateGCD
             E[] result = ring.CreateZeroesArray(poly.Degree(0) + 1);
             foreach (Monomial<E> el in poly.terms)
             {
-                E ucf = el.coefficient;
-                foreach (int variable in evaluationVariables)
+                var ucf = el.coefficient;
+                foreach (var variable in evaluationVariables)
                     ucf = ring.Multiply(ucf, powers.Pow(variable, el.exponents[variable]));
-                int uDeg = el.exponents[0];
+                var uDeg = el.exponents[0];
                 result[uDeg] = ring.Add(result[uDeg], ucf);
             }
 
@@ -3749,13 +3870,13 @@ public static class MultivariateGCD
         }
 
 
-        private readonly Dictionary<int, MultivariatePolynomial<MultivariatePolynomial<E>>> bivariateCache 
+        private readonly Dictionary<int, MultivariatePolynomial<MultivariatePolynomial<E>>> bivariateCache
             = new();
 
 
         MultivariatePolynomial<MultivariatePolynomial<E>> getSparseRecursiveForm(int raiseFactor)
         {
-            MultivariatePolynomial<MultivariatePolynomial<E>> recForm =
+            var recForm =
                 bivariateCache.GetValueOrDefault(raiseFactor, null);
             if (recForm == null)
             {
@@ -3766,7 +3887,7 @@ public static class MultivariateGCD
                 {
                     // values for all variables except first and last
                     E[] values = new E[variable - 1];
-                    for (int i = 0; i < values.Length; ++i)
+                    for (var i = 0; i < values.Length; ++i)
                         values[i] = poly.ring.Pow(evaluationPoint[i], raiseFactor);
 
                     // substitute all that variables to obtain bivariate poly R[x0, xN]
@@ -3788,11 +3909,11 @@ public static class MultivariateGCD
         public UnivariatePolynomial<E> evaluate(int raiseFactor, E value)
         {
             // get sparse recursive form for fast evaluation
-            MultivariatePolynomial<MultivariatePolynomial<E>> recForm = getSparseRecursiveForm(raiseFactor);
+            var recForm = getSparseRecursiveForm(raiseFactor);
             // resulting univariate data
             E[] data = poly.ring.CreateZeroesArray(recForm.Degree() + 1);
 
-            int cacheSize = 128; //recForm.stream().mapToInt(p -> p.Degree()).max().orElse(1);
+            var cacheSize = 128; //recForm.stream().mapToInt(p => p.Degree()).max().orElse(1);
             // cached exponents for value^i
             MultivariatePolynomial<E>.PrecomputedPowersHolder ph =
                 new MultivariatePolynomial<E>.PrecomputedPowersHolder(poly.ring,
@@ -3826,23 +3947,23 @@ public static class MultivariateGCD
 
         public override MultivariatePolynomial<E> evaluate0(E newPoint)
         {
-            LinZipSystem<E>[] systems = new LinZipSystem<E>[sparseUnivarDegrees.Length];
-            for (int i = 0; i < sparseUnivarDegrees.Length; i++)
+            var systems = new LinZipSystem<E>[sparseUnivarDegrees.Length];
+            for (var i = 0; i < sparseUnivarDegrees.Length; i++)
                 systems[i] = new LinZipSystem<E>(sparseUnivarDegrees[i], univarSkeleton[sparseUnivarDegrees[i]], powers,
                     variable == -1 ? a.nVariables - 1 : variable - 1);
 
 
             int nUnknowns = globalSkeleton.Count, nUnknownScalings = -1;
-            int raiseFactor = 0;
+            var raiseFactor = 0;
 
             // number of retries before meet raise condition
-            int nUnderDeterminedRetries = ring.Characteristic().GetBitLength() <= SMALL_FIELD_BIT_LENGTH
+            var nUnderDeterminedRetries = ring.Characteristic().GetBitLength() <= SMALL_FIELD_BIT_LENGTH
                 ? NUMBER_OF_UNDER_DETERMINED_RETRIES_SMALL_FIELD
                 : NUMBER_OF_UNDER_DETERMINED_RETRIES;
 
             int previousFreeVars = -1, underDeterminedTries = 0;
-            bool lastChanceUsed = false;
-            for (int iTry = 0;; ++iTry)
+            var lastChanceUsed = false;
+            for (var iTry = 0;; ++iTry)
             {
                 if (iTry == nUnderDeterminedRetries)
                 {
@@ -3864,7 +3985,7 @@ public static class MultivariateGCD
                     // sequential powers of evaluation point
                     ++raiseFactor;
 
-                    E lastVarValue = newPoint;
+                    var lastVarValue = newPoint;
                     if (variable == -1)
                         lastVarValue = ring.Pow(lastVarValue, raiseFactor);
 
@@ -3884,10 +4005,10 @@ public static class MultivariateGCD
                         // again unlucky main homomorphism
                         return null;
 
-                    int totalEquations = 0;
+                    var totalEquations = 0;
                     foreach (LinZipSystem<E> system in systems)
                     {
-                        E rhs = gcdUnivar.Degree() < system.univarDegree
+                        var rhs = gcdUnivar.Degree() < system.univarDegree
                             ? ring.GetZero()
                             : gcdUnivar[system.univarDegree];
                         system.oneMoreEquation(rhs, nUnknownScalings != 0);
@@ -3901,7 +4022,7 @@ public static class MultivariateGCD
                         // raise condition: new equations does not fix enough variables
                         return null;
 
-                    int freeVars = nUnknowns + nUnknownScalings - totalEquations;
+                    var freeVars = nUnknowns + nUnknownScalings - totalEquations;
                     if (freeVars >= previousFreeVars)
                         ++underDeterminedTries;
                     else
@@ -3911,7 +4032,7 @@ public static class MultivariateGCD
                 }
 
                 MultivariatePolynomial<E> result = a.CreateZero();
-                LinearSolver.SystemInfo info = solveLinZip(a, systems, nUnknownScalings, result);
+                var info = solveLinZip(a, systems, nUnknownScalings, result);
                 if (info == LinearSolver.SystemInfo.UnderDetermined)
                     //try to generate more equations
                     continue;
@@ -3931,17 +4052,17 @@ public static class MultivariateGCD
     private static int nUnderDeterminedLinZip<E>(MultivariatePolynomial<E> factory, LinZipSystem<E>[] subSystems,
         int nUnknownScalings)
     {
-        int nUnknownsMonomials = 0;
+        var nUnknownsMonomials = 0;
         foreach (LinZipSystem<E> system in subSystems)
             nUnknownsMonomials += system.skeleton.Length;
 
-        int nUnknownsTotal = nUnknownsMonomials + nUnknownScalings;
+        var nUnknownsTotal = nUnknownsMonomials + nUnknownScalings;
         var lhsGlobal = new List<E[]>();
-        int offset = 0;
+        var offset = 0;
         Ring<E> ring = factory.ring;
         foreach (LinZipSystem<E> system in subSystems)
         {
-            for (int j = 0; j < system.matrix.Count; j++)
+            for (var j = 0; j < system.matrix.Count; j++)
             {
                 E[] row = ring.CreateZeroesArray(nUnknownsTotal);
                 E[] subRow = system.matrix[j];
@@ -3961,20 +4082,20 @@ public static class MultivariateGCD
     private static LinearSolver.SystemInfo solveLinZip<E>(MultivariatePolynomial<E> factory,
         LinZipSystem<E>[] subSystems, int nUnknownScalings, MultivariatePolynomial<E> destination)
     {
-        List<Monomial<E>> unknowns = new List<Monomial<E>>();
+        var unknowns = new List<Monomial<E>>();
         foreach (LinZipSystem<E> system in subSystems)
         foreach (Monomial<E> DegreeVector in system.skeleton)
             unknowns.Add(DegreeVector.Set(0, system.univarDegree));
 
-        int nUnknownsMonomials = unknowns.Count;
-        int nUnknownsTotal = nUnknownsMonomials + nUnknownScalings;
+        var nUnknownsMonomials = unknowns.Count;
+        var nUnknownsTotal = nUnknownsMonomials + nUnknownScalings;
         List<E[]> lhsGlobal = new List<E[]>();
         List<E> rhsGlobal = new List<E>();
-        int offset = 0;
+        var offset = 0;
         Ring<E> ring = factory.ring;
         foreach (LinZipSystem<E> system in subSystems)
         {
-            for (int j = 0; j < system.matrix.Count; j++)
+            for (var j = 0; j < system.matrix.Count; j++)
             {
                 E[] row = ring.CreateZeroesArray(nUnknownsTotal);
                 E[] subRow = system.matrix[j];
@@ -3990,11 +4111,11 @@ public static class MultivariateGCD
         }
 
         E[] solution = new E[nUnknownsTotal];
-        LinearSolver.SystemInfo info = LinearSolver.Solve(ring, lhsGlobal, rhsGlobal, solution);
+        var info = LinearSolver.Solve(ring, lhsGlobal, rhsGlobal, solution);
         if (info == LinearSolver.SystemInfo.Consistent)
         {
             Monomial<E>[] terms = new Monomial<E>[unknowns.Count];
-            for (int i = 0; i < terms.Length; i++)
+            for (var i = 0; i < terms.Length; i++)
                 terms[i] = unknowns[i].SetCoefficient(solution[i]);
             destination.Add(terms);
         }
@@ -4023,17 +4144,17 @@ public static class MultivariateGCD
 
         public override MultivariatePolynomial<E> evaluate0(E newPoint)
         {
-            VandermondeSystem<E>[] systems = new VandermondeSystem<E>[sparseUnivarDegrees.Length];
-            for (int i = 0; i < sparseUnivarDegrees.Length; i++)
+            var systems = new VandermondeSystem<E>[sparseUnivarDegrees.Length];
+            for (var i = 0; i < sparseUnivarDegrees.Length; i++)
                 systems[i] = new VandermondeSystem<E>(sparseUnivarDegrees[i], univarSkeleton[sparseUnivarDegrees[i]],
                     powers, variable == -1 ? a.nVariables - 1 : variable - 1);
 
-            for (int i = 0; i < requiredNumberOfEvaluations; ++i)
+            for (var i = 0; i < requiredNumberOfEvaluations; ++i)
             {
                 // sequential powers of evaluation point
-                int raiseFactor = i + 1;
+                var raiseFactor = i + 1;
 
-                E lastVarValue = newPoint;
+                var lastVarValue = newPoint;
                 if (variable == -1)
                     lastVarValue = ring.Pow(lastVarValue, raiseFactor);
 
@@ -4062,7 +4183,7 @@ public static class MultivariateGCD
                         // unlucky homomorphism
                         return null;
 
-                    E normalization = evaluateExceptFirst(ring, powers, ring.GetOne(),
+                    var normalization = evaluateExceptFirst(ring, powers, ring.GetOne(),
                         univarSkeleton[MonicScalingExponent].Lt(), i + 1,
                         variable == -1 ? a.nVariables - 1 : variable - 1);
                     //normalize univariate gcd in order to reconstruct leading coefficient polynomial
@@ -4070,11 +4191,11 @@ public static class MultivariateGCD
                     gcdUnivar = gcdUnivar.Multiply(normalization);
                 }
 
-                bool allDone = true;
+                var allDone = true;
                 foreach (VandermondeSystem<E> system in systems)
                     if (system.nEquations() < system.nUnknownVariables())
                     {
-                        E rhs = gcdUnivar.Degree() < system.univarDegree
+                        var rhs = gcdUnivar.Degree() < system.univarDegree
                             ? ring.GetZero()
                             : gcdUnivar[system.univarDegree];
                         system.oneMoreEquation(rhs);
@@ -4089,7 +4210,7 @@ public static class MultivariateGCD
             foreach (VandermondeSystem<E> system in systems)
             {
                 //solve each system
-                LinearSolver.SystemInfo info = system.solve();
+                var info = system.solve();
                 if (info != LinearSolver.SystemInfo.Consistent)
                     // system is inconsistent or under determined
                     // unlucky homomorphism
@@ -4101,10 +4222,10 @@ public static class MultivariateGCD
             {
                 Debug.Assert(MonicScalingExponent == -1 || system.univarDegree != MonicScalingExponent ||
                              ring.IsOne(system.solution[0]));
-                for (int i = 0; i < system.skeleton.Length; i++)
+                for (var i = 0; i < system.skeleton.Length; i++)
                 {
                     Monomial<E> DegreeVector = system.skeleton[i].Set(0, system.univarDegree);
-                    E value = system.solution[i];
+                    var value = system.solution[i];
                     gcdVal.Add(DegreeVector.SetCoefficient(value));
                 }
             }
@@ -4164,8 +4285,8 @@ public static class MultivariateGCD
 
         public void oneMoreEquation(E rhsVal, bool newScalingIntroduced)
         {
-            E[] row = new E[skeleton.Length];
-            for (int i = 0; i < skeleton.Length; i++)
+            var row = new E[skeleton.Length];
+            for (var i = 0; i < skeleton.Length; i++)
                 row[i] = evaluateExceptFirst(ring, powers, ring.GetOne(), skeleton[i], matrix.Count + 1, nVars);
             matrix.Add(row);
 
@@ -4182,11 +4303,11 @@ public static class MultivariateGCD
 
         public new String toString()
         {
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < matrix.Count; i++)
+            var sb = new StringBuilder();
+            for (var i = 0; i < matrix.Count; i++)
             {
                 E[] row = matrix[i];
-                for (int j = 0; j < row.Length; j++)
+                for (var j = 0; j < row.Length; j++)
                 {
                     if (j != 0)
                         sb.Append("+");
@@ -4223,11 +4344,11 @@ public static class MultivariateGCD
                 return LinearSolver.Solve(ring, matrix.ToArray().AsArray2D(), rhs.ToArray(), solution);
 
             // solve vandermonde system
-            E[] vandermondeRow = matrix[0];
-            LinearSolver.SystemInfo
+            var vandermondeRow = matrix[0];
+            var
                 info = LinearSolver.SolveVandermondeT(ring, vandermondeRow, rhs.ToArray(), solution);
             if (info == LinearSolver.SystemInfo.Consistent)
-                for (int i = 0; i < solution.Length; ++i)
+                for (var i = 0; i < solution.Length; ++i)
                     solution[i] = ring.DivideExact(solution[i], vandermondeRow[i]);
 
             return info;
@@ -4235,8 +4356,8 @@ public static class MultivariateGCD
 
         public VandermondeSystem<E> oneMoreEquation(E rhsVal)
         {
-            E[] row = new E[skeleton.Length];
-            for (int i = 0; i < skeleton.Length; i++)
+            var row = new E[skeleton.Length];
+            for (var i = 0; i < skeleton.Length; i++)
                 row[i] = evaluateExceptFirst(ring, powers, ring.GetOne(), skeleton[i], matrix.Count + 1, nVars);
             matrix.Add(row);
             rhs.Add(rhsVal);
@@ -4251,17 +4372,17 @@ public static class MultivariateGCD
         int raiseFactor,
         int nVars)
     {
-        E tmp = coefficient;
-        for (int k = 1; k <= nVars; k++)
+        var tmp = coefficient;
+        for (var k = 1; k <= nVars; k++)
             tmp = ring.Multiply(tmp, powers.Pow(k, raiseFactor * skeleton.exponents[k]));
         return tmp;
     }
 
     private static bool isVandermonde<E>(E[][] lhs, Ring<E> ring)
     {
-        for (int i = 1; i < lhs.Length; i++)
+        for (var i = 1; i < lhs.Length; i++)
         {
-            for (int j = 0; j < lhs[0].Length; j++)
+            for (var j = 0; j < lhs[0].Length; j++)
             {
                 if (!lhs[i][j].Equals(ring.Pow(lhs[0][j], i + 1)))
                     return false;
@@ -4270,338 +4391,30 @@ public static class MultivariateGCD
 
         return true;
     }
-    
 
-     /* =============================================== EZ-GCD algorithm ============================================ */
 
-     private static void liftPair<E>(MultivariatePolynomial<E> @base, MultivariatePolynomial<E> a, MultivariatePolynomial<E> b, MultivariatePolynomial<E> aLC, MultivariatePolynomial<E> bLC, HenselLifting.IEvaluation<E> evaluation) {
-         HenselLifting.multivariateLift0(@base,
-             [a, b],
-             [aLC, bLC],
-                 evaluation,
-             @base.Degrees());
-     }
+    /* =============================================== EZ-GCD algorithm ============================================ */
 
-     private static void liftPairAutomaticLC<E>(MultivariatePolynomial<E> @base, MultivariatePolynomial<E> a, MultivariatePolynomial<E> b, HenselLifting.IEvaluation<E> evaluation) {
-         HenselLifting.multivariateLiftAutomaticLC(@base,
-                 [a, b],
-                 evaluation);
-     }
+    private static void liftPair<E>(MultivariatePolynomial<E> @base, MultivariatePolynomial<E> a,
+        MultivariatePolynomial<E> b, MultivariatePolynomial<E> aLC, MultivariatePolynomial<E> bLC,
+        HenselLifting.IEvaluation<E> evaluation)
+    {
+        HenselLifting.multivariateLift0(@base,
+            [a, b],
+            [aLC, bLC],
+            evaluation,
+            @base.Degrees());
+    }
 
-     static ZeroVariables commonPossibleZeroes(MultivariatePolynomialZp64 a, MultivariatePolynomialZp64 b, int nVariables) {
-         return commonPossibleZeroes(possibleZeros(a, nVariables), possibleZeros(b, nVariables));
-     }
+    private static void liftPairAutomaticLC<E>(MultivariatePolynomial<E> @base, MultivariatePolynomial<E> a,
+        MultivariatePolynomial<E> b, HenselLifting.IEvaluation<E> evaluation)
+    {
+        HenselLifting.multivariateLiftAutomaticLC(@base,
+            [a, b],
+            evaluation);
+    }
 
-     static ZeroVariables commonPossibleZeroes(ZeroVariables a, ZeroVariables b) {
-         if (a.allZeroes)
-             return b;
-         if (b.allZeroes)
-             return a;
-
-         ZeroVariables result = new ZeroVariables(a.nVariables);
-         for (BitSet az : a.pZeros)
-             for (BitSet bz : b.pZeros) {
-                 BitSet tmp = (BitSet) az.Clone();
-                 tmp.and(bz);
-                 result.add(tmp);
-             }
-
-         return result;
-     }
-
-     
-     static ZeroVariables possibleZeros(MultivariatePolynomialZp64 poly, int nVariables) {
-         ZeroVariables result = new ZeroVariables(nVariables);
-         if (poly.cc() != 0) {
-             BitSet s = new BitSet(nVariables);
-             s.set(0, nVariables);
-             result.add(s);
-             return result;
-         }
-         for (MonomialZp64 term : poly) {
-             BitSet zeroes = new BitSet(nVariables);
-             for (int i = 0; i < nVariables; i++)
-                 if (term.exponents[i] == 0)
-                     zeroes.set(i);
-             result.add(zeroes);
-         }
-         return result;
-     }
-
-     
-     static final class ZeroVariables {
-         final List<BitSet> pZeros = new ArrayList<>();
-         final int nVariables;
-
-         public ZeroVariables(int nVariables) {
-             this.nVariables = nVariables;
-         }
-
-         int iMaxPossibleZeros = -1, maxPossibleZeros = -1;
-         public bool allZeroes = false;
-
-         void add(BitSet zeros) {
-             if (allZeroes)
-                 return;
-             int nZeros = zeros.cardinality();
-             if (nVariables == nZeros) {
-                 maxPossibleZeros = zeros.Length();
-                 iMaxPossibleZeros = 0;
-                 allZeroes = true;
-                 pZeros.clear();
-                 pZeros.add(zeros);
-                 return;
-             }
-             IEnumerable<BitSet> it = pZeros.iterator();
-             while (it.hasNext()) {
-                 BitSet e = it.next();
-                 if (contains(e, zeros))
-                     return;
-                 if (contains(zeros, e))
-                     it.remove();
-             }
-             pZeros.add(zeros);
-             if (nZeros > maxPossibleZeros) {
-                 maxPossibleZeros = nZeros;
-                 iMaxPossibleZeros = pZeros.Size() - 1;
-             }
-         }
-
-         BitSet maxZeros() {
-             return pZeros.isEmpty() ? new BitSet(nVariables) : pZeros.get(iMaxPossibleZeros);
-         }
-
-         @Override
-         public String toString() {
-             return pZeros.toString();
-         }
-     }
-
-     
-     static bool contains(BitSet major, BitSet minor) {
-         if (major.equals(minor))
-             return true;
-         BitSet tmp = (BitSet) major.Clone();
-         tmp.and(minor);
-         return tmp.equals(minor);
-     }
-
-     private static final int
-             SAME_BASE_VARIABLE_ATTEMPTS = 8,
-             ATTEMPTS_WITH_MAX_ZEROS = 2;
-
-     sealed class EZGCDEvaluations {
-         final MultivariatePolynomialZp64 a, b;
-         final Random rnd;
-         // actual number of variables in use [0, ... nVariables] (may be less than a.nVariables)
-         final int nVariables;
-         // variables in which both cc and lc in a and b are non zeroes
-         final TIntArrayList perfectVariables = new TIntArrayList();
-
-         EZGCDEvaluations(MultivariatePolynomialZp64 a,
-                          MultivariatePolynomialZp64 b,
-                          int nVariables,
-                          Random rnd) {
-             this.a = a;
-             this.b = b;
-             this.rnd = rnd;
-             this.nVariables = nVariables;
-
-             // search for main variables
-             for (int var = 0; var < nVariables; ++var) {
-                 UnivariatePolynomialZp64 ub = b.evaluateAtZeroAllExcept(var);
-                 if (ub.Degree() == 0 || ub.cc() == 0 || ub.Degree() != b.Degree(var))
-                     continue;
-
-                 UnivariatePolynomialZp64 ua = a.evaluateAtZeroAllExcept(var);
-                 if (ua.Degree() == 0 || ua.cc() == 0 || ua.Degree() != a.Degree(var))
-                     continue;
-
-                 perfectVariables.add(var);
-             }
-         }
-
-         // modified a and b so that all except first variables
-         // may be evaluated to zero
-         MultivariatePolynomialZp64 aReduced, bReduced;
-
-         // pointers in perfectVariables list
-         int
-                 currentPerfectVariable = -1,
-                 nextPerfectVariable = 0;
-
-         int baseVariable = -1;
-         int[]
-                 zeroVariables, // variables that may be replaced with zeros ( 0 <> baseVariable are swaped )
-                 shiftingVariables; // variables that must be shifted before substituting zeros ( 0 <> baseVariable are swaped )
-         // shift values for shiftingVariables
-         long[] shifts;
-
-         // number of tries keeping as many zero variables as possible
-         int nAttemptsWithZeros = 0;
-         // variable that were used as main variables
-         final TIntHashSet usedBaseVariables = new TIntHashSet();
-         int nAttemptsWithSameBaseVariable = 0;
-
-         // returns whether the main variable was changed
-         bool nextEvaluation() {
-             // first try to evaluate all but one variables to zeroes
-
-             if (nextPerfectVariable < perfectVariables.Size()) {
-                 // we have the main variable
-                 currentPerfectVariable = perfectVariables.get(nextPerfectVariable);
-                 ++nextPerfectVariable;
-
-                 aReduced = AMultivariatePolynomial.swapVariables(a, 0, currentPerfectVariable);
-                 bReduced = AMultivariatePolynomial.swapVariables(b, 0, currentPerfectVariable);
-                 return true;
-             }
-
-             // no possible zero substitutions more
-             // => shift some variables and try to
-             // minimize intermediate expression swell
-             // due to "bad zero problem"
-
-             bool changedMainVariable = false;
-             currentPerfectVariable = -1;
-
-             int previousBaseVariable = baseVariable;
-             // try to substitute as many zeroes as possible
-             if (baseVariable == -1 || nAttemptsWithSameBaseVariable > SAME_BASE_VARIABLE_ATTEMPTS) {
-                 if (usedBaseVariables.Size() == nVariables)
-                     usedBaseVariables.clear();
-                 nAttemptsWithSameBaseVariable = nAttemptsWithZeros = 0;
-                 ZeroVariables maxZeros = null;
-                 for (int var = 0; var < nVariables; ++var) {
-                     if (usedBaseVariables.contains(var))
-                         continue;
-                     ZeroVariables pZeros;
-                     if (a.Degree(var) == 0 || b.Degree(var) == 0)
-                         continue;
-                     pZeros = possibleZeros(b.coefficientOf(var, 0), nVariables);
-                     if (maxZeros != null && pZeros.maxPossibleZeros < maxZeros.maxPossibleZeros)
-                         continue;
-
-                     pZeros = commonPossibleZeroes(pZeros, possibleZeros(b.coefficientOf(var, b.Degree(var)), nVariables));
-                     if (maxZeros != null && pZeros.maxPossibleZeros < maxZeros.maxPossibleZeros)
-                         continue;
-
-                     pZeros = commonPossibleZeroes(pZeros, possibleZeros(a.coefficientOf(var, 0), nVariables));
-                     if (maxZeros != null && pZeros.maxPossibleZeros < maxZeros.maxPossibleZeros)
-                         continue;
-
-                     pZeros = commonPossibleZeroes(pZeros, possibleZeros(a.coefficientOf(var, a.Degree(var)), nVariables));
-                     if (maxZeros != null && pZeros.maxPossibleZeros < maxZeros.maxPossibleZeros)
-                         continue;
-
-                     maxZeros = pZeros;
-                     baseVariable = var;
-                 }
-                 if (maxZeros == null) {
-                     // all free variables are bad
-                     usedBaseVariables.clear();
-                     return nextEvaluation();
-                 }
-                 usedBaseVariables.add(baseVariable);
-
-                 // <- we chose the main variable and those that can be safely substituted with zeros
-
-                 BitSet zeroSubstitutions = maxZeros.maxZeros();
-                 // swap 0 and baseVariable
-                 zeroSubstitutions.set(baseVariable, zeroSubstitutions.get(0));
-                 zeroSubstitutions.clear(0);
-
-                 zeroVariables = new int[zeroSubstitutions.cardinality()];
-                 shiftingVariables = new int[nVariables - zeroSubstitutions.cardinality() - 1];
-                 int iCounter = 0, jCounter = 0;
-                 for (int j = 0; j < nVariables; j++)
-                     if (zeroSubstitutions.get(j))
-                         zeroVariables[iCounter++] = j;
-                     else if (j != 0) // don't shift the main variable
-                         shiftingVariables[jCounter++] = j;
-
-                 if (shiftingVariables.Length == 0) { // <- perfect variable exists; just pickup some var for random substitutions
-                     shiftingVariables = new int[]{zeroVariables[zeroVariables.Length - 1]};
-                     zeroVariables = Arrays.copyOf(zeroVariables, zeroVariables.Length - 1);
-                 }
-                 shifts = new long[shiftingVariables.Length];
-
-                 changedMainVariable = previousBaseVariable != baseVariable;
-             }
-
-             aReduced = AMultivariatePolynomial.swapVariables(a, 0, baseVariable);
-             bReduced = AMultivariatePolynomial.swapVariables(b, 0, baseVariable);
-
-             if (nAttemptsWithZeros > ATTEMPTS_WITH_MAX_ZEROS && zeroVariables.Length != 0) {
-                 // fill with some value some zero variable
-                 shiftingVariables = Arrays.copyOf(shiftingVariables, shiftingVariables.Length + 1);
-                 shiftingVariables[shiftingVariables.Length - 1] = zeroVariables[zeroVariables.Length - 1];
-                 zeroVariables = Arrays.copyOf(zeroVariables, zeroVariables.Length - 1);
-                 shifts = new long[shiftingVariables.Length];
-                 nAttemptsWithZeros = 0;
-             }
-
-             ++nAttemptsWithSameBaseVariable;
-             ++nAttemptsWithZeros;
-             int
-                     ubDegree = bReduced.Degree(0),
-                     uaDegree = aReduced.Degree(0);
-
-             // choosing random shifts
-             for (int nFails = 0; ; ++nFails) {
-                 if (nFails > 8) {
-                     // base variable is unlucky -> start over
-                     nAttemptsWithSameBaseVariable = SAME_BASE_VARIABLE_ATTEMPTS + 1;
-                     return nextEvaluation();
-                 }
-                 for (int i = 0; i < shiftingVariables.Length; ++i)
-                     shifts[i] = a.ring.randomElement(rnd);
-
-                 UnivariatePolynomialZp64 ub = bReduced
-                         .evaluateAtZero(zeroVariables)
-                         .evaluate(shiftingVariables, shifts)
-                         .asUnivariate();
-
-                 if (ub.isZeroAt(0) || ub.isZeroAt(ubDegree))
-                     continue;
-
-                 UnivariatePolynomialZp64 ua = aReduced
-                         .evaluateAtZero(zeroVariables)
-                         .evaluate(shiftingVariables, shifts)
-                         .asUnivariate();
-
-                 if (ua.isZeroAt(0) || ua.isZeroAt(uaDegree))
-                     continue;
-
-                 break;
-             }
-             aReduced = aReduced.shift(shiftingVariables, shifts);
-             bReduced = bReduced.shift(shiftingVariables, shifts);
-
-             return changedMainVariable;
-         }
-
-         MultivariatePolynomialZp64 convert(MultivariatePolynomialZp64 poly) {
-             if (currentPerfectVariable != -1)
-                 // just swap the vars
-                 return currentPerfectVariable == 0 ?
-                         poly.Clone() : MultivariatePolynomialZp64.swapVariables(poly, 0, currentPerfectVariable);
-             return AMultivariatePolynomial.swapVariables(poly, 0, baseVariable).shift(shiftingVariables, shifts);
-         }
-
-         MultivariatePolynomialZp64 reconstruct(MultivariatePolynomialZp64 poly) {
-             if (currentPerfectVariable != -1)
-                 // just swap the vars
-                 return currentPerfectVariable == 0 ?
-                         poly : MultivariatePolynomialZp64.swapVariables(poly, 0, currentPerfectVariable);
-
-             poly = poly.shift(shiftingVariables, ArraysUtil.negate(shifts.Clone()));
-             poly = MultivariatePolynomialZp64.swapVariables(poly, 0, baseVariable);
-             return poly;
-         }
-     }
-
-     /* =============================================== EEZ-GCD algorithm ============================================ */
+    /* =============================================== EEZ-GCD algorithm ============================================ */
 
     public static MultivariatePolynomial<E> EEZGCD<E>(MultivariatePolynomial<E> a, MultivariatePolynomial<E> b)
     {
@@ -4617,7 +4430,7 @@ public static class MultivariateGCD
             return ConvertFromZp64<E>(EEZGCD(AsOverZp64(a), AsOverZp64(b)));
 
         // prepare input and test for early termination
-        GCDInput<E> gcdInput = preparedGCDInput(a, b, MultivariateGCD.EEZGCD);
+        var gcdInput = preparedGCDInput(a, b, MultivariateGCD.EEZGCD);
         if (gcdInput.earlyGCD != null)
             return gcdInput.earlyGCD;
 
@@ -4626,7 +4439,7 @@ public static class MultivariateGCD
 
         // remove Content in each variable
         var Content = a.CreateOne();
-        for (int i = 0; i < a.nVariables; ++i)
+        for (var i = 0; i < a.nVariables; ++i)
         {
             if (a.Degree(i) == 0 || b.Degree(i) == 0)
                 continue;
@@ -4652,11 +4465,11 @@ public static class MultivariateGCD
         result = result.Multiply(Content);
         return gcdInput.restoreGCD(result);
     }
-     
+
     private static MultivariatePolynomial<E> EEZGCD0<E>(MultivariatePolynomial<E> a, MultivariatePolynomial<E> b)
     {
         // Degree of univariate gcd
-        int ugcdDegree = int.MaxValue;
+        var ugcdDegree = int.MaxValue;
         // Degrees of a and b as Z[y1, ... ,yN][x]
         int
             uaDegree = a.Degree(0),

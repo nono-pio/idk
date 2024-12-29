@@ -1282,7 +1282,7 @@ public static class UnivariateGCD
         a.Multiply(Util.ToCommonDenominator(inv).Item1.MapCoefficients(Rings.Q, Rings.Q.MkNumerator));
     }
 
-    static BigInteger RemoveDenominators(UnivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> a)
+    public static BigInteger RemoveDenominators(UnivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> a)
     {
         var denominator = Rings.Z.Lcm(a.Stream().Select(Util.CommonDenominator));
         a.Multiply(a.ring.ValueOfBigInteger(denominator));
@@ -1353,15 +1353,15 @@ public static class UnivariateGCD
         {
             var prime = primes.Take();
             var zpRing = new IntegersZp64(prime);
-            var minimalPolyMod = AsOverZp64(minimalPoly, zpRing);
+            var minimalPolyMod = UnivariatePolynomial<BigInteger>.AsOverZp64(minimalPoly, zpRing);
             if (minimalPolyMod.NNonZeroTerms() != minimalPoly.NNonZeroTerms())
 
                 // bad prime
                 continue;
             var modRing = new FiniteField<long>(minimalPolyMod);
             UnivariatePolynomial<UnivariatePolynomialZp64> aMod =
-                    a.MapCoefficients(modRing, (cf) => AsOverZp64(cf, zpRing)),
-                bMod = b.MapCoefficients(modRing, (cf) => AsOverZp64(cf, zpRing));
+                    a.MapCoefficients(modRing, (cf) => UnivariatePolynomial<BigInteger>.AsOverZp64(cf, zpRing)),
+                bMod = b.MapCoefficients(modRing, (cf) => UnivariatePolynomial<BigInteger>.AsOverZp64(cf, zpRing));
             UnivariatePolynomial<UnivariatePolynomialZp64> gcdMod;
             try
             {

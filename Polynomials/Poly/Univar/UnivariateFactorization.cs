@@ -23,14 +23,20 @@ public static class UnivariateFactorization
             return FactorInNumberField(poly.AsT<UnivariatePolynomial<Rational<BigInteger>>>())
                 as PolynomialFactorDecomposition<UnivariatePolynomial<E>>;
         else if (Util.IsOverMultipleFieldExtension(poly))
-            return (PolynomialFactorDecomposition<UnivariatePolynomial<E>>)GenericHandler.InvokeForGeneric<E>(typeof(MultivariatePolynomial<>),
-                nameof(FactorInMultipleFieldExtension), typeof(UnivariateFactorization), poly);// FactorInMultipleFieldExtension(poly);
+            return (PolynomialFactorDecomposition<UnivariatePolynomial<E>>)GenericHandler.InvokeForGeneric<E>(
+                typeof(MultivariatePolynomial<>),
+                nameof(FactorInMultipleFieldExtension), typeof(UnivariateFactorization),
+                poly); // FactorInMultipleFieldExtension(poly);
         else if (IsOverMultivariate(poly))
-            return (PolynomialFactorDecomposition<UnivariatePolynomial<E>>)GenericHandler.InvokeForGeneric<E>(typeof(MultivariatePolynomial<>),
-                nameof(FactorOverMultivariate), typeof(UnivariateFactorization), poly, MultivariateFactorization.Factor<E>); // TODO change<E> FactorOverMultivariate(poly, MultivariateFactorization.Factor);
+            return  (PolynomialFactorDecomposition<UnivariatePolynomial<E>>)GenericHandler.InvokeForGeneric<E>(
+                typeof(MultivariatePolynomial<>),
+                nameof(FactorOverMultivariate), typeof(UnivariateFactorization),
+                poly); // FactorOverMultivariate(poly);
         else if (IsOverUnivariate(poly))
-            return (PolynomialFactorDecomposition<UnivariatePolynomial<E>>)GenericHandler.InvokeForGeneric<E>(typeof(UnivariatePolynomial<>),
-                nameof(FactorOverUnivariate), typeof(UnivariateFactorization), poly, MultivariateFactorization.Factor<E>);//  TODO change<E> FactorOverUnivariate(poly, MultivariateFactorization.Factor);
+            return (PolynomialFactorDecomposition<UnivariatePolynomial<E>>)GenericHandler.InvokeForGeneric<E>(
+                typeof(UnivariatePolynomial<>),
+                nameof(FactorOverUnivariate), typeof(UnivariateFactorization),
+                poly); // FactorOverUnivariate(poly, MultivariateFactorization.Factor);
         else
             throw new Exception("ring is not supported");
     }
@@ -39,45 +45,63 @@ public static class UnivariateFactorization
     {
         return poly.ring is IMultivariateRing;
     }
-    
+
     public static bool IsOverUnivariate<E>(UnivariatePolynomial<E> poly)
     {
         return poly.ring is IUnivariateRing;
     }
-    
-    public static PolynomialFactorDecomposition<UnivariatePolynomial<MultivariatePolynomial<E>>> FactorOverMultivariate<E>(UnivariatePolynomial<MultivariatePolynomial<E>> poly,
-        Func<MultivariatePolynomial<E>, PolynomialFactorDecomposition<MultivariatePolynomial<E>>> factorFunction)
+
+    public static PolynomialFactorDecomposition<UnivariatePolynomial<MultivariatePolynomial<E>>>
+        FactorOverMultivariate<E>(UnivariatePolynomial<MultivariatePolynomial<E>> poly,
+            Func<MultivariatePolynomial<E>, PolynomialFactorDecomposition<MultivariatePolynomial<E>>> factorFunction)
     {
         return factorFunction(MultivariatePolynomial<E>.AsMultivariate(poly, 0, true))
             .MapTo((p) => p.AsUnivariateEliminate(0));
     }
     
+    
+    public static PolynomialFactorDecomposition<UnivariatePolynomial<MultivariatePolynomial<E>>>
+        FactorOverMultivariate<E>(UnivariatePolynomial<MultivariatePolynomial<E>> poly)
+    {
+        return MultivariateFactorization.Factor(MultivariatePolynomial<E>.AsMultivariate(poly, 0, true))
+            .MapTo((p) => p.AsUnivariateEliminate(0));
+    }
+
     public static PolynomialFactorDecomposition<UnivariatePolynomial<UnivariatePolynomial<E>>> FactorOverUnivariate<E>(
         UnivariatePolynomial<UnivariatePolynomial<E>> poly,
-        Func<MultivariatePolynomial<UnivariatePolynomial<E>>, PolynomialFactorDecomposition<MultivariatePolynomial<UnivariatePolynomial<E>>>>
+        Func<MultivariatePolynomial<UnivariatePolynomial<E>>,
+                PolynomialFactorDecomposition<MultivariatePolynomial<UnivariatePolynomial<E>>>>
             factorFunction)
     {
-        return factorFunction(MultivariatePolynomial<UnivariatePolynomial<E>>.AsMultivariate(poly, 1, 0, MonomialOrder.DEFAULT))
+        return factorFunction(
+                MultivariatePolynomial<UnivariatePolynomial<E>>.AsMultivariate(poly, 1, 0, MonomialOrder.DEFAULT))
             .MapTo(m => m.AsUnivariate());
     }
 
-    
+    public static PolynomialFactorDecomposition<UnivariatePolynomial<UnivariatePolynomial<E>>> FactorOverUnivariate<E>(
+        UnivariatePolynomial<UnivariatePolynomial<E>> poly)
+    {
+        return MultivariateFactorization.Factor(
+                MultivariatePolynomial<UnivariatePolynomial<E>>.AsMultivariate(poly, 1, 0, MonomialOrder.DEFAULT))
+            .MapTo(m => m.AsUnivariate());
+    }
+
     public static PolynomialFactorDecomposition<UnivariatePolynomial<Rational<E>>> FactorInQ<E>(
         UnivariatePolynomial<Rational<E>> poly)
     {
-        (UnivariatePolynomial<E>, E) cmd = Util.ToCommonDenominator(poly);
-        UnivariatePolynomial<E> integral = cmd.Item1;
-        E denominator = cmd.Item2;
+        var cmd = Util.ToCommonDenominator(poly);
+        var integral = cmd.Item1;
+        var denominator = cmd.Item2;
         return Factor(integral).MapTo((p) => Util.AsOverRationals(poly.ring, p))
             .AddUnit(poly.CreateConstant(new Rational<E>(integral.ring, integral.ring.GetOne(), denominator)));
     }
-    
+
     private static PolynomialFactorDecomposition<UnivariatePolynomial<MultivariatePolynomial<E>>>
         FactorInMultipleFieldExtension<E>(
-        UnivariatePolynomial<MultivariatePolynomial<E>> poly)
+            UnivariatePolynomial<MultivariatePolynomial<E>> poly)
     {
-        MultipleFieldExtension<E> ring = (MultipleFieldExtension<E>)poly.ring;
-        SimpleFieldExtension<E> simpleExtension = ring.GetSimpleExtension();
+        var ring = (MultipleFieldExtension<E>)poly.ring;
+        var simpleExtension = ring.GetSimpleExtension();
         return Factor(poly.MapCoefficients(simpleExtension, ring.Inverse))
             .MapTo((p) => p.MapCoefficients(ring, ring.Image));
     }
@@ -235,7 +259,7 @@ public static class UnivariateFactorization
             return PolynomialFactorDecomposition<UnivariatePolynomialZ64>.Of(poly);
         var factory = modularFactors[0];
         var modIndexes = NaturalSequenceRef(modularFactors.Count);
-        PolynomialFactorDecomposition<UnivariatePolynomialZ64> trueFactors =
+        var trueFactors =
             PolynomialFactorDecomposition<UnivariatePolynomialZ64>.Empty(poly);
         var fRest = poly;
         var s = 1;
@@ -285,7 +309,7 @@ public static class UnivariateFactorization
             return PolynomialFactorDecomposition<UnivariatePolynomial<BigInteger>>.Of(poly);
         var factory = modularFactors[0];
         var modIndexes = NaturalSequenceRef(modularFactors.Count);
-        PolynomialFactorDecomposition<UnivariatePolynomial<BigInteger>> trueFactors =
+        var trueFactors =
             PolynomialFactorDecomposition<UnivariatePolynomial<BigInteger>>.Empty(poly);
         var fRest = poly;
         var s = 1;
@@ -366,7 +390,7 @@ public static class UnivariateFactorization
                                        * BigInteger.Abs(poly.Lc());
         if (bound2.CompareTo(MachineArithmetic.b_MAX_SUPPORTED_MODULUS) < 0)
         {
-            PolynomialFactorDecomposition<UnivariatePolynomialZ64> tryLong =
+            var tryLong =
                 FactorSquareFreeInZ0(UnivariatePolynomial<BigInteger>.AsOverZ64(poly));
             if (tryLong != null)
                 return ConvertFactorizationToBigIntegers(tryLong);
@@ -394,7 +418,7 @@ public static class UnivariateFactorization
                      !UnivariateSquareFreeFactorization.IsSquareFree(moduloImage));
 
             // do modular factorization
-            PolynomialFactorDecomposition<UnivariatePolynomialZp64> tmpFactors = FactorInGF(moduloImage.Monic());
+            var tmpFactors = FactorInGF(moduloImage.Monic());
             if (tmpFactors.Count == 1)
                 return PolynomialFactorDecomposition<UnivariatePolynomial<BigInteger>>.Of(poly);
             if (lModularFactors == null || lModularFactors.Count > tmpFactors.Count)
@@ -479,7 +503,7 @@ public static class UnivariateFactorization
 
 
         // do modular factorization
-        PolynomialFactorDecomposition<UnivariatePolynomialZp64> modularFactors = FactorInGF(moduloImage.Monic());
+        var modularFactors = FactorInGF(moduloImage.Monic());
 
         // actual lift
         if (henselIterations > 0)
@@ -592,37 +616,37 @@ public static class UnivariateFactorization
         if (poly.Degree() <= 1 || poly.IsMonomial())
             return PolynomialFactorDecomposition<UnivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>>>
                 .Of(poly);
-        PolynomialFactorDecomposition<UnivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>>> result =
+        var result =
             PolynomialFactorDecomposition<UnivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>>>.Empty(poly);
         FactorInNumberField(poly, result);
         if (result.IsTrivial())
             return PolynomialFactorDecomposition<UnivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>>>
                 .Of(poly);
-    
+
         // correct l.c.
-        AlgebraicNumberField<Rational<BigInteger>> numberField =
+        var numberField =
             (AlgebraicNumberField<Rational<BigInteger>>)poly.ring;
         UnivariatePolynomial<Rational<BigInteger>> unit = result.Unit.Lc();
-        for (int i = 0; i < result.Count; i++)
+        for (var i = 0; i < result.Count; i++)
             unit = numberField.Multiply(unit, numberField.Pow(result[i].Lc(), result.Exponents[i]));
         unit = numberField.DivideExact(poly.Lc(), unit);
         result.AddUnit(UnivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>>.Constant(numberField, unit));
         return result;
     }
-    
+
     private static void FactorInNumberField(UnivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> poly,
         PolynomialFactorDecomposition<UnivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>>> result)
     {
         FactorGeneric(poly, result, UnivariateFactorization.FactorSquareFreeInNumberField);
     }
-    
-    
+
+
     public static PolynomialFactorDecomposition<UnivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>>>
         FactorSquareFreeInNumberField(UnivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> poly)
     {
-        AlgebraicNumberField<Rational<BigInteger>> numberField =
+        var numberField =
             (AlgebraicNumberField<Rational<BigInteger>>)poly.ring;
-        for (int s = 0;; ++s)
+        for (var s = 0;; ++s)
         {
             // choose a substitution f(z) -> f(z - s*alpha) so that norm is square-free
             UnivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> backSubstitution, sPoly;
@@ -636,18 +660,20 @@ public static class UnivariateFactorization
                 sPoly = poly.Composition(poly.CreateMonomial(1).Subtract(numberField.Generator().Multiply(s)));
                 backSubstitution = poly.CreateMonomial(1).Add(numberField.Generator().Multiply(s));
             }
-    
-            UnivariatePolynomial<Rational<BigInteger>> sPolyNorm = numberField.NormOfPolynomial(sPoly);
+
+            var sPolyNorm = numberField.NormOfPolynomial(sPoly);
             if (!UnivariateSquareFreeFactorization.IsSquareFree(sPolyNorm))
                 continue;
-    
+
             // factorize norm
-            PolynomialFactorDecomposition<UnivariatePolynomial<Rational<BigInteger>>> normFactors = Factor(sPolyNorm);
+            var normFactors = Factor(sPolyNorm);
             if (normFactors.IsTrivial())
-                return PolynomialFactorDecomposition<UnivariatePolynomial<Rational<BigInteger>>>.Of(poly);
-            PolynomialFactorDecomposition<UnivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>>> result =
-                PolynomialFactorDecomposition<UnivariatePolynomial<Rational<BigInteger>>>.Empty(poly);
-            for (int i = 0; i < normFactors.Count; i++)
+                return PolynomialFactorDecomposition<UnivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>>>
+                    .Of(poly);
+            var result =
+                PolynomialFactorDecomposition<UnivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>>>
+                    .Empty(poly);
+            for (var i = 0; i < normFactors.Count; i++)
             {
                 UnivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> factor =
                     UnivariateGCD.PolynomialGCD(sPoly, ToNumberField(numberField, normFactors[i]));
@@ -655,11 +681,11 @@ public static class UnivariateFactorization
                     factor = factor.Composition(backSubstitution);
                 result.AddFactor(factor, 1);
             }
-    
+
             return result;
         }
     }
-    
+
     private static UnivariatePolynomial<UnivariatePolynomial<Rational<BigInteger>>> ToNumberField(
         AlgebraicNumberField<Rational<BigInteger>> numberField,
         UnivariatePolynomial<Rational<BigInteger>> poly)

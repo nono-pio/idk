@@ -187,7 +187,7 @@ public static class MonomialOrder
     {
         public readonly int[] permutation;
 
-        GrevLexWithPermutation(int[] permutation)
+        public GrevLexWithPermutation(int[] permutation)
         {
             this.permutation = permutation;
         }
