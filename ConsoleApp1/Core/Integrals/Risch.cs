@@ -1,429 +1,577 @@
-﻿// using System.Runtime;
-// using System.Xml;
-// using ConsoleApp1.Core.Expressions.Atoms;
-// using ConsoleApp1.Core.Expressions.Base;
-// using ConsoleApp1.Core.Expressions.Trigonometrie;
-// using ConsoleApp1.Core.Models;
-// using PolynomialTheory;
-//
-// using MPoly = PolynomialTheory.MultiPolynomial<PolynomialTheory.Rational>; // QQ[x, t0, ...]
-// using RMPoly = PolynomialTheory.RationalMultiPolynomial<PolynomialTheory.Rational>; // QQ(x, t0, ...)
-// using UPoly = PolynomialTheory.UniPolynomial<PolynomialTheory.RationalMultiPolynomial<PolynomialTheory.Rational>>; // QQ(x, t0, ...)[ti]
-// using RUPoly = PolynomialTheory.RationalUniPolynomial<PolynomialTheory.RationalMultiPolynomial<PolynomialTheory.Rational>>; // QQ(x, t0, ...)(ti)
-//
-//
-// namespace ConsoleApp1.Core.Integrals;
-//
-// public class Risch
-// {
-//     public enum RischCases
-//     {
-//         Base,
-//         Primitive,
-//         Exp,
-//         Tan,
-//         OtherNonlinear,
-//         OtherLinear
-//     }
-//     
-//     public class DiffField
-//     {
-//         public static RationalRing QQ = new RationalRing();
-//         public Variable[] t;
-//         public Expr[] T;
-//         public Expr[] D;
-//         public RMPoly[] Dtemp;
-//         public RischCases[] Cases;
-//         public Variable x => t[0];
-//         public Expr f;
-//
-//         public DiffField(Expr f, Variable x)
-//         {
-//             List<Variable> t = [x];
-//             List<Expr> T = [x];
-//             List<Expr> D = [1];
-//             this.f = Components(f, ref t, ref T, ref D);
-//             
-//             this.t = t.ToArray();
-//             this.T = T.ToArray();
-//             this.D = D.ToArray();
-//             this.Dtemp = D.Select(ExprToRMPoly).ToArray();
-//             
-//             SetCases();
-//         }
-//
-//         public void SetCases()
-//         {
-//             RischCases GetCase(Variable t, Expr d)
-//             {
-//                 if (d.Constant(t))
-//                 {
-//                     if (d.IsNumOne)
-//                         return RischCases.Base;
-//                     return RischCases.Primitive;
-//                 }
-//                 
-//                 if ((d / t).Constant(t)) // TODO : d.Rem(t).IsZero
-//                     return RischCases.Exp;
-//                 
-//                 if ((d / (Pow(t, 2) + 1)).Constant(t)) // TODO : d.Rem(1 + Pow(t, 2)).IsZero
-//                     return RischCases.Tan;
-//                 
-//                 // if (d.Deg(t) > 1)
-//                 //     return RischCases.OtherNonlinear;
-//                 return RischCases.OtherLinear;
-//             }
-//             
-//             this.Cases = new RischCases[this.T.Length];
-//             for (int i = 0; i < Cases.Length; i++)
-//             {
-//                 Cases[i] = GetCase(t[i], D[i]);
-//             }
-//         }
-//         
-//
-//         public static Expr Components(Expr f, ref List<Variable> t, ref List<Expr> T, ref List<Expr> D)
-//         {
-//             if (f.Constant(t[0]))
-//                 return f;
-//             
-//             if (f.IsVar(t[0]))
-//                 return f;
-//             
-//             var ti = T.IndexOf(f);
-//             if (ti != -1)
-//                 return t[ti];
-//             
-//             switch (f)
-//             {
-//                 case Addition:
-//                 case Multiplication:
-//                     var args = new Expr[f.Args.Length];
-//                     for (int i = 0; i < args.Length; i++)
-//                         args[i] = Components(f.Args[i], ref t, ref T, ref D);
-//                     return f.Eval(args);
-//
-//                 case Power pow:
-//                     if (pow.Exp is Number n && n.Num.IsInt)
-//                     {
-//                         var newBase = Components(pow.Base, ref t, ref T, ref D);
-//                         return Pow(newBase, n);
-//                     }
-//
-//                     break;
-//             }
-//             
-//             // not Rational Polynomial
-//
-//             var newt = new Variable("t" + t.Count, dummy: true);
-//             
-//             t.Add(newt);
-//             T.Add(f);
-//             
-//             var DT = f.Derivee(t[0]);
-//             D.Add(Components(DT, ref t, ref T, ref D));
-//             
-//             return newt;
-//         }
-//
-//         public RMPoly ExprToRMPoly(Expr expr)
-//         {
-//             var (n, d) = expr.AsFraction();
-//             return new RMPoly(ExprToMPoly(n), ExprToMPoly(d));
-//         }
-//         
-//         public MPoly ExprToMPoly(Expr expr)
-//         {
-//             var n = t.Length;
-//
-//             switch (expr)
-//             {
-//                 case Number num:
-//                     if (!num.Num.IsFraction)
-//                         goto default;
-//
-//                     return PolynomialHelper.MultiPolynomial(QQ,
-//                         new Rational((int)num.Num.Numerator, (int)num.Num.Denominator), n);
-//                 case Variable var:
-//                     
-//                     var ti = Array.IndexOf(t, var);
-//                     if (ti == -1)
-//                         goto default;
-//
-//                     var degs = new int[n];
-//                     degs[ti] = 1;
-//                     
-//                     return PolynomialHelper.MultiPolynomial(QQ, (1, degs));
-//                 case Addition add:
-//                     return add.Args.Select(ExprToMPoly).Aggregate((a, b) => a + b);
-//                 case Multiplication mul:
-//                     return mul.Args.Select(ExprToMPoly).Aggregate((a, b) => a * b);
-//                 case Power pow:
-//                     var exp = pow.Exp is Number number && number.Num.IsInt ? (int)number.Num.Numerator : throw new NotImplementedException();
-//                     
-//                     return ExprToMPoly(pow.Base).Pow(exp);
-//                 default:
-//                     throw new NotImplementedException();
-//             }
-//         }
-//     }
-//     
-//     public static Expr Derivative(Expr f, DiffField D)
-//     {
-//         if (f.Constant())
-//             return 0;
-//         
-//         if (f is Variable var)
-//         {
-//             var ti = Array.IndexOf(D.t, var);
-//             if (ti != -1)
-//                 return D.D[ti];
-//
-//             throw new NotImplementedException();
-//         }
-//
-//         Expr result = 0;
-//         for (int i = 0; i < f.Args.Length; i++)
-//         {
-//             result += f.fDerivee(i) * Derivative(f.Args[i], D);
-//         }
-//
-//         return result;
-//     }
-//
-//     public static RMPoly Derivative(RMPoly f, DiffField D)
-//     {
-//         return (Derivative(f.Numerator, D) * f.Denominator.ToRationalPoly() - Derivative(f.Denominator, D) * f.Numerator.ToRationalPoly()) / (f.Denominator * f.Denominator).ToRationalPoly();
-//     }
-//
-//     public static RMPoly Derivative(MPoly f, DiffField D)
-//     {
-//         RMPoly Derivative(Multinomial<Rational> multinomial)
-//         {
-//             var result = RMPoly.Zero(DiffField.QQ, D.t.Length);
-//             for (int i = 0; i < multinomial.Degs.Length; i++)
-//             {
-//                 if (multinomial.Degs[i] == 0)
-//                     continue;
-//                 
-//                 var degs = new int[multinomial.Degs.Length];
-//                 Array.Copy(multinomial.Degs, degs, degs.Length);
-//                 degs[i]--;
-//                 
-//                 var newMul = (multinomial.Degs[i] * multinomial.Coef, degs);
-//                 var newPoly = PolynomialHelper.MultiPolynomial(DiffField.QQ, newMul).ToRationalPoly() * D.Dtemp[i];
-//                 
-//                 result += newPoly;
-//             }
-//
-//             return result;
-//         }
-//         
-//         return f.Multinomials.Select(Derivative).Aggregate((a, b) => a + b);
-//     }
-//     
-//     private static UPoly Derivative(UPoly a, DiffField D, int i)
-//     {
-//         var d = Derivative(RMPoly.CombineWithMultiPolynomial(a, i), D).ToUniPolynomialOfRational(i);
-//         return d.Numerator;
-//     }
-//
-//     
-//     public static Expr RischIntegrate(Expr f, Variable x)
-//     {
-//         var D = new DiffField(f, x);
-//         Expr result = 0;
-//         for (int i = D.T.Length - 1; i >= 0; i--)
-//         {
-//             var @case = D.Cases[i];
-//             switch (@case)
-//             {
-//                 default:
-//                     throw new NotImplementedException();
-//             }
-//         }
-//
-//         return result;
-//     }
-//
-//     public static (UPoly, UPoly) SplitFactor(UPoly p, DiffField D, int i)
-//     {
-//         var S = PolynomialHelper.Gcd(p, Derivative(p, D, i)) / PolynomialHelper.Gcd(p, p.Derivative());
-//         if (S.Degree == 0)
-//             return (p, UPoly.One(p.Ring));
-//     
-//         var (qn, qs) = SplitFactor(p / S, D, i);
-//         return (qn, S * qs);
-//     }
-//
-//     public static (UPoly, UPoly) ExtendedEuclidieanDiophantine(UPoly a, UPoly b, UPoly c)
-//     {
-//         var (s, t, g) = UPoly.ExtendedEuclidean(a.Ring, a, b);
-//         var (q, r) = UPoly.Divide(a.Ring, c, g);
-//         if (!r.IsZero())
-//             throw new ArgumentException("c is not in the ideal generated by a and b");
-//         s = q * s;
-//         t = q * t;
-//         if (!s.IsZero() && s.Degree >= b.Degree)
-//         {
-//             (q, r) = UPoly.Divide(s.Ring, s, b);
-//             s = r;
-//             t = t + q * a;
-//         }
-//
-//         return (s, t);
-//     }
-//
-//     public static (UPoly, RUPoly, RUPoly) CanonicalRepresentation(RUPoly f, DiffField D, int i)
-//     {
-//         if (!f.IsDenMonic())
-//             f = f.MonicDen();
-//         
-//         var (a, d) = (f.Numerator, f.Denominator);
-//         var (q, r) = UPoly.Divide(a.Ring, a, d);
-//         var (dn, ds) = SplitFactor(d, D, i);
-//         var (b, c) = ExtendedEuclidieanDiophantine(dn, ds, r);
-//         return (q, new RUPoly(b, ds), new RUPoly(c, dn));
-//     }
-//
-//     public static UPoly[] SquareFree(UPoly A)
-//     {
-//         // TODO content
-//         var c = A.Ring.One;
-//         var S = A / c;
-//         var Sp = S.Derivative();
-//         var Sm = UPoly.GCD(S.Ring, S, Sp);
-//         var Ss = S / Sm;
-//         var Y = Sp / Sm;
-//         var k = 1;
-//         var Z = Y - Ss.Derivative();
-//         var As = new List<UPoly>();
-//         As.Add(UPoly.Zero(A.Ring));
-//         while (!Z.IsZero())
-//         {
-//             var newA = UPoly.GCD(Ss.Ring, Ss, Z);
-//             Ss = Ss / newA;
-//             Y = Z / newA;
-//             Z = Y - Ss.Derivative();
-//             k++;
-//             As.Add(newA);
-//         }
-//         As.Add(Ss);
-//
-//         return As.ToArray();
-//     }
-//
-//     public static (RUPoly, RUPoly, RUPoly) HermiteReduce(RUPoly f, DiffField D, int index)
-//     {
-//         var (fp, fs, fn) = CanonicalRepresentation(f, D, index);
-//         var (a, d) = (fn.Numerator, fn.Denominator);
-//         var ds = SquareFree(d);
-//         var g = RUPoly.Zero(f.Ring);
-//         for (int i = 1; i < ds.Length; i++)
-//         {
-//             if (ds[i].Degree == 0)
-//                 continue;
-//     
-//             var v = ds[i];
-//             var u = d / v.Pow(i);
-//             for (int j = i - 1; j >= 1; j--) // TODO check range
-//             {
-//                 var (b, c) = ExtendedEuclidieanDiophantine(u * Derivative(v, D, index), v, -a / j);
-//                 g += new RUPoly(b, v.Pow(j));
-//                 a = c * (-j) - u * Derivative(b, D, index);
-//             }
-//     
-//             d = u * v;
-//         }
-//         
-//         var (q, r) = UPoly.Divide(a.Ring, a, d);
-//         return (g, new RUPoly(r, d), new RUPoly(q + fp) + fs);
-//     }
-//
-//     public static (UPoly, UPoly) PolynomialReduce(UPoly p, DiffField D, int i)
-//     {
-//         var q = UPoly.Zero(p.Ring);
-//         var ring = (RationalMultiPolynomialRing<Rational>)p.Ring;
-//         var d = D.Dtemp[i].Numerator;
-//         while (p.Degree >= d.Deg(i))
-//         {
-//             var m = p.Degree - d.Deg(i) + 1;
-//
-//             var coefficients = new RMPoly[m + 1];
-//             Array.Fill(coefficients, RMPoly.Zero(ring.Ring, ring.NVars));
-//             coefficients[m] = p.LC / (d.LC(i) * m);
-//
-//             var q0 = new UPoly(ring, coefficients);
-//             
-//             q += q0;
-//             p = p - Derivative(q0, D, i);
-//
-//         }
-//
-//         return (q, p);
-//     }
-//     
-//     
-//     // public static (RUPoly Integral, bool IsElementary) ResidueReduce(RUPoly f, DiffField D, int index)
-//     // {
-//     //     var d = f.Denominator;
-//     //     var (p, a) = UPoly.Divide(f.Ring, f.Numerator, d);
-//     //     var z = new Variable("z", dummy: true);
-//     //     Poly r;
-//     //     Poly[] R;
-//     //     if (Derivative(d, D, index).Degree <= d.Degree)
-//     //         (r, R) = SubResultant_x(d, a - z * Derivative(d, D, index));
-//     //     else 
-//     //         (r, R) = SubResultant_x(a - z * Derivative(d, D, index), d);
-//     //
-//     //     var (n, s) = SplitSquarefreeFactor(r, kD);
-//     //     for (int i = 0; i < s.Length; i++)
-//     //     {
-//     //         if (s[i].Degree == 0)
-//     //             continue;
-//     //         
-//     //         if (i == d.Degree)
-//     //             S[i] = d;
-//     //         else
-//     //         {
-//     //             S[i] = R.First(el => el.Deg() == i);
-//     //             var A = SquareFree(lc_t(S[i]));
-//     //             for (int j = 0; j < A.Length; j++)
-//     //                 S[i] = S[i] / gcd_x(A[j], s[i]) ^ j;
-//     //         }
-//     //     }
-//     //
-//     //     var b = n.All(ni => ni.IsConstant);
-//     //     return (_, b);
-//     // }
-//     
-//     //
-//     // public static (Poly Integral, bool IsElementary) IntegratePrimitive(Poly f, DiffField D)
-//     // {
-//     //     var (g1, h, r) = HermiteReduce(f, D);
-//     //     var (g2, IsElem) = ResidueReduce(h, D);
-//     //     if (!IsElem)
-//     //         return (g1 + g2, false);
-//     //
-//     //     (var q, IsElem) = IntegratePrimitivePolynomial(h - Derivative(g2, D) + r, D);
-//     //     return (g1 + g2 + q, IsElem);
-//     // }
-//     //
-//     // public static (Poly Integral, bool IsElementary) IntegratePrimitivePolynomial(Poly p, DiffField D)
-//     // {
-//     //     if (p.Deg() == 0)
-//     //         return (0, true);
-//     //
-//     //     var a = p.LC();
-//     //     var bc = LimitedIntegrate(a, Dt, D);
-//     //
-//     //     if (bc is null)
-//     //         return (0, false);
-//     //     
-//     //     var (b, c) = bc.Value;
-//     //     var m = p.Deg();
-//     //     var q0 = c * t ^ (m + 1) / (m + 1) + b * t ^ m;
-//     //     var (q, IsElem) = IntegratePrimitivePolynomial(p - Derivative(q0, D), D);
-//     //     return (q + q0, IsElem);
-//     // }
-// }
+﻿using System.ComponentModel.Design;
+using System.Diagnostics;
+using System.Numerics;
+using System.Text;
+using System.Xml.Resolvers;
+using ConsoleApp1.Core.Expressions.Atoms;
+using ConsoleApp1.Core.Expressions.Base;
+using Polynomials;
+using Polynomials.Poly.Multivar;
+using Polynomials.Poly.Univar;
+using MPoly = Polynomials.Poly.Multivar.MultivariatePolynomial<Polynomials.Rational<System.Numerics.BigInteger>>; // QQ[x, t0, ...]
+using RMPoly = Polynomials.Rational<Polynomials.Poly.Multivar.MultivariatePolynomial<Polynomials.Rational<System.Numerics.BigInteger>>>; // QQ(x, t0, ...)
+using UPoly = Polynomials.Poly.Univar.UnivariatePolynomial<Polynomials.Rational<Polynomials.Poly.Multivar.MultivariatePolynomial<Polynomials.Rational<System.Numerics.BigInteger>>>>; // QQ(x, t0, ...)[ti]
+using RUPoly = Polynomials.Rational<Polynomials.Poly.Univar.UnivariatePolynomial<Polynomials.Rational<Polynomials.Poly.Multivar.MultivariatePolynomial<Polynomials.Rational<System.Numerics.BigInteger>>>>>; // QQ(x, t0, ...)(ti)
+
+
+namespace ConsoleApp1.Core.Integrals;
+
+public static class Risch
+{
+    public static Rationals<BigInteger> QQ = Rings.Q;
+    public static Ring<BigInteger> ZZ = Rings.Z;
+
+    public enum RischCases
+    {
+        Base,
+        Primitive,
+        Exp,
+        Tan,
+        OtherNonlinear,
+        OtherLinear
+    }
+    
+    public class DiffField
+    {
+        public Variable[] t;
+        public Expr[] T;
+        public Expr[] D;
+        public RMPoly[] Dtemp;
+        public RischCases[] Cases;
+        public Variable x => t[0];
+        public Expr f;
+    
+        public DiffField(Expr f, Variable x)
+        {
+            List<Variable> t = [x];
+            List<Expr> T = [x];
+            List<Expr> D = [1];
+            this.f = Components(f, ref t, ref T, ref D);
+            
+            this.t = t.ToArray();
+            this.T = T.ToArray();
+            this.D = D.ToArray();
+            this.Dtemp = D.Select(ExprToRMPoly).ToArray();
+            
+            SetCases();
+        }
+    
+    public void SetCases()
+    {
+        RischCases GetCase(int t, RMPoly d)
+        {
+            if (d.IsConstant(t))
+            {
+                if (d.IsOne())
+                    return RischCases.Base;
+                return RischCases.Primitive;
+            }
+
+            if (!d.IsIntegral())
+                throw new NotImplementedException();
+            
+            if ((d.NumeratorExact() % ExprToMPoly(this.t[t])).IsZero())
+                return RischCases.Exp;
+            
+            if ((d.NumeratorExact() % ExprToMPoly(Pow(this.t[t], 2) + 1)).IsZero())
+                return RischCases.Tan;
+
+            if (d.NumeratorExact().Degree(t) > 1)
+                return RischCases.OtherNonlinear;
+            return RischCases.OtherLinear;
+        }
+        
+        this.Cases = new RischCases[this.T.Length];
+        for (int i = 0; i < Cases.Length; i++)
+        {
+            Cases[i] = GetCase(i, Dtemp[i]);
+        }
+    }
+    
+    
+    public static Expr Components(Expr f, ref List<Variable> t, ref List<Expr> T, ref List<Expr> D)
+    {
+        if (f.Constant(t[0]))
+            return f;
+        
+        if (f.IsVar(t[0]))
+            return f;
+        
+        var ti = T.IndexOf(f);
+        if (ti != -1)
+            return t[ti];
+        
+        switch (f)
+        {
+            case Addition:
+            case Multiplication:
+                var args = new Expr[f.Args.Length];
+                for (int i = 0; i < args.Length; i++)
+                    args[i] = Components(f.Args[i], ref t, ref T, ref D);
+                return f.Eval(args);
+    
+            case Power pow:
+                if (pow.Exp is Number n && n.Num.IsInt)
+                {
+                    var newBase = Components(pow.Base, ref t, ref T, ref D);
+                    return Pow(newBase, n);
+                }
+    
+                break;
+        }
+        
+        // not Rational Polynomial
+    
+        var newt = new Variable("t" + t.Count, dummy: true);
+        
+        t.Add(newt);
+        T.Add(f);
+        
+        var DT = f.Derivee(t[0]);
+        D.Add(Components(DT, ref t, ref T, ref D));
+        
+        return newt;
+    }
+    
+        public RMPoly ExprToRMPoly(Expr expr)
+        {
+            var (n, d) = expr.AsFraction();
+            return PolynomialFactory.RationalPoly(ExprToMPoly(n), ExprToMPoly(d));
+        }
+        
+        public MPoly ExprToMPoly(Expr expr)
+        {
+            var n = t.Length;
+    
+            switch (expr)
+            {
+                case Number num:
+                    if (!num.Num.IsFraction)
+                        goto default;
+    
+                    return PolynomialFactory.Multi(QQ,
+                        (new Rational<BigInteger>(ZZ, num.Num.Numerator, num.Num.Denominator), new int[n]));
+                case Variable var:
+                    
+                    var ti = Array.IndexOf(t, var);
+                    if (ti == -1)
+                        goto default;
+    
+                    var degs = new int[n];
+                    degs[ti] = 1;
+                    
+                    return PolynomialFactory.Multi(QQ, (1, degs));
+                case Addition add:
+                    return add.Args.Select(ExprToMPoly).Aggregate((a, b) => a.Add(b));
+                case Multiplication mul:
+                    return mul.Args.Select(ExprToMPoly).Aggregate((a, b) => a.Multiply(b));
+                case Power pow:
+                    var exp = pow.Exp is Number number && number.Num.IsInt ? (int)number.Num.Numerator : throw new NotImplementedException();
+                    
+                    return ExprToMPoly(pow.Base).Pow(exp);
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+    }
+    
+    public static Expr Derivative(Expr f, DiffField D)
+    {
+        if (f.Constant())
+            return 0;
+        
+        if (f is Variable var)
+        {
+            var ti = Array.IndexOf(D.t, var);
+            if (ti != -1)
+                return D.D[ti];
+    
+            throw new NotImplementedException();
+        }
+    
+        Expr result = 0;
+        for (int i = 0; i < f.Args.Length; i++)
+        {
+            result += f.fDerivee(i) * Derivative(f.Args[i], D);
+        }
+    
+        return result;
+    }
+    
+    public static RMPoly Derivative(RMPoly f, DiffField D)
+    {
+        return (Derivative(f.Numerator(), D) * f.Denominator().ToRMPoly() - Derivative(f.Denominator(), D) * f.Numerator().ToRMPoly()) / (f.Denominator().Square()).ToRMPoly();
+    }
+    
+    public static RMPoly Derivative(MPoly f, DiffField D)
+    {
+        RMPoly Derivative(Monomial<Rational<BigInteger>> multinomial)
+        {
+            var result = RMPoly.Zero(Rings.MultivariateRingQ(D.t.Length));
+            var fac = D.Dtemp[0].Numerator();
+            for (int i = 0; i < multinomial.NVariables(); i++)
+            {
+                if (multinomial.exponents[i] == 0)
+                    continue;
+                
+                var degs = new int[multinomial.NVariables()];
+                Array.Copy(multinomial.exponents, degs, degs.Length);
+                degs[i]--;
+                
+                var newMul = new Monomial<Rational<BigInteger>>(degs, multinomial.exponents[i] * multinomial.coefficient);
+                var newPoly = PolynomialFactory.RationalPoly(fac.Create(newMul)) * D.Dtemp[i];
+                
+                result += newPoly;
+            }
+    
+            return result;
+        }
+        
+        return f.terms.Iterator().Select(Derivative).Aggregate((a, b) => a + b);
+    }
+    
+    private static RUPoly Derivative(UPoly a, DiffField D, int i)
+    {
+        var d = Derivative(a.ToRMPoly(i), D);
+        return d.ToRUPoly(i);
+    }
+    
+    //
+    // public static Expr RischIntegrate(Expr f, Variable x)
+    // {
+    //     var D = new DiffField(f, x);
+    //     Expr result = 0;
+    //     for (int i = D.T.Length - 1; i >= 0; i--)
+    //     {
+    //         var @case = D.Cases[i];
+    //         switch (@case)
+    //         {
+    //             default:
+    //                 throw new NotImplementedException();
+    //         }
+    //     }
+    //
+    //     return result;
+    // }
+
+    public static Diff<RMPoly> DefaultDiff(int i, DiffField D)
+    {
+        return poly => Derivative(poly, D, i);
+    }
+
+    public delegate Rational<UnivariatePolynomial<K>> Diff<K>(UnivariatePolynomial<K> poly);
+    
+    public static (UnivariatePolynomial<K>, UnivariatePolynomial<K>) SplitFactor<K>(UnivariatePolynomial<K> p, Diff<K> D)
+    {
+        var S = UnivariateGCD.PolynomialGCD(p, D(p).NumeratorExact()) / UnivariateGCD.PolynomialGCD(p, p.Derivative());
+        if (S.Degree() == 0)
+            return (p, p.CreateOne());
+    
+        var (qn, qs) = SplitFactor(p / S, D);
+        return (qn, S * qs);
+    }
+    
+    public static (UnivariatePolynomial<K>, UnivariatePolynomial<K>) 
+        ExtendedEuclidieanDiophantine<K>(UnivariatePolynomial<K> a, UnivariatePolynomial<K> b, UnivariatePolynomial<K> c)
+    {
+        var (g, s) = UnivariateGCD.PolynomialFirstBezoutCoefficient(a, b).ToTuple2();
+        var q = UnivariateDivision.DivideExact(c, g);
+        s = q * s;
+
+        if (!s.IsZero() && s.Degree() >= b.Degree())
+        {
+            (q, s) = UnivariateDivision.DivideAndRemainder(s, b)!.ToTuple2();
+        }
+    
+        return (s, (c - s * a) / b);
+    }
+    
+    public static (UnivariatePolynomial<K>, Rational<UnivariatePolynomial<K>>, Rational<UnivariatePolynomial<K>>) 
+        CanonicalRepresentation<K>(Rational<UnivariatePolynomial<K>> f, Diff<K> D)
+    {
+        if (!f.IsIntegral())
+            f = f.MonicDen();
+        
+        var (a, d) = (f.Numerator(), f.Denominator());
+        var (q, r) = UnivariateDivision.DivideAndRemainder(a, d)!.ToTuple2();
+        var (dn, ds) = SplitFactor(d, D);
+        var (b, c) = ExtendedEuclidieanDiophantine(dn, ds, r);
+        return (q, PolynomialFactory.RationalPoly(b, ds), PolynomialFactory.RationalPoly(c, dn));
+    }
+    
+    public static UnivariatePolynomial<K>[] SquareFreeList<K>(UnivariatePolynomial<K> poly)
+    {
+        return SquareFree(poly).List.ToArray();
+    }
+    
+    public static (K Constant, UnivariatePolynomial<K>[] List) SquareFree<K>(UnivariatePolynomial<K> poly)
+    {
+        var fac = UnivariateSquareFreeFactorization.SquareFreeFactorization(poly);
+        Debug.Assert(fac.Unit.Degree() == 0);
+        var cste = fac.Unit.Lc();
+        if (fac.Count == 0)
+            return (cste, []);
+        
+        var result = new UnivariatePolynomial<K>[fac.Exponents.Max() + 1];
+        for (int i = 0; i < result.Length; i++)
+            result[i] = poly.CreateOne();
+
+        for (int i = 0; i < fac.Count; i++)
+            result[fac.Exponents[i]] = fac.Factors[i];
+
+        return (cste, result);
+    }
+    
+    public static (Rational<UnivariatePolynomial<K>>, Rational<UnivariatePolynomial<K>>, Rational<UnivariatePolynomial<K>>) 
+        HermiteReduce<K>(Rational<UnivariatePolynomial<K>> f, Diff<K> D)
+    {
+        var (fp, fs, fn) = CanonicalRepresentation(f, D);
+        var (a, d) = (fn.Numerator(), fn.Denominator());
+        var ds = SquareFreeList(d);
+        var g = Rational<UnivariatePolynomial<K>>.Zero(f.ring);
+        for (int i = 1; i < ds.Length; i++)
+        {
+            if (ds[i].Degree() == 0)
+                continue;
+    
+            var v = ds[i];
+            var u = d / v.Pow(i);
+            for (int j = i - 1; j >= 1; j--)
+            {
+                var (b, c) = ExtendedEuclidieanDiophantine(u * D(v).NumeratorExact(), v, -a / j);
+                g += PolynomialFactory.RationalPoly(b, v.Pow(j));
+                a = c * (-j) - u * D(b).NumeratorExact();
+            }
+    
+            d = u * v;
+        }
+        
+        var (q, r) = UnivariateDivision.DivideAndRemainder(a, d)!.ToTuple2();
+        return (g, PolynomialFactory.RationalPoly(r, d), PolynomialFactory.RationalPoly(q + fp) + fs);
+    }
+    
+    public static (UnivariatePolynomial<K>, UnivariatePolynomial<K>) 
+        PolynomialReduce<K>(UnivariatePolynomial<K> p, Diff<K> D)
+    {
+        var q = p.CreateZero();
+        var ring = p.ring;
+        var d = D(p.CreateMonomial(ring.GetOne(), 1)).NumeratorExact(); // Dt
+        while (p.Degree() >= d.Degree()) /*deg(p) >= deg_t(Dt)*/
+        {
+            var m = p.Degree() - d.Degree() + 1; /*deg(p) - deg_t(Dt) + 1*/
+    
+            var c = ring.DivideExact(p.Lc(), ring.Multiply(ring.ValueOfLong(m), d.Lc())); /* lc(p) / (m * lc_t(Dt)) */
+            var q0 = p.CreateMonomial(c, m);
+            
+            q += q0;
+            p = p - D(q0).NumeratorExact();
+    
+        }
+    
+        return (q, p);
+    }
+
+    private static (K, UnivariatePolynomial<K>[]) SubResultant<K>(UnivariatePolynomial<K> a, UnivariatePolynomial<K> b)
+    {
+        var res = UnivariateResultants.SubresultantPRS(a, b);
+        return (res.Resultant(), res.remainders.ToArray());
+    }
+
+    public static (UnivariatePolynomial<K>[], UnivariatePolynomial<K>[]) SplitSquarefreeFactor<K>(
+        UnivariatePolynomial<K> p, Diff<K> D) // p in K[z]
+    {
+        var k_z_ring = p.AsRing();
+
+        UnivariatePolynomial<K> kD(UnivariatePolynomial<K> poly) // poly in K[z]
+            => poly.MapCoefficients<K>(poly.ring, c => D(UnivariatePolynomial<K>.Constant(poly.ring, c)).NumeratorExact().Lc());
+        
+        var (pc, p_list) = SquareFree(p);
+        if (!p.ring.IsOne(pc))
+            p_list[1] *= p.CreateConstant(pc);
+        if (p.IsZero())
+            return ([p], []);
+
+        var S = new UnivariatePolynomial<K>[p_list.Length]; // K[z]
+        var N = new UnivariatePolynomial<K>[p_list.Length]; // K[z]
+        for (int i = 0; i < p_list.Length; i++)
+        {
+            var pi = p_list[i];
+            if (pi.IsOne())
+            {
+                S[i] = pi.CreateOne();
+                N[i] = pi.CreateOne();
+                continue;
+            }
+
+            S[i] = UnivariateGCD.PolynomialGCD(pi, kD(pi));
+            N[i] = pi / S[i];
+        }
+
+        return (N, S);
+    }
+
+
+    /// Return ((s_i in K[z], S_i in K[z][t]), IsElementary)
+    public static ((UnivariatePolynomial<K>[] s, UnivariatePolynomial<UnivariatePolynomial<K>>[] S), bool IsElementary) 
+        ResidueReduce<K>(Rational<UnivariatePolynomial<K>> f, Diff<K> D)
+    {
+        var d = f.Denominator();
+        var (p, a) = UnivariateDivision.DivideAndRemainder(f.Numerator(), d)!.ToTuple2();
+        
+        UnivariatePolynomial<K> r; // K[z]
+        UnivariatePolynomial<UnivariatePolynomial<K>>[] R; // K[z][t]
+        var ringK = d.ring;
+        var Dd = D(d).NumeratorExact();
+        
+        // Convert poly from K[x] to K[z][t]
+        var newD = d.MapCoefficients(Rings.UnivariateRing(ringK), c => UnivariatePolynomial<K>.Constant(ringK, c));
+        var newA = a.MapCoefficients(Rings.UnivariateRing(ringK), c => UnivariatePolynomial<K>.Constant(ringK, c));
+        var newDd = Dd.MapCoefficients(Rings.UnivariateRing(ringK), c => UnivariatePolynomial<K>.Constant(ringK, c));
+        var newZ = PolynomialFactory.Uni(Rings.UnivariateRing(ringK),
+            [PolynomialFactory.Uni(ringK, [ringK.GetZero(), ringK.GetOne()])]); // z in K[z][t]
+        
+        
+        if (Dd.Degree() <= d.Degree())
+            (r, R) = SubResultant(newD, newA - newZ * newDd); 
+        else 
+            (r, R) = SubResultant(newA - newZ * newDd, newD);
+
+        var (n, s) = SplitSquarefreeFactor(r, D);
+        var S = new UnivariatePolynomial<UnivariatePolynomial<K>>[s.Length]; // K[z][t]
+        for (int i = 0; i < s.Length; i++)
+        {
+            if (s[i].Degree() == 0)
+                continue;
+            
+            if (i == d.Degree())
+                S[i] = PolynomialFactory.Uni(Rings.UnivariateRing(ringK), d);
+            else
+            {
+                S[i] = R.First(el => el.Degree() == i);
+                var A = SquareFree(S[i].Lc()).List;
+                for (int j = 0; j < A.Length; j++)
+                    S[i] = S[i] / UnivariateGCD.PolynomialGCD(A[j], s[i]).Pow(j);
+            }
+        }
+        
+        var b = n.All(ni => ni.IsConstant());
+        return ((s, S), b);
+    }
+
+    private static K[] Solutions<K>(UnivariatePolynomial<K> poly, bool factor = true)
+    {
+        var ring = poly.ring;
+        switch (poly.Degree())
+        {
+            case 0:
+                return [];
+            case 1:
+                return [ring.DivideExact(ring.Negate(poly.Cc()), poly.Lc())];
+        }
+
+        if (!factor)
+            throw new Exception();
+
+        var sols = new List<K>();
+        var fac = UnivariateFactorization.Factor(poly);
+        for (int i = 0; i < fac.Count; i++)
+        {
+            var fSols = Solutions(fac.Factors[i], false);
+            for (int j = 0; j < fac.Exponents[i]; j++)
+                sols.AddRange(fSols);
+        }
+
+        return sols.ToArray();
+    }
+
+
+    //
+    // public static (Poly Integral, bool IsElementary) IntegratePrimitive(Poly f, DiffField D)
+    // {
+    //     var (g1, h, r) = HermiteReduce(f, D);
+    //     var (g2, IsElem) = ResidueReduce(h, D);
+    //     if (!IsElem)
+    //         return (g1 + g2, false);
+    //
+    //     (var q, IsElem) = IntegratePrimitivePolynomial(h - Derivative(g2, D) + r, D);
+    //     return (g1 + g2 + q, IsElem);
+    // }
+    //
+    // public static (Poly Integral, bool IsElementary) IntegratePrimitivePolynomial(Poly p, DiffField D)
+    // {
+    //     if (p.Deg() == 0)
+    //         return (0, true);
+    //
+    //     var a = p.LC();
+    //     var bc = LimitedIntegrate(a, Dt, D);
+    //
+    //     if (bc is null)
+    //         return (0, false);
+    //     
+    //     var (b, c) = bc.Value;
+    //     var m = p.Deg();
+    //     var q0 = c * t ^ (m + 1) / (m + 1) + b * t ^ m;
+    //     var (q, IsElem) = IntegratePrimitivePolynomial(p - Derivative(q0, D), D);
+    //     return (q + q0, IsElem);
+    // }
+    
+    // Extensions
+
+    private static bool IsConstant(this RMPoly poly, int variable)
+    {
+        return poly.Numerator().Degree(variable) == 0 && poly.Denominator().Degree(variable) == 0;
+    }
+
+    private static RMPoly ToRMPoly(this MPoly poly)
+    {
+        return PolynomialFactory.RationalPoly(poly);
+    }
+
+    public static RUPoly ToRUPoly(this RMPoly poly, int i)
+    {
+        var num = poly.Numerator().AsUnivariate(i);
+        var ring = Rings.Frac(num.ring);
+        var newNum = num.MapCoefficients(ring, PolynomialFactory.RationalPoly);
+        var newDen = poly.Denominator().AsUnivariate(i).MapCoefficients(ring, PolynomialFactory.RationalPoly);
+        
+        return PolynomialFactory.RationalPoly(newNum, newDen);
+    }
+
+    public static RMPoly ToRMPoly(this UPoly poly, int i)
+    {
+        var fac = poly[0].Numerator();
+        var newfac = fac.Clone();
+        var result = RMPoly.Zero(Rings.MultivariateRing(newfac));
+        for (int j = 0; j < poly.data.Length; j++)
+        {
+            var coef = poly.data[j];
+            if (poly.ring.IsZero(coef))
+                continue;
+
+            var newNum = coef.Numerator() * newfac.CreateMonomial(i, j);
+            var newDen = coef.Denominator();
+            result += PolynomialFactory.RationalPoly(newNum, newDen);
+        }
+
+        return result;
+    } 
+    
+    public static RMPoly ToRMPoly(this RUPoly poly, int i)
+    {
+        return poly.Numerator().ToRMPoly(i) / poly.Denominator().ToRMPoly(i);
+    }
+    
+    private static Rational<UnivariatePolynomial<E>> MonicDen<E>(this Rational<UnivariatePolynomial<E>> rat)
+    {
+        var ring = rat.ring;
+        var lc = rat.Denominator().Lc();
+        return new Rational<UnivariatePolynomial<E>>(ring, rat.Numerator().DivideExact(lc),
+            rat.Denominator().DivideExact(lc));
+    }
+
+    private static (E, E) ToTuple2<E>(this E[] data) =>
+        data.Length == 2 ? (data[0], data[1]) : throw new ArgumentException();
+    
+    private static (E, E, E) ToTuple3<E>(this E[] data) =>
+        data.Length == 3 ? (data[0], data[1], data[2]) : throw new ArgumentException();
+}

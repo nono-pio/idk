@@ -226,7 +226,7 @@ public static class MultivariateGCD
                 as MultivariatePolynomial<E>;
         if (Util.IsOverRationals(a))
             return (MultivariatePolynomial<E>)GenericHandler.InvokeForGeneric<E>(typeof(Rational<>),
-                nameof(PolynomialGCD),
+                nameof(PolynomialGCDInQ),
                 typeof(MultivariateGCD), a, b); // PolynomialGCDInQ( a,  b);
         if (Util.IsOverSimpleNumberField(a))
             return PolynomialGCDinNumberField(
@@ -562,7 +562,7 @@ public static class MultivariateGCD
             c = ring.Negate(c);
         var aCorrection = ring.DivideExact(a.Lc(), c);
         var bCorrection = ring.DivideExact(b.Lc(), c);
-        while (aIt.MoveNext())
+        while (aIt.MoveNext() && bIt.MoveNext())
         {
             Monomial<E>
                 aTerm = aIt.Current,

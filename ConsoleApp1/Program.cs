@@ -66,49 +66,27 @@ static (int, int) sqrt(int n)
     return (n / (sqrt * sqrt), sqrt);
 }
 
-// Domain : ASin(Log(x) - 1)
-
-
-// Good functions for domains
-// ASin(Ln(x)) -> [1/e, e]
-// Ln(x) -> ]0, +inf[
-// Asin(Ln(x) - 1) -> [1, e^2]
-// Exp(x)/Ln(x) -> ]1, +inf[ U [0, 1[
 
 // Hermite
-// var D = new Risch.DiffField((x-Tan(x))/Pow(Tan(x), 2) ,x);
+// var D = new Risch.DiffField((x - Tan(x)) / Pow(Tan(x), 2), x);
+// var Diff = Risch.DefaultDiff(1, D);
 // print(D.Dtemp);
 //
-// var f = D.ExprToRMPoly(D.f).ToUniPolynomialOfRational(1);
-// print(Risch.HermiteReduce(f, D, 1));
+// var f = D.ExprToRMPoly(D.f).ToRUPoly(1);
+// print(Risch.HermiteReduce(f, Diff));
 
 // Poly reduce
 // var D = new Risch.DiffField(1 + x * Tan(x) + Pow(Tan(x), 2), x);
+// var Diff = Risch.DefaultDiff(1, D);
 // print(D.Dtemp);
 //
-// var f = D.ExprToRMPoly(D.f).ToUniPolynomialOfRational(1);
-// print(Risch.PolynomialReduce(f.Numerator, D, 1));
+// var f = D.ExprToRMPoly(D.f).ToRUPoly(1);
+// print(Risch.PolynomialReduce(f.Numerator(), Diff));
 
-// --- Univar test
-// var polyA = new UnivariatePolynomial<Rational<BigInteger>>(Rings.Q, Rings.Q.FromArray([2, 0, 2, 0, 2]));
-// var polyB = new UnivariatePolynomial<Rational<BigInteger>>(Rings.Q, Rings.Q.FromArray([1, 3, 3, 1]));
-//
-// print(polyA);
-// print(polyB);
-// print(IrreduciblePolynomials.IrreducibleQ(polyA));
-// print(IrreduciblePolynomials.IrreducibleQ(polyB));
+var expr = (2 * Pow(Ln(x), 2) - Ln(x) - Pow(x, 2)) / (Pow(Ln(x), 3) - Pow(x, 2) * Ln(x));
+var D = new Risch.DiffField(expr, x);
+var Diff = Risch.DefaultDiff(1, D);
+print(D.Dtemp);
 
-
-
-// x^2 + y^2 + z^2 + 2xy + 2xz + 2yz = (x + y + z)^2
-var monomial1 = new Monomial<BigInteger>([2, 0, 0], 1);
-var monomial2 = new Monomial<BigInteger>([1, 1, 0], -1);
-var monomial3 = new Monomial<BigInteger>([1, 0, 1], 1);
-var monomial4 = new Monomial<BigInteger>([0, 1, 1], -1);
-// var monomial5 = new Monomial<BigInteger>([1, 0, 1], 2);
-// var monomial6 = new Monomial<BigInteger>([0, 1, 1], 2);
-
-var poly = MultivariatePolynomial<BigInteger>.Create(3, Rings.Z, MonomialOrder.GRLEX, [monomial1, monomial2, monomial3, monomial4]);
-
-print(poly);
-print(MultivariateFactorization.Factor(poly));
+var f = D.ExprToRMPoly(D.f).ToRUPoly(1);
+print(Risch.ResidueReduce(f, Diff));

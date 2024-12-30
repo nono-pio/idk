@@ -115,7 +115,7 @@ public sealed class PolynomialMethods
         T k2p = copy ? @base.Clone() : @base;
         for (;;)
         {
-            if (exponent.IsEven)
+            if (!exponent.IsEven)
                 result = result.Multiply(k2p);
             exponent = exponent >> 1;
             if (exponent.IsZero)

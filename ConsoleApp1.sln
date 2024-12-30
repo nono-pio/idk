@@ -4,8 +4,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApp1", "ConsoleApp1\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApplication1", "WebApplication1\WebApplication1.csproj", "{CABFEC97-A8A9-4E2B-906C-EF0BDBE2F454}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rings2", "Rings2\Rings2.csproj", "{16F2FB9B-D517-4B57-95F3-704123D39843}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Polynomials", "Polynomials\Polynomials.csproj", "{5236AC45-FEF6-40C0-BC3F-11347CD2B7BB}"
 EndProject
 Global
@@ -22,10 +20,6 @@ Global
 		{CABFEC97-A8A9-4E2B-906C-EF0BDBE2F454}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CABFEC97-A8A9-4E2B-906C-EF0BDBE2F454}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CABFEC97-A8A9-4E2B-906C-EF0BDBE2F454}.Release|Any CPU.Build.0 = Release|Any CPU
-		{16F2FB9B-D517-4B57-95F3-704123D39843}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{16F2FB9B-D517-4B57-95F3-704123D39843}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{16F2FB9B-D517-4B57-95F3-704123D39843}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{16F2FB9B-D517-4B57-95F3-704123D39843}.Release|Any CPU.Build.0 = Release|Any CPU
 		{5236AC45-FEF6-40C0-BC3F-11347CD2B7BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5236AC45-FEF6-40C0-BC3F-11347CD2B7BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5236AC45-FEF6-40C0-BC3F-11347CD2B7BB}.Release|Any CPU.ActiveCfg = Release|Any CPU

@@ -3063,4 +3063,59 @@ public class MultivariatePolynomial<E> : Polynomial<MultivariatePolynomial<E>>, 
 
         return this as MultivariatePolynomial<T>;
     }
+
+    public MultivariatePolynomial<E> Pow(int n)
+    {
+        return PolynomialMethods.PolyPow(this, n);
+    }
+    
+    public static MultivariatePolynomial<E> operator +(MultivariatePolynomial<E> a, MultivariatePolynomial<E> b) =>
+        a.Clone().Add(b);
+    public static MultivariatePolynomial<E> operator -(MultivariatePolynomial<E> a, MultivariatePolynomial<E> b) =>
+        a.Clone().Subtract(b);
+    public static MultivariatePolynomial<E> operator *(MultivariatePolynomial<E> a, MultivariatePolynomial<E> b) =>
+        a.Clone().Multiply(b);
+    public static MultivariatePolynomial<E> operator /(MultivariatePolynomial<E> a, MultivariatePolynomial<E> b) =>
+        MultivariateDivision.DivideExact(a, b);
+    public static MultivariatePolynomial<E> operator %(MultivariatePolynomial<E> a, MultivariatePolynomial<E> b) =>
+        MultivariateDivision.Remainder(a, b)!;
+    public static MultivariatePolynomial<E> operator -(MultivariatePolynomial<E> a) =>
+        a.Clone().Negate();
+    
+    
+    public static MultivariatePolynomial<E> operator +(E a, MultivariatePolynomial<E> b) =>
+        b.Clone().Add(a);
+    public static MultivariatePolynomial<E> operator -(E a, MultivariatePolynomial<E> b) =>
+        b.Clone().Subtract(a);
+    public static MultivariatePolynomial<E> operator *(E a, MultivariatePolynomial<E> b) =>
+        b.Clone().Multiply(a);
+    
+    public static MultivariatePolynomial<E> operator +(MultivariatePolynomial<E> a, E b) =>
+        a.Clone().Add(b);
+    public static MultivariatePolynomial<E> operator -(MultivariatePolynomial<E> a, E b) =>
+        a.Clone().Subtract(b);
+    public static MultivariatePolynomial<E> operator *(MultivariatePolynomial<E> a, E b) =>
+        a.Clone().Multiply(b);
+    public static MultivariatePolynomial<E> operator /(MultivariatePolynomial<E> a, E b) =>
+        a.Clone().DivideExact(b);
+
+    public static MultivariatePolynomial<E> operator +(long a, MultivariatePolynomial<E> b) =>
+        b + b.ring.ValueOfLong(a);
+
+    public static MultivariatePolynomial<E> operator -(long a, MultivariatePolynomial<E> b) =>
+        b - b.ring.ValueOfLong(a);
+
+    public static MultivariatePolynomial<E> operator *(long a, MultivariatePolynomial<E> b) =>
+        b * b.ring.ValueOfLong(a);
+
+
+    public static MultivariatePolynomial<E> operator +(MultivariatePolynomial<E> a, long b) =>
+        a + a.ring.ValueOfLong(b);
+    public static MultivariatePolynomial<E> operator -(MultivariatePolynomial<E> a, long b) =>
+        a - a.ring.ValueOfLong(b);
+ 
+    public static MultivariatePolynomial<E> operator *(MultivariatePolynomial<E> a, long b) =>
+        a * a.ring.ValueOfLong(b);
+    public static MultivariatePolynomial<E> operator /(MultivariatePolynomial<E> a, long b) =>
+        a / a.ring.ValueOfLong(b);
 }

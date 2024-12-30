@@ -1808,4 +1808,59 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>, IUni
     {
         return new UnivariateRing<E>(this);
     }
+
+    public UnivariatePolynomial<E> Pow(int n)
+    {
+        return PolynomialMethods.PolyPow(this, n);
+    }
+
+    public static UnivariatePolynomial<E> operator +(UnivariatePolynomial<E> a, UnivariatePolynomial<E> b) =>
+        a.Clone().Add(b);
+    public static UnivariatePolynomial<E> operator -(UnivariatePolynomial<E> a, UnivariatePolynomial<E> b) =>
+        a.Clone().Subtract(b);
+    public static UnivariatePolynomial<E> operator *(UnivariatePolynomial<E> a, UnivariatePolynomial<E> b) =>
+        a.Clone().Multiply(b);
+    public static UnivariatePolynomial<E> operator /(UnivariatePolynomial<E> a, UnivariatePolynomial<E> b) =>
+        UnivariateDivision.DivideExact(a, b);
+    public static UnivariatePolynomial<E> operator %(UnivariatePolynomial<E> a, UnivariatePolynomial<E> b) =>
+        UnivariateDivision.Remainder(a, b)!;
+    public static UnivariatePolynomial<E> operator -(UnivariatePolynomial<E> a) =>
+        a.Clone().Negate();
+    
+    
+    public static UnivariatePolynomial<E> operator +(E a, UnivariatePolynomial<E> b) =>
+        b.Clone().Add(a);
+    public static UnivariatePolynomial<E> operator -(E a, UnivariatePolynomial<E> b) =>
+        b.Clone().Subtract(a);
+    public static UnivariatePolynomial<E> operator *(E a, UnivariatePolynomial<E> b) =>
+        b.Clone().Multiply(a);
+    
+    public static UnivariatePolynomial<E> operator +(UnivariatePolynomial<E> a, E b) =>
+        a.Clone().Add(b);
+    public static UnivariatePolynomial<E> operator -(UnivariatePolynomial<E> a, E b) =>
+        a.Clone().Subtract(b);
+    public static UnivariatePolynomial<E> operator *(UnivariatePolynomial<E> a, E b) =>
+        a.Clone().Multiply(b);
+    public static UnivariatePolynomial<E> operator /(UnivariatePolynomial<E> a, E b) =>
+        a.Clone().DivideExact(b);
+
+    public static UnivariatePolynomial<E> operator +(long a, UnivariatePolynomial<E> b) =>
+        b + b.ring.ValueOfLong(a);
+
+    public static UnivariatePolynomial<E> operator -(long a, UnivariatePolynomial<E> b) =>
+        b - b.ring.ValueOfLong(a);
+
+    public static UnivariatePolynomial<E> operator *(long a, UnivariatePolynomial<E> b) =>
+        b * b.ring.ValueOfLong(a);
+
+
+    public static UnivariatePolynomial<E> operator +(UnivariatePolynomial<E> a, long b) =>
+        a + a.ring.ValueOfLong(b);
+    public static UnivariatePolynomial<E> operator -(UnivariatePolynomial<E> a, long b) =>
+        a - a.ring.ValueOfLong(b);
+ 
+    public static UnivariatePolynomial<E> operator *(UnivariatePolynomial<E> a, long b) =>
+        a * a.ring.ValueOfLong(b);
+    public static UnivariatePolynomial<E> operator /(UnivariatePolynomial<E> a, long b) =>
+        a / a.ring.ValueOfLong(b);
 }

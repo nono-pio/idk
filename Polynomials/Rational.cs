@@ -1,4 +1,5 @@
 using System.Numerics;
+using Polynomials.Poly.Multivar;
 using Polynomials.Poly.Univar;
 using Polynomials.Utils;
 
@@ -101,7 +102,7 @@ public class Rational<E>
     private static readonly Predicate<IUnivariatePolynomial> upolySimplicityCriteria = p => p.Degree() - 1 <= SIMPLE_UPOLY_SIZE;
 
 
-    // private static readonly Predicate<AMultivariatePolynomial> mpolySimplicityCriteria =
+    // private static readonly Predicate<IMultivariatePolynomial> mpolySimplicityCriteria =
     //     (Predicate<AMultivariatePolynomial> & java.io.Serializable)((p) =>
     //         p.Count <= SIMPLE_MPOLY_DENSE_SIZE ||
     //         (p.Count < SIMPLE_MPOLY_SPARSE_SIZE && p.Sparsity2() < SIMPLE_POLY_SPARSITY2));
@@ -810,4 +811,59 @@ public class Rational<E>
         string den = (denominator.Expand(ring)).ToString();
         return $"({num})/({den})";
     }
+
+    public Rational<E> Clone()
+    {
+        return new Rational<E>(ring, numerator.DeepCopy(ring), denominator.DeepCopy(ring));
+    }
+    
+    public static Rational<E> operator +(Rational<E> a, Rational<E> b) =>
+        a.Clone().Add(b);
+    public static Rational<E> operator -(Rational<E> a, Rational<E> b) =>
+        a.Clone().Subtract(b);
+    public static Rational<E> operator *(Rational<E> a, Rational<E> b) =>
+        a.Clone().Multiply(b);
+    public static Rational<E> operator /(Rational<E> a, Rational<E> b) =>
+        a.Divide(b);
+    public static Rational<E> operator %(Rational<E> a, Rational<E> b) =>
+        Rational<E>.Zero(a.ring);
+    public static Rational<E> operator -(Rational<E> a) =>
+        a.Clone().Negate();
+    
+    
+    public static Rational<E> operator +(E a, Rational<E> b) =>
+        b.Clone().Add(a);
+    public static Rational<E> operator -(E a, Rational<E> b) =>
+        b.Clone().Subtract(a);
+    public static Rational<E> operator *(E a, Rational<E> b) =>
+        b.Clone().Multiply(a);
+    
+    public static Rational<E> operator +(Rational<E> a, E b) =>
+        a.Clone().Add(b);
+    public static Rational<E> operator -(Rational<E> a, E b) =>
+        a.Clone().Subtract(b);
+    public static Rational<E> operator *(Rational<E> a, E b) =>
+        a.Clone().Multiply(b);
+    public static Rational<E> operator /(Rational<E> a, E b) =>
+        a.Clone().Divide(b);
+
+    public static Rational<E> operator +(long a, Rational<E> b) =>
+        b + b.ring.ValueOfLong(a);
+
+    public static Rational<E> operator -(long a, Rational<E> b) =>
+        b - b.ring.ValueOfLong(a);
+
+    public static Rational<E> operator *(long a, Rational<E> b) =>
+        b * b.ring.ValueOfLong(a);
+
+
+    public static Rational<E> operator +(Rational<E> a, long b) =>
+        a + a.ring.ValueOfLong(b);
+    public static Rational<E> operator -(Rational<E> a, long b) =>
+        a - a.ring.ValueOfLong(b);
+ 
+    public static Rational<E> operator *(Rational<E> a, long b) =>
+        a * a.ring.ValueOfLong(b);
+    public static Rational<E> operator /(Rational<E> a, long b) =>
+        a / a.ring.ValueOfLong(b);
 }
