@@ -247,5 +247,140 @@ public static class RischDE
 
         return q;
     }
+    
+    public static UnivariatePolynomial<K>? PolyRischDENoCancel3<K>(UnivariatePolynomial<K> b, UnivariatePolynomial<K> c,
+        DiffPoly<K> D, int n)
+    {
+        var q = b.CreateZero();
+        var ring = q.ring;
+        var M = () ? ring.Negate(ring.DivideExact(b.Lc(), lambda(t))) : -1;
+        
+        while (!c.IsZero())
+        {
+            var m = Math.Max(M, c.Degree() - delta(t) + 1);
+            if (n < 0 || m < 0 || m > n)
+                return null;
 
+            var u = m * lambda(t) + b.Lc();
+            if (u == 0)
+                return (q, m, c);
+            UnivariatePolynomial<K> p;
+            if (m > 0)
+                p = b.CreateMonomial(b.ring.DivideExact(c.Lc(), u), m);
+            else
+            {
+                if (c.Degree() != delta(t) - 1)
+                    return null;
+                p = b.CreateConstant(b.ring.DivideExact(c.Lc(), b.Lc()));
+            }
+                
+            q += p;
+            n = m - 1;
+            c = c - D(p) - b * p;
+        }
+
+        return q;
+    }
+
+    public static UnivariatePolynomial<K>? PolyRischDECancelPrim<K>(K b, UnivariatePolynomial<K> c,
+        DiffPoly<K> D, int n)
+    {
+        if ()
+        {
+            if ()
+                return p / z;
+            return null;
+        }
+
+        if (c.IsZero())
+            return 0;
+        if (n < c.Degree())
+            return null;
+        var q = c.CreateZero();
+        var ring = c.ring;
+        while (!c.IsZero())
+        {
+            var m = c.Degree();
+            if (n < m)
+                return null;
+            var s = RischDE(b, c.Lc());
+            if (s is null)
+                return null;
+
+            q = q.AddMonomial(s, m);
+            n = m - 1;
+            c = c - c.CreateMonomial(ring.Multiply(b, s), m) - D(c.CreateMonomial(s, m));
+        }
+
+        return q;
+    }
+    
+    public static UnivariatePolynomial<K>? PolyRischDECancelExp<K>(K b, UnivariatePolynomial<K> c,
+        DiffPoly<K> D, int n)
+    {
+        if ()
+        {
+            if ()
+                return q;
+            return null;
+        }
+
+        if (c.IsZero())
+            return 0;
+        if (n < c.Degree())
+            return null;
+        var q = c.CreateZero();
+        var ring = c.ring;
+        while (!c.IsZero())
+        {
+            var m = c.Degree();
+            if (n < m)
+                return null;
+            var s = RischDE(b + m * D(t)/t, c.Lc());
+            if (s is null)
+                return null;
+
+            q = q.AddMonomial(s, m);
+            n = m - 1;
+            c = c - c.CreateMonomial(ring.Multiply(b, s), m) - D(c.CreateMonomial(s, m));
+        }
+
+        return q;
+    }
+
+
+    public static UnivariatePolynomial<K>? PolyRischDECancelTan<K>(K b0, UnivariatePolynomial<K> c,
+        DiffPoly<K> D, int n)
+    {
+        var ring = c.ring;
+        if (n == 0)
+        {
+            if (c.IsConstant())
+            {
+                if (!ring.IsZero(b0))
+                    return RischDE(b0, c);
+                else if ()
+                    return q;
+                return null;
+            }
+
+            return null;
+        }
+
+        var p = t ^ 2 + 1;
+        var eta = D(t) / p;
+        var (c_, rem) = UnivariateDivision.DivideAndRemainder(c, p).ToTuple2();
+        var c0 = rem.Cc();
+        var c1 = rem.Lc();
+        var uv = CoupledDESystem(b0, -n * eta, c0, c1);
+        if (uv is null)
+            return null;
+        var (u, v) = uv.Value;
+        if (n == 1)
+            return u * t + v;
+        var r = u + v * t;
+        c = (c - D(r) - (b0 - n * eta) * r) / p;
+        var h = PolyRischDECancelTan(b0, c, D, n - 2);
+        return h is null ? null : p * h + r;
+    }
 }

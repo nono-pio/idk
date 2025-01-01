@@ -658,7 +658,7 @@ public static class Risch
             rat.Denominator().DivideExact(lc));
     }
 
-    private static (E, E) ToTuple2<E>(this E[] data) =>
+    public static (E, E) ToTuple2<E>(this E[] data) =>
         data.Length == 2 ? (data[0], data[1]) : throw new ArgumentException();
 
     private static (E, E, E) ToTuple3<E>(this E[] data) =>
