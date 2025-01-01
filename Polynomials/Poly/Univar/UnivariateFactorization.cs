@@ -52,7 +52,7 @@ public static class UnivariateFactorization
     }
 
     public static PolynomialFactorDecomposition<UnivariatePolynomial<MultivariatePolynomial<E>>>
-        FactorOverMultivariate<E>(UnivariatePolynomial<MultivariatePolynomial<E>> poly,
+        FactorOverMultivariateFunc<E>(UnivariatePolynomial<MultivariatePolynomial<E>> poly,
             Func<MultivariatePolynomial<E>, PolynomialFactorDecomposition<MultivariatePolynomial<E>>> factorFunction)
     {
         return factorFunction(MultivariatePolynomial<E>.AsMultivariate(poly, 0, true))
@@ -67,7 +67,7 @@ public static class UnivariateFactorization
             .MapTo((p) => p.AsUnivariateEliminate(0));
     }
 
-    public static PolynomialFactorDecomposition<UnivariatePolynomial<UnivariatePolynomial<E>>> FactorOverUnivariate<E>(
+    public static PolynomialFactorDecomposition<UnivariatePolynomial<UnivariatePolynomial<E>>> FactorOverUnivariateFunc<E>(
         UnivariatePolynomial<UnivariatePolynomial<E>> poly,
         Func<MultivariatePolynomial<UnivariatePolynomial<E>>,
                 PolynomialFactorDecomposition<MultivariatePolynomial<UnivariatePolynomial<E>>>>

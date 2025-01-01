@@ -36,14 +36,14 @@ public static class UnivariateSquareFreeFactorization
     public static PolynomialFactorDecomposition<UnivariatePolynomial<MultivariatePolynomial<E>>>
         SquareFreeFactorizationOverMultivariate<E>(UnivariatePolynomial<MultivariatePolynomial<E>> poly)
     {
-        return UnivariateFactorization.FactorOverMultivariate(poly,
+        return UnivariateFactorization.FactorOverMultivariateFunc(poly,
             MultivariateSquareFreeFactorization.SquareFreeFactorization);
     }
 
     public static PolynomialFactorDecomposition<UnivariatePolynomial<UnivariatePolynomial<E>>>
         SquareFreeFactorizationOverUnivariate<E>(UnivariatePolynomial<UnivariatePolynomial<E>> poly)
     {
-        return UnivariateFactorization.FactorOverUnivariate(poly,
+        return UnivariateFactorization.FactorOverUnivariateFunc(poly,
             MultivariateSquareFreeFactorization.SquareFreeFactorization);
     }
 

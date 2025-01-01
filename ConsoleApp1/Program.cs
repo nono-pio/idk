@@ -89,4 +89,5 @@ var Diff = Risch.DefaultDiff(1, D);
 print(D.Dtemp);
 
 var f = D.ExprToRMPoly(D.f).ToRUPoly(1);
-print(Risch.ResidueReduce(f, Diff));
+var residue = Risch.ResidueReduce(f, Diff);
+print(residue);
