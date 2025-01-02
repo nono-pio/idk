@@ -215,30 +215,13 @@ public static class Risch
 
     public static RMPoly Derivative(MPoly f, DiffField D)
     {
-        RMPoly Derivative(Monomial<Rational<BigInteger>> multinomial)
+        var result = RMPoly.Zero(Rings.MultivariateRingQ(D.t.Length));
+        for (int i = 0; i < f.nVariables; i++)
         {
-            var result = RMPoly.Zero(Rings.MultivariateRingQ(D.t.Length));
-            var fac = D.Dtemp[0].Numerator();
-            for (int i = 0; i < multinomial.NVariables(); i++)
-            {
-                if (multinomial.exponents[i] == 0)
-                    continue;
-
-                var degs = new int[multinomial.NVariables()];
-                Array.Copy(multinomial.exponents, degs, degs.Length);
-                degs[i]--;
-
-                var newMul =
-                    new Monomial<Rational<BigInteger>>(degs, multinomial.exponents[i] * multinomial.coefficient);
-                var newPoly = PolynomialFactory.RationalPoly(fac.Create(newMul)) * D.Dtemp[i];
-
-                result += newPoly;
-            }
-
-            return result;
+            result += f.Derivative(i) * D.Dtemp[i];
         }
-
-        return f.terms.Iterator().Select(Derivative).Aggregate((a, b) => a + b);
+        
+        return result;
     }
 
     private static RUPoly Derivative(UPoly a, DiffField D, int i)
@@ -484,7 +467,7 @@ public static class Risch
     }
 
 
-    private static (K, UnivariatePolynomial<K>[]) SubResultant<K>(UnivariatePolynomial<K> a,
+    public static (K, UnivariatePolynomial<K>[]) SubResultant<K>(UnivariatePolynomial<K> a,
         UnivariatePolynomial<K> b)
     {
         var res = UnivariateResultants.SubresultantPRS(a, b);

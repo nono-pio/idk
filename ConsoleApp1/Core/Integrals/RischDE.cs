@@ -36,6 +36,27 @@ public static class RischDE
         return result;
     }
 
+    public static int OrderAt<K>(UnivariatePolynomial<K> a, UnivariatePolynomial<K> p)
+    {
+        if (a.IsZero())
+            return int.MaxValue;
+        
+        var order = 0;
+        while ((a = UnivariateDivision.DivideOrNull(a, p)) is not null)
+        {
+            order++;
+        }
+
+        return order;
+    }
+
+    public static int OrderAt<K>(Rational<UnivariatePolynomial<K>> a, UnivariatePolynomial<K> p)
+    {
+        if (a.IsZero())
+            return int.MaxValue;
+        return OrderAt(a.Numerator(), p) - OrderAt(a.Denominator(), p);
+    }
+    
     public static (UnivariatePolynomial<K> a, Rational<UnivariatePolynomial<K>> b, Rational<UnivariatePolynomial<K>> c, UnivariatePolynomial<K> h)? 
         RdeNormalDenominator<K>(Rational<UnivariatePolynomial<K>> f, Rational<UnivariatePolynomial<K>> g, DiffPoly<K> D)
     {
@@ -54,21 +75,26 @@ public static class RischDE
     public static (UnivariatePolynomial<K> a, UnivariatePolynomial<K> b, UnivariatePolynomial<K> c, UnivariatePolynomial<K> h) RdeSpecialDenomExp<K>(UnivariatePolynomial<K> a, Rational<UnivariatePolynomial<K>> b,
         Rational<UnivariatePolynomial<K>> c, DiffPoly<K> D)
     {
-        var p ;
-        var nb ;
-        var nc ;
+        var t = a.CreateMonomial(a.ring.GetOne(), 1);
+        var p = t;
+        var nb = OrderAt(b, p);
+        var nc = OrderAt(c, p);
         var n = Math.Min(0, nc - Math.Min(0, nb));
         if (nb == 0)
         {
-            var alpha = UnivariateDivision.Remainder(-b / a, p);
-            if (alpha = m D(t)/t - Dz/z)
-            {
-                n = Math.Min(m, n);
-            }
+            // var ring = a.ring;
+            // var alpha = ring.Negate(ring.DivideExact(b.Numerator().Evaluate(0), ring.Multiply(b.Denominator().Evaluate(0), a.Evaluate(0))));
+            // var eta = D(t) / t;
+            // var log = ParamDERisch.ParametricLogarithmicDerivative(alpha, eta, D);
+            // if (log is not null)
+            // {
+            //     n = Math.Min(log.Value.m, n);
+            // }
+            throw new NotImplementedException();
         }
 
-        var N = Math.Max(0, -nb, n - nc);
-        return (a * p.Pow(N), (b + n * a * D(p) / p) * p.Pow(N), c * p.Pow(N - n), p.Pow(-n));
+        var N = Math.Max(0, Math.Max(-nb, n - nc));
+        return (a * p.Pow(N), ((b + n * a * D(p) / p) * p.Pow(N)).NumeratorExact(), (c * p.Pow(N - n)).NumeratorExact(), p.Pow(-n));
     }
 
 
@@ -76,20 +102,22 @@ public static class RischDE
         UnivariatePolynomial<K> h) RdeSpecielDenomTan<K>(UnivariatePolynomial<K> a, Rational<UnivariatePolynomial<K>> b,
             Rational<UnivariatePolynomial<K>> c, DiffPoly<K> D)
     {
-        var p;
-        var nb;
-        var nc;
+        var ring = a.ring;
+        var t = a.CreateMonomial(ring.GetOne(), 1);
+        var p = a.CreateFromArray([ring.GetOne(), ring.GetZero(), ring.GetOne()]); // t^2+1
+        var nb = OrderAt(b, p);
+        var nc = OrderAt(c, p);
         var n = Math.Min(0, nc - Math.Min(0, nb));
         if (nb == 0)
         {
-            var alpha;
-            var beta;
-            var eta = Dt / (t ^ 2 + 1);
+            // var alpha;
+            // var beta;
+            // var eta = D(t) / p;
             throw new NotImplementedException();
         }
 
-        var N = Math.Max(0, -nb, n - nc);
-        return (a * p.Pow(N), (b + n * a * D(p) / p) * p.Pow(N), c * p.Pow(N - n), p.Pow(-n));
+        var N = Math.Max(0, Math.Max(-nb, n - nc));
+        return (a * p.Pow(N), ((b + n * a * D(p) / p) * p.Pow(N)).NumeratorExact(), (c * p.Pow(N - n)).NumeratorExact(), p.Pow(-n));
     }
 
     public static int RdeBoundDegreePrim<K>(UnivariatePolynomial<K> a, UnivariatePolynomial<K> b,
@@ -103,8 +131,9 @@ public static class RischDE
         if (db == da - 1)
         {
             var alpha = ring.Negate(ring.DivideExact(b.Lc(), a.Lc()));
-            if ()
-                n = Math.Max(n, m);
+            var integ = LimitedIntegrate(alpha, [eta], D);
+            if (integ is not null)
+                n = Math.Max(n, integ.Value.m[0]);
         }
 
         if (db == da)
