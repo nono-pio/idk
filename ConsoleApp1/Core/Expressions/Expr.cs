@@ -381,6 +381,17 @@ public abstract class Expr
         return MapAtoms<Variable>(var => var == variable ? value : var);
     }
 
+    public Expr Substitue(Variable[] variable, Expr[] value)
+    {
+        var result = this;
+        for (int i = 0; i < variable.Length; i++)
+        {
+            result = result.Substitue(variable[i], value[i]);
+        }
+
+        return result;
+    }
+    
     public virtual Expr Substitue(Expr expr, Expr value)
     {
         
@@ -763,7 +774,7 @@ public abstract class Expr
     public (Expr AddCoef, Expr MulCoef)? AsLinear(Variable variable)
     {
         if (Constant(variable))
-            return (0, 0);
+            return (this, 0);
         if (IsVar(variable))
             return (0, 1);
         

@@ -83,11 +83,19 @@ static (int, int) sqrt(int n)
 // var f = D.ExprToRMPoly(D.f).ToRUPoly(1);
 // print(Risch.PolynomialReduce(f.Numerator(), Diff));
 
-var expr = (2 * Pow(Ln(x), 2) - Ln(x) - Pow(x, 2)) / (Pow(Ln(x), 3) - Pow(x, 2) * Ln(x));
-var D = new Risch.DiffField(expr, x);
-var Diff = Risch.DefaultDiff(1, D);
-print(D.Dtemp);
+// var expr = (2 * Pow(Ln(x), 2) - Ln(x) - Pow(x, 2)) / (Pow(Ln(x), 3) - Pow(x, 2) * Ln(x));
+// var D = new Risch.DiffField(expr, x);
+// var Diff = Risch.DefaultDiff(1, D);
+// print(D.Dtemp);
+//
+// var f = D.ExprToRMPoly(D.f).ToRUPoly(1);
+// var residue = Risch.ResidueReduce(f, Diff);
+// print(residue);
 
-var f = D.ExprToRMPoly(D.f).ToRUPoly(1);
-var residue = Risch.ResidueReduce(f, Diff);
-print(residue);
+var A = PolynomialFactory.Uni(Rings.Q, [1]);
+var D = PolynomialFactory.Uni(Rings.Q, [0, 1]);
+
+print(A);
+print(D);
+print(RationalPolynomialIntegration.IntegrateRationalPolynomial(A, D, new UniDiffFieldQ(x)));
+// var residue = RationalPolynomialIntegration.IntRationalLogPart(A, D); // A/D = d/dx(g) + h

@@ -2,9 +2,7 @@
 using System.Numerics;
 using ConsoleApp1.Core.Expressions.Atoms;
 using ConsoleApp1.Core.Expressions.Base;
-using ConsoleApp1.Core.Expressions.Trigonometrie;
 using Polynomials;
-using Polynomials.Poly.Multivar;
 using Polynomials.Poly.Univar;
 using MPoly =
     Polynomials.Poly.Multivar.MultivariatePolynomial<
@@ -184,29 +182,6 @@ public static class Risch
         }
     }
 
-    public static Expr Derivative(Expr f, DiffField D)
-    {
-        if (f.Constant())
-            return 0;
-
-        if (f is Variable var)
-        {
-            var ti = Array.IndexOf(D.t, var);
-            if (ti != -1)
-                return D.D[ti];
-
-            throw new NotImplementedException();
-        }
-
-        Expr result = 0;
-        for (int i = 0; i < f.Args.Length; i++)
-        {
-            result += f.fDerivee(i) * Derivative(f.Args[i], D);
-        }
-
-        return result;
-    }
-
     public static RMPoly Derivative(RMPoly f, DiffField D)
     {
         return (Derivative(f.Numerator(), D) * f.Denominator().ToRMPoly() -
@@ -248,22 +223,20 @@ public static class Risch
     //     return result;
     // }
 
-    public static Diff<RMPoly> DefaultDiff(int i, DiffField D)
+    public static UniDiffField<RMPoly> DefaultDiff(int i, DiffField D)
     {
-        return poly => Derivative(poly, D, i);
+        return new UniDiffFieldMulti(D, i);
     }
 
-    public delegate Rational<UnivariatePolynomial<K>>
-        Diff<K>(UnivariatePolynomial<K> poly); // Derivative of K[t] on K(t)
 
     public static (UnivariatePolynomial<K>, UnivariatePolynomial<K>) SplitFactor<K>(UnivariatePolynomial<K> p,
-        Diff<K> D)
+        UniDiffField<K> Diff)
     {
-        var S = UnivariateGCD.PolynomialGCD(p, D(p).NumeratorExact()) / UnivariateGCD.PolynomialGCD(p, p.Derivative());
+        var S = UnivariateGCD.PolynomialGCD(p, Diff.DPoly(p)) / UnivariateGCD.PolynomialGCD(p, p.Derivative());
         if (S.Degree() == 0)
             return (p, p.CreateOne());
 
-        var (qn, qs) = SplitFactor(p / S, D);
+        var (qn, qs) = SplitFactor(p / S, Diff);
         return (qn, S * qs);
     }
 
@@ -284,14 +257,14 @@ public static class Risch
     }
 
     public static (UnivariatePolynomial<K>, Rational<UnivariatePolynomial<K>>, Rational<UnivariatePolynomial<K>>)
-        CanonicalRepresentation<K>(Rational<UnivariatePolynomial<K>> f, Diff<K> D)
+        CanonicalRepresentation<K>(Rational<UnivariatePolynomial<K>> f, UniDiffField<K> Diff)
     {
         if (!f.IsIntegral())
             f = f.MonicDen();
 
         var (a, d) = (f.Numerator(), f.Denominator());
         var (q, r) = UnivariateDivision.DivideAndRemainder(a, d)!.ToTuple2();
-        var (dn, ds) = SplitFactor(d, D);
+        var (dn, ds) = SplitFactor(d, Diff);
         var (b, c) = ExtendedEuclidieanDiophantine(dn, ds, r);
         return (q, PolynomialFactory.RationalPoly(b, ds), PolynomialFactory.RationalPoly(c, dn));
     }
@@ -321,9 +294,9 @@ public static class Risch
 
     public static (Rational<UnivariatePolynomial<K>>, Rational<UnivariatePolynomial<K>>,
         Rational<UnivariatePolynomial<K>>)
-        HermiteReduce<K>(Rational<UnivariatePolynomial<K>> f, Diff<K> D)
+        HermiteReduce<K>(Rational<UnivariatePolynomial<K>> f, UniDiffField<K> Diff)
     {
-        var (fp, fs, fn) = CanonicalRepresentation(f, D);
+        var (fp, fs, fn) = CanonicalRepresentation(f, Diff);
         var (a, d) = (fn.Numerator(), fn.Denominator());
         var ds = SquareFreeList(d);
         var g = Rational<UnivariatePolynomial<K>>.Zero(f.ring);
@@ -336,9 +309,9 @@ public static class Risch
             var u = d / v.Pow(i);
             for (int j = i - 1; j >= 1; j--)
             {
-                var (b, c) = ExtendedEuclidieanDiophantine(u * D(v).NumeratorExact(), v, -a / j);
+                var (b, c) = ExtendedEuclidieanDiophantine(u * Diff.DPoly(v), v, -a / j);
                 g += PolynomialFactory.RationalPoly(b, v.Pow(j));
-                a = c * (-j) - u * D(b).NumeratorExact();
+                a = c * (-j) - u * Diff.DPoly(b);
             }
 
             d = u * v;
@@ -349,11 +322,11 @@ public static class Risch
     }
 
     public static (UnivariatePolynomial<K>, UnivariatePolynomial<K>)
-        PolynomialReduce<K>(UnivariatePolynomial<K> p, Diff<K> D)
+        PolynomialReduce<K>(UnivariatePolynomial<K> p, UniDiffField<K> Diff)
     {
         var q = p.CreateZero();
         var ring = p.ring;
-        var d = D(p.CreateMonomial(ring.GetOne(), 1)).NumeratorExact(); // Dt
+        var d = Diff.DtPoly; // Dt
         while (p.Degree() >= d.Degree()) /*deg(p) >= deg_t(Dt)*/
         {
             var m = p.Degree() - d.Degree() + 1; /*deg(p) - deg_t(Dt) + 1*/
@@ -362,7 +335,7 @@ public static class Risch
             var q0 = p.CreateMonomial(c, m);
 
             q += q0;
-            p = p - D(q0).NumeratorExact();
+            p = p - Diff.DPoly(q0);
         }
 
         return (q, p);
@@ -373,18 +346,17 @@ public static class Risch
         public UnivariatePolynomial<K>[] s; // K[z]
         public UnivariatePolynomial<UnivariatePolynomial<K>>[] S; // K[z][t]
         public K[][] Alphas;
+        public UniDiffField<K> Diff;
         public bool IsElementary;
 
-        public Residue(UnivariatePolynomial<K>[] s, UnivariatePolynomial<UnivariatePolynomial<K>>[] S, bool elem)
+        public Residue(UnivariatePolynomial<K>[] s, UnivariatePolynomial<UnivariatePolynomial<K>>[] S, bool elem, UniDiffField<K> diff)
         {
             this.s = s;
             this.S = S;
             IsElementary = elem;
+            Diff = diff;
             SetAlphas();
         }
-
-        public Expr ToExpr(K cste) => throw new NotImplementedException();
-        public Expr ToExpr(UnivariatePolynomial<K> poly /*K[t]*/) => throw new NotImplementedException();
 
         public Expr ToExpression()
         {
@@ -396,14 +368,14 @@ public static class Risch
                 foreach (var alpha in Alphas[i])
                 {
                     var eval = S[i].MapCoefficients(ringK, uni_z => uni_z.Evaluate(alpha));
-                    result += ToExpr(alpha) * Ln(ToExpr(eval) );
+                    result += Diff.ToExpr(alpha) * Ln(Diff.ToExpr(eval));
                 }
             }
 
             return result;
         }
 
-        public Rational<UnivariatePolynomial<K>> Derivative(Diff<K> D)
+        public Rational<UnivariatePolynomial<K>> Derivative()
         {
             // residue = sum_i sum_|alpha| a log(S_i(a)(t))
             // residue' = sum_i sum_|alpha| a D[S_i(a)(t)] / S_i(a)(t)
@@ -414,7 +386,7 @@ public static class Risch
                 foreach (var alpha in Alphas[i])
                 {
                     var eval = S[i].MapCoefficients(ringK, uni_z => uni_z.Evaluate(alpha));
-                    var Deval = D(eval);
+                    var Deval = Diff.D(eval);
                     result += PolynomialFactory.Uni(ringK, alpha) * Deval / eval;
                 }
             }
@@ -475,13 +447,12 @@ public static class Risch
     }
 
     public static (UnivariatePolynomial<K>[], UnivariatePolynomial<K>[]) SplitSquarefreeFactor<K>(
-        UnivariatePolynomial<K> p, Diff<K> D) // p in K[z]
+        UnivariatePolynomial<K> p, UniDiffField<K> Diff) // p in K[z]
     {
         var k_z_ring = p.AsRing();
 
         UnivariatePolynomial<K> kD(UnivariatePolynomial<K> poly) // poly in K[z]
-            => poly.MapCoefficients<K>(poly.ring,
-                c => D(UnivariatePolynomial<K>.Constant(poly.ring, c)).NumeratorExact().Lc());
+            => poly.MapCoefficients<K>(poly.ring, Diff.DKinK);
 
         var (pc, p_list) = SquareFree(p);
         if (!p.ring.IsOne(pc))
@@ -508,7 +479,7 @@ public static class Risch
         return (N, S);
     }
 
-    public static Residue<K> ResidueReduce<K>(Rational<UnivariatePolynomial<K>> f, Diff<K> D)
+    public static Residue<K> ResidueReduce<K>(Rational<UnivariatePolynomial<K>> f, UniDiffField<K> Diff)
     {
         var d = f.Denominator();
         var (p, a) = UnivariateDivision.DivideAndRemainder(f.Numerator(), d)!.ToTuple2();
@@ -516,7 +487,7 @@ public static class Risch
         UnivariatePolynomial<K> r; // K[z]
         UnivariatePolynomial<UnivariatePolynomial<K>>[] R; // K[z][t]
         var ringK = d.ring;
-        var Dd = D(d).NumeratorExact();
+        var Dd = Diff.DPoly(d);
 
         // Convert poly from K[x] to K[z][t]
         var newD = d.MapCoefficients(Rings.UnivariateRing(ringK), c => UnivariatePolynomial<K>.Constant(ringK, c));
@@ -532,18 +503,19 @@ public static class Risch
         else
             (r, R) = SubResultant(newA - newZ * newDd, newD);
 
-        var (n, s) = SplitSquarefreeFactor(r, D);
+        var (n, s) = SplitSquarefreeFactor(r, Diff);
         var S = new UnivariatePolynomial<UnivariatePolynomial<K>>[s.Length]; // K[z][t]
         for (int i = 0; i < s.Length; i++)
         {
             if (s[i].Degree() == 0)
                 continue;
 
+            var ring = Rings.SimpleFieldExtension(s[i]);
             if (i == d.Degree())
-                S[i] = PolynomialFactory.Uni(Rings.UnivariateRing(ringK), d);
+                S[i] = newD.MapCoefficients(ring, ring.ValueOf);
             else
             {
-                S[i] = R.First(el => el.Degree() == i);
+                S[i] = R.First(el => el.Degree() == i).MapCoefficients(ring, ring.ValueOf);
                 var A = SquareFree(S[i].Lc()).List;
                 for (int j = 0; j < A.Length; j++)
                     S[i] = S[i] / UnivariateGCD.PolynomialGCD(A[j], s[i]).Pow(j);
@@ -551,40 +523,41 @@ public static class Risch
         }
 
         var b = n.All(ni => ni.IsConstant());
-        return new Residue<K>(s, S, b);
+        return new Residue<K>(s, S, b, Diff);
     }
 
     
-    public static (Expr Integral, bool IsElementary) IntegratePrimitive<K>(Rational<UnivariatePolynomial<K>> f, Diff<K> D)
+    public static (Expr Integral, bool IsElementary) IntegratePrimitive<K>(Rational<UnivariatePolynomial<K>> f, UniDiffField<K> Diff)
     {
-        var (g1, h, r) = HermiteReduce(f, D);
-        var residue = ResidueReduce(h, D);
+        var (g1, h, r) = HermiteReduce(f, Diff);
+        var residue = ResidueReduce(h, Diff);
         if (!residue.IsElementary)
             throw new NotImplementedException();
             // return (g1 + g2, false); TODO ToExpr
     
-        var (q, IsElem) = IntegratePrimitivePolynomial((h - residue.Derivative(D) + r).NumeratorExact(), D);
+        var (q, IsElem) = IntegratePrimitivePolynomial((h - residue.Derivative() + r).NumeratorExact(), Diff);
         throw new NotImplementedException();
         // return (g1 + g2 + q, IsElem); TODO ToExpr
     }
     
-    public static (UnivariatePolynomial<K> Integral, bool IsElementary) IntegratePrimitivePolynomial<K>(UnivariatePolynomial<K> p, Diff<K> D)
+    public static (UnivariatePolynomial<K> Integral, bool IsElementary) IntegratePrimitivePolynomial<K>(UnivariatePolynomial<K> p, UniDiffField<K> D)
     {
-        if (p.Degree() == 0)
-            return (p.CreateZero(), true);
-
-        var t = p.CreateMonomial(p.ring.GetOne(), 1);
-        var a = p.Lc();
-        var bc = LimitedIntegrate(a, D(t), D);
-    
-        if (bc is null)
-            return (p.CreateZero(), false);
-        
-        var (b, c) = bc.Value;
-        var m = p.Degree();
-        var q0 = p.CreateMonomial(p.ring.DivideExact(c, p.ring.ValueOfLong(m + 1)), m + 1) + p.CreateMonomial(b, m);
-        var (q, IsElem) = IntegratePrimitivePolynomial(p - D(q0).NumeratorExact(), D);
-        return (q + q0, IsElem);
+        throw new NotImplementedException();
+        // if (p.Degree() == 0)
+        //     return (p.CreateZero(), true);
+        //
+        // var t = p.CreateMonomial(p.ring.GetOne(), 1);
+        // var a = p.Lc();
+        // var bc = LimitedIntegrate(a, D(t), D); TODO
+        //
+        // if (bc is null)
+        //     return (p.CreateZero(), false);
+        //
+        // var (b, c) = bc.Value;
+        // var m = p.Degree();
+        // var q0 = p.CreateMonomial(p.ring.DivideExact(c, p.ring.ValueOfLong(m + 1)), m + 1) + p.CreateMonomial(b, m);
+        // var (q, IsElem) = IntegratePrimitivePolynomial(p - D(q0).NumeratorExact(), D);
+        // return (q + q0, IsElem);
     }
 
     // Extensions
@@ -644,6 +617,6 @@ public static class Risch
     public static (E, E) ToTuple2<E>(this E[] data) =>
         data.Length == 2 ? (data[0], data[1]) : throw new ArgumentException();
 
-    private static (E, E, E) ToTuple3<E>(this E[] data) =>
+    public static (E, E, E) ToTuple3<E>(this E[] data) =>
         data.Length == 3 ? (data[0], data[1], data[2]) : throw new ArgumentException();
 }

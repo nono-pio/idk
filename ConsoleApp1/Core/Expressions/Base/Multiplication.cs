@@ -351,6 +351,8 @@ public class Multiplication : Expr
         
         if (newFactors.Count == 0)
             return (coef, null);
+        if (newFactors.Count == 1)
+            return (coef, newFactors[0]);
 
         return (coef, NotEval(newFactors.ToArray()));
     }

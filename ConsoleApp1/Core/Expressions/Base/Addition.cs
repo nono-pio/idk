@@ -104,32 +104,30 @@ public class Addition : Expr
 
         if (a is Multiplication aMul && b is Multiplication bMul)
         {
-            var hasANum = aMul.Factors[0] is Number ? 1 : 0;
-            var hasBNum = bMul.Factors[0] is Number ? 1 : 0;
+            var (csteA, varA) = aMul.AsMulCoef();
+            var (csteB, varB) = bMul.AsMulCoef();
 
-            if (aMul.Factors.Length - hasANum != bMul.Factors.Length - hasBNum)
+            if (varA != varB)
                 return null;
-        
-            var length = aMul.Factors.Length - hasANum;
-            for (int i = 0; i < length; i++)
-            {
-                if (aMul.Factors[i + hasANum] != bMul.Factors[i + hasBNum])
-                    return null;
-            }
-        
-            NumberStruct sum = (hasANum == 1 ? ((Number)aMul.Factors[0]).Num : 1) + (hasBNum == 1 ? ((Number)bMul.Factors[0]).Num : 1);
-
+            
+            var sum = csteA + csteB;
+            
             if (sum == 0)
                 return 0;
 
             if (sum == 1)
-                return length == 1 ? aMul.Factors[hasANum] : aMul.NotEval(aMul.Factors[hasANum..]);
-        
-            var exprs = new Expr[length + 1];
+                return varA;
 
-            exprs[0] = Num(sum);
-            Array.Copy(aMul.Factors, hasANum, exprs, 1, length);
-            return aMul.NotEval(exprs);
+            if (varA is Multiplication finalMul)
+            {
+                var exprs = new Expr[finalMul.Factors.Length + 1];
+
+                exprs[0] = Num(sum);
+                Array.Copy(finalMul.Factors, 0, exprs, 1, finalMul.Factors.Length);
+                return aMul.NotEval(exprs);
+            }
+
+            return new Multiplication([Num(sum), varA]);
         }
 
         Multiplication mul;
@@ -316,8 +314,8 @@ public class Addition : Expr
     }
     public (Expr Constant, Expr Variable) AsIndependent(Variable var, bool exact=false)
     {
-        Expr constant = 1;
-        Expr variable = 1;
+        Expr constant = 0;
+        Expr variable = 0;
         foreach (var therm in Therms)
         {
             if (exact ? therm == var : !therm.Constant(var))

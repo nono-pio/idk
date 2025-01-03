@@ -14,6 +14,18 @@ public class Polynomial
     {
         Coefs = RemoveZeroes(coefficients);
     }
+
+    /// Create a poly of the form S_i=0^degree ci * x^i where ci are variables of the form base_var_i
+    public static Polynomial UnknowPoly(int degree, string base_var)
+    {
+        var coefs = new Expr[degree + 1];
+        for (int i = 0; i <= degree; i++)
+        {
+            coefs[i] = new Variable($"{base_var}_{i}");
+        }
+        
+        return new Polynomial(coefs); 
+    }
     
     private Expr[] RemoveZeroes(Expr[] coefs)
     {
@@ -23,7 +35,7 @@ public class Polynomial
             i--;
         }
         
-        if (i == coefs.Length - 1)
+        if (i == coefs.Length - 1 && i >= 0)
             return coefs;
         
         if (i == -1)
@@ -283,6 +295,9 @@ public class Polynomial
 
     public Polynomial Derivee()
     {
+        if (IsZero())
+            return this;
+        
         var coefs = new Expr[Deg];
         
         for (int i = 1; i <= Deg; i++)

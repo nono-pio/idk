@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Numerics;
 using System.Text;
 using Polynomials.Poly.Multivar;
@@ -34,12 +35,15 @@ public class UnivariatePolynomial<E> : Polynomial<UnivariatePolynomial<E>>, IUni
 
     public UnivariatePolynomial(Ring<E> ring, E[] data) : this(ring, data, data.Length - 1)
     {
+        Debug.Assert(data.Length != 0);
         FixDegree();
     }
 
 
     public static UnivariatePolynomial<E> Create(Ring<E> ring, params E[] data)
     {
+        if (data.Length == 0)
+            return Zero(ring);
         ring.SetToValueOf(data);
         return new UnivariatePolynomial<E>(ring, data);
     }

@@ -16,6 +16,11 @@ public static class PolynomialFactory
     {
         return UnivariatePolynomial<Rational<E>>.Create(ring, data.Select(ring.MkNumerator).ToArray());
     }
+    
+    public static UnivariatePolynomial<E> Uni<E>(Ring<E> ring, params long[] data)
+    {
+        return Uni(ring, ring.ValueOfLong(data));
+    }
 
     public static UnivariatePolynomial<long> UniZ64(params long[] data)
     {
