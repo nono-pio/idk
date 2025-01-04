@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Numerics;
 using Polynomials.Utils;
 
@@ -8,7 +9,16 @@ public static class ChineseRemainders
     private static long MultiplyExact(long a, long b) => checked(a * b);
     private static long AddExact(long a, long b) => checked(a + b);
     private static long SubtractExact(long a, long b) => checked(a - b);
-    private static long FloorMod(long a, long b) => Math.Abs(a - (a / b) * b) * Math.Sign(b);
+    private static long FloorMod(long a, long b) => a - FloorDiv(a, b) * b;
+
+    private static long FloorDiv(long a, long b)
+    {
+        Debug.Assert(b > 0);
+        if (a < 0 && a % b != 0)
+            return a / b - 1;
+
+        return a / b;
+    }
     
     
     

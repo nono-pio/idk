@@ -93,9 +93,17 @@ static (int, int) sqrt(int n)
 // print(residue);
 
 var A = PolynomialFactory.Uni(Rings.Q, [1]);
-var D = PolynomialFactory.Uni(Rings.Q, [0, 1]);
+var D = PolynomialFactory.Uni(Rings.Q, [1, 0, 0, 0, 1]);
 
 print(A);
 print(D);
 print(RationalPolynomialIntegration.IntegrateRationalPolynomial(A, D, new UniDiffFieldQ(x)));
-// var residue = RationalPolynomialIntegration.IntRationalLogPart(A, D); // A/D = d/dx(g) + h
+
+// var _R = PolynomialFactory.Uni(Rings.Q, [1, 0, 4]);
+// var _S = PolynomialFactory.Uni(Rings.UnivariateRingQ, [
+//     PolynomialFactory.Uni(Rings.Q, [0, -4]),
+//     PolynomialFactory.Uni(Rings.Q, [-3]),
+//     PolynomialFactory.Uni(Rings.Q, [0, 2]),
+//     PolynomialFactory.Uni(Rings.Q, [1]),
+// ]); 
+// print(Simplifier.Simplify(RationalPolynomialIntegration.LogToReal(_R, _S, new UniDiffFieldQ(Var("x")))));

@@ -26,7 +26,7 @@ public static class EqualDegreeFactorization
     {
         Util.EnsureOverFiniteField(input);
         var result = PolynomialFactorDecomposition<UnivariatePolynomial<E>>.FromUnit(input.LcAsPoly());
-        if (!input.CoefficientRingCardinality().Value.IsEven)
+        if (input.CoefficientRingCardinality().Value.IsEven)
 
             //even characteristic => GF2p
             CantorZassenhaus(input, d, result, (int) input.CoefficientRingPerfectPowerExponent());

@@ -3,7 +3,7 @@ using Polynomials.Utils;
 
 namespace Polynomials;
 
-public abstract class Ring<E> : IComparer<E>
+public abstract class Ring<E> : IComparer<E>, IEqualityComparer<E>
 {
     private BigInteger?[]? perfectPowerDecomposition;
 
@@ -503,5 +503,15 @@ public abstract class Ring<E> : IComparer<E>
         } while (IsZero(el));
 
         return el;
+    }
+
+    public bool Equals(E? x, E? y)
+    {
+        return Equal(x, y);
+    }
+
+    public int GetHashCode(E obj)
+    {
+        return obj.GetHashCode();
     }
 }

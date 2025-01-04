@@ -125,7 +125,7 @@ public static class UnivariatePolynomialArithmetic
         var k2p = PolyMod(@base, polyModulus, invMod, copy); // this will copy the base
         for (;;)
         {
-            if (exponent.IsEven)
+            if (!exponent.IsEven)
                 result = PolyMod(result.Multiply(k2p), polyModulus, invMod, false);
             exponent = exponent >> 1;
             if (exponent.IsZero)

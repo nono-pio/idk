@@ -345,17 +345,17 @@ public static class Risch
     {
         public UnivariatePolynomial<K>[] s; // K[z]
         public UnivariatePolynomial<UnivariatePolynomial<K>>[] S; // K[z][t]
-        public K[][] Alphas;
+        public K[][]? Alphas;
         public UniDiffField<K> Diff;
         public bool IsElementary;
 
-        public Residue(UnivariatePolynomial<K>[] s, UnivariatePolynomial<UnivariatePolynomial<K>>[] S, bool elem, UniDiffField<K> diff)
+        public Residue(UnivariatePolynomial<K>[] s, UnivariatePolynomial<UnivariatePolynomial<K>>[] S, bool elem, UniDiffField<K> diff, bool calculate_alphas = true)
         {
             this.s = s;
             this.S = S;
             IsElementary = elem;
             Diff = diff;
-            SetAlphas();
+            Alphas = calculate_alphas ? GetAlphas() : null;
         }
 
         public Expr ToExpression()
@@ -394,19 +394,21 @@ public static class Risch
             return result;
         }
 
-        public void SetAlphas()
+        public K[][] GetAlphas()
         {
-            Alphas = new K[s.Length][];
+            var alphas = new K[s.Length][];
             for (int i = 0; i < Alphas.Length; i++)
             {
                 if (s[i].Degree() == 0)
                 {
-                    Alphas[i] = [];
+                    alphas[i] = [];
                     continue;
                 }
 
-                Alphas[i] = Solutions(s[i]);
+                alphas[i] = Solutions(s[i]);
             }
+
+            return alphas;
         }
 
         private static K[] Solutions(UnivariatePolynomial<K> poly, bool factor = true)
