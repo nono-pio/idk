@@ -1,13 +1,14 @@
-﻿// using System.Diagnostics;
-// using ConsoleApp1.Core.Sets;
-// using ConsoleApp1.Core.Solvers;
-// using Polynomials;
-// using Polynomials.Poly.Univar;
-//
-// namespace ConsoleApp1.Core.Integrals;
-//
-// public static class ParamDERisch
-// {
+﻿using System.Diagnostics;
+using ConsoleApp1.Core.Expressions.Atoms;
+using ConsoleApp1.Core.Sets;
+using ConsoleApp1.Core.Solvers;
+using Polynomials;
+using Polynomials.Poly.Univar;
+
+namespace ConsoleApp1.Core.Integrals;
+
+public static class ParamDERisch
+{
 //     public delegate UnivariatePolynomial<K> DiffPoly<K>(UnivariatePolynomial<K> f);
 //     public delegate Rational<UnivariatePolynomial<K>> Diff<K>(UnivariatePolynomial<K> f);
 //
@@ -384,48 +385,64 @@
 //         return (a, b, a, N, a * hn * f, w.Select(w_i => -a * hn * w_i).ToArray());
 //     }
 //     
-//     public static ()? ParametricLogarithmicDerivative<K>(Rational<UnivariatePolynomial<K>> f, Rational<UnivariatePolynomial<K>> theta, DiffPoly<K> D)
-//     {
-//         var w = D(theta) / theta;
-//         var d = f.Denominator();
-//         var e = w.Denominator();
-//         var (p, a) = UnivariateDivision.DivideAndRemainder(f.Numerator(), d).ToTuple2();
-//         var (q, b) = UnivariateDivision.DivideAndRemainder(w.Numerator(), e).ToTuple2();
-//         var B = Math.Max(0, D(t).Degree() - 1);
-//         var C = Math.Max(p.Degree(), q.Degree());
-//         if (q.Degree() > B)
-//         {
-//             var s = solve();
-//             if (s is null || s not in Q)
-//                 return null;
-//             var N = s.Numerator();
-//             var M = s.Denominator();
-//             if ()
-//                 return (Q * N, Q * M, v);
-//             return null;
-//         }
-//
-//         if (p.Degree() > B)
-//             return null;
-//
-//         var l = f.ring.Lcm(d, e);
-//         var (ln, ls) = Risch.SplitFactor(l, D);
-//         var z = ls*UnivariateGCD.PolynomialGCD(ln, ln.Derivative());
-//         if (z.IsConstant())
-//             return null;
-//
-//         var (u1, r1) = UnivariateDivision.DivideAndRemainder((l * f).NumeratorExact(), z).ToTuple2();
-//         var (u2, r2) = UnivariateDivision.DivideAndRemainder((l * w), z).ToTuple2();
-//
-//         var s = solve();
-//         if (s is null || s not in Q)
-//             return null;
-//         
-//         var M = s.Numerator();
-//         var N = s.Denominator();
-//         if ()
-//             return (Q * N, Q * M, v);
-//         return null;
-//     }
-//    
-// }
+     // public static (int n, int m, Rational<UnivariatePolynomial<K>> v)? ParametricLogarithmicDerivative<K>(Rational<UnivariatePolynomial<K>> f, Rational<UnivariatePolynomial<K>> theta, UniDiffField<K> D)
+     // {
+     //     var w = D.D(theta) / theta;
+     //     var d = f.Denominator();
+     //     var e = w.Denominator();
+     //     var (p, a) = UnivariateDivision.DivideAndRemainder(f.Numerator(), d).ToTuple2();
+     //     var (q, b) = UnivariateDivision.DivideAndRemainder(w.Numerator(), e).ToTuple2();
+     //     var B = Math.Max(0, D.DtPoly.Degree() - 1);
+     //     var C = Math.Max(p.Degree(), q.Degree());
+     //     if (q.Degree() > B)
+     //     {
+     //         var c = Var("c");
+     //         var s1 = Solve.SolveEquations(Enumerable.Range(B+1, C+1).Select(i => (D.ToExpr(p[i]), D.ToExpr(q[i]) * c)).ToArray(), [c]);
+     //         if (s1 is null || s1[0] is not Number num)
+     //             return null;
+     //         var N1 = num.Num.Numerator;
+     //         var M1 = num.Num.Denominator;
+     //         var Qv = is_log_deriv_k_t_radical_in_field(N1 * f - M1 * w, D);
+     //         if (Qv is not null)
+     //         {
+     //             var (Q, v) = Qv.Value;
+     //             if (Q.IsZero() || v.IsZero())
+     //                 return null;
+     //             
+     //             return (Q * N1, Q * M1, v);
+     //         }
+     //         return null;
+     //     }
+     //
+     //     if (p.Degree() > B)
+     //         return null;
+     //
+     //     var l = f.ring.Lcm(d, e);
+     //     var (ln, ls) = Risch.SplitFactor(l, D);
+     //     var z = ls*UnivariateGCD.PolynomialGCD(ln, ln.Derivative());
+     //     if (z.IsConstant())
+     //         return null;
+     //
+     //     var (u1, r1) = UnivariateDivision.DivideAndRemainder((l * f).NumeratorExact(), z).ToTuple2();
+     //     var (u2, r2) = UnivariateDivision.DivideAndRemainder((l * w).NumeratorExact(), z).ToTuple2();
+     //
+     //     var c2 = Var("c");
+     //     var s = Solve.SolveEquations(Enumerable.Range(0, z.Degree()).Select(i => (D.ToExpr(r1[i]), D.ToExpr(r2[i]) * c2)).ToArray(), [c2]);
+     //     if (s is null || s[0] is not Number num2)
+     //         return null;
+     //     
+     //     var M = num2.Num.Numerator;
+     //     var N = num2.Num.Denominator;
+     //     var Qv2 = is_log_deriv_k_t_radical_in_field(N * f - M * w, D);
+     //     if (Qv2 is not null)
+     //     {
+     //         var (Q, v) = Qv2.Value;
+     //         if (Q.IsZero() || v.IsZero())
+     //             return null;
+     //             
+     //         return (Q * N, Q * M, v);
+     //     }
+     //     return null;
+     // }
+   
+}

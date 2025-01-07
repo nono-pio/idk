@@ -1,101 +1,99 @@
-﻿// using System.Diagnostics;
-// using Polynomials;
-// using Polynomials.Poly.Univar;
-//
-// namespace ConsoleApp1.Core.Integrals;
-//
-// public static class RischDE
-// {
-//     public delegate UnivariatePolynomial<K> DiffPoly<K>(UnivariatePolynomial<K> poly);
-//     
-//     public static UnivariatePolynomial<K> WeakNormalizer<K>(Rational<UnivariatePolynomial<K>> f, DiffPoly<K> D)
-//     {
-//         var (dn, ds) = Risch.SplitFactor(f.Denominator(), D);
-//         var g = UnivariateGCD.PolynomialGCD(dn, dn.Derivative());
-//         var d_s = dn / g;
-//         var d1 = d_s / UnivariateGCD.PolynomialGCD(d_s, g);
-//         var (a, b) = Risch.ExtendedEuclidieanDiophantine(f.Denominator() / d1, d1, f.Numerator());
-//
-//         var Dd1 = D(d1);
-//         // To K[z][t]
-//         var ringK = a.ring;
-//         var ringZOverK = Rings.UnivariateRing(ringK);
-//         var newA = a.MapCoefficients(ringZOverK, cf => PolynomialFactory.Uni(ringK, cf));
-//         var newD1 = a.MapCoefficients(ringZOverK, cf => PolynomialFactory.Uni(ringK, cf));
-//         var newDd1 = a.MapCoefficients(ringZOverK, cf => PolynomialFactory.Uni(ringK, cf));
-//         var newZ = PolynomialFactory.Uni(ringZOverK, PolynomialFactory.Uni(ringK, [ringK.GetZero(), ringK.GetOne()]));
-//         
-//         var r = UnivariateResultants.Resultant(newA - newZ * newDd1, newD1); // K[z]
-//         int[] N = PositiveIntegerRoots(r);
-//         var result = a.CreateOne();
-//         foreach (var n in N)
-//         {
-//             result *= UnivariateGCD.PolynomialGCD(a - n * D(d1), d1).Pow(n);
-//         }
-//
-//         return result;
-//     }
-//
-//     public static int OrderAt<K>(UnivariatePolynomial<K> a, UnivariatePolynomial<K> p)
-//     {
-//         if (a.IsZero())
-//             return int.MaxValue;
-//         
-//         var order = 0;
-//         while ((a = UnivariateDivision.DivideOrNull(a, p)) is not null)
-//         {
-//             order++;
-//         }
-//
-//         return order;
-//     }
-//
-//     public static int OrderAt<K>(Rational<UnivariatePolynomial<K>> a, UnivariatePolynomial<K> p)
-//     {
-//         if (a.IsZero())
-//             return int.MaxValue;
-//         return OrderAt(a.Numerator(), p) - OrderAt(a.Denominator(), p);
-//     }
-//     
-//     public static (UnivariatePolynomial<K> a, Rational<UnivariatePolynomial<K>> b, Rational<UnivariatePolynomial<K>> c, UnivariatePolynomial<K> h)? 
-//         RdeNormalDenominator<K>(Rational<UnivariatePolynomial<K>> f, Rational<UnivariatePolynomial<K>> g, DiffPoly<K> D)
-//     {
-//         var (dn, ds) = Risch.SplitFactor(f.Denominator(), D);
-//         var (en, es) = Risch.SplitFactor(g.Denominator(), D);
-//         var p = UnivariateGCD.PolynomialGCD(dn, en);
-//         var h = UnivariateGCD.PolynomialGCD(en, en.Derivative()) / UnivariateGCD.PolynomialGCD(p, p.Derivative());
-//         var d_hsquare = dn * h.Clone().Square();
-//         if (UnivariateDivision.DivideOrNull(d_hsquare, en) is null)
-//             return null;
-//         
-//         return (dn * h, dn * h * f - dn * D(h), d_hsquare * g, h);
-//     }
-//
-//
-//     public static (UnivariatePolynomial<K> a, UnivariatePolynomial<K> b, UnivariatePolynomial<K> c, UnivariatePolynomial<K> h) RdeSpecialDenomExp<K>(UnivariatePolynomial<K> a, Rational<UnivariatePolynomial<K>> b,
-//         Rational<UnivariatePolynomial<K>> c, DiffPoly<K> D)
-//     {
-//         var t = a.CreateMonomial(a.ring.GetOne(), 1);
-//         var p = t;
-//         var nb = OrderAt(b, p);
-//         var nc = OrderAt(c, p);
-//         var n = Math.Min(0, nc - Math.Min(0, nb));
-//         if (nb == 0)
-//         {
-//             // var ring = a.ring;
-//             // var alpha = ring.Negate(ring.DivideExact(b.Numerator().Evaluate(0), ring.Multiply(b.Denominator().Evaluate(0), a.Evaluate(0))));
-//             // var eta = D(t) / t;
-//             // var log = ParamDERisch.ParametricLogarithmicDerivative(alpha, eta, D);
-//             // if (log is not null)
-//             // {
-//             //     n = Math.Min(log.Value.m, n);
-//             // }
-//             throw new NotImplementedException();
-//         }
-//
-//         var N = Math.Max(0, Math.Max(-nb, n - nc));
-//         return (a * p.Pow(N), ((b + n * a * D(p) / p) * p.Pow(N)).NumeratorExact(), (c * p.Pow(N - n)).NumeratorExact(), p.Pow(-n));
-//     }
+﻿using System.Diagnostics;
+using Polynomials;
+using Polynomials.Poly.Univar;
+
+namespace ConsoleApp1.Core.Integrals;
+
+public static class RischDE
+{
+     
+     // public static UnivariatePolynomial<K> WeakNormalizer<K>(Rational<UnivariatePolynomial<K>> f, UniDiffField<K> Diff)
+     // {
+     //     var (dn, ds) = Risch.SplitFactor(f.Denominator(), Diff);
+     //     var g = UnivariateGCD.PolynomialGCD(dn, dn.Derivative());
+     //     var d_s = dn / g;
+     //     var d1 = d_s / UnivariateGCD.PolynomialGCD(d_s, g);
+     //     var (a, b) = Risch.ExtendedEuclidieanDiophantine(f.Denominator() / d1, d1, f.Numerator());
+     //
+     //     var Dd1 = Diff.DPoly(d1);
+     //     // To K[z][t]
+     //     var ringK = a.ring;
+     //     var ringZOverK = Rings.UnivariateRing(ringK);
+     //     var newA = a.MapCoefficients(ringZOverK, cf => PolynomialFactory.Uni(ringK, cf));
+     //     var newD1 = d1.MapCoefficients(ringZOverK, cf => PolynomialFactory.Uni(ringK, cf));
+     //     var newDd1 = Dd1.MapCoefficients(ringZOverK, cf => PolynomialFactory.Uni(ringK, cf));
+     //     var newZ = PolynomialFactory.Uni(ringZOverK, PolynomialFactory.Uni(ringK, [ringK.GetZero(), ringK.GetOne()]));
+     //     
+     //     var r = UnivariateResultants.Resultant(newA - newZ * newDd1, newD1); // K[z]
+     //     int[] N = PositiveIntegerRoots(r); TODO
+     //     var result = a.CreateOne();
+     //     foreach (var n in N)
+     //     {
+     //         result *= UnivariateGCD.PolynomialGCD(a - n * Dd1, d1).Pow(n);
+     //     }
+     //
+     //     return result;
+     // }
+
+     public static int OrderAt<K>(UnivariatePolynomial<K> a, UnivariatePolynomial<K> p)
+     {
+         if (a.IsZero())
+             return int.MaxValue;
+         
+         var order = 0;
+         while ((a = UnivariateDivision.DivideOrNull(a, p)) is not null)
+         {
+             order++;
+         }
+
+         return order;
+     }
+
+     public static int OrderAt<K>(Rational<UnivariatePolynomial<K>> a, UnivariatePolynomial<K> p)
+     {
+         if (a.IsZero())
+             return int.MaxValue;
+         return OrderAt(a.Numerator(), p) - OrderAt(a.Denominator(), p);
+     }
+     
+     public static (UnivariatePolynomial<K> a, Rational<UnivariatePolynomial<K>> b, Rational<UnivariatePolynomial<K>> c, UnivariatePolynomial<K> h)? 
+         RdeNormalDenominator<K>(Rational<UnivariatePolynomial<K>> f, Rational<UnivariatePolynomial<K>> g, UniDiffField<K> D)
+     {
+         var (dn, ds) = Risch.SplitFactor(f.Denominator(), D);
+         var (en, es) = Risch.SplitFactor(g.Denominator(), D);
+         var p = UnivariateGCD.PolynomialGCD(dn, en);
+         var h = UnivariateGCD.PolynomialGCD(en, en.Derivative()) / UnivariateGCD.PolynomialGCD(p, p.Derivative());
+         var d_hsquare = dn * h.Clone().Square();
+         if (UnivariateDivision.DivideOrNull(d_hsquare, en) is null)
+             return null;
+         
+         return (dn * h, dn * h * f - dn * D.D(h), d_hsquare * g, h);
+     }
+
+
+     // public static (UnivariatePolynomial<K> a, UnivariatePolynomial<K> b, UnivariatePolynomial<K> c, UnivariatePolynomial<K> h) RdeSpecialDenomExp<K>(UnivariatePolynomial<K> a, Rational<UnivariatePolynomial<K>> b,
+     //     Rational<UnivariatePolynomial<K>> c, UniDiffField<K> D)
+     // {
+     //     var t = a.CreateMonomial(a.ring.GetOne(), 1);
+     //     var p = t;
+     //     var nb = OrderAt(b, p);
+     //     var nc = OrderAt(c, p);
+     //     var n = Math.Min(0, nc - Math.Min(0, nb));
+     //     if (nb == 0)
+     //     {
+     //         var ring = a.ring;
+     //         var alpha = ring.Negate(ring.DivideExact(b.Numerator().Evaluate(0), ring.Multiply(b.Denominator().Evaluate(0), a.Evaluate(0))));
+     //         var eta = D.D(t) / t;
+     //         var log = ParamDERisch.ParametricLogarithmicDerivative(PolynomialFactory.RationalPoly(a.CreateConstant(alpha)), eta, D);
+     //         if (log is not null && log.Value.n == 1)
+     //         {
+     //             n = Math.Min(log.Value.m, n);
+     //         }
+     //     }
+     //
+     //     var N = Math.Max(0, Math.Max(-nb, n - nc));
+     //     return (a * p.Pow(N), ((b + n * a * D.D(p) / p) * p.Pow(N)).NumeratorExact(), (c * p.Pow(N - n)).NumeratorExact(), p.Pow(-n));
+     // }
 //
 //
 //     public static (UnivariatePolynomial<K> a, UnivariatePolynomial<K> b, UnivariatePolynomial<K> c,
@@ -412,4 +410,4 @@
 //         var h = PolyRischDECancelTan(b0, c, D, n - 2);
 //         return h is null ? null : p * h + r;
 //     }
-// }
+}
